@@ -7,9 +7,7 @@ int load_rom(struct gbc_ram **ram, struct gbc_rom **rom, char *path) {
     // Read the file at the specified path
     FILE *file;
     file = fopen(path, "r");
-
-    // Allocate memory for the array of char arrays
-    (*rom)->rom_banks = malloc(ROM_BANK_COUNT * sizeof((*rom)->rom_banks));
+    (*rom)->rom_banks = NULL;
 
     int byte;
     int index = 0;
@@ -23,8 +21,11 @@ int load_rom(struct gbc_ram **ram, struct gbc_rom **rom, char *path) {
             // Switch banks and allocate sufficent memory
             // Usually cartidges hold 32KB, so there will be two banks of 16KB
             if(index == ROM_BANK_SIZE || index == 0) {
-                (*rom)->rom_banks[++bank] = calloc(ROM_BANK_SIZE, sizeof(char));
+                bank++;
                 index = 0;
+
+                (*rom)->rom_banks = realloc((*rom)->rom_banks, bank + 1);
+                (*rom)->rom_banks[bank] = calloc(ROM_BANK_SIZE, sizeof(char));
             }
             // Add the byte to memory
             (*rom)->rom_banks[bank][index] = (unsigned char) byte;

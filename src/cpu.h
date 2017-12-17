@@ -26,16 +26,16 @@ struct gbc_registers {
 
     union {
         struct {
-            unsigned char E;
             unsigned char D;
+            unsigned char E;
         };
         unsigned short DE;
     };
 
     union {
         struct {
-            unsigned char L;
             unsigned char H;
+            unsigned char L;
         };
         unsigned short HL;
     };

@@ -4,7 +4,14 @@
 #include<time.h>
 #include<string.h>
 #include<SDL2/SDL.h>
-#include<gtk/gtk.h>
+
+#ifndef max
+	#define max(a, b) (((a) > (b)) ? (a) : (b))
+#endif
+
+#ifndef min
+	#define min(a, b) (((a) < (b)) ? (a) : (b))
+#endif
 
 // GameBoy Specification
 

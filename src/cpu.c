@@ -3061,8 +3061,6 @@ void execute_instr(struct gbc_system **gbc) {
     // Get the opcode at the program counter
     unsigned char opcode = read_byte(&(*gbc)->ram, (*gbc)->registers->PC);
 
-    printf("OPCODE: %x\n", opcode);
-
     // Get the instruction structure
     struct gbc_instr instruction = find_instr(opcode, gbc);
 
