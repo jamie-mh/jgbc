@@ -2,11 +2,10 @@
 BIN := ./bin
 SRC := ./src
 OBJ := ./obj
-LIB := ./lib
 
 # Compiler
 CC := gcc
-CFLAGS := -I$(SRC)/ -lSDL2 -L$(LIB)/ -g
+CFLAGS := -I$(SRC)/ -lSDL2 -lm -g
 
 # Files
 OUTNAME := lxgbc
@@ -15,11 +14,11 @@ OBJECTS := $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(SOURCES))
 
 # Link all objects to create the executable
 all: $(OBJECTS)
-	$(CC) $(CFLAGS) $^ -o $(BIN)/$(OUTNAME)
+	$(CC) $^ -o $(BIN)/$(OUTNAME) $(CFLAGS)
 
 # Compile all source files to objects
 $(OBJ)/%.o: $(SRC)/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) -c $< -o $@ $(CFLAGS)
 
 clean:
 	rm -rf $(OBJ)/* $(BIN)/*
