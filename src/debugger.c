@@ -94,6 +94,7 @@ struct debug_box *dbox_regis(struct gbc_system **gbc) {
 
     char *line = malloc(12);
 
+    // TODO: Replace this at some point
     sprintf(line, "A : %02X", (*gbc)->registers->A);
     box->rows[0] = malloc(sizeof(char) * strlen(line));
     strcpy(box->rows[0], line);
@@ -158,10 +159,19 @@ struct debug_box *dbox_flags(struct gbc_system **gbc) {
     box->height = DBOX_FLAGS_ROWS;
     box->width = DBOX_FLAGS_WIDTH;
 
-    box->rows[0] = malloc()
-
+    // Allocate memory for 4 rows
+    int i;
+    for(i = 0; i < 4; i++) {
+        box->rows[i] = malloc(sizeof(char) * DBOX_FLAGS_WIDTH);
+    } 
+    
+    // Create the rows
+    sprintf(box->rows[0], "Z: %d", (*gbc)->registers->F & 1);
+    sprintf(box->rows[1], "N: %d", ((*gbc)->registers->F >> 1) & 1); 
+    sprintf(box->rows[2], "H: %d", ((*gbc)->registers->F >> 2) & 1);
+    sprintf(box->rows[3], "C: %d", ((*gbc)->registers->F >> 3) & 1);
+        
     return box;
-
 }
 
 void print_separator(int width) {
@@ -178,11 +188,7 @@ void print_debug(struct gbc_system **gbc) {
     boxes[0] = dbox_instr(gbc);
     boxes[1] = dbox_regis(gbc);
     boxes[2] = dbox_flags(gbc);
-    boxes[3] = dbox_instr(gbc);
-
-    // boxes[1] = dbox_regis(gbc);
-    // boxes[2] = dbox_flags(gbc);
-    // boxes[3] = dbox_contr();
+    boxes[3] = dbox_regis(gbc);
 
     // Render the various boxes in columns of 2
     int i;

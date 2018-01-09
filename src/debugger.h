@@ -8,8 +8,8 @@
 #define DBOX_REGIS_ROWS 12
 #define DBOX_REGIS_WIDTH 8
 
-#define DBOX_FLAGS_ROWS 12
-#define DBOX_FLAGS_WIDTH 8
+#define DBOX_FLAGS_ROWS 4
+#define DBOX_FLAGS_WIDTH 4
 
 #define KNRM "\x1B[0m"
 #define KRED "\x1B[31m"
