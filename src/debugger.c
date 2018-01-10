@@ -174,6 +174,30 @@ struct debug_box *dbox_flags(struct gbc_system **gbc) {
     return box;
 }
 
+struct debug_box *dbox_info(struct gbc_system **gbc) {
+   
+
+    // Allocate memory for the box
+    struct debug_box *box = malloc(sizeof(*box));
+    box->rows = malloc(sizeof(box->rows) * DBOX_INFO_ROWS);
+ 
+    // Set its properties
+    box->height = DBOX_INFO_ROWS;
+    box->width = DBOX_INFO_WIDTH;
+
+    // Allocate memory for the rows
+    int i;
+    for(i = 0; i < DBOX_INFO_ROWS; i++) {
+        box->rows[i] = malloc(sizeof(char) * DBOX_INFO_WIDTH);
+    }
+
+    // Write some information
+    strcpy(box->rows[0], "OPCODE:");
+    sprintf(box->rows[1], "%02X", read_byte(&(*gbc)->ram, (*gbc)->registers->PC));
+
+    return box;
+}
+
 void print_separator(int width) {
     int i = 0; 
     for(; i < width; printf("-"), i++);
@@ -188,7 +212,7 @@ void print_debug(struct gbc_system **gbc) {
     boxes[0] = dbox_instr(gbc);
     boxes[1] = dbox_regis(gbc);
     boxes[2] = dbox_flags(gbc);
-    boxes[3] = dbox_regis(gbc);
+    boxes[3] = dbox_info(gbc);
 
     // Render the various boxes in columns of 2
     int i;
