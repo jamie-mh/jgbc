@@ -118,7 +118,7 @@ void op_add_hl_bc(struct gbc_system **gbc) {
 
 // 0x0A: LD A, (BC) (- - - -)
 void op_ld_a_bcp(struct gbc_system **gbc) {
-    printf("Unimplemented Instruction: LD A, (BC)\n");
+    (*gbc)->registers->A = read_byte(&(*gbc)->ram, (*gbc)->registers->BC);
 }
 
 // 0x0B: DEC BC (- - - -)
@@ -198,7 +198,7 @@ void op_add_hl_de(struct gbc_system **gbc) {
 
 // 0x1A: LD A, (DE) (- - - -)
 void op_ld_a_dep(struct gbc_system **gbc) {
-    printf("Unimplemented Instruction: LD A, (DE)\n");
+    (*gbc)->registers->A = read_byte(&(*gbc)->ram, (*gbc)->registers->DE);
 }
 
 // 0x1B: DEC DE (- - - -)
@@ -389,7 +389,7 @@ void op_dec_a(struct gbc_system **gbc) {
 
 // 0x3E: LD A, d8 (- - - -)
 void op_ld_a_d8(struct gbc_system **gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: LD A, d8\n");
+    (*gbc)->registers->A = operand;
 }
 
 // 0x3F: CCF (- 0 0 C)
@@ -679,42 +679,42 @@ void op_ld_hlp_a(struct gbc_system **gbc) {
 
 // 0x78: LD A, B (- - - -)
 void op_ld_a_b(struct gbc_system **gbc) {
-    printf("Unimplemented Instruction: LD A, B\n");
+    (*gbc)->registers->A = (*gbc)->registers->B;
 }
 
 // 0x79: LD A, C (- - - -)
 void op_ld_a_c(struct gbc_system **gbc) {
-    printf("Unimplemented Instruction: LD A, C\n");
+    (*gbc)->registers->A = (*gbc)->registers->C;
 }
 
 // 0x7A: LD A, D (- - - -)
 void op_ld_a_d(struct gbc_system **gbc) {
-    printf("Unimplemented Instruction: LD A, D\n");
+    (*gbc)->registers->A = (*gbc)->registers->D;
 }
 
 // 0x7B: LD A, E (- - - -)
 void op_ld_a_e(struct gbc_system **gbc) {
-    printf("Unimplemented Instruction: LD A, E\n");
+    (*gbc)->registers->A = (*gbc)->registers->E;
 }
 
 // 0x7C: LD A, H (- - - -)
 void op_ld_a_h(struct gbc_system **gbc) {
-    printf("Unimplemented Instruction: LD A, H\n");
+    (*gbc)->registers->A = (*gbc)->registers->H;
 }
 
 // 0x7D: LD A, L (- - - -)
 void op_ld_a_l(struct gbc_system **gbc) {
-    printf("Unimplemented Instruction: LD A, L\n");
+    (*gbc)->registers->A = (*gbc)->registers->L;
 }
 
 // 0x7E: LD A, (HL) (- - - -)
 void op_ld_a_hlp(struct gbc_system **gbc) {
-    printf("Unimplemented Instruction: LD A, (HL)\n");
+    (*gbc)->registers->A = read_byte(&(*gbc)->ram, (*gbc)->registers->HL);
 }
 
 // 0x7F: LD A, A (- - - -)
 void op_ld_a_a(struct gbc_system **gbc) {
-    printf("Unimplemented Instruction: LD A, A\n");
+    (*gbc)->registers->A = (*gbc)->registers->A;
 }
 
 // 0x80: ADD A, B (Z 0 H C)
@@ -1286,7 +1286,7 @@ void op_ld_sp_hl(struct gbc_system **gbc) {
 
 // 0xFA: LD A, (a16) (- - - -)
 void op_ld_a_a16p(struct gbc_system **gbc, unsigned short operand) {
-    printf("Unimplemented Instruction: LD A, (a16)\n");
+    (*gbc)->registers->A = read_byte(&(*gbc)->ram, operand);
 }
 
 // 0xFB: EI (- - - -)
