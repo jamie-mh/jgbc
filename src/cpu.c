@@ -3130,13 +3130,13 @@ void set_flag(char flag, unsigned char value, unsigned char *regis) {
         case 'N': offset = 6; break;
         case 'H': offset = 5; break;
         case 'C': offset = 4; break;
+        default: return;
     }
 
     // Set or clear the bit
     if(value == 0) {
         *regis &= ~(1 << offset);
-    }
-    else if(value == 1) {
+    } else if(value == 1) {
         *regis |= 1 << offset;          
     }
 }
