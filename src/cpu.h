@@ -10,32 +10,32 @@ struct gbc_registers {
     // https://cturt.github.io/cinoop.html
     union {
         struct {
-            unsigned char A;
             unsigned char F;
+            unsigned char A;
         };
         unsigned short AF;
     };
 
     union {
         struct {
-            unsigned char B;
             unsigned char C;
+            unsigned char B;
         };
         unsigned short BC;
     };
 
     union {
         struct {
-            unsigned char D;
             unsigned char E;
+            unsigned char D;
         };
         unsigned short DE;
     };
 
     union {
         struct {
-            unsigned char H;
             unsigned char L;
+            unsigned char H;
         };
         unsigned short HL;
     };
@@ -53,8 +53,10 @@ struct gbc_instr {
 };
 
 void init_cpu(struct gbc_system **);
-struct gbc_instr find_instr(unsigned char opcode, struct gbc_system **);
+struct gbc_instr find_instr(unsigned char, struct gbc_system **);
 void execute_instr(struct gbc_system **);
 
 void incr_byte(unsigned char *, unsigned char *);
 void decr_byte(unsigned char *, unsigned char *);
+
+void set_flag(char, unsigned char, unsigned char *);

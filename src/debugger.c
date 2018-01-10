@@ -166,10 +166,10 @@ struct debug_box *dbox_flags(struct gbc_system **gbc) {
     } 
     
     // Create the rows
-    sprintf(box->rows[0], "Z: %d", (*gbc)->registers->F & 1);
-    sprintf(box->rows[1], "N: %d", ((*gbc)->registers->F >> 1) & 1); 
-    sprintf(box->rows[2], "H: %d", ((*gbc)->registers->F >> 2) & 1);
-    sprintf(box->rows[3], "C: %d", ((*gbc)->registers->F >> 3) & 1);
+    sprintf(box->rows[0], "Z: %d", ((*gbc)->registers->F >> 7) & 1);
+    sprintf(box->rows[1], "N: %d", ((*gbc)->registers->F >> 6) & 1); 
+    sprintf(box->rows[2], "H: %d", ((*gbc)->registers->F >> 5) & 1);
+    sprintf(box->rows[3], "C: %d", ((*gbc)->registers->F >> 4) & 1);
         
     return box;
 }
