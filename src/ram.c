@@ -9,6 +9,9 @@ void init_ram(struct gbc_ram **ram) {
     (*ram)->vram = calloc(VRAM_SIZE, sizeof(char));
     (*ram)->wram00 = calloc(WRAM_BANK_SIZE, sizeof(char));
 
+    // Allocate the switchable ram bank directly as we are not emulating a SGB
+    (*ram)->wramNN = calloc(WRAM_BANK_SIZE, sizeof(char));
+
     (*ram)->oam = calloc(OAM_SIZE, sizeof(char));
     (*ram)->io = calloc(IO_SIZE, sizeof(char));
     (*ram)->hram = calloc(HRAM_SIZE, sizeof(char));
@@ -107,6 +110,7 @@ void write_byte(struct gbc_ram **ram, unsigned short address, unsigned char valu
     
     // Get the memory location with the relative address
     unsigned short rel_address = address;
+
     unsigned char **mem = get_memory_location(ram, &rel_address);
 
     // Write the byte in memory
