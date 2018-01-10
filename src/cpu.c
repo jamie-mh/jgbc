@@ -1256,7 +1256,7 @@ void op_ld_a_cp(struct gbc_system **gbc, unsigned char operand) {
 
 // 0xF3: DI (- - - -)
 void op_di(struct gbc_system **gbc) {
-    printf("Unimplemented Instruction: DI\n");
+    (*gbc)->interrupts_enabled = 0; 
 }
 
 // 0xF5: PUSH AF (- - - -)
@@ -1291,7 +1291,7 @@ void op_ld_a_a16p(struct gbc_system **gbc, unsigned short operand) {
 
 // 0xFB: EI (- - - -)
 void op_ei(struct gbc_system **gbc) {
-    printf("Unimplemented Instruction: EI\n");
+    (*gbc)->interrupts_enabled = 1;
 }
 
 // 0xFE: CP d8 (Z 1 H C)

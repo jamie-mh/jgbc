@@ -11,7 +11,7 @@
 #define DBOX_FLAGS_ROWS 4
 #define DBOX_FLAGS_WIDTH 4
 
-#define DBOX_INFO_ROWS 2
+#define DBOX_INFO_ROWS 4
 #define DBOX_INFO_WIDTH 7
 
 #define KNRM "\x1B[0m"

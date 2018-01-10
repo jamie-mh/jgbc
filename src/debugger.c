@@ -176,7 +176,6 @@ struct debug_box *dbox_flags(struct gbc_system **gbc) {
 
 struct debug_box *dbox_info(struct gbc_system **gbc) {
    
-
     // Allocate memory for the box
     struct debug_box *box = malloc(sizeof(*box));
     box->rows = malloc(sizeof(box->rows) * DBOX_INFO_ROWS);
@@ -193,7 +192,9 @@ struct debug_box *dbox_info(struct gbc_system **gbc) {
 
     // Write some information
     strcpy(box->rows[0], "OPCODE:");
-    sprintf(box->rows[1], "%02X", read_byte(&(*gbc)->ram, (*gbc)->registers->PC));
+    sprintf(box->rows[1], "-> %02X", read_byte(&(*gbc)->ram, (*gbc)->registers->PC));
+    strcpy(box->rows[2], "INTERR:");
+    sprintf(box->rows[3], "-> %d", (*gbc)->interrupts_enabled);
 
     return box;
 }
