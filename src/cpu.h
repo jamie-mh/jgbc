@@ -4,6 +4,11 @@
 #define INSTRUCTION_COUNT 256
 #define CB_INSTRUCTION_COUNT 256
 
+#define FLAG_ZERO 'Z'
+#define FLAG_SUBTRACT 'N'
+#define FLAG_HALFCARRY 'H'
+#define FLAG_CARRY 'C'
+
 struct gbc_registers {
 
     // Combined register idea thanks to

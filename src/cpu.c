@@ -30,14 +30,37 @@ unsigned char xor(unsigned char a, unsigned char b, unsigned char *flag) {
     unsigned char result = a ^ b;
 
     if(!result) {
-        set_flag('Z', 1, flag);
-        set_flag('N', 0, flag);
-        set_flag('H', 0, flag);
-        set_flag('C', 0, flag);
+        set_flag(FLAG_ZERO, 1, flag);
+        set_flag(FLAG_SUBTRACT, 0, flag);
+        set_flag(FLAG_HALFCARRY, 0, flag);
+        set_flag(FLAG_CARRY, 0, flag);
     }
 
     return result;
-} 
+}
+
+unsigned char dec_byte(unsigned char operand, unsigned char *flag) {
+
+    unsigned char result = operand - 1;
+
+    // Check if the result is 0
+    if(result == 0) {
+        set_flag(FLAG_ZERO, 1, flag);
+    } else {
+        set_flag(FLAG_ZERO, 0, flag); 
+    }
+
+    set_flag(FLAG_SUBTRACT, 1, flag);
+
+    // Check for bit 4 borrow 
+    if(operand & 0x0f) {
+        set_flag(FLAG_HALFCARRY, 0, flag);
+    } else {
+        set_flag(FLAG_HALFCARRY, 1, flag);
+    }
+
+    return result;
+}
 
 /*
 *   CPU instructions
@@ -70,7 +93,7 @@ void op_inc_b(struct gbc_system **gbc) {
 
 // 0x05: DEC B (Z 1 H -)
 void op_dec_b(struct gbc_system **gbc) {
-    printf("Unimplemented Instruction: DEC B\n");
+    (*gbc)->registers->B = dec_byte((*gbc)->registers->B, &(*gbc)->registers->F);
 }
 
 // 0x06: LD B, d8 (- - - -)
@@ -110,7 +133,7 @@ void op_inc_c(struct gbc_system **gbc) {
 
 // 0x0D: DEC C (Z 1 H -)
 void op_dec_c(struct gbc_system **gbc) {
-    printf("Unimplemented Instruction: DEC C\n");
+    (*gbc)->registers->C = dec_byte((*gbc)->registers->C, &(*gbc)->registers->F);
 }
 
 // 0x0E: LD C, d8 (- - - -)
@@ -150,7 +173,7 @@ void op_inc_d(struct gbc_system **gbc) {
 
 // 0x15: DEC D (Z 1 H -)
 void op_dec_d(struct gbc_system **gbc) {
-    printf("Unimplemented Instruction: DEC D\n");
+    (*gbc)->registers->D = dec_byte((*gbc)->registers->D, &(*gbc)->registers->F);
 }
 
 // 0x16: LD D, d8 (- - - -)
@@ -190,7 +213,7 @@ void op_inc_e(struct gbc_system **gbc) {
 
 // 0x1D: DEC E (Z 1 H -)
 void op_dec_e(struct gbc_system **gbc) {
-    printf("Unimplemented Instruction: DEC E\n");
+    (*gbc)->registers->E = dec_byte((*gbc)->registers->E, &(*gbc)->registers->F);
 }
 
 // 0x1E: LD E, d8 (- - - -)
@@ -230,7 +253,7 @@ void op_inc_h(struct gbc_system **gbc) {
 
 // 0x25: DEC H (Z 1 H -)
 void op_dec_h(struct gbc_system **gbc) {
-    printf("Unimplemented Instruction: DEC H\n");
+    (*gbc)->registers->H = dec_byte((*gbc)->registers->H, &(*gbc)->registers->F);
 }
 
 // 0x26: LD H, d8 (- - - -)
@@ -270,7 +293,7 @@ void op_inc_l(struct gbc_system **gbc) {
 
 // 0x2D: DEC L (Z 1 H -)
 void op_dec_l(struct gbc_system **gbc) {
-    printf("Unimplemented Instruction: DEC L\n");
+    (*gbc)->registers->L = dec_byte((*gbc)->registers->L, &(*gbc)->registers->F);
 }
 
 // 0x2E: LD L, d8 (- - - -)
@@ -311,7 +334,9 @@ void op_inc_hlp(struct gbc_system **gbc) {
 
 // 0x35: DEC (HL) (Z 1 H -)
 void op_dec_hlp(struct gbc_system **gbc) {
-    printf("Unimplemented Instruction: DEC (HL)\n");
+    write_byte(&(*gbc)->ram,
+               (*gbc)->registers->HL,
+               dec_byte(read_byte(&(*gbc)->ram, (*gbc)->registers->HL), &(*gbc)->registers->F));
 }
 
 // 0x36: LD (HL), d8 (- - - -)
@@ -351,7 +376,7 @@ void op_inc_a(struct gbc_system **gbc) {
 
 // 0x3D: DEC A (Z 1 H -)
 void op_dec_a(struct gbc_system **gbc) {
-    printf("Unimplemented Instruction: DEC A\n");
+    (*gbc)->registers->A = dec_byte((*gbc)->registers->A, &(*gbc)->registers->F);
 }
 
 // 0x3E: LD A, d8 (- - - -)
@@ -3126,10 +3151,10 @@ void set_flag(char flag, unsigned char value, unsigned char *regis) {
 
     // Find the offset of the bit
     switch(flag) {
-        case 'Z': offset = 7; break;
-        case 'N': offset = 6; break;
-        case 'H': offset = 5; break;
-        case 'C': offset = 4; break;
+        case FLAG_ZERO: offset = 7; break;
+        case FLAG_SUBTRACT: offset = 6; break;
+        case FLAG_HALFCARRY: offset = 5; break;
+        case FLAG_CARRY: offset = 4; break;
         default: return;
     }
 
