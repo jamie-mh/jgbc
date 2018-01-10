@@ -28,7 +28,7 @@ void op_nop(struct gbc_system **gbc) {
 
 // 0x01: LD BC, d16 (- - - -)
 void op_ld_bc_d16(struct gbc_system **gbc, unsigned short operand) {
-    printf("Unimplemented Instruction: LD BC, d16\n");
+    (*gbc)->registers->BC = operand;
 }
 
 // 0x02: LD (BC), A (- - - -)
@@ -108,7 +108,7 @@ void op_stop_0(struct gbc_system **gbc, unsigned char operand) {
 
 // 0x11: LD DE, d16 (- - - -)
 void op_ld_de_d16(struct gbc_system **gbc, unsigned short operand) {
-    printf("Unimplemented Instruction: LD DE, d16\n");
+    (*gbc)->registers->DE = operand;
 }
 
 // 0x12: LD (DE), A (- - - -)
@@ -188,7 +188,7 @@ void op_jr_nz_r8(struct gbc_system **gbc, unsigned char operand) {
 
 // 0x21: LD HL, d16 (- - - -)
 void op_ld_hl_d16(struct gbc_system **gbc, unsigned short operand) {
-    printf("Unimplemented Instruction: LD HL, d16\n");
+    (*gbc)->registers->HL = operand;
 }
 
 // 0x22: LD (HL+), A (- - - -)
@@ -268,7 +268,7 @@ void op_jr_nc_r8(struct gbc_system **gbc, unsigned char operand) {
 
 // 0x31: LD SP, d16 (- - - -)
 void op_ld_sp_d16(struct gbc_system **gbc, unsigned short operand) {
-    printf("Unimplemented Instruction: LD SP, d16\n");
+    (*gbc)->registers->SP = operand;
 }
 
 // 0x32: LD (HL-), A (- - - -)
