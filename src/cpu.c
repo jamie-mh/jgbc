@@ -273,7 +273,8 @@ void op_ld_sp_d16(struct gbc_system **gbc, unsigned short operand) {
 
 // 0x32: LD (HL-), A (- - - -)
 void op_ld_hlmp_a(struct gbc_system **gbc) {
-    printf("Unimplemented Instruction: LD (HL-), A\n");
+    write_byte(&(*gbc)->ram, (*gbc)->registers->HL, (*gbc)->registers->A);
+    (*gbc)->registers->HL--;
 }
 
 // 0x33: INC SP (- - - -)
@@ -1369,7 +1370,7 @@ struct gbc_instr instructions[INSTRUCTION_COUNT] = {
     {"CPL", 1, 4, 1, op_cpl}, // 0x2F
     {"JR NC, %02x", 2, 12, 1, op_jr_nc_r8}, // 0x30
     {"LD SP, %04x", 3, 12, 1, op_ld_sp_d16}, // 0x31
-    {"LD (HL-), A", 1, 8, 1, op_ld_hlp_a}, // 0x32
+    {"LD (HL-), A", 1, 8, 1, op_ld_hlmp_a}, // 0x32
     {"INC SP", 1, 8, 1, op_inc_sp}, // 0x33
     {"INC (HL)", 1, 12, 1, op_inc_hlp}, // 0x34
     {"DEC (HL)", 1, 12, 1, op_dec_hlp}, // 0x35
