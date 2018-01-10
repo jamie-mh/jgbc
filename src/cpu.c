@@ -228,7 +228,9 @@ void op_rra(struct gbc_system **gbc) {
 
 // 0x20: JR NZ, r8 (- - - -)
 void op_jr_nz_r8(struct gbc_system **gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: JR NZ, r8\n");
+    if(get_flag(FLAG_ZERO, (*gbc)->registers->F) == 0) {
+        (*gbc)->registers->PC += (signed char) operand;
+    }
 }
 
 // 0x21: LD HL, d16 (- - - -)
@@ -268,7 +270,9 @@ void op_daa(struct gbc_system **gbc) {
 
 // 0x28: JR Z, r8 (- - - -)
 void op_jr_z_r8(struct gbc_system **gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: JR Z, r8\n");
+    if(get_flag(FLAG_ZERO, (*gbc)->registers->F) == 1) {
+        (*gbc)->registers->PC += (signed char) operand;
+    }
 }
 
 // 0x29: ADD HL, HL (- 0 H C)
@@ -308,7 +312,9 @@ void op_cpl(struct gbc_system **gbc) {
 
 // 0x30: JR NC, r8 (- - - -)
 void op_jr_nc_r8(struct gbc_system **gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: JR NC, r8\n");
+    if(get_flag(FLAG_CARRY, (*gbc)->registers->F) == 0) {
+        (*gbc)->registers->PC += (signed char) operand;
+    }
 }
 
 // 0x31: LD SP, d16 (- - - -)
@@ -351,7 +357,9 @@ void op_scf(struct gbc_system **gbc) {
 
 // 0x38: JR C, r8 (- - - -)
 void op_jr_c_r8(struct gbc_system **gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: JR C, r8\n");
+    if(get_flag(FLAG_CARRY, (*gbc)->registers->F) == 1) {
+        (*gbc)->registers->F += (signed char) operand;
+    }
 }
 
 // 0x39: ADD HL, SP (- 0 H C)
@@ -3145,18 +3153,21 @@ void execute_instr(struct gbc_system **gbc) {
     }
 }
 
-void set_flag(char flag, unsigned char value, unsigned char *regis) {
-
-    char offset;
-
+static char get_flag_offset(char flag) {
+    
     // Find the offset of the bit
     switch(flag) {
-        case FLAG_ZERO: offset = 7; break;
-        case FLAG_SUBTRACT: offset = 6; break;
-        case FLAG_HALFCARRY: offset = 5; break;
-        case FLAG_CARRY: offset = 4; break;
-        default: return;
+        case FLAG_ZERO: return 7;
+        case FLAG_SUBTRACT: return 6;
+        case FLAG_HALFCARRY: return 5;
+        case FLAG_CARRY: return 4;
+        default: return -1;
     }
+}
+
+void set_flag(char flag, unsigned char value, unsigned char *regis) {
+
+    char offset = get_flag_offset(flag);
 
     // Set or clear the bit
     if(value == 0) {
@@ -3164,4 +3175,12 @@ void set_flag(char flag, unsigned char value, unsigned char *regis) {
     } else if(value == 1) {
         *regis |= 1 << offset;          
     }
+}
+
+char get_flag(char flag, unsigned char regis) {
+
+    char offset = get_flag_offset(flag);
+
+    // Read the nth bit of the register
+    return (regis >> offset) & 1;
 }

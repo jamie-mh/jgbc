@@ -65,3 +65,4 @@ void incr_byte(unsigned char *, unsigned char *);
 void decr_byte(unsigned char *, unsigned char *);
 
 void set_flag(char, unsigned char, unsigned char *);
+char get_flag(char, unsigned char);
