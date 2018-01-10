@@ -53,7 +53,7 @@ void op_dec_b(struct gbc_system **gbc) {
 
 // 0x06: LD B, d8 (- - - -)
 void op_ld_b_d8(struct gbc_system **gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: LD B, d8\n");
+    (*gbc)->registers->B = operand;
 }
 
 // 0x07: RLCA (0 0 0 C)
@@ -93,7 +93,7 @@ void op_dec_c(struct gbc_system **gbc) {
 
 // 0x0E: LD C, d8 (- - - -)
 void op_ld_c_d8(struct gbc_system **gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: LD C, d8\n");
+    (*gbc)->registers->C = operand;
 }
 
 // 0x0F: RRCA (0 0 0 C)
@@ -133,7 +133,7 @@ void op_dec_d(struct gbc_system **gbc) {
 
 // 0x16: LD D, d8 (- - - -)
 void op_ld_d_d8(struct gbc_system **gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: LD D, d8\n");
+    (*gbc)->registers->D = operand;
 }
 
 // 0x17: RLA (0 0 0 C)
@@ -173,7 +173,7 @@ void op_dec_e(struct gbc_system **gbc) {
 
 // 0x1E: LD E, d8 (- - - -)
 void op_ld_e_d8(struct gbc_system **gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: LD E, d8\n");
+    (*gbc)->registers->E = operand;
 }
 
 // 0x1F: RRA (0 0 0 C)
@@ -213,7 +213,7 @@ void op_dec_h(struct gbc_system **gbc) {
 
 // 0x26: LD H, d8 (- - - -)
 void op_ld_h_d8(struct gbc_system **gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: LD H, d8\n");
+    (*gbc)->registers->H = operand;
 }
 
 // 0x27: DAA (Z - 0 C)
@@ -253,7 +253,7 @@ void op_dec_l(struct gbc_system **gbc) {
 
 // 0x2E: LD L, d8 (- - - -)
 void op_ld_l_d8(struct gbc_system **gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: LD L, d8\n");
+    (*gbc)->registers->L = operand;
 }
 
 // 0x2F: CPL (- 1 1 -)
