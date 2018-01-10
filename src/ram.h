@@ -13,7 +13,7 @@ struct gbc_ram {
     unsigned char *extram; // 8KB External Ram (cartridge)
     unsigned char *wram00; // 4KB Work RAM bank 0
     unsigned char *wramNN; // 4KB Work RAM bank 1-7 (switchable SGB only) 
-    unsigned char **echo; // 8KB Same as C000-DDFF
+    //echo 8KB Same as C000-DDFF
     unsigned char *oam; // 1.59KB Sprite Attribute Table
     unsigned char *io; // 128B IO Ports
     unsigned char *hram; // 128B High RAM
