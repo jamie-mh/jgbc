@@ -21,6 +21,28 @@ void init_cpu(struct gbc_system **gbc) {
     (*gbc)->registers->SP = DEFAULT_SP;
 }
 
+/*
+*   Common CPU operations
+*/
+
+unsigned char xor(unsigned char a, unsigned char b, unsigned char *flag) {
+    
+    unsigned char result = a ^ b;
+
+    if(!result) {
+        set_flag('Z', 1, flag);
+        set_flag('N', 0, flag);
+        set_flag('H', 0, flag);
+        set_flag('C', 0, flag);
+    }
+
+    return result;
+} 
+
+/*
+*   CPU instructions
+*/
+
 // 0x00: NOP (- - - -)
 void op_nop(struct gbc_system **gbc) {
     // Do nothing
@@ -864,106 +886,44 @@ void op_and_a(struct gbc_system **gbc) {
 
 // 0xA8: XOR B (Z 0 0 0)
 void op_xor_b(struct gbc_system **gbc) {
-    unsigned char result = (*gbc)->registers->B ^ (*gbc)->registers->A;
-    (*gbc)->registers->A = result;
-
-    if(!result) {
-        set_flag('Z', 1, &((*gbc)->registers->F));
-        set_flag('N', 0, &((*gbc)->registers->F));
-        set_flag('H', 0, &((*gbc)->registers->F));
-        set_flag('C', 0, &((*gbc)->registers->F));
-    }
+    (*gbc)->registers->A = xor((*gbc)->registers->B, (*gbc)->registers->A, &(*gbc)->registers->F);
 }
 
 // 0xA9: XOR C (Z 0 0 0)
 void op_xor_c(struct gbc_system **gbc) {
-    unsigned char result = (*gbc)->registers->C ^ (*gbc)->registers->A;
-    (*gbc)->registers->A = result;
-
-    if(!result) {
-        set_flag('Z', 1, &((*gbc)->registers->F));
-        set_flag('N', 0, &((*gbc)->registers->F));
-        set_flag('H', 0, &((*gbc)->registers->F));
-        set_flag('C', 0, &((*gbc)->registers->F));
-    }
+    (*gbc)->registers->A = xor((*gbc)->registers->C, (*gbc)->registers->A, &(*gbc)->registers->F);
 }
 
 // 0xAA: XOR D (Z 0 0 0)
 void op_xor_d(struct gbc_system **gbc) {
-    unsigned char result = (*gbc)->registers->D ^ (*gbc)->registers->A;
-    (*gbc)->registers->A = result;
-
-    if(!result) {
-        set_flag('Z', 1, &((*gbc)->registers->F));
-        set_flag('N', 0, &((*gbc)->registers->F));
-        set_flag('H', 0, &((*gbc)->registers->F));
-        set_flag('C', 0, &((*gbc)->registers->F));
-    }
+    (*gbc)->registers->A = xor((*gbc)->registers->D, (*gbc)->registers->A, &(*gbc)->registers->F);
 }
 
 // 0xAB: XOR E (Z 0 0 0)
 void op_xor_e(struct gbc_system **gbc) {
-    unsigned char result = (*gbc)->registers->E ^ (*gbc)->registers->A;
-    (*gbc)->registers->A = result;
-
-    if(!result) {
-        set_flag('Z', 1, &((*gbc)->registers->F));
-        set_flag('N', 0, &((*gbc)->registers->F));
-        set_flag('H', 0, &((*gbc)->registers->F));
-        set_flag('C', 0, &((*gbc)->registers->F));
-    }
+    (*gbc)->registers->A = xor((*gbc)->registers->E, (*gbc)->registers->A, &(*gbc)->registers->F);
 }
 
 // 0xAC: XOR H (Z 0 0 0)
 void op_xor_h(struct gbc_system **gbc) {
-    unsigned char result = (*gbc)->registers->H ^ (*gbc)->registers->A;
-    (*gbc)->registers->A = result;
-
-    if(!result) {
-        set_flag('Z', 1, &((*gbc)->registers->F));
-        set_flag('N', 0, &((*gbc)->registers->F));
-        set_flag('H', 0, &((*gbc)->registers->F));
-        set_flag('C', 0, &((*gbc)->registers->F));
-    }
+    (*gbc)->registers->A = xor((*gbc)->registers->H, (*gbc)->registers->A, &(*gbc)->registers->F);
 }
 
 // 0xAD: XOR L (Z 0 0 0)
 void op_xor_l(struct gbc_system **gbc) {
-    unsigned char result = (*gbc)->registers->L ^ (*gbc)->registers->A;
-    (*gbc)->registers->A = result;
-
-    if(!result) {
-        set_flag('Z', 1, &((*gbc)->registers->F));
-        set_flag('N', 0, &((*gbc)->registers->F));
-        set_flag('H', 0, &((*gbc)->registers->F));
-        set_flag('C', 0, &((*gbc)->registers->F));
-    }
+    (*gbc)->registers->A = xor((*gbc)->registers->L, (*gbc)->registers->A, &(*gbc)->registers->F);
 }
 
 // 0xAE: XOR (HL) (Z 0 0 0)
 void op_xor_hlp(struct gbc_system **gbc) {
-    unsigned char result = (*gbc)->registers->HL ^ (*gbc)->registers->A;
-    (*gbc)->registers->A = result;
-
-    if(!result) {
-        set_flag('Z', 1, &((*gbc)->registers->F));
-        set_flag('N', 0, &((*gbc)->registers->F));
-        set_flag('H', 0, &((*gbc)->registers->F));
-        set_flag('C', 0, &((*gbc)->registers->F));
-    }
+    (*gbc)->registers->A = xor(read_byte(&(*gbc)->ram, (*gbc)->registers->HL),
+                               (*gbc)->registers->A, 
+                               &(*gbc)->registers->F);
 }
 
 // 0xAF: XOR A (Z 0 0 0)
 void op_xor_a(struct gbc_system **gbc) { 
-    unsigned char result = (*gbc)->registers->A ^ (*gbc)->registers->A;
-    (*gbc)->registers->A = result;
-
-    if(!result) {
-        set_flag('Z', 1, &((*gbc)->registers->F));
-        set_flag('N', 0, &((*gbc)->registers->F));
-        set_flag('H', 0, &((*gbc)->registers->F));
-        set_flag('C', 0, &((*gbc)->registers->F));
-    }
+    (*gbc)->registers->A = xor((*gbc)->registers->A, (*gbc)->registers->A, &(*gbc)->registers->F);
 }
 
 // 0xB0: OR B (Z 0 0 0)
@@ -1238,15 +1198,7 @@ void op_ld_a16p_a(struct gbc_system **gbc, unsigned short operand) {
 
 // 0xEE: XOR d8 (Z 0 0 0)
 void op_xor_d8(struct gbc_system **gbc, unsigned char operand) {
-    unsigned char result = operand ^ (*gbc)->registers->A;
-    (*gbc)->registers->A = result;
-
-    if(!result) {
-        set_flag('Z', 1, &((*gbc)->registers->F));
-        set_flag('N', 0, &((*gbc)->registers->F));
-        set_flag('H', 0, &((*gbc)->registers->F));
-        set_flag('C', 0, &((*gbc)->registers->F));
-    }
+    (*gbc)->registers->A = xor(operand, (*gbc)->registers->A, &(*gbc)->registers->F);
 }
 
 // 0xEF: RST 28H (- - - -)
