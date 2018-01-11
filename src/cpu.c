@@ -1186,7 +1186,7 @@ void op_rst_18h(struct gbc_system **gbc) {
 
 // 0xE0: LDH (a8), A (- - - -)
 void op_ldh_a8p_a(struct gbc_system **gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: LDH (a8), A\n");
+    write_byte(&(*gbc)->ram, 0xFF00 + operand, (*gbc)->registers->A);
 }
 
 // 0xE1: POP HL (- - - -)
