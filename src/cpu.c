@@ -62,6 +62,34 @@ unsigned char dec_byte(unsigned char operand, unsigned char *flag) {
     return result;
 }
 
+void compare(unsigned char a, unsigned char b, unsigned char *flag) {
+
+    unsigned char result = a - b;
+
+    // Check if the result is 0
+    if(result == 0) {
+        set_flag(FLAG_ZERO, 1, flag);
+    } else {
+        set_flag(FLAG_ZERO, 0, flag);
+    }
+
+    set_flag(FLAG_SUBTRACT, 1, flag);
+
+    // Check for borrow from bit 4
+    if(((a & 0xf) - (b & 0xf)) & 0x10 == 0x10) {
+        set_flag(FLAG_HALFCARRY, 1, flag);
+    } else {
+        set_flag(FLAG_HALFCARRY, 0, flag);
+    }
+    
+    // Check for no borrow
+    if(a < b) {
+        set_flag(FLAG_CARRY, 1, flag);
+    } else {
+        set_flag(FLAG_CARRY, 0, flag);
+    }
+}
+
 /*
 *   CPU instructions
 */
@@ -1001,42 +1029,44 @@ void op_or_a(struct gbc_system **gbc) {
 
 // 0xB8: CP B (Z 1 H C)
 void op_cp_b(struct gbc_system **gbc) {
-    printf("Unimplemented Instruction: CP B\n");
+    compare((*gbc)->registers->A, (*gbc)->registers->B, &(*gbc)->registers->F);
 }
 
 // 0xB9: CP C (Z 1 H C)
 void op_cp_c(struct gbc_system **gbc) {
-    printf("Unimplemented Instruction: CP C\n");
+    compare((*gbc)->registers->A, (*gbc)->registers->C, &(*gbc)->registers->F);
 }
 
 // 0xBA: CP D (Z 1 H C)
 void op_cp_d(struct gbc_system **gbc) {
-    printf("Unimplemented Instruction: CP D\n");
+    compare((*gbc)->registers->A, (*gbc)->registers->D, &(*gbc)->registers->F);
 }
 
 // 0xBB: CP E (Z 1 H C)
 void op_cp_e(struct gbc_system **gbc) {
-    printf("Unimplemented Instruction: CP E\n");
+    compare((*gbc)->registers->A, (*gbc)->registers->E, &(*gbc)->registers->F);
 }
 
 // 0xBC: CP H (Z 1 H C)
 void op_cp_h(struct gbc_system **gbc) {
-    printf("Unimplemented Instruction: CP H\n");
+    compare((*gbc)->registers->A, (*gbc)->registers->H, &(*gbc)->registers->F);
 }
 
 // 0xBD: CP L (Z 1 H C)
 void op_cp_l(struct gbc_system **gbc) {
-    printf("Unimplemented Instruction: CP L\n");
+    compare((*gbc)->registers->A, (*gbc)->registers->L, &(*gbc)->registers->F);
 }
 
 // 0xBE: CP (HL) (Z 1 H C)
 void op_cp_hlp(struct gbc_system **gbc) {
-    printf("Unimplemented Instruction: CP (HL)\n");
+    compare((*gbc)->registers->A,
+            read_byte(&(*gbc)->ram, (*gbc)->registers->HL),
+            &(*gbc)->registers->F);
 }
 
 // 0xBF: CP A (Z 1 H C)
 void op_cp_a(struct gbc_system **gbc) {
-    printf("Unimplemented Instruction: CP A\n");
+    compare((*gbc)->registers->A, (*gbc)->registers->A, &(*gbc)->registers->F);
 }
 
 // 0xC0: RET NZ (- - - -)
@@ -1296,7 +1326,7 @@ void op_ei(struct gbc_system **gbc) {
 
 // 0xFE: CP d8 (Z 1 H C)
 void op_cp_d8(struct gbc_system **gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: CP d8\n");
+    compare((*gbc)->registers->A, operand, &(*gbc)->registers->F);
 }
 
 // 0xFF: RST 38H (- - - -)
