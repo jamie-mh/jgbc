@@ -3,6 +3,7 @@
 #include<math.h>
 #include<time.h>
 #include<string.h>
+#include<unistd.h>
 #include<SDL2/SDL.h>
 
 #ifndef max
@@ -13,11 +14,19 @@
 	#define min(a, b) (((a) < (b)) ? (a) : (b))
 #endif
 
-// GameBoy Specification
+#define ROM_PATH_LENGTH 256
 
+// GameBoy Specification
 struct gbc_system {
     char is_running;
     char interrupts_enabled;
     struct gbc_registers *registers;
     struct gbc_ram *ram;
 };
+
+struct cmd_options {
+    char *rom_path;
+    char debug;
+};
+
+static char get_cl_arguments(int, char **, struct cmd_options **); 
