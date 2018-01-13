@@ -10,4 +10,4 @@ struct gbc_rom {
     unsigned char **rom_banks; // Up to 7 x 16KB ROM banks
 };
 
-int load_rom(struct gbc_ram **, struct gbc_rom **, char *);
+char load_rom(struct gbc_ram **, struct gbc_rom **, const char *);

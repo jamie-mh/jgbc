@@ -19,8 +19,8 @@ int main(int argc, char **argv) {
 
     // Temp
     gbc->is_running = 1;
-    gbc->is_debugging = 0;
     gbc->interrupts_enabled = 1;
+    struct gbc_debugger *debugger = malloc(sizeof(*debugger));
 
     // Load the rom into memory
     if(!load_rom(&gbc->ram, &rom, argv[1])) {
@@ -30,18 +30,11 @@ int main(int argc, char **argv) {
     // Main Loop
     while(gbc->is_running) {
 
-        // Debug: breakpoint
-        if(gbc->registers->PC == 0x29a) {
-            gbc->is_debugging = 1;
-        }
-
         // Read in memory at the program counter
         execute_instr(&gbc);
 
-        if(gbc->is_debugging) {
-            print_debug(&gbc);
-            getchar();
-        }
+        debug(&gbc, &debugger);
+
     }
 
     // Free memory

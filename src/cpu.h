@@ -58,11 +58,8 @@ struct gbc_instr {
 };
 
 void init_cpu(struct gbc_system **);
-struct gbc_instr find_instr(unsigned char, struct gbc_system **);
+struct gbc_instr find_instr(const unsigned char, struct gbc_system **);
 void execute_instr(struct gbc_system **);
 
-void incr_byte(unsigned char *, unsigned char *);
-void decr_byte(unsigned char *, unsigned char *);
-
-void set_flag(char, unsigned char, unsigned char *);
-char get_flag(char, unsigned char);
+static void set_flag(const char, const unsigned char, unsigned char *);
+static char get_flag(const char, const unsigned char);

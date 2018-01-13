@@ -14,14 +14,18 @@
 #define DBOX_INFO_ROWS 4
 #define DBOX_INFO_WIDTH 7
 
-#define KNRM "\x1B[0m"
-#define KRED "\x1B[31m"
-#define KGRN "\x1B[32m"
-#define KYEL "\x1B[33m"
-#define KBLU "\x1B[34m"
-#define KMAG "\x1B[35m"
-#define KCYN "\x1B[36m"
-#define KWHT "\x1B[37m"
+#define CNRM "\x1B[0m"
+#define CRED "\x1B[31m"
+#define CGRN "\x1B[32m"
+#define CYEL "\x1B[33m"
+#define CBLU "\x1B[34m"
+#define CMAG "\x1B[35m"
+#define CCYN "\x1B[36m"
+#define CWHT "\x1B[37m"
+
+struct gbc_debugger {
+    unsigned short *breakpoints;
+};
 
 struct debug_box {
     int width;
@@ -29,5 +33,5 @@ struct debug_box {
     char **rows;
 };
 
-void print_debug(struct gbc_system **);
-void print_separator(int);
+static void print_debug(struct gbc_system **, struct gbc_debugger **);
+void debug(struct gbc_system **, struct gbc_debugger **);

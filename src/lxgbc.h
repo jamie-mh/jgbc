@@ -17,7 +17,6 @@
 
 struct gbc_system {
     char is_running;
-    char is_debugging;
     char interrupts_enabled;
     struct gbc_registers *registers;
     struct gbc_ram *ram;

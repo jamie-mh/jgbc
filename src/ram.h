@@ -24,10 +24,10 @@ struct gbc_ram {
 };
 
 void init_ram(struct gbc_ram **);
-unsigned char **get_memory_location(struct gbc_ram **, unsigned short *);
+static unsigned char **get_memory_location(struct gbc_ram **, unsigned short *);
 
-unsigned char read_byte(struct gbc_ram **, unsigned short);
-unsigned short read_short(struct gbc_ram **, unsigned short);
+unsigned char read_byte(struct gbc_ram **, const unsigned short);
+unsigned short read_short(struct gbc_ram **, const unsigned short);
 
-void write_byte(struct gbc_ram **, unsigned short, unsigned char);
-void write_short(struct gbc_ram **, unsigned short, unsigned short);
+void write_byte(struct gbc_ram **, const unsigned short, const unsigned char);
+void write_short(struct gbc_ram **, const unsigned short, const unsigned short);

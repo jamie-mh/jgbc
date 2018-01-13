@@ -2,7 +2,7 @@
 #include "ram.h"
 #include "rom.h"
 
-int load_rom(struct gbc_ram **ram, struct gbc_rom **rom, char *path) {
+char load_rom(struct gbc_ram **ram, struct gbc_rom **rom, const char *path) {
 
     // Read the file at the specified path
     FILE *file;

@@ -3,7 +3,7 @@
 #include "cpu.h"
 #include "ram.h"
 
-struct debug_box *dbox_instr(struct gbc_system **gbc) {
+static struct debug_box *dbox_instr(struct gbc_system **gbc, struct gbc_debugger **debugger) {
     
     // Allocate memory for the box
     struct debug_box *box = malloc(sizeof(*box));
@@ -82,7 +82,7 @@ struct debug_box *dbox_instr(struct gbc_system **gbc) {
     return box;
 }
 
-struct debug_box *dbox_regis(struct gbc_system **gbc) {
+static struct debug_box *dbox_regis(struct gbc_system **gbc, struct gbc_debugger **debugger) {
 
     // Allocate memory for the box
     struct debug_box *box = malloc(sizeof(*box));
@@ -92,7 +92,7 @@ struct debug_box *dbox_regis(struct gbc_system **gbc) {
     box->height = DBOX_REGIS_ROWS;
     box->width = DBOX_REGIS_WIDTH;
 
-    char *line = malloc(12);
+    char *line = malloc(DBOX_REGIS_ROWS);
 
     // TODO: Replace this at some point
     sprintf(line, "A : %02X", (*gbc)->registers->A);
@@ -149,7 +149,7 @@ struct debug_box *dbox_regis(struct gbc_system **gbc) {
     return box;
 }
 
-struct debug_box *dbox_flags(struct gbc_system **gbc) {
+static struct debug_box *dbox_flags(struct gbc_system **gbc, struct gbc_debugger **debugger) {
 
     // Allocate memory for the box
     struct debug_box *box = malloc(sizeof(*box));
@@ -174,7 +174,7 @@ struct debug_box *dbox_flags(struct gbc_system **gbc) {
     return box;
 }
 
-struct debug_box *dbox_info(struct gbc_system **gbc) {
+static struct debug_box *dbox_info(struct gbc_system **gbc, struct gbc_debugger **debugger) {
    
     // Allocate memory for the box
     struct debug_box *box = malloc(sizeof(*box));
@@ -199,21 +199,25 @@ struct debug_box *dbox_info(struct gbc_system **gbc) {
     return box;
 }
 
-void print_separator(int width) {
+static void print_separator(const int width) {
     int i = 0; 
     for(; i < width; printf("-"), i++);
     printf("\n");
 }
 
-void print_debug(struct gbc_system **gbc) {
+static void clear_debug() {
+    for(int i = 0; i < 50; printf("\n"), i++);
+}
+
+static void print_debug(struct gbc_system **gbc, struct gbc_debugger **debugger) {
 
     // Create an array of boxes
     // A box is a formatted debug table in the console window
     struct debug_box *boxes[DBOX_COUNT];
-    boxes[0] = dbox_instr(gbc);
-    boxes[1] = dbox_regis(gbc);
-    boxes[2] = dbox_flags(gbc);
-    boxes[3] = dbox_info(gbc);
+    boxes[0] = dbox_instr(gbc, debugger);
+    boxes[1] = dbox_regis(gbc, debugger);
+    boxes[2] = dbox_flags(gbc, debugger);
+    boxes[3] = dbox_info(gbc, debugger);
 
     // Render the various boxes in columns of 2
     int i;
@@ -254,4 +258,14 @@ void print_debug(struct gbc_system **gbc) {
         free(box_one);
         free(box_two);
     }
+}
+
+void debug(struct gbc_system **gbc, struct gbc_debugger **debugger) {
+
+    // Clear the screen and print all the boxes 
+    clear_debug();
+    print_debug(gbc, debugger);
+
+    getchar(); 
+
 }
