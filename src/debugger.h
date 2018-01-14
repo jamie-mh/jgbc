@@ -24,7 +24,17 @@
 #define CWHT "\x1B[37m"
 
 struct gbc_debugger {
-    unsigned short *breakpoints;
+    struct breakpoint *breakpoint_head;
+    int breakpoint_count;
+    char skip_instr;
+    char running;
+    char print;
+};
+
+// Breakpoint linked list element
+struct breakpoint {
+    unsigned short address;
+    struct breakpoint *next;
 };
 
 struct debug_box {
@@ -33,5 +43,10 @@ struct debug_box {
     char **rows;
 };
 
+void init_debugger(struct gbc_debugger **);
 static void print_debug(struct gbc_system **, struct gbc_debugger **);
 void debug(struct gbc_system **, struct gbc_debugger **);
+
+static char add_breakpoint(const unsigned short, struct gbc_debugger **);
+static char remove_breakpoint(const unsigned short, struct gbc_debugger **);
+static struct breakpoint *find_breakpoint(const unsigned short, struct gbc_debugger **);

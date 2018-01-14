@@ -14,7 +14,7 @@ static struct debug_box *dbox_instr(struct gbc_system **gbc, struct gbc_debugger
     box->width = DBOX_INSTR_WIDTH;
 
     // Write to the row array
-    unsigned short pointer = (*gbc)->registers->PC;
+    unsigned int pointer = (*gbc)->registers->PC;
     int i;
     for(i = 0; i < DBOX_INSTR_ROWS; i++) {
 
@@ -32,7 +32,12 @@ static struct debug_box *dbox_instr(struct gbc_system **gbc, struct gbc_debugger
         if(i == 0) {
             strcat(box->rows[i], "-> ");
         } else {
-            strcat(box->rows[i], "   ");
+            // If the instruction is at a breakpoint
+            if(find_breakpoint(pointer, debugger)) {
+                strcat(box->rows[i], "@  ");
+            } else {
+                strcat(box->rows[i], "   ");
+            }
         }
 
         // Check the we aren't outside the highest memory address
@@ -205,10 +210,6 @@ static void print_separator(const int width) {
     printf("\n");
 }
 
-static void clear_debug() {
-    for(int i = 0; i < 50; printf("\n"), i++);
-}
-
 static void print_debug(struct gbc_system **gbc, struct gbc_debugger **debugger) {
 
     // Create an array of boxes
@@ -262,10 +263,213 @@ static void print_debug(struct gbc_system **gbc, struct gbc_debugger **debugger)
 
 void debug(struct gbc_system **gbc, struct gbc_debugger **debugger) {
 
-    // Clear the screen and print all the boxes 
-    clear_debug();
-    print_debug(gbc, debugger);
+    // If the emulator is running
+    if((*debugger)->running) {
 
-    getchar(); 
+        struct breakpoint *bp = find_breakpoint((*gbc)->registers->PC, debugger);
 
+        // If there is a breakpoint at this instruction
+        if(bp) {
+            (*debugger)->running = 0;
+            print_debug(gbc, debugger);
+            printf(CYEL "Stopped at breakpoint 0x%04X\n" CNRM, bp->address);
+        } else {
+            return;
+        }
+    }
+
+    // If we need to skip some instructions
+    if((*debugger)->skip_instr > 0) {
+        (*debugger)->skip_instr--;
+        return;
+    }
+
+    int command;
+
+    // Get a command from the user
+    while((command = getchar()) != EOF) {
+        
+        if((*debugger)->print) {
+            print_debug(gbc, debugger);
+            (*debugger)->print = 0;
+        }
+    
+        switch(command) {
+
+            // Help command
+            case 'h':
+                printf("\nAvailable Commands:\n(1-9): Run X instructions\nb: Create a breakpoint\nd: Remove a breakpoint\nl: List all breakpoints\nr: Run\np: Print debug information\nq: Quit\n");
+                continue;
+
+            // Number input to run for X instructions before stopping
+            case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
+
+                // Subtract '0' to get the digit
+                (*debugger)->skip_instr = command - '0' - 1;
+                (*debugger)->print = 1;
+                return;
+
+            // Add breakpoint command
+            case 'b': {
+                unsigned int address;
+                printf("\nNew breakpoint\nAddress (HEX) 0x");
+                scanf("%x", &address);
+
+                // Add the breakpoint 
+                if(add_breakpoint(address, debugger)) {
+                    printf(CGRN "Breakpoint added at 0x%04X\n" CNRM, address);
+                } else {
+                    printf(CRED "Breakpoint already exists\n" CNRM);
+                }
+                continue;
+            }
+
+            // Remove breakpoint
+            case 'd': {
+                unsigned int address;
+                printf("\nRemove breakpoint\nAddress (HEX) 0x");
+                scanf("%x", &address);
+
+                // Remove the breakpoint 
+                if(remove_breakpoint(address, debugger)) {
+                    printf(CGRN "Breakpoint at 0x%04X removed\n" CNRM, address);
+                } else {
+                    printf(CRED "Breakpoint does not exist\n" CNRM);
+                }
+                continue;
+            }
+
+            // List breakpoints
+            case 'l': {
+
+                struct breakpoint *item = (*debugger)->breakpoint_head;
+                int i = 1;
+                while(item) {
+                    printf("%d: 0x%04X\n", i, item->address);
+                    item = item->next;
+                    i++;
+                }
+                continue;
+            }
+
+            // Print debug information
+            case 'p':
+                print_debug(gbc, debugger);
+                continue;
+
+            // Run command
+            case 'r':
+                (*debugger)->running = 1;
+                return;
+
+            // Quit command
+            case 'q':
+                exit(0);
+        }
+
+        printf("(dbg) ");
+    }
+}
+
+void init_debugger(struct gbc_debugger **debugger) {
+    
+    // Set the defaults
+    (*debugger)->breakpoint_head = NULL;
+    (*debugger)->breakpoint_count = 0;
+    (*debugger)->skip_instr = 0;
+    (*debugger)->running = 0;
+
+    // Start the prompt
+    printf("(dbg) ");
+}
+
+static char add_breakpoint(const unsigned short address, struct gbc_debugger **debugger) {
+
+    // Check for duplicate breakpoints
+    struct breakpoint *found = find_breakpoint(address, debugger);
+   
+    if(found == NULL) {
+        
+        // Create a new breakpoint element
+        struct breakpoint *new = malloc(sizeof(*new));
+        new->address = address;
+
+        // If there are no breakpoints, set it as the head
+        if((*debugger)->breakpoint_count == 0) {
+            new->next = NULL;
+            (*debugger)->breakpoint_head = new;
+        } else {
+            // Add the new breakpoint to the front of the linked list
+            new->next = (*debugger)->breakpoint_head;
+            (*debugger)->breakpoint_head = new;
+        }
+        
+        (*debugger)->breakpoint_count++;
+        return 1;
+    }
+    
+    return 0; 
+}
+
+static char remove_breakpoint(const unsigned short address, struct gbc_debugger **debugger) {
+
+    // Remove the item from the linked list
+    struct breakpoint *prev = NULL;
+    struct breakpoint *curr= NULL;
+
+    if((*debugger)->breakpoint_count > 0) {
+       
+        // Go through all the breakpoints
+        curr = (*debugger)->breakpoint_head;
+        while(curr) {
+            
+            // If the item matches 
+            if(curr->address == address) {
+                
+                // If we are removing the head
+                if(curr == (*debugger)->breakpoint_head) {
+
+                    // If there is only one
+                    if((*debugger)->breakpoint_count == 1) {
+                        (*debugger)->breakpoint_head = NULL;
+                    } else {
+                        (*debugger)->breakpoint_head = curr->next;
+                    }
+                } 
+                // If there is more than one 
+                else {
+                    prev->next = curr->next; 
+                }
+
+                free(curr);
+                (*debugger)->breakpoint_count--;
+                return 1;
+            }
+            
+            prev = curr;
+            curr = curr->next;
+        }
+
+    }
+
+    return 0;
+}
+
+static struct breakpoint *find_breakpoint(const unsigned short address, struct gbc_debugger **debugger) {
+
+    if((*debugger)->breakpoint_count > 0) {
+
+        // Iterate through the breakpoints and find one with the correct address
+        struct breakpoint *item = (*debugger)->breakpoint_head;
+        while(item) {
+            
+            if(item->address == address) {
+                return item;
+            }
+
+            item = item->next;
+        }
+    }
+
+    return NULL; 
 }

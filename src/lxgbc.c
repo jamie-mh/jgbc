@@ -11,7 +11,7 @@ int main(int argc, char **argv) {
     struct gbc_system *gbc = malloc(sizeof(*gbc));
     struct gbc_rom *rom = malloc(sizeof(*rom));
     struct gbc_display *display = malloc(sizeof(*display));
-    struct gbc_debugger *debugger = malloc(sizeof(*debugger));
+    struct gbc_debugger *debugger = NULL;
 
     // Get the command line arguments
     struct cmd_options *cmd = calloc(1, sizeof(*cmd));
@@ -25,6 +25,13 @@ int main(int argc, char **argv) {
     init_cpu(&gbc);
     init_ram(&gbc->ram);
     //init_display(&display);
+
+    // Show a message and initialise the debugger 
+    if(cmd->debug) {
+        printf("\nLXGBC "CRED"DEBUGGER RUNNING"CNRM"\nType 'h' for information on the available commands.\n");
+        debugger = malloc(sizeof(*debugger));
+        init_debugger(&debugger);
+    }
 
     // TODO: Remove temporary 
     gbc->is_running = 1;
