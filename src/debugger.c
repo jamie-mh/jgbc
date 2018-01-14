@@ -303,7 +303,7 @@ void debug(struct gbc_system **gbc, struct gbc_debugger **debugger) {
 
             // Help command
             case 'h':
-                printf("\nAvailable Commands:\n(1-9): Run X instructions\nb: Create a breakpoint\nd: Remove a breakpoint\nl: List all breakpoints\nr: Run\np: Print debug information\nq: Quit\n");
+                printf("\nAvailable Commands:\n(1-9): Run X instructions\nb: Create a breakpoint\nd: Remove a breakpoint\nl: List all breakpoints\nr: Run\np: Print debug information\nf: Dump RAM to a file\nq: Quit\n");
                 continue;
 
             // Number input to run for X instructions before stopping
@@ -357,15 +357,31 @@ void debug(struct gbc_system **gbc, struct gbc_debugger **debugger) {
                 continue;
             }
 
+            // Run command
+            case 'r':
+                (*debugger)->running = 1;
+                return;
+            
             // Print debug information
             case 'p':
                 print_debug(gbc, debugger);
                 continue;
 
-            // Run command
-            case 'r':
-                (*debugger)->running = 1;
-                return;
+            // Dump RAM to a file
+            case 'f': {
+                printf("Filename: ");
+                char *filename = malloc(sizeof(*filename) * RAM_DUMP_FILENAME_SIZE);
+                getchar();
+                fgets(filename, RAM_DUMP_FILENAME_SIZE, stdin);
+                filename[strlen(filename) - 1] = '\0';
+
+                if(dump_ram(&(*gbc)->ram, filename)) {
+                    printf(CGRN "RAM dumped successfully to \"%s\"\n" CNRM, filename);    
+                } else {
+                    printf(CRED "RAM dump failed!\n" CNRM);
+                }
+                continue;
+            }
 
             // Quit command
             case 'q':
@@ -477,4 +493,29 @@ static struct breakpoint *find_breakpoint(const unsigned short address, struct g
     }
 
     return NULL; 
+}
+
+static char dump_ram(struct gbc_ram **ram, const char *filename) {
+   
+    // Open the file for writing
+    FILE *fp = NULL;
+    if((fp = fopen(filename, "w")) == NULL) {
+        return 0; 
+    }
+   
+    // Dump the ram to a file
+    unsigned short pointer = 0x0;
+    for(; pointer < 0xFFFF; pointer++) {
+        
+        // TODO: Remove this
+        if((pointer >= 0xA000 && pointer <= 0xBFFF) ||
+           (pointer >= 0xFE00)) {
+            fputc(0, fp); 
+        } else {
+            fputc(read_byte(ram, pointer), fp);
+        }
+    }
+    fclose(fp);
+
+    return 1;
 }

@@ -23,6 +23,8 @@
 #define CCYN "\x1B[36m"
 #define CWHT "\x1B[37m"
 
+#define RAM_DUMP_FILENAME_SIZE 128
+
 struct gbc_debugger {
     struct breakpoint *breakpoint_head;
     int breakpoint_count;
@@ -50,3 +52,4 @@ void debug(struct gbc_system **, struct gbc_debugger **);
 static char add_breakpoint(const unsigned short, struct gbc_debugger **);
 static char remove_breakpoint(const unsigned short, struct gbc_debugger **);
 static struct breakpoint *find_breakpoint(const unsigned short, struct gbc_debugger **);
+static char dump_ram(struct gbc_ram **, const char *);
