@@ -132,21 +132,25 @@ static struct debug_box *dbox_regis(struct gbc_system **gbc, struct gbc_debugger
     box->rows[7] = malloc(sizeof(char) * strlen(line));
     strcpy(box->rows[7], line);
 
-    sprintf(line, "DE: %04X", (*gbc)->registers->DE);
+    sprintf(line, "BC: %04X", (*gbc)->registers->BC);
     box->rows[8] = malloc(sizeof(char) * strlen(line));
     strcpy(box->rows[8], line);
 
-    sprintf(line, "HL: %04X", (*gbc)->registers->HL);
+    sprintf(line, "DE: %04X", (*gbc)->registers->DE);
     box->rows[9] = malloc(sizeof(char) * strlen(line));
     strcpy(box->rows[9], line);
 
-    sprintf(line, "PC: %04X", (*gbc)->registers->PC);
+    sprintf(line, "HL: %04X", (*gbc)->registers->HL);
     box->rows[10] = malloc(sizeof(char) * strlen(line));
     strcpy(box->rows[10], line);
 
-    sprintf(line, "SP: %04X", (*gbc)->registers->SP);
+    sprintf(line, "PC: %04X", (*gbc)->registers->PC);
     box->rows[11] = malloc(sizeof(char) * strlen(line));
     strcpy(box->rows[11], line);
+
+    sprintf(line, "SP: %04X", (*gbc)->registers->SP);
+    box->rows[12] = malloc(sizeof(char) * strlen(line));
+    strcpy(box->rows[12], line);
 
     // Free memory
     free(line);

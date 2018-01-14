@@ -5,7 +5,7 @@
 #define DBOX_INSTR_ROWS 13
 #define DBOX_INSTR_WIDTH 28
 
-#define DBOX_REGIS_ROWS 12
+#define DBOX_REGIS_ROWS 13
 #define DBOX_REGIS_WIDTH 8
 
 #define DBOX_FLAGS_ROWS 4
