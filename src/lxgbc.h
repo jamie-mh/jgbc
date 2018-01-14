@@ -15,6 +15,7 @@
 #endif
 
 #define ROM_PATH_LENGTH 256
+#define LOGO "    __   _  ____________  ______\n   / /  | |/ / ____/ __ )/ ____/\n  / /   |   / / __/ __  / /    \n / /___/   / /_/ / /_/ / /___  \n/_____/_/|_\\____/_____/\\____/   \n                                \n"
 
 // GameBoy Specification
 struct gbc_system {

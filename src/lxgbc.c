@@ -7,6 +7,8 @@
 
 int main(int argc, char **argv) {
 
+    printf(LOGO);
+
     // Allocate memory for the gbc
     struct gbc_system *gbc = malloc(sizeof(*gbc));
     struct gbc_rom *rom = malloc(sizeof(*rom));
@@ -26,13 +28,6 @@ int main(int argc, char **argv) {
     init_ram(&gbc->ram);
     //init_display(&display);
 
-    // Show a message and initialise the debugger 
-    if(cmd->debug) {
-        printf("\nLXGBC "CRED"DEBUGGER RUNNING"CNRM"\nType 'h' for information on the available commands.\n");
-        debugger = malloc(sizeof(*debugger));
-        init_debugger(&debugger);
-    }
-
     // TODO: Remove temporary 
     gbc->is_running = 1;
     gbc->interrupts_enabled = 1;
@@ -41,6 +36,18 @@ int main(int argc, char **argv) {
     if(!load_rom(&gbc->ram, &rom, cmd->rom_path)) {
         printf("ERROR: Could not load rom file!\n\n");
         exit(0);
+    }
+
+    // Print the rom information
+    printf("Title: %s\n", rom->title);
+    printf("CGB Features: %d\n", rom->is_cgb);
+    printf("Type: %02X\n", rom->cartridge_type);
+    
+    // Show a message and initialise the debugger 
+    if(cmd->debug) {
+        printf("\nLXGBC "CRED"DEBUGGER RUNNING"CNRM"\nType 'h' for information on the available commands.\n");
+        debugger = malloc(sizeof(*debugger));
+        init_debugger(&debugger);
     }
 
     // Main endless loop 

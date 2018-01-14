@@ -47,6 +47,33 @@ char load_rom(struct gbc_ram **ram, struct gbc_rom **rom, const char *path) {
     if(bank >= 1) {
         (*ram)->romNN = &(*rom)->rom_banks[1];
     }
+    
+    // Parse the rom information
+    get_rom_info(ram, rom);
 
     return 1;
+}
+
+static void get_rom_info(struct gbc_ram **ram, struct gbc_rom **rom) {
+
+    // Read the title from the header    
+    // The title is 16 characters maximum, uppercase ASCII
+    char *title = calloc(sizeof(char), 16);
+    int i;
+
+    for(i = 0; i < 16; i++) {
+        title[i] = read_byte(ram, 0x134 + i);
+    }
+
+    title[strlen(title)] = '\0';
+    (*rom)->title = malloc(sizeof(char) * strlen(title) + 1);
+    strcpy((*rom)->title, title);
+    free(title);
+
+    // Check if the rom has GB color features
+    unsigned char cgb_byte = read_byte(ram, 0x143);
+    (*rom)->is_cgb = (cgb_byte == 0x80) ? 1 : 0;
+    
+    // Read the cartridge type
+    (*rom)->cartridge_type = read_byte(ram, 0x147);
 }
