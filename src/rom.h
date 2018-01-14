@@ -6,7 +6,6 @@ struct gbc_rom {
     unsigned char indicator;
     unsigned char cartridge_type;
 
-    unsigned char **wram_banks; // Up to 7 x 4KB RAM banks
     unsigned char **rom_banks; // Up to 7 x 16KB ROM banks
 };
 
