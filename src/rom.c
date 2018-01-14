@@ -24,7 +24,7 @@ char load_rom(struct gbc_ram **ram, struct gbc_rom **rom, const char *path) {
                 bank++;
                 index = 0;
 
-                (*rom)->rom_banks = realloc((*rom)->rom_banks, bank + 1);
+                (*rom)->rom_banks = realloc((*rom)->rom_banks, (bank + 1) * sizeof(char *));
                 (*rom)->rom_banks[bank] = calloc(ROM_BANK_SIZE, sizeof(char));
             }
             // Add the byte to memory
