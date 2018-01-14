@@ -272,6 +272,7 @@ void debug(struct gbc_system **gbc, struct gbc_debugger **debugger) {
         if(bp) {
             (*debugger)->running = 0;
             print_debug(gbc, debugger);
+            remove_breakpoint(bp->address, debugger);
             printf(CYEL "Stopped at breakpoint 0x%04X\n" CNRM, bp->address);
         } else {
             return;
