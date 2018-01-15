@@ -63,6 +63,12 @@ static struct debug_box *dbox_instr(struct gbc_system **gbc, struct gbc_debugger
                 unsigned short operand = 0;
                 if(instr.length == 2) {
                     operand = read_byte(&(*gbc)->ram, pointer + 1);
+
+                    // If the operand is signed, get the two's complement
+                    if(instr.signed_operand) {
+                        operand = (~(operand - 1)) & 0x00FF;
+                    }
+
                     pointer += 2;
                 } else if(instr.length == 3) {
                     operand = read_short(&(*gbc)->ram, pointer + 1);

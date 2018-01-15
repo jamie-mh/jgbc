@@ -54,6 +54,7 @@ struct gbc_instr {
     char length;
     char cycles;
     char increment_PC;
+    char signed_operand;
     void *execute;
 };
 
