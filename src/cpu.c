@@ -7,14 +7,11 @@ void init_cpu(struct gbc_system **gbc) {
     // Initialize the registers
     (*gbc)->registers = malloc(sizeof(struct gbc_registers));
 
-    // Set all the registers to 0
-    (*gbc)->registers->A = 0;
-    (*gbc)->registers->B = 0;
-    (*gbc)->registers->C = 0;
-    (*gbc)->registers->D = 0;
-    (*gbc)->registers->E = 0;
-    (*gbc)->registers->H = 0;
-    (*gbc)->registers->L = 0;
+    // Default register values
+    (*gbc)->registers->AF = DEFAULT_AF;
+    (*gbc)->registers->BC = DEFAULT_BC;
+    (*gbc)->registers->DE = DEFAULT_DE;
+    (*gbc)->registers->HL = DEFAULT_HL;
 
     // Set the pointers to their default value
     (*gbc)->registers->PC = DEFAULT_PC;
