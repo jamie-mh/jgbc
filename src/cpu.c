@@ -2,20 +2,20 @@
 #include "cpu.h"
 #include "ram.h"
 
-void init_cpu(struct gbc_system **gbc) {
+void init_cpu(struct gbc_system *gbc) {
 
     // Initialize the registers
-    (*gbc)->registers = malloc(sizeof(struct gbc_registers));
+    gbc->registers = malloc(sizeof(struct gbc_registers));
 
     // Default register values
-    (*gbc)->registers->AF = DEFAULT_AF;
-    (*gbc)->registers->BC = DEFAULT_BC;
-    (*gbc)->registers->DE = DEFAULT_DE;
-    (*gbc)->registers->HL = DEFAULT_HL;
+    gbc->registers->AF = DEFAULT_AF;
+    gbc->registers->BC = DEFAULT_BC;
+    gbc->registers->DE = DEFAULT_DE;
+    gbc->registers->HL = DEFAULT_HL;
 
     // Set the pointers to their default value
-    (*gbc)->registers->PC = DEFAULT_PC;
-    (*gbc)->registers->SP = DEFAULT_SP;
+    gbc->registers->PC = DEFAULT_PC;
+    gbc->registers->SP = DEFAULT_SP;
 }
 
 /*
@@ -92,1242 +92,1242 @@ static void compare(const unsigned char a, const unsigned char b, unsigned char 
 */
 
 // 0x00: NOP (- - - -)
-static void op_nop(struct gbc_system **gbc) {
+static void op_nop(struct gbc_system *gbc) {
     // Do nothing
 }
 
 // 0x01: LD BC, d16 (- - - -)
-static void op_ld_bc_d16(struct gbc_system **gbc, unsigned short operand) {
-    (*gbc)->registers->BC = operand;
+static void op_ld_bc_d16(struct gbc_system *gbc, unsigned short operand) {
+    gbc->registers->BC = operand;
 }
 
 // 0x02: LD (BC), A (- - - -)
-static void op_ld_bcp_a(struct gbc_system **gbc) {
+static void op_ld_bcp_a(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD (BC), A\n");
 }
 
 // 0x03: INC BC (- - - -)
-static void op_inc_bc(struct gbc_system **gbc) {
+static void op_inc_bc(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: INC BC\n");
 }
 
 // 0x04: INC B (Z 0 H -)
-static void op_inc_b(struct gbc_system **gbc) {
+static void op_inc_b(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: INC B\n");
 }
 
 // 0x05: DEC B (Z 1 H -)
-static void op_dec_b(struct gbc_system **gbc) {
-    (*gbc)->registers->B = dec_byte((*gbc)->registers->B, &(*gbc)->registers->F);
+static void op_dec_b(struct gbc_system *gbc) {
+    gbc->registers->B = dec_byte(gbc->registers->B, &gbc->registers->F);
 }
 
 // 0x06: LD B, d8 (- - - -)
-static void op_ld_b_d8(struct gbc_system **gbc, unsigned char operand) {
-    (*gbc)->registers->B = operand;
+static void op_ld_b_d8(struct gbc_system *gbc, unsigned char operand) {
+    gbc->registers->B = operand;
 }
 
 // 0x07: RLCA (0 0 0 C)
-static void op_rlca(struct gbc_system **gbc) {
+static void op_rlca(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: RLCA\n");
 }
 
 // 0x08: LD (a16), SP (- - - -)
-static void op_ld_a16p_sp(struct gbc_system **gbc, unsigned short operand) {
+static void op_ld_a16p_sp(struct gbc_system *gbc, unsigned short operand) {
     printf("Unimplemented Instruction: LD (a16), SP\n");
 }
 
 // 0x09: ADD HL, BC (- 0 H C)
-static void op_add_hl_bc(struct gbc_system **gbc) {
+static void op_add_hl_bc(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: ADD HL, BC\n");
 }
 
 // 0x0A: LD A, (BC) (- - - -)
-static void op_ld_a_bcp(struct gbc_system **gbc) {
-    (*gbc)->registers->A = read_byte(&(*gbc)->ram, (*gbc)->registers->BC);
+static void op_ld_a_bcp(struct gbc_system *gbc) {
+    gbc->registers->A = read_byte(gbc->ram, gbc->registers->BC);
 }
 
 // 0x0B: DEC BC (- - - -)
-static void op_dec_bc(struct gbc_system **gbc) {
+static void op_dec_bc(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: DEC BC\n");
 }
 
 // 0x0C: INC C (Z 0 H -)
-static void op_inc_c(struct gbc_system **gbc) {
+static void op_inc_c(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: INC C\n");
 }
 
 // 0x0D: DEC C (Z 1 H -)
-static void op_dec_c(struct gbc_system **gbc) {
-    (*gbc)->registers->C = dec_byte((*gbc)->registers->C, &(*gbc)->registers->F);
+static void op_dec_c(struct gbc_system *gbc) {
+    gbc->registers->C = dec_byte(gbc->registers->C, &gbc->registers->F);
 }
 
 // 0x0E: LD C, d8 (- - - -)
-static void op_ld_c_d8(struct gbc_system **gbc, unsigned char operand) {
-    (*gbc)->registers->C = operand;
+static void op_ld_c_d8(struct gbc_system *gbc, unsigned char operand) {
+    gbc->registers->C = operand;
 }
 
 // 0x0F: RRCA (0 0 0 C)
-static void op_rrca(struct gbc_system **gbc) {
+static void op_rrca(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: RRCA\n");
 }
 
 // 0x10: STOP 0 (- - - -)
-static void op_stop_0(struct gbc_system **gbc, unsigned char operand) {
+static void op_stop_0(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: STOP 0\n");
 }
 
 // 0x11: LD DE, d16 (- - - -)
-static void op_ld_de_d16(struct gbc_system **gbc, unsigned short operand) {
-    (*gbc)->registers->DE = operand;
+static void op_ld_de_d16(struct gbc_system *gbc, unsigned short operand) {
+    gbc->registers->DE = operand;
 }
 
 // 0x12: LD (DE), A (- - - -)
-static void op_ld_dep_a(struct gbc_system **gbc) {
+static void op_ld_dep_a(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD (DE), A\n");
 }
 
 // 0x13: INC DE (- - - -)
-static void op_inc_de(struct gbc_system **gbc) {
+static void op_inc_de(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: INC DE\n");
 }
 
 // 0x14: INC D (Z 0 H -)
-static void op_inc_d(struct gbc_system **gbc) {
+static void op_inc_d(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: INC D\n");
 }
 
 // 0x15: DEC D (Z 1 H -)
-static void op_dec_d(struct gbc_system **gbc) {
-    (*gbc)->registers->D = dec_byte((*gbc)->registers->D, &(*gbc)->registers->F);
+static void op_dec_d(struct gbc_system *gbc) {
+    gbc->registers->D = dec_byte(gbc->registers->D, &gbc->registers->F);
 }
 
 // 0x16: LD D, d8 (- - - -)
-static void op_ld_d_d8(struct gbc_system **gbc, unsigned char operand) {
-    (*gbc)->registers->D = operand;
+static void op_ld_d_d8(struct gbc_system *gbc, unsigned char operand) {
+    gbc->registers->D = operand;
 }
 
 // 0x17: RLA (0 0 0 C)
-static void op_rla(struct gbc_system **gbc) {
+static void op_rla(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: RLA\n");
 }
 
 // 0x18: JR r8 (- - - -)
-static void op_jr_r8(struct gbc_system **gbc, char operand) {
+static void op_jr_r8(struct gbc_system *gbc, char operand) {
     printf("Unimplemented Instruction: JR r8\n");
 }
 
 // 0x19: ADD HL, DE (- 0 H C)
-static void op_add_hl_de(struct gbc_system **gbc) {
+static void op_add_hl_de(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: ADD HL, DE\n");
 }
 
 // 0x1A: LD A, (DE) (- - - -)
-static void op_ld_a_dep(struct gbc_system **gbc) {
-    (*gbc)->registers->A = read_byte(&(*gbc)->ram, (*gbc)->registers->DE);
+static void op_ld_a_dep(struct gbc_system *gbc) {
+    gbc->registers->A = read_byte(gbc->ram, gbc->registers->DE);
 }
 
 // 0x1B: DEC DE (- - - -)
-static void op_dec_de(struct gbc_system **gbc) {
+static void op_dec_de(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: DEC DE\n");
 }
 
 // 0x1C: INC E (Z 0 H -)
-static void op_inc_e(struct gbc_system **gbc) {
+static void op_inc_e(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: INC E\n");
 }
 
 // 0x1D: DEC E (Z 1 H -)
-static void op_dec_e(struct gbc_system **gbc) {
-    (*gbc)->registers->E = dec_byte((*gbc)->registers->E, &(*gbc)->registers->F);
+static void op_dec_e(struct gbc_system *gbc) {
+    gbc->registers->E = dec_byte(gbc->registers->E, &gbc->registers->F);
 }
 
 // 0x1E: LD E, d8 (- - - -)
-static void op_ld_e_d8(struct gbc_system **gbc, unsigned char operand) {
-    (*gbc)->registers->E = operand;
+static void op_ld_e_d8(struct gbc_system *gbc, unsigned char operand) {
+    gbc->registers->E = operand;
 }
 
 // 0x1F: RRA (0 0 0 C)
-static void op_rra(struct gbc_system **gbc) {
+static void op_rra(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: RRA\n");
 }
 
 // 0x20: JR NZ, r8 (- - - -)
-static void op_jr_nz_r8(struct gbc_system **gbc, char operand) {
-    if(get_flag(FLAG_ZERO, (*gbc)->registers->F) == 0) {
-        (*gbc)->registers->PC += operand;
+static void op_jr_nz_r8(struct gbc_system *gbc, char operand) {
+    if(get_flag(FLAG_ZERO, gbc->registers->F) == 0) {
+        gbc->registers->PC += operand;
     }
 }
 
 // 0x21: LD HL, d16 (- - - -)
-static void op_ld_hl_d16(struct gbc_system **gbc, unsigned short operand) {
-    (*gbc)->registers->HL = operand;
+static void op_ld_hl_d16(struct gbc_system *gbc, unsigned short operand) {
+    gbc->registers->HL = operand;
 }
 
 // 0x22: LD (HL+), A (- - - -)
-static void op_ld_hlpp_a(struct gbc_system **gbc) {
+static void op_ld_hlpp_a(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD (HL+), A\n");
 }
 
 // 0x23: INC HL (- - - -)
-static void op_inc_hl(struct gbc_system **gbc) {
+static void op_inc_hl(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: INC HL\n");
 }
 
 // 0x24: INC H (Z 0 H -)
-static void op_inc_h(struct gbc_system **gbc) {
+static void op_inc_h(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: INC H\n");
 }
 
 // 0x25: DEC H (Z 1 H -)
-static void op_dec_h(struct gbc_system **gbc) {
-    (*gbc)->registers->H = dec_byte((*gbc)->registers->H, &(*gbc)->registers->F);
+static void op_dec_h(struct gbc_system *gbc) {
+    gbc->registers->H = dec_byte(gbc->registers->H, &gbc->registers->F);
 }
 
 // 0x26: LD H, d8 (- - - -)
-static void op_ld_h_d8(struct gbc_system **gbc, unsigned char operand) {
-    (*gbc)->registers->H = operand;
+static void op_ld_h_d8(struct gbc_system *gbc, unsigned char operand) {
+    gbc->registers->H = operand;
 }
 
 // 0x27: DAA (Z - 0 C)
-static void op_daa(struct gbc_system **gbc) {
+static void op_daa(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: DAA\n");
 }
 
 // 0x28: JR Z, r8 (- - - -)
-static void op_jr_z_r8(struct gbc_system **gbc, char operand) {
-    if(get_flag(FLAG_ZERO, (*gbc)->registers->F) == 1) {
-        (*gbc)->registers->PC += operand;
+static void op_jr_z_r8(struct gbc_system *gbc, char operand) {
+    if(get_flag(FLAG_ZERO, gbc->registers->F) == 1) {
+        gbc->registers->PC += operand;
     }
 }
 
 // 0x29: ADD HL, HL (- 0 H C)
-static void op_add_hl_hl(struct gbc_system **gbc) {
+static void op_add_hl_hl(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: ADD HL, HL\n");
 }
 
 // 0x2A: LD A, (HL+) (- - - -)
-static void op_ld_a_hlpp(struct gbc_system **gbc) {
+static void op_ld_a_hlpp(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD A, (HL+)\n");
 }
 
 // 0x2B: DEC HL (- - - -)
-static void op_dec_hl(struct gbc_system **gbc) {
+static void op_dec_hl(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: DEC HL\n");
 }
 
 // 0x2C: INC L (Z 0 H -)
-static void op_inc_l(struct gbc_system **gbc) {
+static void op_inc_l(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: INC L\n");
 }
 
 // 0x2D: DEC L (Z 1 H -)
-static void op_dec_l(struct gbc_system **gbc) {
-    (*gbc)->registers->L = dec_byte((*gbc)->registers->L, &(*gbc)->registers->F);
+static void op_dec_l(struct gbc_system *gbc) {
+    gbc->registers->L = dec_byte(gbc->registers->L, &gbc->registers->F);
 }
 
 // 0x2E: LD L, d8 (- - - -)
-static void op_ld_l_d8(struct gbc_system **gbc, unsigned char operand) {
-    (*gbc)->registers->L = operand;
+static void op_ld_l_d8(struct gbc_system *gbc, unsigned char operand) {
+    gbc->registers->L = operand;
 }
 
 // 0x2F: CPL (- 1 1 -)
-static void op_cpl(struct gbc_system **gbc) {
+static void op_cpl(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: CPL\n");
 }
 
 // 0x30: JR NC, r8 (- - - -)
-static void op_jr_nc_r8(struct gbc_system **gbc, char operand) {
-    if(get_flag(FLAG_CARRY, (*gbc)->registers->F) == 0) {
-        (*gbc)->registers->PC += operand;
+static void op_jr_nc_r8(struct gbc_system *gbc, char operand) {
+    if(get_flag(FLAG_CARRY, gbc->registers->F) == 0) {
+        gbc->registers->PC += operand;
     }
 }
 
 // 0x31: LD SP, d16 (- - - -)
-static void op_ld_sp_d16(struct gbc_system **gbc, unsigned short operand) {
-    (*gbc)->registers->SP = operand;
+static void op_ld_sp_d16(struct gbc_system *gbc, unsigned short operand) {
+    gbc->registers->SP = operand;
 }
 
 // 0x32: LD (HL-), A (- - - -)
-static void op_ld_hlmp_a(struct gbc_system **gbc) {
-    write_byte(&(*gbc)->ram, (*gbc)->registers->HL, (*gbc)->registers->A);
-    (*gbc)->registers->HL--;
+static void op_ld_hlmp_a(struct gbc_system *gbc) {
+    write_byte(gbc->ram, gbc->registers->HL, gbc->registers->A);
+    gbc->registers->HL--;
 }
 
 // 0x33: INC SP (- - - -)
-static void op_inc_sp(struct gbc_system **gbc) {
+static void op_inc_sp(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: INC SP\n");
 }
 
 // 0x34: INC (HL) (Z 0 H -)
-static void op_inc_hlp(struct gbc_system **gbc) {
+static void op_inc_hlp(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: INC (HL)\n");
 }
 
 // 0x35: DEC (HL) (Z 1 H -)
-static void op_dec_hlp(struct gbc_system **gbc) {
-    write_byte(&(*gbc)->ram,
-               (*gbc)->registers->HL,
-               dec_byte(read_byte(&(*gbc)->ram, (*gbc)->registers->HL), &(*gbc)->registers->F));
+static void op_dec_hlp(struct gbc_system *gbc) {
+    write_byte(gbc->ram,
+               gbc->registers->HL,
+               dec_byte(read_byte(gbc->ram, gbc->registers->HL), &gbc->registers->F));
 }
 
 // 0x36: LD (HL), d8 (- - - -)
-static void op_ld_hlp_d8(struct gbc_system **gbc, unsigned char operand) {
+static void op_ld_hlp_d8(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: LD (HL), d8\n");
 }
 
 // 0x37: SCF (- 0 0 1)
-static void op_scf(struct gbc_system **gbc) {
+static void op_scf(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: SCF\n");
 }
 
 // 0x38: JR C, r8 (- - - -)
-static void op_jr_c_r8(struct gbc_system **gbc, char operand) {
-    if(get_flag(FLAG_CARRY, (*gbc)->registers->F) == 1) {
-        (*gbc)->registers->F += operand;
+static void op_jr_c_r8(struct gbc_system *gbc, char operand) {
+    if(get_flag(FLAG_CARRY, gbc->registers->F) == 1) {
+        gbc->registers->F += operand;
     }
 }
 
 // 0x39: ADD HL, SP (- 0 H C)
-static void op_add_hl_sp(struct gbc_system **gbc) {
+static void op_add_hl_sp(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: ADD HL, SP\n");
 }
 
 // 0x3A: LD A, (HL-) (- - - -)
-static void op_ld_a_hlmp(struct gbc_system **gbc) {
+static void op_ld_a_hlmp(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD A, (HL-)\n");
 }
 
 // 0x3B: DEC SP (- - - -)
-static void op_dec_sp(struct gbc_system **gbc) {
+static void op_dec_sp(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: DEC SP\n");
 }
 
 // 0x3C: INC A (Z 0 H -)
-static void op_inc_a(struct gbc_system **gbc) {
+static void op_inc_a(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: INC A\n");
 }
 
 // 0x3D: DEC A (Z 1 H -)
-static void op_dec_a(struct gbc_system **gbc) {
-    (*gbc)->registers->A = dec_byte((*gbc)->registers->A, &(*gbc)->registers->F);
+static void op_dec_a(struct gbc_system *gbc) {
+    gbc->registers->A = dec_byte(gbc->registers->A, &gbc->registers->F);
 }
 
 // 0x3E: LD A, d8 (- - - -)
-static void op_ld_a_d8(struct gbc_system **gbc, unsigned char operand) {
-    (*gbc)->registers->A = operand;
+static void op_ld_a_d8(struct gbc_system *gbc, unsigned char operand) {
+    gbc->registers->A = operand;
 }
 
 // 0x3F: CCF (- 0 0 C)
-static void op_ccf(struct gbc_system **gbc) {
+static void op_ccf(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: CCF\n");
 }
 
 // 0x40: LD B, B (- - - -)
-static void op_ld_b_b(struct gbc_system **gbc) {
+static void op_ld_b_b(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD B, B\n");
 }
 
 // 0x41: LD B, C (- - - -)
-static void op_ld_b_c(struct gbc_system **gbc) {
+static void op_ld_b_c(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD B, C\n");
 }
 
 // 0x42: LD B, D (- - - -)
-static void op_ld_b_d(struct gbc_system **gbc) {
+static void op_ld_b_d(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD B, D\n");
 }
 
 // 0x43: LD B, E (- - - -)
-static void op_ld_b_e(struct gbc_system **gbc) {
+static void op_ld_b_e(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD B, E\n");
 }
 
 // 0x44: LD B, H (- - - -)
-static void op_ld_b_h(struct gbc_system **gbc) {
+static void op_ld_b_h(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD B, H\n");
 }
 
 // 0x45: LD B, L (- - - -)
-static void op_ld_b_l(struct gbc_system **gbc) {
+static void op_ld_b_l(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD B, L\n");
 }
 
 // 0x46: LD B, (HL) (- - - -)
-static void op_ld_b_hlp(struct gbc_system **gbc) {
+static void op_ld_b_hlp(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD B, (HL)\n");
 }
 
 // 0x47: LD B, A (- - - -)
-static void op_ld_b_a(struct gbc_system **gbc) {
+static void op_ld_b_a(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD B, A\n");
 }
 
 // 0x48: LD C, B (- - - -)
-static void op_ld_c_b(struct gbc_system **gbc) {
+static void op_ld_c_b(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD C, B\n");
 }
 
 // 0x49: LD C, C (- - - -)
-static void op_ld_c_c(struct gbc_system **gbc) {
+static void op_ld_c_c(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD C, C\n");
 }
 
 // 0x4A: LD C, D (- - - -)
-static void op_ld_c_d(struct gbc_system **gbc) {
+static void op_ld_c_d(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD C, D\n");
 }
 
 // 0x4B: LD C, E (- - - -)
-static void op_ld_c_e(struct gbc_system **gbc) {
+static void op_ld_c_e(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD C, E\n");
 }
 
 // 0x4C: LD C, H (- - - -)
-static void op_ld_c_h(struct gbc_system **gbc) {
+static void op_ld_c_h(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD C, H\n");
 }
 
 // 0x4D: LD C, L (- - - -)
-static void op_ld_c_l(struct gbc_system **gbc) {
+static void op_ld_c_l(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD C, L\n");
 }
 
 // 0x4E: LD C, (HL) (- - - -)
-static void op_ld_c_hlp(struct gbc_system **gbc) {
+static void op_ld_c_hlp(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD C, (HL)\n");
 }
 
 // 0x4F: LD C, A (- - - -)
-static void op_ld_c_a(struct gbc_system **gbc) {
+static void op_ld_c_a(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD C, A\n");
 }
 
 // 0x50: LD D, B (- - - -)
-static void op_ld_d_b(struct gbc_system **gbc) {
+static void op_ld_d_b(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD D, B\n");
 }
 
 // 0x51: LD D, C (- - - -)
-static void op_ld_d_c(struct gbc_system **gbc) {
+static void op_ld_d_c(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD D, C\n");
 }
 
 // 0x52: LD D, D (- - - -)
-static void op_ld_d_d(struct gbc_system **gbc) {
+static void op_ld_d_d(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD D, D\n");
 }
 
 // 0x53: LD D, E (- - - -)
-static void op_ld_d_e(struct gbc_system **gbc) {
+static void op_ld_d_e(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD D, E\n");
 }
 
 // 0x54: LD D, H (- - - -)
-static void op_ld_d_h(struct gbc_system **gbc) {
+static void op_ld_d_h(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD D, H\n");
 }
 
 // 0x55: LD D, L (- - - -)
-static void op_ld_d_l(struct gbc_system **gbc) {
+static void op_ld_d_l(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD D, L\n");
 }
 
 // 0x56: LD D, (HL) (- - - -)
-static void op_ld_d_hlp(struct gbc_system **gbc) {
+static void op_ld_d_hlp(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD D, (HL)\n");
 }
 
 // 0x57: LD D, A (- - - -)
-static void op_ld_d_a(struct gbc_system **gbc) {
+static void op_ld_d_a(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD D, A\n");
 }
 
 // 0x58: LD E, B (- - - -)
-static void op_ld_e_b(struct gbc_system **gbc) {
+static void op_ld_e_b(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD E, B\n");
 }
 
 // 0x59: LD E, C (- - - -)
-static void op_ld_e_c(struct gbc_system **gbc) {
+static void op_ld_e_c(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD E, C\n");
 }
 
 // 0x5A: LD E, D (- - - -)
-static void op_ld_e_d(struct gbc_system **gbc) {
+static void op_ld_e_d(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD E, D\n");
 }
 
 // 0x5B: LD E, E (- - - -)
-static void op_ld_e_e(struct gbc_system **gbc) {
+static void op_ld_e_e(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD E, E\n");
 }
 
 // 0x5C: LD E, H (- - - -)
-static void op_ld_e_h(struct gbc_system **gbc) {
+static void op_ld_e_h(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD E, H\n");
 }
 
 // 0x5D: LD E, L (- - - -)
-static void op_ld_e_l(struct gbc_system **gbc) {
+static void op_ld_e_l(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD E, L\n");
 }
 
 // 0x5E: LD E, (HL) (- - - -)
-static void op_ld_e_hlp(struct gbc_system **gbc) {
+static void op_ld_e_hlp(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD E, (HL)\n");
 }
 
 // 0x5F: LD E, A (- - - -)
-static void op_ld_e_a(struct gbc_system **gbc) {
+static void op_ld_e_a(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD E, A\n");
 }
 
 // 0x60: LD H, B (- - - -)
-static void op_ld_h_b(struct gbc_system **gbc) {
+static void op_ld_h_b(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD H, B\n");
 }
 
 // 0x61: LD H, C (- - - -)
-static void op_ld_h_c(struct gbc_system **gbc) {
+static void op_ld_h_c(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD H, C\n");
 }
 
 // 0x62: LD H, D (- - - -)
-static void op_ld_h_d(struct gbc_system **gbc) {
+static void op_ld_h_d(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD H, D\n");
 }
 
 // 0x63: LD H, E (- - - -)
-static void op_ld_h_e(struct gbc_system **gbc) {
+static void op_ld_h_e(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD H, E\n");
 }
 
 // 0x64: LD H, H (- - - -)
-static void op_ld_h_h(struct gbc_system **gbc) {
+static void op_ld_h_h(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD H, H\n");
 }
 
 // 0x65: LD H, L (- - - -)
-static void op_ld_h_l(struct gbc_system **gbc) {
+static void op_ld_h_l(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD H, L\n");
 }
 
 // 0x66: LD H, (HL) (- - - -)
-static void op_ld_h_hlp(struct gbc_system **gbc) {
+static void op_ld_h_hlp(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD H, (HL)\n");
 }
 
 // 0x67: LD H, A (- - - -)
-static void op_ld_h_a(struct gbc_system **gbc) {
+static void op_ld_h_a(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD H, A\n");
 }
 
 // 0x68: LD L, B (- - - -)
-static void op_ld_l_b(struct gbc_system **gbc) {
+static void op_ld_l_b(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD L, B\n");
 }
 
 // 0x69: LD L, C (- - - -)
-static void op_ld_l_c(struct gbc_system **gbc) {
+static void op_ld_l_c(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD L, C\n");
 }
 
 // 0x6A: LD L, D (- - - -)
-static void op_ld_l_d(struct gbc_system **gbc) {
+static void op_ld_l_d(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD L, D\n");
 }
 
 // 0x6B: LD L, E (- - - -)
-static void op_ld_l_e(struct gbc_system **gbc) {
+static void op_ld_l_e(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD L, E\n");
 }
 
 // 0x6C: LD L, H (- - - -)
-static void op_ld_l_h(struct gbc_system **gbc) {
+static void op_ld_l_h(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD L, H\n");
 }
 
 // 0x6D: LD L, L (- - - -)
-static void op_ld_l_l(struct gbc_system **gbc) {
+static void op_ld_l_l(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD L, L\n");
 }
 
 // 0x6E: LD L, (HL) (- - - -)
-static void op_ld_l_hlp(struct gbc_system **gbc) {
+static void op_ld_l_hlp(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD L, (HL)\n");
 }
 
 // 0x6F: LD L, A (- - - -)
-static void op_ld_l_a(struct gbc_system **gbc) {
+static void op_ld_l_a(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD L, A\n");
 }
 
 // 0x70: LD (HL), B (- - - -)
-static void op_ld_hlp_b(struct gbc_system **gbc) {
+static void op_ld_hlp_b(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD (HL), B\n");
 }
 
 // 0x71: LD (HL), C (- - - -)
-static void op_ld_hlp_c(struct gbc_system **gbc) {
+static void op_ld_hlp_c(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD (HL), C\n");
 }
 
 // 0x72: LD (HL), D (- - - -)
-static void op_ld_hlp_d(struct gbc_system **gbc) {
+static void op_ld_hlp_d(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD (HL), D\n");
 }
 
 // 0x73: LD (HL), E (- - - -)
-static void op_ld_hlp_e(struct gbc_system **gbc) {
+static void op_ld_hlp_e(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD (HL), E\n");
 }
 
 // 0x74: LD (HL), H (- - - -)
-static void op_ld_hlp_h(struct gbc_system **gbc) {
+static void op_ld_hlp_h(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD (HL), H\n");
 }
 
 // 0x75: LD (HL), L (- - - -)
-static void op_ld_hlp_l(struct gbc_system **gbc) {
+static void op_ld_hlp_l(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD (HL), L\n");
 }
 
 // 0x76: HALT (- - - -)
-static void op_halt(struct gbc_system **gbc) {
+static void op_halt(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: HALT\n");
 }
 
 // 0x77: LD (HL), A (- - - -)
-static void op_ld_hlp_a(struct gbc_system **gbc) {
+static void op_ld_hlp_a(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD (HL), A\n");
 }
 
 // 0x78: LD A, B (- - - -)
-static void op_ld_a_b(struct gbc_system **gbc) {
-    (*gbc)->registers->A = (*gbc)->registers->B;
+static void op_ld_a_b(struct gbc_system *gbc) {
+    gbc->registers->A = gbc->registers->B;
 }
 
 // 0x79: LD A, C (- - - -)
-static void op_ld_a_c(struct gbc_system **gbc) {
-    (*gbc)->registers->A = (*gbc)->registers->C;
+static void op_ld_a_c(struct gbc_system *gbc) {
+    gbc->registers->A = gbc->registers->C;
 }
 
 // 0x7A: LD A, D (- - - -)
-static void op_ld_a_d(struct gbc_system **gbc) {
-    (*gbc)->registers->A = (*gbc)->registers->D;
+static void op_ld_a_d(struct gbc_system *gbc) {
+    gbc->registers->A = gbc->registers->D;
 }
 
 // 0x7B: LD A, E (- - - -)
-static void op_ld_a_e(struct gbc_system **gbc) {
-    (*gbc)->registers->A = (*gbc)->registers->E;
+static void op_ld_a_e(struct gbc_system *gbc) {
+    gbc->registers->A = gbc->registers->E;
 }
 
 // 0x7C: LD A, H (- - - -)
-static void op_ld_a_h(struct gbc_system **gbc) {
-    (*gbc)->registers->A = (*gbc)->registers->H;
+static void op_ld_a_h(struct gbc_system *gbc) {
+    gbc->registers->A = gbc->registers->H;
 }
 
 // 0x7D: LD A, L (- - - -)
-static void op_ld_a_l(struct gbc_system **gbc) {
-    (*gbc)->registers->A = (*gbc)->registers->L;
+static void op_ld_a_l(struct gbc_system *gbc) {
+    gbc->registers->A = gbc->registers->L;
 }
 
 // 0x7E: LD A, (HL) (- - - -)
-static void op_ld_a_hlp(struct gbc_system **gbc) {
-    (*gbc)->registers->A = read_byte(&(*gbc)->ram, (*gbc)->registers->HL);
+static void op_ld_a_hlp(struct gbc_system *gbc) {
+    gbc->registers->A = read_byte(gbc->ram, gbc->registers->HL);
 }
 
 // 0x7F: LD A, A (- - - -)
-static void op_ld_a_a(struct gbc_system **gbc) {
-    (*gbc)->registers->A = (*gbc)->registers->A;
+static void op_ld_a_a(struct gbc_system *gbc) {
+    gbc->registers->A = gbc->registers->A;
 }
 
 // 0x80: ADD A, B (Z 0 H C)
-static void op_add_a_b(struct gbc_system **gbc) {
+static void op_add_a_b(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: ADD A, B\n");
 }
 
 // 0x81: ADD A, C (Z 0 H C)
-static void op_add_a_c(struct gbc_system **gbc) {
+static void op_add_a_c(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: ADD A, C\n");
 }
 
 // 0x82: ADD A, D (Z 0 H C)
-static void op_add_a_d(struct gbc_system **gbc) {
+static void op_add_a_d(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: ADD A, D\n");
 }
 
 // 0x83: ADD A, E (Z 0 H C)
-static void op_add_a_e(struct gbc_system **gbc) {
+static void op_add_a_e(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: ADD A, E\n");
 }
 
 // 0x84: ADD A, H (Z 0 H C)
-static void op_add_a_h(struct gbc_system **gbc) {
+static void op_add_a_h(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: ADD A, H\n");
 }
 
 // 0x85: ADD A, L (Z 0 H C)
-static void op_add_a_l(struct gbc_system **gbc) {
+static void op_add_a_l(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: ADD A, L\n");
 }
 
 // 0x86: ADD A, (HL) (Z 0 H C)
-static void op_add_a_hlp(struct gbc_system **gbc) {
+static void op_add_a_hlp(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: ADD A, (HL)\n");
 }
 
 // 0x87: ADD A, A (Z 0 H C)
-static void op_add_a_a(struct gbc_system **gbc) {
+static void op_add_a_a(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: ADD A, A\n");
 }
 
 // 0x88: ADC A, B (Z 0 H C)
-static void op_adc_a_b(struct gbc_system **gbc) {
+static void op_adc_a_b(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: ADC A, B\n");
 }
 
 // 0x89: ADC A, C (Z 0 H C)
-static void op_adc_a_c(struct gbc_system **gbc) {
+static void op_adc_a_c(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: ADC A, C\n");
 }
 
 // 0x8A: ADC A, D (Z 0 H C)
-static void op_adc_a_d(struct gbc_system **gbc) {
+static void op_adc_a_d(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: ADC A, D\n");
 }
 
 // 0x8B: ADC A, E (Z 0 H C)
-static void op_adc_a_e(struct gbc_system **gbc) {
+static void op_adc_a_e(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: ADC A, E\n");
 }
 
 // 0x8C: ADC A, H (Z 0 H C)
-static void op_adc_a_h(struct gbc_system **gbc) {
+static void op_adc_a_h(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: ADC A, H\n");
 }
 
 // 0x8D: ADC A, L (Z 0 H C)
-static void op_adc_a_l(struct gbc_system **gbc) {
+static void op_adc_a_l(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: ADC A, L\n");
 }
 
 // 0x8E: ADC A, (HL) (Z 0 H C)
-static void op_adc_a_hlp(struct gbc_system **gbc) {
+static void op_adc_a_hlp(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: ADC A, (HL)\n");
 }
 
 // 0x8F: ADC A, A (Z 0 H C)
-static void op_adc_a_a(struct gbc_system **gbc) {
+static void op_adc_a_a(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: ADC A, A\n");
 }
 
 // 0x90: SUB B (Z 1 H C)
-static void op_sub_b(struct gbc_system **gbc) {
+static void op_sub_b(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: SUB B\n");
 }
 
 // 0x91: SUB C (Z 1 H C)
-static void op_sub_c(struct gbc_system **gbc) {
+static void op_sub_c(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: SUB C\n");
 }
 
 // 0x92: SUB D (Z 1 H C)
-static void op_sub_d(struct gbc_system **gbc) {
+static void op_sub_d(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: SUB D\n");
 }
 
 // 0x93: SUB E (Z 1 H C)
-static void op_sub_e(struct gbc_system **gbc) {
+static void op_sub_e(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: SUB E\n");
 }
 
 // 0x94: SUB H (Z 1 H C)
-static void op_sub_h(struct gbc_system **gbc) {
+static void op_sub_h(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: SUB H\n");
 }
 
 // 0x95: SUB L (Z 1 H C)
-static void op_sub_l(struct gbc_system **gbc) {
+static void op_sub_l(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: SUB L\n");
 }
 
 // 0x96: SUB (HL) (Z 1 H C)
-static void op_sub_hlp(struct gbc_system **gbc) {
+static void op_sub_hlp(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: SUB (HL)\n");
 }
 
 // 0x97: SUB A (Z 1 H C)
-static void op_sub_a(struct gbc_system **gbc) {
+static void op_sub_a(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: SUB A\n");
 }
 
 // 0x98: SBC A, B (Z 1 H C)
-static void op_sbc_a_b(struct gbc_system **gbc) {
+static void op_sbc_a_b(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: SBC A, B\n");
 }
 
 // 0x99: SBC A, C (Z 1 H C)
-static void op_sbc_a_c(struct gbc_system **gbc) {
+static void op_sbc_a_c(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: SBC A, C\n");
 }
 
 // 0x9A: SBC A, D (Z 1 H C)
-static void op_sbc_a_d(struct gbc_system **gbc) {
+static void op_sbc_a_d(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: SBC A, D\n");
 }
 
 // 0x9B: SBC A, E (Z 1 H C)
-static void op_sbc_a_e(struct gbc_system **gbc) {
+static void op_sbc_a_e(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: SBC A, E\n");
 }
 
 // 0x9C: SBC A, H (Z 1 H C)
-static void op_sbc_a_h(struct gbc_system **gbc) {
+static void op_sbc_a_h(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: SBC A, H\n");
 }
 
 // 0x9D: SBC A, L (Z 1 H C)
-static void op_sbc_a_l(struct gbc_system **gbc) {
+static void op_sbc_a_l(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: SBC A, L\n");
 }
 
 // 0x9E: SBC A, (HL) (Z 1 H C)
-static void op_sbc_a_hlp(struct gbc_system **gbc) {
+static void op_sbc_a_hlp(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: SBC A, (HL)\n");
 }
 
 // 0x9F: SBC A, A (Z 1 H C)
-static void op_sbc_a_a(struct gbc_system **gbc) {
+static void op_sbc_a_a(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: SBC A, A\n");
 }
 
 // 0xA0: AND B (Z 0 1 0)
-static void op_and_b(struct gbc_system **gbc) {
+static void op_and_b(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: AND B\n");
 }
 
 // 0xA1: AND C (Z 0 1 0)
-static void op_and_c(struct gbc_system **gbc) {
+static void op_and_c(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: AND C\n");
 }
 
 // 0xA2: AND D (Z 0 1 0)
-static void op_and_d(struct gbc_system **gbc) {
+static void op_and_d(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: AND D\n");
 }
 
 // 0xA3: AND E (Z 0 1 0)
-static void op_and_e(struct gbc_system **gbc) {
+static void op_and_e(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: AND E\n");
 }
 
 // 0xA4: AND H (Z 0 1 0)
-static void op_and_h(struct gbc_system **gbc) {
+static void op_and_h(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: AND H\n");
 }
 
 // 0xA5: AND L (Z 0 1 0)
-static void op_and_l(struct gbc_system **gbc) {
+static void op_and_l(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: AND L\n");
 }
 
 // 0xA6: AND (HL) (Z 0 1 0)
-static void op_and_hlp(struct gbc_system **gbc) {
+static void op_and_hlp(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: AND (HL)\n");
 }
 
 // 0xA7: AND A (Z 0 1 0)
-static void op_and_a(struct gbc_system **gbc) {
+static void op_and_a(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: AND A\n");
 }
 
 // 0xA8: XOR B (Z 0 0 0)
-static void op_xor_b(struct gbc_system **gbc) {
-    (*gbc)->registers->A = xor((*gbc)->registers->B, (*gbc)->registers->A, &(*gbc)->registers->F);
+static void op_xor_b(struct gbc_system *gbc) {
+    gbc->registers->A = xor(gbc->registers->B, gbc->registers->A, &gbc->registers->F);
 }
 
 // 0xA9: XOR C (Z 0 0 0)
-static void op_xor_c(struct gbc_system **gbc) {
-    (*gbc)->registers->A = xor((*gbc)->registers->C, (*gbc)->registers->A, &(*gbc)->registers->F);
+static void op_xor_c(struct gbc_system *gbc) {
+    gbc->registers->A = xor(gbc->registers->C, gbc->registers->A, &gbc->registers->F);
 }
 
 // 0xAA: XOR D (Z 0 0 0)
-static void op_xor_d(struct gbc_system **gbc) {
-    (*gbc)->registers->A = xor((*gbc)->registers->D, (*gbc)->registers->A, &(*gbc)->registers->F);
+static void op_xor_d(struct gbc_system *gbc) {
+    gbc->registers->A = xor(gbc->registers->D, gbc->registers->A, &gbc->registers->F);
 }
 
 // 0xAB: XOR E (Z 0 0 0)
-static void op_xor_e(struct gbc_system **gbc) {
-    (*gbc)->registers->A = xor((*gbc)->registers->E, (*gbc)->registers->A, &(*gbc)->registers->F);
+static void op_xor_e(struct gbc_system *gbc) {
+    gbc->registers->A = xor(gbc->registers->E, gbc->registers->A, &gbc->registers->F);
 }
 
 // 0xAC: XOR H (Z 0 0 0)
-static void op_xor_h(struct gbc_system **gbc) {
-    (*gbc)->registers->A = xor((*gbc)->registers->H, (*gbc)->registers->A, &(*gbc)->registers->F);
+static void op_xor_h(struct gbc_system *gbc) {
+    gbc->registers->A = xor(gbc->registers->H, gbc->registers->A, &gbc->registers->F);
 }
 
 // 0xAD: XOR L (Z 0 0 0)
-static void op_xor_l(struct gbc_system **gbc) {
-    (*gbc)->registers->A = xor((*gbc)->registers->L, (*gbc)->registers->A, &(*gbc)->registers->F);
+static void op_xor_l(struct gbc_system *gbc) {
+    gbc->registers->A = xor(gbc->registers->L, gbc->registers->A, &gbc->registers->F);
 }
 
 // 0xAE: XOR (HL) (Z 0 0 0)
-static void op_xor_hlp(struct gbc_system **gbc) {
-    (*gbc)->registers->A = xor(read_byte(&(*gbc)->ram, (*gbc)->registers->HL),
-                               (*gbc)->registers->A, 
-                               &(*gbc)->registers->F);
+static void op_xor_hlp(struct gbc_system *gbc) {
+    gbc->registers->A = xor(read_byte(gbc->ram, gbc->registers->HL),
+                               gbc->registers->A, 
+                               &gbc->registers->F);
 }
 
 // 0xAF: XOR A (Z 0 0 0)
-static void op_xor_a(struct gbc_system **gbc) { 
-    (*gbc)->registers->A = xor((*gbc)->registers->A, (*gbc)->registers->A, &(*gbc)->registers->F);
+static void op_xor_a(struct gbc_system *gbc) { 
+    gbc->registers->A = xor(gbc->registers->A, gbc->registers->A, &gbc->registers->F);
 }
 
 // 0xB0: OR B (Z 0 0 0)
-static void op_or_b(struct gbc_system **gbc) {
+static void op_or_b(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: OR B\n");
 }
 
 // 0xB1: OR C (Z 0 0 0)
-static void op_or_c(struct gbc_system **gbc) {
+static void op_or_c(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: OR C\n");
 }
 
 // 0xB2: OR D (Z 0 0 0)
-static void op_or_d(struct gbc_system **gbc) {
+static void op_or_d(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: OR D\n");
 }
 
 // 0xB3: OR E (Z 0 0 0)
-static void op_or_e(struct gbc_system **gbc) {
+static void op_or_e(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: OR E\n");
 }
 
 // 0xB4: OR H (Z 0 0 0)
-static void op_or_h(struct gbc_system **gbc) {
+static void op_or_h(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: OR H\n");
 }
 
 // 0xB5: OR L (Z 0 0 0)
-static void op_or_l(struct gbc_system **gbc) {
+static void op_or_l(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: OR L\n");
 }
 
 // 0xB6: OR (HL) (Z 0 0 0)
-static void op_or_hlp(struct gbc_system **gbc) {
+static void op_or_hlp(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: OR (HL)\n");
 }
 
 // 0xB7: OR A (Z 0 0 0)
-static void op_or_a(struct gbc_system **gbc) {
+static void op_or_a(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: OR A\n");
 }
 
 // 0xB8: CP B (Z 1 H C)
-static void op_cp_b(struct gbc_system **gbc) {
-    compare((*gbc)->registers->A, (*gbc)->registers->B, &(*gbc)->registers->F);
+static void op_cp_b(struct gbc_system *gbc) {
+    compare(gbc->registers->A, gbc->registers->B, &gbc->registers->F);
 }
 
 // 0xB9: CP C (Z 1 H C)
-static void op_cp_c(struct gbc_system **gbc) {
-    compare((*gbc)->registers->A, (*gbc)->registers->C, &(*gbc)->registers->F);
+static void op_cp_c(struct gbc_system *gbc) {
+    compare(gbc->registers->A, gbc->registers->C, &gbc->registers->F);
 }
 
 // 0xBA: CP D (Z 1 H C)
-static void op_cp_d(struct gbc_system **gbc) {
-    compare((*gbc)->registers->A, (*gbc)->registers->D, &(*gbc)->registers->F);
+static void op_cp_d(struct gbc_system *gbc) {
+    compare(gbc->registers->A, gbc->registers->D, &gbc->registers->F);
 }
 
 // 0xBB: CP E (Z 1 H C)
-static void op_cp_e(struct gbc_system **gbc) {
-    compare((*gbc)->registers->A, (*gbc)->registers->E, &(*gbc)->registers->F);
+static void op_cp_e(struct gbc_system *gbc) {
+    compare(gbc->registers->A, gbc->registers->E, &gbc->registers->F);
 }
 
 // 0xBC: CP H (Z 1 H C)
-static void op_cp_h(struct gbc_system **gbc) {
-    compare((*gbc)->registers->A, (*gbc)->registers->H, &(*gbc)->registers->F);
+static void op_cp_h(struct gbc_system *gbc) {
+    compare(gbc->registers->A, gbc->registers->H, &gbc->registers->F);
 }
 
 // 0xBD: CP L (Z 1 H C)
-static void op_cp_l(struct gbc_system **gbc) {
-    compare((*gbc)->registers->A, (*gbc)->registers->L, &(*gbc)->registers->F);
+static void op_cp_l(struct gbc_system *gbc) {
+    compare(gbc->registers->A, gbc->registers->L, &gbc->registers->F);
 }
 
 // 0xBE: CP (HL) (Z 1 H C)
-static void op_cp_hlp(struct gbc_system **gbc) {
-    compare((*gbc)->registers->A,
-            read_byte(&(*gbc)->ram, (*gbc)->registers->HL),
-            &(*gbc)->registers->F);
+static void op_cp_hlp(struct gbc_system *gbc) {
+    compare(gbc->registers->A,
+            read_byte(gbc->ram, gbc->registers->HL),
+            &gbc->registers->F);
 }
 
 // 0xBF: CP A (Z 1 H C)
-static void op_cp_a(struct gbc_system **gbc) {
-    compare((*gbc)->registers->A, (*gbc)->registers->A, &(*gbc)->registers->F);
+static void op_cp_a(struct gbc_system *gbc) {
+    compare(gbc->registers->A, gbc->registers->A, &gbc->registers->F);
 }
 
 // 0xC0: RET NZ (- - - -)
-static void op_ret_nz(struct gbc_system **gbc) {
+static void op_ret_nz(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: RET NZ\n");
 }
 
 // 0xC1: POP BC (- - - -)
-static void op_pop_bc(struct gbc_system **gbc) {
+static void op_pop_bc(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: POP BC\n");
 }
 
 // 0xC2: JP NZ, a16 (- - - -)
-static void op_jp_nz_a16(struct gbc_system **gbc, unsigned short operand) {
+static void op_jp_nz_a16(struct gbc_system *gbc, unsigned short operand) {
     printf("Unimplemented Instruction: JP NZ, a16\n");
 }
 
 // 0xC3: JP a16 (- - - -)
-static void op_jp_a16(struct gbc_system **gbc, unsigned short operand) {
-    (*gbc)->registers->PC = operand;
+static void op_jp_a16(struct gbc_system *gbc, unsigned short operand) {
+    gbc->registers->PC = operand;
 }
 
 // 0xC4: CALL NZ, a16 (- - - -)
-static void op_call_nz_a16(struct gbc_system **gbc, unsigned short operand) {
+static void op_call_nz_a16(struct gbc_system *gbc, unsigned short operand) {
     printf("Unimplemented Instruction: CALL NZ, a16\n");
 }
 
 // 0xC5: PUSH BC (- - - -)
-static void op_push_bc(struct gbc_system **gbc) {
+static void op_push_bc(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: PUSH BC\n");
 }
 
 // 0xC6: ADD A, d8 (Z 0 H C)
-static void op_add_a_d8(struct gbc_system **gbc, unsigned char operand) {
+static void op_add_a_d8(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: ADD A, d8\n");
 }
 
 // 0xC7: RST 00H (- - - -)
-static void op_rst_00h(struct gbc_system **gbc) {
+static void op_rst_00h(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: RST 00H\n");
 }
 
 // 0xC8: RET Z (- - - -)
-static void op_ret_z(struct gbc_system **gbc) {
+static void op_ret_z(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: RET Z\n");
 }
 
 // 0xC9: RET (- - - -)
-static void op_ret(struct gbc_system **gbc) {
+static void op_ret(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: RET\n");
 }
 
 // 0xCA: JP Z, a16 (- - - -)
-static void op_jp_z_a16(struct gbc_system **gbc, unsigned short operand) {
+static void op_jp_z_a16(struct gbc_system *gbc, unsigned short operand) {
     printf("Unimplemented Instruction: JP Z, a16\n");
 }
 
 // 0xCB: PREFIX CB (- - - -)
-static void op_prefix_cb(struct gbc_system **gbc) {
+static void op_prefix_cb(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: PREFIX CB\n");
 }
 
 // 0xCC: CALL Z, a16 (- - - -)
-static void op_call_z_a16(struct gbc_system **gbc, unsigned short operand) {
+static void op_call_z_a16(struct gbc_system *gbc, unsigned short operand) {
     printf("Unimplemented Instruction: CALL Z, a16\n");
 }
 
 // 0xCD: CALL a16 (- - - -)
-static void op_call_a16(struct gbc_system **gbc, unsigned short operand) {
+static void op_call_a16(struct gbc_system *gbc, unsigned short operand) {
     printf("Unimplemented Instruction: CALL a16\n");
 }
 
 // 0xCE: ADC A, d8 (Z 0 H C)
-static void op_adc_a_d8(struct gbc_system **gbc, unsigned char operand) {
+static void op_adc_a_d8(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: ADC A, d8\n");
 }
 
 // 0xCF: RST 08H (- - - -)
-static void op_rst_08h(struct gbc_system **gbc) {
+static void op_rst_08h(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: RST 08H\n");
 }
 
 // 0xD0: RET NC (- - - -)
-static void op_ret_nc(struct gbc_system **gbc) {
+static void op_ret_nc(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: RET NC\n");
 }
 
 // 0xD1: POP DE (- - - -)
-static void op_pop_de(struct gbc_system **gbc) {
+static void op_pop_de(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: POP DE\n");
 }
 
 // 0xD2: JP NC, a16 (- - - -)
-static void op_jp_nc_a16(struct gbc_system **gbc, unsigned short operand) {
+static void op_jp_nc_a16(struct gbc_system *gbc, unsigned short operand) {
     printf("Unimplemented Instruction: JP NC, a16\n");
 }
 
 // 0xD4: CALL NC, a16 (- - - -)
-static void op_call_nc_a16(struct gbc_system **gbc, unsigned short operand) {
+static void op_call_nc_a16(struct gbc_system *gbc, unsigned short operand) {
     printf("Unimplemented Instruction: CALL NC, a16\n");
 }
 
 // 0xD5: PUSH DE (- - - -)
-static void op_push_de(struct gbc_system **gbc) {
+static void op_push_de(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: PUSH DE\n");
 }
 
 // 0xD6: SUB d8 (Z 1 H C)
-static void op_sub_d8(struct gbc_system **gbc, unsigned char operand) {
+static void op_sub_d8(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SUB d8\n");
 }
 
 // 0xD7: RST 10H (- - - -)
-static void op_rst_10h(struct gbc_system **gbc) {
+static void op_rst_10h(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: RST 10H\n");
 }
 
 // 0xD8: RET C (- - - -)
-static void op_ret_c(struct gbc_system **gbc) {
+static void op_ret_c(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: RET C\n");
 }
 
 // 0xD9: RETI (- - - -)
-static void op_reti(struct gbc_system **gbc) {
+static void op_reti(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: RETI\n");
 }
 
 // 0xDA: JP C, a16 (- - - -)
-static void op_jp_c_a16(struct gbc_system **gbc, unsigned short operand) {
+static void op_jp_c_a16(struct gbc_system *gbc, unsigned short operand) {
     printf("Unimplemented Instruction: JP C, a16\n");
 }
 
 // 0xDC: CALL C, a16 (- - - -)
-static void op_call_c_a16(struct gbc_system **gbc, unsigned short operand) {
+static void op_call_c_a16(struct gbc_system *gbc, unsigned short operand) {
     printf("Unimplemented Instruction: CALL C, a16\n");
 }
 
 // 0xDE: SBC A, d8 (Z 1 H C)
-static void op_sbc_a_d8(struct gbc_system **gbc, unsigned char operand) {
+static void op_sbc_a_d8(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SBC A, d8\n");
 }
 
 // 0xDF: RST 18H (- - - -)
-static void op_rst_18h(struct gbc_system **gbc) {
+static void op_rst_18h(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: RST 18H\n");
 }
 
 // 0xE0: LDH (a8), A (- - - -)
-static void op_ldh_a8p_a(struct gbc_system **gbc, unsigned char operand) {
-    write_byte(&(*gbc)->ram, 0xFF00 + operand, (*gbc)->registers->A);
+static void op_ldh_a8p_a(struct gbc_system *gbc, unsigned char operand) {
+    write_byte(gbc->ram, 0xFF00 + operand, gbc->registers->A);
 }
 
 // 0xE1: POP HL (- - - -)
-static void op_pop_hl(struct gbc_system **gbc) {
+static void op_pop_hl(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: POP HL\n");
 }
 
 // 0xE2: LD (C), A (- - - -)
-static void op_ld_cp_a(struct gbc_system **gbc, unsigned char operand) {
+static void op_ld_cp_a(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: LD (C), A\n");
 }
 
 // 0xE5: PUSH HL (- - - -)
-static void op_push_hl(struct gbc_system **gbc) {
+static void op_push_hl(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: PUSH HL\n");
 }
 
 // 0xE6: AND d8 (Z 0 1 0)
-static void op_and_d8(struct gbc_system **gbc, unsigned char operand) {
+static void op_and_d8(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: AND d8\n");
 }
 
 // 0xE7: RST 20H (- - - -)
-static void op_rst_20h(struct gbc_system **gbc) {
+static void op_rst_20h(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: RST 20H\n");
 }
 
 // 0xE8: ADD SP, r8 (0 0 H C)
-static void op_add_sp_r8(struct gbc_system **gbc, char operand) {
+static void op_add_sp_r8(struct gbc_system *gbc, char operand) {
     printf("Unimplemented Instruction: ADD SP, r8\n");
 }
 
 // 0xE9: JP (HL) (- - - -)
-static void op_jp_hlp(struct gbc_system **gbc) {
+static void op_jp_hlp(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: JP (HL)\n");
 }
 
 // 0xEA: LD (a16), A (- - - -)
-static void op_ld_a16p_a(struct gbc_system **gbc, unsigned short operand) {
+static void op_ld_a16p_a(struct gbc_system *gbc, unsigned short operand) {
     printf("Unimplemented Instruction: LD (a16), A\n");
 }
 
 // 0xEE: XOR d8 (Z 0 0 0)
-static void op_xor_d8(struct gbc_system **gbc, unsigned char operand) {
-    (*gbc)->registers->A = xor(operand, (*gbc)->registers->A, &(*gbc)->registers->F);
+static void op_xor_d8(struct gbc_system *gbc, unsigned char operand) {
+    gbc->registers->A = xor(operand, gbc->registers->A, &gbc->registers->F);
 }
 
 // 0xEF: RST 28H (- - - -)
-static void op_rst_28h(struct gbc_system **gbc) {
+static void op_rst_28h(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: RST 28H\n");
 }
 
 // 0xF0: LDH A, (a8) (- - - -)
-static void op_ldh_a_a8p(struct gbc_system **gbc, unsigned char operand) {
-    (*gbc)->registers->A = read_byte(&(*gbc)->ram, 0xFF00 + operand);
+static void op_ldh_a_a8p(struct gbc_system *gbc, unsigned char operand) {
+    gbc->registers->A = read_byte(gbc->ram, 0xFF00 + operand);
 }
 
 // 0xF1: POP AF (Z N H C)
-static void op_pop_af(struct gbc_system **gbc) {
+static void op_pop_af(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: POP AF\n");
 }
 
 // 0xF2: LD A, (C) (- - - -)
-static void op_ld_a_cp(struct gbc_system **gbc, unsigned char operand) {
+static void op_ld_a_cp(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: LD A, (C)\n");
 }
 
 // 0xF3: DI (- - - -)
-static void op_di(struct gbc_system **gbc) {
-    (*gbc)->interrupts_enabled = 0; 
+static void op_di(struct gbc_system *gbc) {
+    gbc->interrupts_enabled = 0; 
 }
 
 // 0xF5: PUSH AF (- - - -)
-static void op_push_af(struct gbc_system **gbc) {
+static void op_push_af(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: PUSH AF\n");
 }
 
 // 0xF6: OR d8 (Z 0 0 0)
-static void op_or_d8(struct gbc_system **gbc, unsigned char operand) {
+static void op_or_d8(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: OR d8\n");
 }
 
 // 0xF7: RST 30H (- - - -)
-static void op_rst_30h(struct gbc_system **gbc) {
+static void op_rst_30h(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: RST 30H\n");
 }
 
 // 0xF8: LD HL, SP+r8 (0 0 H C)
-static void op_ld_hl_sppr8(struct gbc_system **gbc, char operand) {
+static void op_ld_hl_sppr8(struct gbc_system *gbc, char operand) {
     printf("Unimplemented Instruction: LD HL, SP+r8\n");
 }
 
 // 0xF9: LD SP, HL (- - - -)
-static void op_ld_sp_hl(struct gbc_system **gbc) {
+static void op_ld_sp_hl(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: LD SP, HL\n");
 }
 
 // 0xFA: LD A, (a16) (- - - -)
-static void op_ld_a_a16p(struct gbc_system **gbc, unsigned short operand) {
-    (*gbc)->registers->A = read_byte(&(*gbc)->ram, operand);
+static void op_ld_a_a16p(struct gbc_system *gbc, unsigned short operand) {
+    gbc->registers->A = read_byte(gbc->ram, operand);
 }
 
 // 0xFB: EI (- - - -)
-static void op_ei(struct gbc_system **gbc) {
-    (*gbc)->interrupts_enabled = 1;
+static void op_ei(struct gbc_system *gbc) {
+    gbc->interrupts_enabled = 1;
 }
 
 // 0xFE: CP d8 (Z 1 H C)
-static void op_cp_d8(struct gbc_system **gbc, unsigned char operand) {
-    compare((*gbc)->registers->A, operand, &(*gbc)->registers->F);
+static void op_cp_d8(struct gbc_system *gbc, unsigned char operand) {
+    compare(gbc->registers->A, operand, &gbc->registers->F);
 }
 
 // 0xFF: RST 38H (- - - -)
-static void op_rst_38h(struct gbc_system **gbc) {
+static void op_rst_38h(struct gbc_system *gbc) {
     printf("Unimplemented Instruction: RST 38H\n");
 }
 
@@ -1591,1282 +1591,1282 @@ struct gbc_instr instructions[INSTRUCTION_COUNT] = {
 };
 
 // 0xCB00: RLC B (Z 0 0 C)
-static void op_rlc_b(struct gbc_system **gbc, unsigned char operand) {
+static void op_rlc_b(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RLC B\n");
 }
 
 // 0xCB01: RLC C (Z 0 0 C)
-static void op_rlc_c(struct gbc_system **gbc, unsigned char operand) {
+static void op_rlc_c(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RLC C\n");
 }
 
 // 0xCB02: RLC D (Z 0 0 C)
-static void op_rlc_d(struct gbc_system **gbc, unsigned char operand) {
+static void op_rlc_d(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RLC D\n");
 }
 
 // 0xCB03: RLC E (Z 0 0 C)
-static void op_rlc_e(struct gbc_system **gbc, unsigned char operand) {
+static void op_rlc_e(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RLC E\n");
 }
 
 // 0xCB04: RLC H (Z 0 0 C)
-static void op_rlc_h(struct gbc_system **gbc, unsigned char operand) {
+static void op_rlc_h(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RLC H\n");
 }
 
 // 0xCB05: RLC L (Z 0 0 C)
-static void op_rlc_l(struct gbc_system **gbc, unsigned char operand) {
+static void op_rlc_l(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RLC L\n");
 }
 
 // 0xCB06: RLC (HL) (Z 0 0 C)
-static void op_rlc_hlp(struct gbc_system **gbc, unsigned char operand) {
+static void op_rlc_hlp(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RLC (HL)\n");
 }
 
 // 0xCB07: RLC A (Z 0 0 C)
-static void op_rlc_a(struct gbc_system **gbc, unsigned char operand) {
+static void op_rlc_a(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RLC A\n");
 }
 
 // 0xCB08: RRC B (Z 0 0 C)
-static void op_rrc_b(struct gbc_system **gbc, unsigned char operand) {
+static void op_rrc_b(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RRC B\n");
 }
 
 // 0xCB09: RRC C (Z 0 0 C)
-static void op_rrc_c(struct gbc_system **gbc, unsigned char operand) {
+static void op_rrc_c(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RRC C\n");
 }
 
 // 0xCB0A: RRC D (Z 0 0 C)
-static void op_rrc_d(struct gbc_system **gbc, unsigned char operand) {
+static void op_rrc_d(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RRC D\n");
 }
 
 // 0xCB0B: RRC E (Z 0 0 C)
-static void op_rrc_e(struct gbc_system **gbc, unsigned char operand) {
+static void op_rrc_e(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RRC E\n");
 }
 
 // 0xCB0C: RRC H (Z 0 0 C)
-static void op_rrc_h(struct gbc_system **gbc, unsigned char operand) {
+static void op_rrc_h(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RRC H\n");
 }
 
 // 0xCB0D: RRC L (Z 0 0 C)
-static void op_rrc_l(struct gbc_system **gbc, unsigned char operand) {
+static void op_rrc_l(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RRC L\n");
 }
 
 // 0xCB0E: RRC (HL) (Z 0 0 C)
-static void op_rrc_hlp(struct gbc_system **gbc, unsigned char operand) {
+static void op_rrc_hlp(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RRC (HL)\n");
 }
 
 // 0xCB0F: RRC A (Z 0 0 C)
-static void op_rrc_a(struct gbc_system **gbc, unsigned char operand) {
+static void op_rrc_a(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RRC A\n");
 }
 
 // 0xCB10: RL B (Z 0 0 C)
-static void op_rl_b(struct gbc_system **gbc, unsigned char operand) {
+static void op_rl_b(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RL B\n");
 }
 
 // 0xCB11: RL C (Z 0 0 C)
-static void op_rl_c(struct gbc_system **gbc, unsigned char operand) {
+static void op_rl_c(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RL C\n");
 }
 
 // 0xCB12: RL D (Z 0 0 C)
-static void op_rl_d(struct gbc_system **gbc, unsigned char operand) {
+static void op_rl_d(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RL D\n");
 }
 
 // 0xCB13: RL E (Z 0 0 C)
-static void op_rl_e(struct gbc_system **gbc, unsigned char operand) {
+static void op_rl_e(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RL E\n");
 }
 
 // 0xCB14: RL H (Z 0 0 C)
-static void op_rl_h(struct gbc_system **gbc, unsigned char operand) {
+static void op_rl_h(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RL H\n");
 }
 
 // 0xCB15: RL L (Z 0 0 C)
-static void op_rl_l(struct gbc_system **gbc, unsigned char operand) {
+static void op_rl_l(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RL L\n");
 }
 
 // 0xCB16: RL (HL) (Z 0 0 C)
-static void op_rl_hlp(struct gbc_system **gbc, unsigned char operand) {
+static void op_rl_hlp(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RL (HL)\n");
 }
 
 // 0xCB17: RL A (Z 0 0 C)
-static void op_rl_a(struct gbc_system **gbc, unsigned char operand) {
+static void op_rl_a(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RL A\n");
 }
 
 // 0xCB18: RR B (Z 0 0 C)
-static void op_rr_b(struct gbc_system **gbc, unsigned char operand) {
+static void op_rr_b(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RR B\n");
 }
 
 // 0xCB19: RR C (Z 0 0 C)
-static void op_rr_c(struct gbc_system **gbc, unsigned char operand) {
+static void op_rr_c(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RR C\n");
 }
 
 // 0xCB1A: RR D (Z 0 0 C)
-static void op_rr_d(struct gbc_system **gbc, unsigned char operand) {
+static void op_rr_d(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RR D\n");
 }
 
 // 0xCB1B: RR E (Z 0 0 C)
-static void op_rr_e(struct gbc_system **gbc, unsigned char operand) {
+static void op_rr_e(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RR E\n");
 }
 
 // 0xCB1C: RR H (Z 0 0 C)
-static void op_rr_h(struct gbc_system **gbc, unsigned char operand) {
+static void op_rr_h(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RR H\n");
 }
 
 // 0xCB1D: RR L (Z 0 0 C)
-static void op_rr_l(struct gbc_system **gbc, unsigned char operand) {
+static void op_rr_l(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RR L\n");
 }
 
 // 0xCB1E: RR (HL) (Z 0 0 C)
-static void op_rr_hlp(struct gbc_system **gbc, unsigned char operand) {
+static void op_rr_hlp(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RR (HL)\n");
 }
 
 // 0xCB1F: RR A (Z 0 0 C)
-static void op_rr_a(struct gbc_system **gbc, unsigned char operand) {
+static void op_rr_a(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RR A\n");
 }
 
 // 0xCB20: SLA B (Z 0 0 C)
-static void op_sla_b(struct gbc_system **gbc, unsigned char operand) {
+static void op_sla_b(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SLA B\n");
 }
 
 // 0xCB21: SLA C (Z 0 0 C)
-static void op_sla_c(struct gbc_system **gbc, unsigned char operand) {
+static void op_sla_c(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SLA C\n");
 }
 
 // 0xCB22: SLA D (Z 0 0 C)
-static void op_sla_d(struct gbc_system **gbc, unsigned char operand) {
+static void op_sla_d(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SLA D\n");
 }
 
 // 0xCB23: SLA E (Z 0 0 C)
-static void op_sla_e(struct gbc_system **gbc, unsigned char operand) {
+static void op_sla_e(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SLA E\n");
 }
 
 // 0xCB24: SLA H (Z 0 0 C)
-static void op_sla_h(struct gbc_system **gbc, unsigned char operand) {
+static void op_sla_h(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SLA H\n");
 }
 
 // 0xCB25: SLA L (Z 0 0 C)
-static void op_sla_l(struct gbc_system **gbc, unsigned char operand) {
+static void op_sla_l(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SLA L\n");
 }
 
 // 0xCB26: SLA (HL) (Z 0 0 C)
-static void op_sla_hlp(struct gbc_system **gbc, unsigned char operand) {
+static void op_sla_hlp(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SLA (HL)\n");
 }
 
 // 0xCB27: SLA A (Z 0 0 C)
-static void op_sla_a(struct gbc_system **gbc, unsigned char operand) {
+static void op_sla_a(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SLA A\n");
 }
 
 // 0xCB28: SRA B (Z 0 0 0)
-static void op_sra_b(struct gbc_system **gbc, unsigned char operand) {
+static void op_sra_b(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SRA B\n");
 }
 
 // 0xCB29: SRA C (Z 0 0 0)
-static void op_sra_c(struct gbc_system **gbc, unsigned char operand) {
+static void op_sra_c(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SRA C\n");
 }
 
 // 0xCB2A: SRA D (Z 0 0 0)
-static void op_sra_d(struct gbc_system **gbc, unsigned char operand) {
+static void op_sra_d(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SRA D\n");
 }
 
 // 0xCB2B: SRA E (Z 0 0 0)
-static void op_sra_e(struct gbc_system **gbc, unsigned char operand) {
+static void op_sra_e(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SRA E\n");
 }
 
 // 0xCB2C: SRA H (Z 0 0 0)
-static void op_sra_h(struct gbc_system **gbc, unsigned char operand) {
+static void op_sra_h(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SRA H\n");
 }
 
 // 0xCB2D: SRA L (Z 0 0 0)
-static void op_sra_l(struct gbc_system **gbc, unsigned char operand) {
+static void op_sra_l(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SRA L\n");
 }
 
 // 0xCB2E: SRA (HL) (Z 0 0 0)
-static void op_sra_hlp(struct gbc_system **gbc, unsigned char operand) {
+static void op_sra_hlp(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SRA (HL)\n");
 }
 
 // 0xCB2F: SRA A (Z 0 0 0)
-static void op_sra_a(struct gbc_system **gbc, unsigned char operand) {
+static void op_sra_a(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SRA A\n");
 }
 
 // 0xCB30: SWAP B (Z 0 0 0)
-static void op_swap_b(struct gbc_system **gbc, unsigned char operand) {
+static void op_swap_b(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SWAP B\n");
 }
 
 // 0xCB31: SWAP C (Z 0 0 0)
-static void op_swap_c(struct gbc_system **gbc, unsigned char operand) {
+static void op_swap_c(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SWAP C\n");
 }
 
 // 0xCB32: SWAP D (Z 0 0 0)
-static void op_swap_d(struct gbc_system **gbc, unsigned char operand) {
+static void op_swap_d(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SWAP D\n");
 }
 
 // 0xCB33: SWAP E (Z 0 0 0)
-static void op_swap_e(struct gbc_system **gbc, unsigned char operand) {
+static void op_swap_e(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SWAP E\n");
 }
 
 // 0xCB34: SWAP H (Z 0 0 0)
-static void op_swap_h(struct gbc_system **gbc, unsigned char operand) {
+static void op_swap_h(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SWAP H\n");
 }
 
 // 0xCB35: SWAP L (Z 0 0 0)
-static void op_swap_l(struct gbc_system **gbc, unsigned char operand) {
+static void op_swap_l(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SWAP L\n");
 }
 
 // 0xCB36: SWAP (HL) (Z 0 0 0)
-static void op_swap_hlp(struct gbc_system **gbc, unsigned char operand) {
+static void op_swap_hlp(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SWAP (HL)\n");
 }
 
 // 0xCB37: SWAP A (Z 0 0 0)
-static void op_swap_a(struct gbc_system **gbc, unsigned char operand) {
+static void op_swap_a(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SWAP A\n");
 }
 
 // 0xCB38: SRL B (Z 0 0 C)
-static void op_srl_b(struct gbc_system **gbc, unsigned char operand) {
+static void op_srl_b(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SRL B\n");
 }
 
 // 0xCB39: SRL C (Z 0 0 C)
-static void op_srl_c(struct gbc_system **gbc, unsigned char operand) {
+static void op_srl_c(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SRL C\n");
 }
 
 // 0xCB3A: SRL D (Z 0 0 C)
-static void op_srl_d(struct gbc_system **gbc, unsigned char operand) {
+static void op_srl_d(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SRL D\n");
 }
 
 // 0xCB3B: SRL E (Z 0 0 C)
-static void op_srl_e(struct gbc_system **gbc, unsigned char operand) {
+static void op_srl_e(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SRL E\n");
 }
 
 // 0xCB3C: SRL H (Z 0 0 C)
-static void op_srl_h(struct gbc_system **gbc, unsigned char operand) {
+static void op_srl_h(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SRL H\n");
 }
 
 // 0xCB3D: SRL L (Z 0 0 C)
-static void op_srl_l(struct gbc_system **gbc, unsigned char operand) {
+static void op_srl_l(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SRL L\n");
 }
 
 // 0xCB3E: SRL (HL) (Z 0 0 C)
-static void op_srl_hlp(struct gbc_system **gbc, unsigned char operand) {
+static void op_srl_hlp(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SRL (HL)\n");
 }
 
 // 0xCB3F: SRL A (Z 0 0 C)
-static void op_srl_a(struct gbc_system **gbc, unsigned char operand) {
+static void op_srl_a(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SRL A\n");
 }
 
 // 0xCB40: BIT 0, B (Z 0 1 -)
-static void op_bit_0_b(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_0_b(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 0, B\n");
 }
 
 // 0xCB41: BIT 0, C (Z 0 1 -)
-static void op_bit_0_c(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_0_c(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 0, C\n");
 }
 
 // 0xCB42: BIT 0, D (Z 0 1 -)
-static void op_bit_0_d(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_0_d(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 0, D\n");
 }
 
 // 0xCB43: BIT 0, E (Z 0 1 -)
-static void op_bit_0_e(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_0_e(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 0, E\n");
 }
 
 // 0xCB44: BIT 0, H (Z 0 1 -)
-static void op_bit_0_h(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_0_h(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 0, H\n");
 }
 
 // 0xCB45: BIT 0, L (Z 0 1 -)
-static void op_bit_0_l(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_0_l(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 0, L\n");
 }
 
 // 0xCB46: BIT 0, (HL) (Z 0 1 -)
-static void op_bit_0_hlp(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_0_hlp(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 0, (HL)\n");
 }
 
 // 0xCB47: BIT 0, A (Z 0 1 -)
-static void op_bit_0_a(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_0_a(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 0, A\n");
 }
 
 // 0xCB48: BIT 1, B (Z 0 1 -)
-static void op_bit_1_b(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_1_b(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 1, B\n");
 }
 
 // 0xCB49: BIT 1, C (Z 0 1 -)
-static void op_bit_1_c(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_1_c(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 1, C\n");
 }
 
 // 0xCB4A: BIT 1, D (Z 0 1 -)
-static void op_bit_1_d(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_1_d(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 1, D\n");
 }
 
 // 0xCB4B: BIT 1, E (Z 0 1 -)
-static void op_bit_1_e(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_1_e(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 1, E\n");
 }
 
 // 0xCB4C: BIT 1, H (Z 0 1 -)
-static void op_bit_1_h(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_1_h(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 1, H\n");
 }
 
 // 0xCB4D: BIT 1, L (Z 0 1 -)
-static void op_bit_1_l(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_1_l(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 1, L\n");
 }
 
 // 0xCB4E: BIT 1, (HL) (Z 0 1 -)
-static void op_bit_1_hlp(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_1_hlp(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 1, (HL)\n");
 }
 
 // 0xCB4F: BIT 1, A (Z 0 1 -)
-static void op_bit_1_a(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_1_a(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 1, A\n");
 }
 
 // 0xCB50: BIT 2, B (Z 0 1 -)
-static void op_bit_2_b(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_2_b(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 2, B\n");
 }
 
 // 0xCB51: BIT 2, C (Z 0 1 -)
-static void op_bit_2_c(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_2_c(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 2, C\n");
 }
 
 // 0xCB52: BIT 2, D (Z 0 1 -)
-static void op_bit_2_d(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_2_d(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 2, D\n");
 }
 
 // 0xCB53: BIT 2, E (Z 0 1 -)
-static void op_bit_2_e(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_2_e(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 2, E\n");
 }
 
 // 0xCB54: BIT 2, H (Z 0 1 -)
-static void op_bit_2_h(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_2_h(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 2, H\n");
 }
 
 // 0xCB55: BIT 2, L (Z 0 1 -)
-static void op_bit_2_l(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_2_l(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 2, L\n");
 }
 
 // 0xCB56: BIT 2, (HL) (Z 0 1 -)
-static void op_bit_2_hlp(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_2_hlp(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 2, (HL)\n");
 }
 
 // 0xCB57: BIT 2, A (Z 0 1 -)
-static void op_bit_2_a(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_2_a(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 2, A\n");
 }
 
 // 0xCB58: BIT 3, B (Z 0 1 -)
-static void op_bit_3_b(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_3_b(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 3, B\n");
 }
 
 // 0xCB59: BIT 3, C (Z 0 1 -)
-static void op_bit_3_c(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_3_c(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 3, C\n");
 }
 
 // 0xCB5A: BIT 3, D (Z 0 1 -)
-static void op_bit_3_d(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_3_d(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 3, D\n");
 }
 
 // 0xCB5B: BIT 3, E (Z 0 1 -)
-static void op_bit_3_e(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_3_e(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 3, E\n");
 }
 
 // 0xCB5C: BIT 3, H (Z 0 1 -)
-static void op_bit_3_h(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_3_h(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 3, H\n");
 }
 
 // 0xCB5D: BIT 3, L (Z 0 1 -)
-static void op_bit_3_l(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_3_l(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 3, L\n");
 }
 
 // 0xCB5E: BIT 3, (HL) (Z 0 1 -)
-static void op_bit_3_hlp(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_3_hlp(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 3, (HL)\n");
 }
 
 // 0xCB5F: BIT 3, A (Z 0 1 -)
-static void op_bit_3_a(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_3_a(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 3, A\n");
 }
 
 // 0xCB60: BIT 4, B (Z 0 1 -)
-static void op_bit_4_b(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_4_b(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 4, B\n");
 }
 
 // 0xCB61: BIT 4, C (Z 0 1 -)
-static void op_bit_4_c(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_4_c(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 4, C\n");
 }
 
 // 0xCB62: BIT 4, D (Z 0 1 -)
-static void op_bit_4_d(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_4_d(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 4, D\n");
 }
 
 // 0xCB63: BIT 4, E (Z 0 1 -)
-static void op_bit_4_e(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_4_e(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 4, E\n");
 }
 
 // 0xCB64: BIT 4, H (Z 0 1 -)
-static void op_bit_4_h(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_4_h(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 4, H\n");
 }
 
 // 0xCB65: BIT 4, L (Z 0 1 -)
-static void op_bit_4_l(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_4_l(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 4, L\n");
 }
 
 // 0xCB66: BIT 4, (HL) (Z 0 1 -)
-static void op_bit_4_hlp(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_4_hlp(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 4, (HL)\n");
 }
 
 // 0xCB67: BIT 4, A (Z 0 1 -)
-static void op_bit_4_a(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_4_a(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 4, A\n");
 }
 
 // 0xCB68: BIT 5, B (Z 0 1 -)
-static void op_bit_5_b(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_5_b(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 5, B\n");
 }
 
 // 0xCB69: BIT 5, C (Z 0 1 -)
-static void op_bit_5_c(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_5_c(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 5, C\n");
 }
 
 // 0xCB6A: BIT 5, D (Z 0 1 -)
-static void op_bit_5_d(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_5_d(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 5, D\n");
 }
 
 // 0xCB6B: BIT 5, E (Z 0 1 -)
-static void op_bit_5_e(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_5_e(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 5, E\n");
 }
 
 // 0xCB6C: BIT 5, H (Z 0 1 -)
-static void op_bit_5_h(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_5_h(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 5, H\n");
 }
 
 // 0xCB6D: BIT 5, L (Z 0 1 -)
-static void op_bit_5_l(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_5_l(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 5, L\n");
 }
 
 // 0xCB6E: BIT 5, (HL) (Z 0 1 -)
-static void op_bit_5_hlp(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_5_hlp(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 5, (HL)\n");
 }
 
 // 0xCB6F: BIT 5, A (Z 0 1 -)
-static void op_bit_5_a(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_5_a(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 5, A\n");
 }
 
 // 0xCB70: BIT 6, B (Z 0 1 -)
-static void op_bit_6_b(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_6_b(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 6, B\n");
 }
 
 // 0xCB71: BIT 6, C (Z 0 1 -)
-static void op_bit_6_c(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_6_c(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 6, C\n");
 }
 
 // 0xCB72: BIT 6, D (Z 0 1 -)
-static void op_bit_6_d(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_6_d(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 6, D\n");
 }
 
 // 0xCB73: BIT 6, E (Z 0 1 -)
-static void op_bit_6_e(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_6_e(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 6, E\n");
 }
 
 // 0xCB74: BIT 6, H (Z 0 1 -)
-static void op_bit_6_h(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_6_h(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 6, H\n");
 }
 
 // 0xCB75: BIT 6, L (Z 0 1 -)
-static void op_bit_6_l(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_6_l(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 6, L\n");
 }
 
 // 0xCB76: BIT 6, (HL) (Z 0 1 -)
-static void op_bit_6_hlp(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_6_hlp(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 6, (HL)\n");
 }
 
 // 0xCB77: BIT 6, A (Z 0 1 -)
-static void op_bit_6_a(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_6_a(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 6, A\n");
 }
 
 // 0xCB78: BIT 7, B (Z 0 1 -)
-static void op_bit_7_b(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_7_b(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 7, B\n");
 }
 
 // 0xCB79: BIT 7, C (Z 0 1 -)
-static void op_bit_7_c(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_7_c(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 7, C\n");
 }
 
 // 0xCB7A: BIT 7, D (Z 0 1 -)
-static void op_bit_7_d(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_7_d(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 7, D\n");
 }
 
 // 0xCB7B: BIT 7, E (Z 0 1 -)
-static void op_bit_7_e(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_7_e(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 7, E\n");
 }
 
 // 0xCB7C: BIT 7, H (Z 0 1 -)
-static void op_bit_7_h(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_7_h(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 7, H\n");
 }
 
 // 0xCB7D: BIT 7, L (Z 0 1 -)
-static void op_bit_7_l(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_7_l(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 7, L\n");
 }
 
 // 0xCB7E: BIT 7, (HL) (Z 0 1 -)
-static void op_bit_7_hlp(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_7_hlp(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 7, (HL)\n");
 }
 
 // 0xCB7F: BIT 7, A (Z 0 1 -)
-static void op_bit_7_a(struct gbc_system **gbc, unsigned char operand) {
+static void op_bit_7_a(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: BIT 7, A\n");
 }
 
 // 0xCB80: RES 0, B (- - - -)
-static void op_res_0_b(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_0_b(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 0, B\n");
 }
 
 // 0xCB81: RES 0, C (- - - -)
-static void op_res_0_c(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_0_c(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 0, C\n");
 }
 
 // 0xCB82: RES 0, D (- - - -)
-static void op_res_0_d(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_0_d(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 0, D\n");
 }
 
 // 0xCB83: RES 0, E (- - - -)
-static void op_res_0_e(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_0_e(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 0, E\n");
 }
 
 // 0xCB84: RES 0, H (- - - -)
-static void op_res_0_h(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_0_h(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 0, H\n");
 }
 
 // 0xCB85: RES 0, L (- - - -)
-static void op_res_0_l(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_0_l(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 0, L\n");
 }
 
 // 0xCB86: RES 0, (HL) (- - - -)
-static void op_res_0_hlp(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_0_hlp(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 0, (HL)\n");
 }
 
 // 0xCB87: RES 0, A (- - - -)
-static void op_res_0_a(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_0_a(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 0, A\n");
 }
 
 // 0xCB88: RES 1, B (- - - -)
-static void op_res_1_b(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_1_b(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 1, B\n");
 }
 
 // 0xCB89: RES 1, C (- - - -)
-static void op_res_1_c(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_1_c(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 1, C\n");
 }
 
 // 0xCB8A: RES 1, D (- - - -)
-static void op_res_1_d(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_1_d(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 1, D\n");
 }
 
 // 0xCB8B: RES 1, E (- - - -)
-static void op_res_1_e(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_1_e(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 1, E\n");
 }
 
 // 0xCB8C: RES 1, H (- - - -)
-static void op_res_1_h(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_1_h(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 1, H\n");
 }
 
 // 0xCB8D: RES 1, L (- - - -)
-static void op_res_1_l(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_1_l(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 1, L\n");
 }
 
 // 0xCB8E: RES 1, (HL) (- - - -)
-static void op_res_1_hlp(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_1_hlp(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 1, (HL)\n");
 }
 
 // 0xCB8F: RES 1, A (- - - -)
-static void op_res_1_a(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_1_a(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 1, A\n");
 }
 
 // 0xCB90: RES 2, B (- - - -)
-static void op_res_2_b(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_2_b(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 2, B\n");
 }
 
 // 0xCB91: RES 2, C (- - - -)
-static void op_res_2_c(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_2_c(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 2, C\n");
 }
 
 // 0xCB92: RES 2, D (- - - -)
-static void op_res_2_d(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_2_d(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 2, D\n");
 }
 
 // 0xCB93: RES 2, E (- - - -)
-static void op_res_2_e(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_2_e(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 2, E\n");
 }
 
 // 0xCB94: RES 2, H (- - - -)
-static void op_res_2_h(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_2_h(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 2, H\n");
 }
 
 // 0xCB95: RES 2, L (- - - -)
-static void op_res_2_l(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_2_l(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 2, L\n");
 }
 
 // 0xCB96: RES 2, (HL) (- - - -)
-static void op_res_2_hlp(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_2_hlp(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 2, (HL)\n");
 }
 
 // 0xCB97: RES 2, A (- - - -)
-static void op_res_2_a(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_2_a(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 2, A\n");
 }
 
 // 0xCB98: RES 3, B (- - - -)
-static void op_res_3_b(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_3_b(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 3, B\n");
 }
 
 // 0xCB99: RES 3, C (- - - -)
-static void op_res_3_c(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_3_c(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 3, C\n");
 }
 
 // 0xCB9A: RES 3, D (- - - -)
-static void op_res_3_d(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_3_d(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 3, D\n");
 }
 
 // 0xCB9B: RES 3, E (- - - -)
-static void op_res_3_e(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_3_e(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 3, E\n");
 }
 
 // 0xCB9C: RES 3, H (- - - -)
-static void op_res_3_h(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_3_h(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 3, H\n");
 }
 
 // 0xCB9D: RES 3, L (- - - -)
-static void op_res_3_l(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_3_l(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 3, L\n");
 }
 
 // 0xCB9E: RES 3, (HL) (- - - -)
-static void op_res_3_hlp(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_3_hlp(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 3, (HL)\n");
 }
 
 // 0xCB9F: RES 3, A (- - - -)
-static void op_res_3_a(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_3_a(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 3, A\n");
 }
 
 // 0xCBA0: RES 4, B (- - - -)
-static void op_res_4_b(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_4_b(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 4, B\n");
 }
 
 // 0xCBA1: RES 4, C (- - - -)
-static void op_res_4_c(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_4_c(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 4, C\n");
 }
 
 // 0xCBA2: RES 4, D (- - - -)
-static void op_res_4_d(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_4_d(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 4, D\n");
 }
 
 // 0xCBA3: RES 4, E (- - - -)
-static void op_res_4_e(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_4_e(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 4, E\n");
 }
 
 // 0xCBA4: RES 4, H (- - - -)
-static void op_res_4_h(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_4_h(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 4, H\n");
 }
 
 // 0xCBA5: RES 4, L (- - - -)
-static void op_res_4_l(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_4_l(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 4, L\n");
 }
 
 // 0xCBA6: RES 4, (HL) (- - - -)
-static void op_res_4_hlp(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_4_hlp(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 4, (HL)\n");
 }
 
 // 0xCBA7: RES 4, A (- - - -)
-static void op_res_4_a(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_4_a(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 4, A\n");
 }
 
 // 0xCBA8: RES 5, B (- - - -)
-static void op_res_5_b(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_5_b(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 5, B\n");
 }
 
 // 0xCBA9: RES 5, C (- - - -)
-static void op_res_5_c(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_5_c(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 5, C\n");
 }
 
 // 0xCBAA: RES 5, D (- - - -)
-static void op_res_5_d(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_5_d(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 5, D\n");
 }
 
 // 0xCBAB: RES 5, E (- - - -)
-static void op_res_5_e(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_5_e(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 5, E\n");
 }
 
 // 0xCBAC: RES 5, H (- - - -)
-static void op_res_5_h(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_5_h(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 5, H\n");
 }
 
 // 0xCBAD: RES 5, L (- - - -)
-static void op_res_5_l(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_5_l(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 5, L\n");
 }
 
 // 0xCBAE: RES 5, (HL) (- - - -)
-static void op_res_5_hlp(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_5_hlp(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 5, (HL)\n");
 }
 
 // 0xCBAF: RES 5, A (- - - -)
-static void op_res_5_a(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_5_a(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 5, A\n");
 }
 
 // 0xCBB0: RES 6, B (- - - -)
-static void op_res_6_b(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_6_b(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 6, B\n");
 }
 
 // 0xCBB1: RES 6, C (- - - -)
-static void op_res_6_c(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_6_c(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 6, C\n");
 }
 
 // 0xCBB2: RES 6, D (- - - -)
-static void op_res_6_d(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_6_d(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 6, D\n");
 }
 
 // 0xCBB3: RES 6, E (- - - -)
-static void op_res_6_e(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_6_e(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 6, E\n");
 }
 
 // 0xCBB4: RES 6, H (- - - -)
-static void op_res_6_h(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_6_h(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 6, H\n");
 }
 
 // 0xCBB5: RES 6, L (- - - -)
-static void op_res_6_l(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_6_l(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 6, L\n");
 }
 
 // 0xCBB6: RES 6, (HL) (- - - -)
-static void op_res_6_hlp(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_6_hlp(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 6, (HL)\n");
 }
 
 // 0xCBB7: RES 6, A (- - - -)
-static void op_res_6_a(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_6_a(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 6, A\n");
 }
 
 // 0xCBB8: RES 7, B (- - - -)
-static void op_res_7_b(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_7_b(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 7, B\n");
 }
 
 // 0xCBB9: RES 7, C (- - - -)
-static void op_res_7_c(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_7_c(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 7, C\n");
 }
 
 // 0xCBBA: RES 7, D (- - - -)
-static void op_res_7_d(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_7_d(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 7, D\n");
 }
 
 // 0xCBBB: RES 7, E (- - - -)
-static void op_res_7_e(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_7_e(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 7, E\n");
 }
 
 // 0xCBBC: RES 7, H (- - - -)
-static void op_res_7_h(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_7_h(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 7, H\n");
 }
 
 // 0xCBBD: RES 7, L (- - - -)
-static void op_res_7_l(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_7_l(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 7, L\n");
 }
 
 // 0xCBBE: RES 7, (HL) (- - - -)
-static void op_res_7_hlp(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_7_hlp(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 7, (HL)\n");
 }
 
 // 0xCBBF: RES 7, A (- - - -)
-static void op_res_7_a(struct gbc_system **gbc, unsigned char operand) {
+static void op_res_7_a(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: RES 7, A\n");
 }
 
 // 0xCBC0: SET 0, B (- - - -)
-static void op_set_0_b(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_0_b(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 0, B\n");
 }
 
 // 0xCBC1: SET 0, C (- - - -)
-static void op_set_0_c(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_0_c(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 0, C\n");
 }
 
 // 0xCBC2: SET 0, D (- - - -)
-static void op_set_0_d(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_0_d(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 0, D\n");
 }
 
 // 0xCBC3: SET 0, E (- - - -)
-static void op_set_0_e(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_0_e(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 0, E\n");
 }
 
 // 0xCBC4: SET 0, H (- - - -)
-static void op_set_0_h(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_0_h(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 0, H\n");
 }
 
 // 0xCBC5: SET 0, L (- - - -)
-static void op_set_0_l(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_0_l(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 0, L\n");
 }
 
 // 0xCBC6: SET 0, (HL) (- - - -)
-static void op_set_0_hlp(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_0_hlp(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 0, (HL)\n");
 }
 
 // 0xCBC7: SET 0, A (- - - -)
-static void op_set_0_a(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_0_a(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 0, A\n");
 }
 
 // 0xCBC8: SET 1, B (- - - -)
-static void op_set_1_b(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_1_b(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 1, B\n");
 }
 
 // 0xCBC9: SET 1, C (- - - -)
-static void op_set_1_c(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_1_c(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 1, C\n");
 }
 
 // 0xCBCA: SET 1, D (- - - -)
-static void op_set_1_d(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_1_d(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 1, D\n");
 }
 
 // 0xCBCB: SET 1, E (- - - -)
-static void op_set_1_e(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_1_e(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 1, E\n");
 }
 
 // 0xCBCC: SET 1, H (- - - -)
-static void op_set_1_h(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_1_h(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 1, H\n");
 }
 
 // 0xCBCD: SET 1, L (- - - -)
-static void op_set_1_l(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_1_l(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 1, L\n");
 }
 
 // 0xCBCE: SET 1, (HL) (- - - -)
-static void op_set_1_hlp(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_1_hlp(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 1, (HL)\n");
 }
 
 // 0xCBCF: SET 1, A (- - - -)
-static void op_set_1_a(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_1_a(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 1, A\n");
 }
 
 // 0xCBD0: SET 2, B (- - - -)
-static void op_set_2_b(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_2_b(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 2, B\n");
 }
 
 // 0xCBD1: SET 2, C (- - - -)
-static void op_set_2_c(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_2_c(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 2, C\n");
 }
 
 // 0xCBD2: SET 2, D (- - - -)
-static void op_set_2_d(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_2_d(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 2, D\n");
 }
 
 // 0xCBD3: SET 2, E (- - - -)
-static void op_set_2_e(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_2_e(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 2, E\n");
 }
 
 // 0xCBD4: SET 2, H (- - - -)
-static void op_set_2_h(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_2_h(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 2, H\n");
 }
 
 // 0xCBD5: SET 2, L (- - - -)
-static void op_set_2_l(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_2_l(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 2, L\n");
 }
 
 // 0xCBD6: SET 2, (HL) (- - - -)
-static void op_set_2_hlp(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_2_hlp(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 2, (HL)\n");
 }
 
 // 0xCBD7: SET 2, A (- - - -)
-static void op_set_2_a(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_2_a(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 2, A\n");
 }
 
 // 0xCBD8: SET 3, B (- - - -)
-static void op_set_3_b(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_3_b(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 3, B\n");
 }
 
 // 0xCBD9: SET 3, C (- - - -)
-static void op_set_3_c(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_3_c(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 3, C\n");
 }
 
 // 0xCBDA: SET 3, D (- - - -)
-static void op_set_3_d(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_3_d(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 3, D\n");
 }
 
 // 0xCBDB: SET 3, E (- - - -)
-static void op_set_3_e(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_3_e(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 3, E\n");
 }
 
 // 0xCBDC: SET 3, H (- - - -)
-static void op_set_3_h(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_3_h(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 3, H\n");
 }
 
 // 0xCBDD: SET 3, L (- - - -)
-static void op_set_3_l(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_3_l(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 3, L\n");
 }
 
 // 0xCBDE: SET 3, (HL) (- - - -)
-static void op_set_3_hlp(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_3_hlp(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 3, (HL)\n");
 }
 
 // 0xCBDF: SET 3, A (- - - -)
-static void op_set_3_a(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_3_a(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 3, A\n");
 }
 
 // 0xCBE0: SET 4, B (- - - -)
-static void op_set_4_b(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_4_b(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 4, B\n");
 }
 
 // 0xCBE1: SET 4, C (- - - -)
-static void op_set_4_c(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_4_c(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 4, C\n");
 }
 
 // 0xCBE2: SET 4, D (- - - -)
-static void op_set_4_d(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_4_d(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 4, D\n");
 }
 
 // 0xCBE3: SET 4, E (- - - -)
-static void op_set_4_e(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_4_e(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 4, E\n");
 }
 
 // 0xCBE4: SET 4, H (- - - -)
-static void op_set_4_h(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_4_h(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 4, H\n");
 }
 
 // 0xCBE5: SET 4, L (- - - -)
-static void op_set_4_l(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_4_l(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 4, L\n");
 }
 
 // 0xCBE6: SET 4, (HL) (- - - -)
-static void op_set_4_hlp(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_4_hlp(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 4, (HL)\n");
 }
 
 // 0xCBE7: SET 4, A (- - - -)
-static void op_set_4_a(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_4_a(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 4, A\n");
 }
 
 // 0xCBE8: SET 5, B (- - - -)
-static void op_set_5_b(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_5_b(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 5, B\n");
 }
 
 // 0xCBE9: SET 5, C (- - - -)
-static void op_set_5_c(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_5_c(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 5, C\n");
 }
 
 // 0xCBEA: SET 5, D (- - - -)
-static void op_set_5_d(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_5_d(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 5, D\n");
 }
 
 // 0xCBEB: SET 5, E (- - - -)
-static void op_set_5_e(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_5_e(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 5, E\n");
 }
 
 // 0xCBEC: SET 5, H (- - - -)
-static void op_set_5_h(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_5_h(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 5, H\n");
 }
 
 // 0xCBED: SET 5, L (- - - -)
-static void op_set_5_l(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_5_l(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 5, L\n");
 }
 
 // 0xCBEE: SET 5, (HL) (- - - -)
-static void op_set_5_hlp(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_5_hlp(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 5, (HL)\n");
 }
 
 // 0xCBEF: SET 5, A (- - - -)
-static void op_set_5_a(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_5_a(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 5, A\n");
 }
 
 // 0xCBF0: SET 6, B (- - - -)
-static void op_set_6_b(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_6_b(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 6, B\n");
 }
 
 // 0xCBF1: SET 6, C (- - - -)
-static void op_set_6_c(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_6_c(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 6, C\n");
 }
 
 // 0xCBF2: SET 6, D (- - - -)
-static void op_set_6_d(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_6_d(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 6, D\n");
 }
 
 // 0xCBF3: SET 6, E (- - - -)
-static void op_set_6_e(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_6_e(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 6, E\n");
 }
 
 // 0xCBF4: SET 6, H (- - - -)
-static void op_set_6_h(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_6_h(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 6, H\n");
 }
 
 // 0xCBF5: SET 6, L (- - - -)
-static void op_set_6_l(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_6_l(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 6, L\n");
 }
 
 // 0xCBF6: SET 6, (HL) (- - - -)
-static void op_set_6_hlp(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_6_hlp(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 6, (HL)\n");
 }
 
 // 0xCBF7: SET 6, A (- - - -)
-static void op_set_6_a(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_6_a(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 6, A\n");
 }
 
 // 0xCBF8: SET 7, B (- - - -)
-static void op_set_7_b(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_7_b(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 7, B\n");
 }
 
 // 0xCBF9: SET 7, C (- - - -)
-static void op_set_7_c(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_7_c(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 7, C\n");
 }
 
 // 0xCBFA: SET 7, D (- - - -)
-static void op_set_7_d(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_7_d(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 7, D\n");
 }
 
 // 0xCBFB: SET 7, E (- - - -)
-static void op_set_7_e(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_7_e(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 7, E\n");
 }
 
 // 0xCBFC: SET 7, H (- - - -)
-static void op_set_7_h(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_7_h(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 7, H\n");
 }
 
 // 0xCBFD: SET 7, L (- - - -)
-static void op_set_7_l(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_7_l(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 7, L\n");
 }
 
 // 0xCBFE: SET 7, (HL) (- - - -)
-static void op_set_7_hlp(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_7_hlp(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 7, (HL)\n");
 }
 
 // 0xCBFF: SET 7, A (- - - -)
-static void op_set_7_a(struct gbc_system **gbc, unsigned char operand) {
+static void op_set_7_a(struct gbc_system *gbc, unsigned char operand) {
     printf("Unimplemented Instruction: SET 7, A\n");
 }
 
@@ -3129,10 +3129,10 @@ struct gbc_instr cb_instructions[CB_INSTRUCTION_COUNT] = {
     {"SET 7, A", 2, 8, 1, 0, op_set_7_a} // 0xCBFF
 };
 
-struct gbc_instr find_instr(const unsigned char opcode, struct gbc_system **gbc) {
+struct gbc_instr find_instr(const unsigned char opcode, struct gbc_system *gbc) {
     // If the opcode has the CB prefix
     if(opcode == 0xCB) {
-        unsigned char next_opcode = read_byte(&(*gbc)->ram, (*gbc)->registers->PC + 1);
+        unsigned char next_opcode = read_byte(gbc->ram, gbc->registers->PC + 1);
         return cb_instructions[next_opcode];
     } 
     // Standard instruction
@@ -3141,10 +3141,10 @@ struct gbc_instr find_instr(const unsigned char opcode, struct gbc_system **gbc)
     }
 }
 
-void execute_instr(struct gbc_system **gbc) {
+void execute_instr(struct gbc_system *gbc) {
 
     // Get the opcode at the program counter
-    unsigned char opcode = read_byte(&(*gbc)->ram, (*gbc)->registers->PC);
+    unsigned char opcode = read_byte(gbc->ram, gbc->registers->PC);
 
     // Get the instruction structure
     struct gbc_instr instruction = find_instr(opcode, gbc);
@@ -3164,19 +3164,19 @@ void execute_instr(struct gbc_system **gbc) {
             break;
 
         case 1:
-            operand = read_byte(&(*gbc)->ram, (*gbc)->registers->PC + 1);
+            operand = read_byte(gbc->ram, gbc->registers->PC + 1);
             opcode_function(gbc, (unsigned char) operand);
             break;
 
         case 2:
-            operand = read_short(&(*gbc)->ram, (*gbc)->registers->PC + 1);
+            operand = read_short(gbc->ram, gbc->registers->PC + 1);
             opcode_function(gbc, operand);
             break;
     }
 
     // If the instruction is not a jump, return, etc... Increment the PC
     if(instruction.increment_PC) {
-        (*gbc)->registers->PC += instruction.length;
+        gbc->registers->PC += instruction.length;
     }
 }
 

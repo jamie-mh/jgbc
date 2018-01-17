@@ -9,4 +9,4 @@ struct gbc_display {
     SDL_Event *event;
 };
 
-void init_display(struct gbc_display **);
+void init_display(struct gbc_display *);

@@ -3,7 +3,7 @@
 #include "cpu.h"
 #include "ram.h"
 
-static struct debug_box *dbox_instr(struct gbc_system **gbc, struct gbc_debugger **debugger) {
+static struct debug_box *dbox_instr(struct gbc_system *gbc, struct gbc_debugger *debugger) {
     
     // Allocate memory for the box
     struct debug_box *box = malloc(sizeof(*box));
@@ -14,7 +14,7 @@ static struct debug_box *dbox_instr(struct gbc_system **gbc, struct gbc_debugger
     box->width = DBOX_INSTR_WIDTH;
 
     // Write to the row array
-    unsigned int pointer = (*gbc)->registers->PC;
+    unsigned int pointer = gbc->registers->PC;
     int i;
     for(i = 0; i < DBOX_INSTR_ROWS; i++) {
 
@@ -54,7 +54,7 @@ static struct debug_box *dbox_instr(struct gbc_system **gbc, struct gbc_debugger
         else {
 
             // Read byte at the pointer and find the instruction
-            struct gbc_instr instr = find_instr(read_byte(&(*gbc)->ram, pointer), gbc);
+            struct gbc_instr instr = find_instr(read_byte(gbc->ram, pointer), gbc);
 
             // Read the operand and format the string
             if(instr.length > 1) {
@@ -62,7 +62,7 @@ static struct debug_box *dbox_instr(struct gbc_system **gbc, struct gbc_debugger
                 // Read the operand based on the length and increment the pointer
                 unsigned short operand = 0;
                 if(instr.length == 2) {
-                    operand = read_byte(&(*gbc)->ram, pointer + 1);
+                    operand = read_byte(gbc->ram, pointer + 1);
 
                     // If the operand is signed, get the two's complement
                     if(instr.signed_operand) {
@@ -71,7 +71,7 @@ static struct debug_box *dbox_instr(struct gbc_system **gbc, struct gbc_debugger
 
                     pointer += 2;
                 } else if(instr.length == 3) {
-                    operand = read_short(&(*gbc)->ram, pointer + 1);
+                    operand = read_short(gbc->ram, pointer + 1);
                     pointer += 3;
                 }
 
@@ -93,7 +93,7 @@ static struct debug_box *dbox_instr(struct gbc_system **gbc, struct gbc_debugger
     return box;
 }
 
-static struct debug_box *dbox_regis(struct gbc_system **gbc, struct gbc_debugger **debugger) {
+static struct debug_box *dbox_regis(struct gbc_system *gbc, struct gbc_debugger *debugger) {
 
     // Allocate memory for the box
     struct debug_box *box = malloc(sizeof(*box));
@@ -106,55 +106,55 @@ static struct debug_box *dbox_regis(struct gbc_system **gbc, struct gbc_debugger
     char *line = malloc(DBOX_REGIS_ROWS);
 
     // TODO: Replace this at some point
-    sprintf(line, "A : %02X", (*gbc)->registers->A);
+    sprintf(line, "A : %02X", gbc->registers->A);
     box->rows[0] = malloc(sizeof(char) * strlen(line));
     strcpy(box->rows[0], line);
 
-    sprintf(line, "B : %02X", (*gbc)->registers->B);
+    sprintf(line, "B : %02X", gbc->registers->B);
     box->rows[1] = malloc(sizeof(char) * strlen(line));
     strcpy(box->rows[1], line);
 
-    sprintf(line, "C : %02X", (*gbc)->registers->C);
+    sprintf(line, "C : %02X", gbc->registers->C);
     box->rows[2] = malloc(sizeof(char) * strlen(line));
     strcpy(box->rows[2], line);
 
-    sprintf(line, "D : %02X", (*gbc)->registers->D);
+    sprintf(line, "D : %02X", gbc->registers->D);
     box->rows[3] = malloc(sizeof(char) * strlen(line));
     strcpy(box->rows[3], line);
 
-    sprintf(line, "E : %02X", (*gbc)->registers->E);
+    sprintf(line, "E : %02X", gbc->registers->E);
     box->rows[4] = malloc(sizeof(char) * strlen(line));
     strcpy(box->rows[4], line);
 
-    sprintf(line, "H : %02X", (*gbc)->registers->H);
+    sprintf(line, "H : %02X", gbc->registers->H);
     box->rows[5] = malloc(sizeof(char) * strlen(line));
     strcpy(box->rows[5], line);
 
-    sprintf(line, "L : %02X", (*gbc)->registers->L);
+    sprintf(line, "L : %02X", gbc->registers->L);
     box->rows[6] = malloc(sizeof(char) * strlen(line));
     strcpy(box->rows[6], line);
 
-    sprintf(line, "AF: %04X", (*gbc)->registers->AF);
+    sprintf(line, "AF: %04X", gbc->registers->AF);
     box->rows[7] = malloc(sizeof(char) * strlen(line));
     strcpy(box->rows[7], line);
 
-    sprintf(line, "BC: %04X", (*gbc)->registers->BC);
+    sprintf(line, "BC: %04X", gbc->registers->BC);
     box->rows[8] = malloc(sizeof(char) * strlen(line));
     strcpy(box->rows[8], line);
 
-    sprintf(line, "DE: %04X", (*gbc)->registers->DE);
+    sprintf(line, "DE: %04X", gbc->registers->DE);
     box->rows[9] = malloc(sizeof(char) * strlen(line));
     strcpy(box->rows[9], line);
 
-    sprintf(line, "HL: %04X", (*gbc)->registers->HL);
+    sprintf(line, "HL: %04X", gbc->registers->HL);
     box->rows[10] = malloc(sizeof(char) * strlen(line));
     strcpy(box->rows[10], line);
 
-    sprintf(line, "PC: %04X", (*gbc)->registers->PC);
+    sprintf(line, "PC: %04X", gbc->registers->PC);
     box->rows[11] = malloc(sizeof(char) * strlen(line));
     strcpy(box->rows[11], line);
 
-    sprintf(line, "SP: %04X", (*gbc)->registers->SP);
+    sprintf(line, "SP: %04X", gbc->registers->SP);
     box->rows[12] = malloc(sizeof(char) * strlen(line));
     strcpy(box->rows[12], line);
 
@@ -164,7 +164,7 @@ static struct debug_box *dbox_regis(struct gbc_system **gbc, struct gbc_debugger
     return box;
 }
 
-static struct debug_box *dbox_flags(struct gbc_system **gbc, struct gbc_debugger **debugger) {
+static struct debug_box *dbox_flags(struct gbc_system *gbc, struct gbc_debugger *debugger) {
 
     // Allocate memory for the box
     struct debug_box *box = malloc(sizeof(*box));
@@ -181,15 +181,15 @@ static struct debug_box *dbox_flags(struct gbc_system **gbc, struct gbc_debugger
     } 
     
     // Create the rows
-    sprintf(box->rows[0], "Z: %d", ((*gbc)->registers->F >> 7) & 1);
-    sprintf(box->rows[1], "N: %d", ((*gbc)->registers->F >> 6) & 1); 
-    sprintf(box->rows[2], "H: %d", ((*gbc)->registers->F >> 5) & 1);
-    sprintf(box->rows[3], "C: %d", ((*gbc)->registers->F >> 4) & 1);
+    sprintf(box->rows[0], "Z: %d", (gbc->registers->F >> 7) & 1);
+    sprintf(box->rows[1], "N: %d", (gbc->registers->F >> 6) & 1); 
+    sprintf(box->rows[2], "H: %d", (gbc->registers->F >> 5) & 1);
+    sprintf(box->rows[3], "C: %d", (gbc->registers->F >> 4) & 1);
         
     return box;
 }
 
-static struct debug_box *dbox_info(struct gbc_system **gbc, struct gbc_debugger **debugger) {
+static struct debug_box *dbox_info(struct gbc_system *gbc, struct gbc_debugger *debugger) {
    
     // Allocate memory for the box
     struct debug_box *box = malloc(sizeof(*box));
@@ -207,9 +207,9 @@ static struct debug_box *dbox_info(struct gbc_system **gbc, struct gbc_debugger 
 
     // Write some information
     strcpy(box->rows[0], "OPCODE:");
-    sprintf(box->rows[1], "-> %02X", read_byte(&(*gbc)->ram, (*gbc)->registers->PC));
+    sprintf(box->rows[1], "-> %02X", read_byte(gbc->ram, gbc->registers->PC));
     strcpy(box->rows[2], "INTERR:");
-    sprintf(box->rows[3], "-> %d", (*gbc)->interrupts_enabled);
+    sprintf(box->rows[3], "-> %d", gbc->interrupts_enabled);
 
     return box;
 }
@@ -220,7 +220,7 @@ static void print_separator(const int width) {
     printf("\n");
 }
 
-static void print_debug(struct gbc_system **gbc, struct gbc_debugger **debugger) {
+static void print_debug(struct gbc_system *gbc, struct gbc_debugger *debugger) {
 
     // Create an array of boxes
     // A box is a formatted debug table in the console window
@@ -271,16 +271,16 @@ static void print_debug(struct gbc_system **gbc, struct gbc_debugger **debugger)
     }
 }
 
-void debug(struct gbc_system **gbc, struct gbc_debugger **debugger) {
+void debug(struct gbc_system *gbc, struct gbc_debugger *debugger) {
 
     // If the emulator is running
-    if((*debugger)->running) {
+    if(debugger->running) {
 
-        struct breakpoint *bp = find_breakpoint((*gbc)->registers->PC, debugger);
+        struct breakpoint *bp = find_breakpoint(gbc->registers->PC, debugger);
 
         // If there is a breakpoint at this instruction
         if(bp) {
-            (*debugger)->running = 0;
+            debugger->running = 0;
             print_debug(gbc, debugger);
             printf(CYEL "Stopped at breakpoint 0x%04X\n" CNRM, bp->address);
             remove_breakpoint(bp->address, debugger);
@@ -290,8 +290,8 @@ void debug(struct gbc_system **gbc, struct gbc_debugger **debugger) {
     }
 
     // If we need to skip some instructions
-    if((*debugger)->skip_instr > 0) {
-        (*debugger)->skip_instr--;
+    if(debugger->skip_instr > 0) {
+        debugger->skip_instr--;
         return;
     }
 
@@ -300,9 +300,9 @@ void debug(struct gbc_system **gbc, struct gbc_debugger **debugger) {
     // Get a command from the user
     while((command = getchar()) != EOF) {
         
-        if((*debugger)->print) {
+        if(debugger->print) {
             print_debug(gbc, debugger);
-            (*debugger)->print = 0;
+            debugger->print = 0;
         }
     
         switch(command) {
@@ -316,8 +316,8 @@ void debug(struct gbc_system **gbc, struct gbc_debugger **debugger) {
             case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
 
                 // Subtract '0' to get the digit
-                (*debugger)->skip_instr = command - '0' - 1;
-                (*debugger)->print = 1;
+                debugger->skip_instr = command - '0' - 1;
+                debugger->print = 1;
                 return;
 
             // Add breakpoint command
@@ -353,7 +353,7 @@ void debug(struct gbc_system **gbc, struct gbc_debugger **debugger) {
             // List breakpoints
             case 'l': {
 
-                struct breakpoint *item = (*debugger)->breakpoint_head;
+                struct breakpoint *item = debugger->breakpoint_head;
                 int i = 1;
                 while(item) {
                     printf("%d: 0x%04X\n", i, item->address);
@@ -365,7 +365,7 @@ void debug(struct gbc_system **gbc, struct gbc_debugger **debugger) {
 
             // Run command
             case 'r':
-                (*debugger)->running = 1;
+                debugger->running = 1;
                 return;
             
             // Print debug information
@@ -381,7 +381,7 @@ void debug(struct gbc_system **gbc, struct gbc_debugger **debugger) {
                 fgets(filename, RAM_DUMP_FILENAME_SIZE, stdin);
                 filename[strlen(filename) - 1] = '\0';
 
-                if(dump_ram(&(*gbc)->ram, filename)) {
+                if(dump_ram(gbc->ram, filename)) {
                     printf(CGRN "RAM dumped successfully to \"%s\"\n" CNRM, filename);    
                 } else {
                     printf(CRED "RAM dump failed!\n" CNRM);
@@ -398,19 +398,19 @@ void debug(struct gbc_system **gbc, struct gbc_debugger **debugger) {
     }
 }
 
-void init_debugger(struct gbc_debugger **debugger) {
+void init_debugger(struct gbc_debugger *debugger) {
     
     // Set the defaults
-    (*debugger)->breakpoint_head = NULL;
-    (*debugger)->breakpoint_count = 0;
-    (*debugger)->skip_instr = 0;
-    (*debugger)->running = 0;
+    debugger->breakpoint_head = NULL;
+    debugger->breakpoint_count = 0;
+    debugger->skip_instr = 0;
+    debugger->running = 0;
 
     // Start the prompt
     printf("(dbg) ");
 }
 
-static char add_breakpoint(const unsigned short address, struct gbc_debugger **debugger) {
+static char add_breakpoint(const unsigned short address, struct gbc_debugger *debugger) {
 
     // Check for duplicate breakpoints
     struct breakpoint *found = find_breakpoint(address, debugger);
@@ -422,45 +422,45 @@ static char add_breakpoint(const unsigned short address, struct gbc_debugger **d
         new->address = address;
 
         // If there are no breakpoints, set it as the head
-        if((*debugger)->breakpoint_count == 0) {
+        if(debugger->breakpoint_count == 0) {
             new->next = NULL;
-            (*debugger)->breakpoint_head = new;
+            debugger->breakpoint_head = new;
         } else {
             // Add the new breakpoint to the front of the linked list
-            new->next = (*debugger)->breakpoint_head;
-            (*debugger)->breakpoint_head = new;
+            new->next = debugger->breakpoint_head;
+            debugger->breakpoint_head = new;
         }
         
-        (*debugger)->breakpoint_count++;
+        debugger->breakpoint_count++;
         return 1;
     }
     
     return 0; 
 }
 
-static char remove_breakpoint(const unsigned short address, struct gbc_debugger **debugger) {
+static char remove_breakpoint(const unsigned short address, struct gbc_debugger *debugger) {
 
     // Remove the item from the linked list
     struct breakpoint *prev = NULL;
     struct breakpoint *curr= NULL;
 
-    if((*debugger)->breakpoint_count > 0) {
+    if(debugger->breakpoint_count > 0) {
        
         // Go through all the breakpoints
-        curr = (*debugger)->breakpoint_head;
+        curr = debugger->breakpoint_head;
         while(curr) {
             
             // If the item matches 
             if(curr->address == address) {
                 
                 // If we are removing the head
-                if(curr == (*debugger)->breakpoint_head) {
+                if(curr == debugger->breakpoint_head) {
 
                     // If there is only one
-                    if((*debugger)->breakpoint_count == 1) {
-                        (*debugger)->breakpoint_head = NULL;
+                    if(debugger->breakpoint_count == 1) {
+                        debugger->breakpoint_head = NULL;
                     } else {
-                        (*debugger)->breakpoint_head = curr->next;
+                        debugger->breakpoint_head = curr->next;
                     }
                 } 
                 // If there is more than one 
@@ -469,7 +469,7 @@ static char remove_breakpoint(const unsigned short address, struct gbc_debugger 
                 }
 
                 free(curr);
-                (*debugger)->breakpoint_count--;
+                debugger->breakpoint_count--;
                 return 1;
             }
             
@@ -482,12 +482,12 @@ static char remove_breakpoint(const unsigned short address, struct gbc_debugger 
     return 0;
 }
 
-static struct breakpoint *find_breakpoint(const unsigned short address, struct gbc_debugger **debugger) {
+static struct breakpoint *find_breakpoint(const unsigned short address, struct gbc_debugger *debugger) {
 
-    if((*debugger)->breakpoint_count > 0) {
+    if(debugger->breakpoint_count > 0) {
 
         // Iterate through the breakpoints and find one with the correct address
-        struct breakpoint *item = (*debugger)->breakpoint_head;
+        struct breakpoint *item = debugger->breakpoint_head;
         while(item) {
             
             if(item->address == address) {
@@ -501,7 +501,7 @@ static struct breakpoint *find_breakpoint(const unsigned short address, struct g
     return NULL; 
 }
 
-static char dump_ram(struct gbc_ram **ram, const char *filename) {
+static char dump_ram(struct gbc_ram *ram, const char *filename) {
    
     // Open the file for writing
     FILE *fp = NULL;

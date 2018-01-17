@@ -7,8 +7,8 @@
 #define HRAM_SIZE 128
 
 struct gbc_ram {
-    unsigned char **rom00; // 16KB ROM Bank
-    unsigned char **romNN; // 16KB Switchable ROM Bank
+    unsigned char *rom00; // 16KB ROM Bank
+    unsigned char *romNN; // 16KB Switchable ROM Bank
     unsigned char *vram; // 8KB Video RAM
     unsigned char *extram; // 8KB External Ram (cartridge)
     unsigned char *wram00; // 4KB Work RAM bank 0
@@ -23,11 +23,11 @@ struct gbc_ram {
     unsigned char rom_bank;
 };
 
-void init_ram(struct gbc_ram **);
-static unsigned char **get_memory_location(struct gbc_ram **, unsigned short *);
+void init_ram(struct gbc_ram *);
+static unsigned char *get_memory_location(struct gbc_ram *, unsigned short *);
 
-unsigned char read_byte(struct gbc_ram **, const unsigned short);
-unsigned short read_short(struct gbc_ram **, const unsigned short);
+unsigned char read_byte(struct gbc_ram *, const unsigned short);
+unsigned short read_short(struct gbc_ram *, const unsigned short);
 
-void write_byte(struct gbc_ram **, const unsigned short, const unsigned char);
-void write_short(struct gbc_ram **, const unsigned short, const unsigned short);
+void write_byte(struct gbc_ram *, const unsigned short, const unsigned char);
+void write_short(struct gbc_ram *, const unsigned short, const unsigned short);

@@ -45,11 +45,11 @@ struct debug_box {
     char **rows;
 };
 
-void init_debugger(struct gbc_debugger **);
-static void print_debug(struct gbc_system **, struct gbc_debugger **);
-void debug(struct gbc_system **, struct gbc_debugger **);
+void init_debugger(struct gbc_debugger *);
+static void print_debug(struct gbc_system *, struct gbc_debugger *);
+void debug(struct gbc_system *, struct gbc_debugger *);
 
-static char add_breakpoint(const unsigned short, struct gbc_debugger **);
-static char remove_breakpoint(const unsigned short, struct gbc_debugger **);
-static struct breakpoint *find_breakpoint(const unsigned short, struct gbc_debugger **);
-static char dump_ram(struct gbc_ram **, const char *);
+static char add_breakpoint(const unsigned short, struct gbc_debugger *);
+static char remove_breakpoint(const unsigned short, struct gbc_debugger *);
+static struct breakpoint *find_breakpoint(const unsigned short, struct gbc_debugger *);
+static char dump_ram(struct gbc_ram *, const char *);

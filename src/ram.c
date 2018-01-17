@@ -2,99 +2,101 @@
 #include "ram.h"
 
 // Allocates memory
-void init_ram(struct gbc_ram **ram) {
+void init_ram(struct gbc_ram *ram) {
 
-    *ram = malloc(sizeof(**ram));
+    ram->rom00 = NULL;
+    ram->romNN = NULL;
+    ram->extram = NULL;
 
-    (*ram)->vram = calloc(VRAM_SIZE, sizeof(char));
-    (*ram)->wram00 = calloc(WRAM_BANK_SIZE, sizeof(char));
+    ram->vram = calloc(VRAM_SIZE, sizeof(char));
+    ram->wram00 = calloc(WRAM_BANK_SIZE, sizeof(char));
 
     // Allocate the switchable ram bank directly as we are not emulating a SGB
-    (*ram)->wramNN = calloc(WRAM_BANK_SIZE, sizeof(char));
+    ram->wramNN = calloc(WRAM_BANK_SIZE, sizeof(char));
 
-    (*ram)->oam = calloc(OAM_SIZE, sizeof(char));
-    (*ram)->io = calloc(IO_SIZE, sizeof(char));
-    (*ram)->hram = calloc(HRAM_SIZE, sizeof(char));
-    (*ram)->ier = calloc(1, sizeof(char));
+    ram->oam = calloc(OAM_SIZE, sizeof(char));
+    ram->io = calloc(IO_SIZE, sizeof(char));
+    ram->hram = calloc(HRAM_SIZE, sizeof(char));
+    ram->ier = calloc(1, sizeof(char));
 
-    (*ram)->wram_bank = 1;
-    (*ram)->rom_bank = 1;
+    ram->wram_bank = 1;
+    ram->rom_bank = 1;
 }
 
 // Returns a pointer to the memory location of the specified address
 // and changes the input address to the relative location inside this section.
-static unsigned char **get_memory_location(struct gbc_ram **ram, unsigned short *address) {
+static unsigned char *get_memory_location(struct gbc_ram *ram, unsigned short *address) {
 
     // 16KB ROM Bank 00 
     if(*address >= 0x0 && *address <= 0x3FFF) {
-        return (*ram)->rom00;
+        return ram->rom00;
     } 
     // 16KB ROM Bank NN
     else if(*address >= 0x4000 && *address <= 0x7FFF) {
         *address -= 0x4000;
-        return (*ram)->romNN;
+        return ram->romNN;
     } 
     // 8KB Video RAM
     else if(*address >= 0x8000 && *address <= 0x9FFF) {
         *address -= 0x8000;
-        return &(*ram)->vram;
+        return ram->vram;
     } 
     // 8KB External RAM (in cartridge)
     else if(*address >= 0xA000 && *address <= 0xBFFF) {
         *address -= 0xC000;
-        return &(*ram)->extram;
+        return ram->extram;
     }
     // 4KB Work RAM Bank 00
     else if(*address >= 0xC000 && *address <= 0xCFFF) {
         *address -= 0xC000;
-        return &(*ram)->wram00;
+        return ram->wram00;
     } 
     // 4KB Work RAM Bank NN
     else if(*address >= 0xD000 && *address <= 0xDFFF) {
         *address -= 0xD000;
-        return &(*ram)->wramNN;
+        return ram->wramNN;
     } 
     // Mirror of Work RAM
     else if(*address >= 0xE000 && *address <= 0xFDFF) {
         *address -= 0x2000;
-        return &(*ram)->wram00;
+        return ram->wram00;
     }
     // Sprite Attibute Table
     else if(*address >= 0xFE00 && *address <= 0xFE9F) {
         *address -= 0xFE00;
-        return &(*ram)->oam;
+        return ram->oam;
     }
     // IO Registers
     else if(*address >= 0xFF00 && *address <= 0xFF7F) {
         *address -= 0xFF00;
-        return &(*ram)->io;
+        return ram->io;
     }
     // High RAM
     else if(*address >= 0xFF80 && *address <= 0xFFFE) {
         *address -= 0xFF80;
-        return &(*ram)->hram;
+        return ram->hram;
     } 
     // Interrupt Enable Register
     else if(*address == 0xFFFF) {
         *address = 0;
-        return &(*ram)->ier;
+        return ram->ier;
     }
 }
 
 // Reads a byte from the specified location in memory
-unsigned char read_byte(struct gbc_ram **ram, const unsigned short address) {
+unsigned char read_byte(struct gbc_ram *ram, const unsigned short address) {
 
     // Get the memory location and the relative address inside this memory
     unsigned short rel_address = address;
-    unsigned char **mem = get_memory_location(ram, &rel_address);
+    unsigned char *mem = get_memory_location(ram, &rel_address);
 
     // Return the byte from memory
-    return (*mem)[rel_address];
+    return mem[rel_address];
 }
 
 // Reads a short (2 bytes) from the specified location in memory
 // Returns the LS byte first
-unsigned short read_short(struct gbc_ram **ram, const unsigned short address) {
+unsigned short read_short(struct gbc_ram *ram, const unsigned short address) {
 
     // Get the two consecutive bytes
     unsigned char byte_a = read_byte(ram, address);
@@ -105,19 +107,19 @@ unsigned short read_short(struct gbc_ram **ram, const unsigned short address) {
 }
 
 // Writes a byte in memory at the address
-void write_byte(struct gbc_ram **ram, const unsigned short address, const unsigned char value) {
+void write_byte(struct gbc_ram *ram, const unsigned short address, const unsigned char value) {
     
     // Get the memory location with the relative address
     unsigned short rel_address = address;
 
-    unsigned char **mem = get_memory_location(ram, &rel_address);
+    unsigned char *mem = get_memory_location(ram, &rel_address);
 
     // Write the byte in memory
-    (*mem)[rel_address] = value;
+    mem[rel_address] = value;
 }
 
 // Writes two bytes in memory starting at the address
-void write_short(struct gbc_ram **ram, const unsigned short address, const unsigned short value) {
+void write_short(struct gbc_ram *ram, const unsigned short address, const unsigned short value) {
 
     // Split the short into two bytes
     unsigned char byte_a = (value & 0x00FF);

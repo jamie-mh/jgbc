@@ -11,6 +11,7 @@ int main(int argc, char **argv) {
 
     // Allocate memory for the gbc
     struct gbc_system *gbc = malloc(sizeof(*gbc));
+    gbc->ram = malloc(sizeof(struct gbc_ram));
     struct gbc_rom *rom = malloc(sizeof(*rom));
     struct gbc_display *display = malloc(sizeof(*display));
     struct gbc_debugger *debugger = NULL;
@@ -19,13 +20,13 @@ int main(int argc, char **argv) {
     struct cmd_options *cmd = calloc(1, sizeof(*cmd));
     cmd->rom_path = malloc(sizeof(char) * ROM_PATH_LENGTH);
 
-    if(!get_cl_arguments(argc, argv, &cmd)) {
+    if(!get_cl_arguments(argc, argv, cmd)) {
         exit(0);
     }
 
     // Initialize the system
-    init_cpu(&gbc);
-    init_ram(&gbc->ram);
+    init_cpu(gbc);
+    init_ram(gbc->ram);
     //init_display(&display);
 
     // TODO: Remove temporary 
@@ -33,37 +34,34 @@ int main(int argc, char **argv) {
     gbc->interrupts_enabled = 1;
 
     // Load the rom into memory
-    if(!load_rom(&gbc->ram, &rom, cmd->rom_path)) {
+    if(!load_rom(gbc->ram, rom, cmd->rom_path)) {
         printf("ERROR: Could not load rom file!\n\n");
         exit(0);
     }
 
-    // Print the rom information
-    printf("Title: %s\n", rom->title);
-    printf("CGB Features: %d\n", rom->is_cgb);
-    printf("Type: %02X\n", rom->cartridge_type);
+    print_rom_info(rom); 
     
     // Show a message and initialise the debugger 
     if(cmd->debug) {
         printf("\nLXGBC "CRED"DEBUGGER RUNNING"CNRM"\nType 'h' for information on the available commands.\n");
         debugger = malloc(sizeof(*debugger));
-        init_debugger(&debugger);
+        init_debugger(debugger);
     }
 
     // Main endless loop 
     while(gbc->is_running) {
 
         // Execute the instruction at the program counter 
-        execute_instr(&gbc);
+        execute_instr(gbc);
 
         // Run the debugger if specified
-        if(cmd->debug) debug(&gbc, &debugger);
+        if(cmd->debug) debug(gbc, debugger);
     }
 
     return 0;
 }
 
-static char get_cl_arguments(int argc, char **argv, struct cmd_options **cmd) {
+static char get_cl_arguments(int argc, char **argv, struct cmd_options *cmd) {
 
     int option;
     int f_flag = 0;
@@ -71,12 +69,12 @@ static char get_cl_arguments(int argc, char **argv, struct cmd_options **cmd) {
     while((option = getopt(argc, argv, "f:d")) != -1) {
         switch (option) {
             case 'f':
-                (*cmd)->rom_path = optarg;
+                cmd->rom_path = optarg;
                 f_flag = 1;
                 break;
             
             case 'd':
-                (*cmd)->debug = 1;
+                cmd->debug = 1;
                 break;
 
             default: 

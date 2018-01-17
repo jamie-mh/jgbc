@@ -62,9 +62,9 @@ struct gbc_instr {
     void *execute;
 };
 
-void init_cpu(struct gbc_system **);
-struct gbc_instr find_instr(const unsigned char, struct gbc_system **);
-void execute_instr(struct gbc_system **);
+void init_cpu(struct gbc_system *);
+struct gbc_instr find_instr(const unsigned char, struct gbc_system *);
+void execute_instr(struct gbc_system *);
 
 static void set_flag(const char, const unsigned char, unsigned char *);
 static char get_flag(const char, const unsigned char);

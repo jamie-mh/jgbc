@@ -2,12 +2,12 @@
 #include "ram.h"
 #include "rom.h"
 
-char load_rom(struct gbc_ram **ram, struct gbc_rom **rom, const char *path) {
+char load_rom(struct gbc_ram *ram, struct gbc_rom *rom, const char *path) {
 
     // Read the file at the specified path
     FILE *file;
     file = fopen(path, "r");
-    (*rom)->rom_banks = NULL;
+    rom->rom_banks = NULL;
 
     int byte;
     int index = 0;
@@ -24,11 +24,12 @@ char load_rom(struct gbc_ram **ram, struct gbc_rom **rom, const char *path) {
                 bank++;
                 index = 0;
 
-                (*rom)->rom_banks = realloc((*rom)->rom_banks, (bank + 1) * sizeof(char *));
-                (*rom)->rom_banks[bank] = calloc(ROM_BANK_SIZE, sizeof(char));
+                rom->rom_banks = realloc(rom->rom_banks, (bank + 1) * sizeof(char *));
+                rom->rom_banks[bank] = calloc(ROM_BANK_SIZE, sizeof(char));
             }
+
             // Add the byte to memory
-            (*rom)->rom_banks[bank][index] = (unsigned char) byte;
+            rom->rom_banks[bank][index] = (unsigned char) byte;
 
             index++;
         }
@@ -42,19 +43,19 @@ char load_rom(struct gbc_ram **ram, struct gbc_rom **rom, const char *path) {
     // Point the cartridge ram locations to the first rom banks
     // With ROM0 being fixed at the first rom bank
     // And romNN starting with the second one, if it exists
-    (*ram)->rom00 = &(*rom)->rom_banks[0];
+    ram->rom00 = rom->rom_banks[0];
 
     if(bank >= 1) {
-        (*ram)->romNN = &(*rom)->rom_banks[1];
+        ram->romNN = rom->rom_banks[1];
     }
-    
+   
     // Parse the rom information
     get_rom_info(ram, rom);
 
     return 1;
 }
 
-static void get_rom_info(struct gbc_ram **ram, struct gbc_rom **rom) {
+static void get_rom_info(struct gbc_ram *ram, struct gbc_rom *rom) {
 
     // Read the title from the header    
     // The title is 16 characters maximum, uppercase ASCII
@@ -66,14 +67,22 @@ static void get_rom_info(struct gbc_ram **ram, struct gbc_rom **rom) {
     }
 
     title[strlen(title)] = '\0';
-    (*rom)->title = malloc(sizeof(char) * strlen(title) + 1);
-    strcpy((*rom)->title, title);
+    rom->title = malloc(sizeof(char) * strlen(title) + 1);
+    strcpy(rom->title, title);
     free(title);
 
     // Check if the rom has GB color features
     unsigned char cgb_byte = read_byte(ram, 0x143);
-    (*rom)->is_cgb = (cgb_byte == 0x80) ? 1 : 0;
+    rom->is_cgb = (cgb_byte == 0x80) ? 1 : 0;
     
     // Read the cartridge type
-    (*rom)->cartridge_type = read_byte(ram, 0x147);
+    rom->cartridge_type = read_byte(ram, 0x147);
+}
+
+void print_rom_info(struct gbc_rom *rom) {
+    
+    // Print the rom information
+    printf("Title: %s\n", rom->title);
+    printf("CGB Features: %d\n", rom->is_cgb);
+    printf("Type: %02X\n", rom->cartridge_type);
 }

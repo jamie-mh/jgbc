@@ -30,4 +30,4 @@ struct cmd_options {
     char debug;
 };
 
-static char get_cl_arguments(int, char **, struct cmd_options **); 
+static char get_cl_arguments(int, char **, struct cmd_options *); 
