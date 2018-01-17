@@ -27,7 +27,7 @@ char load_rom(struct gbc_ram *ram, struct gbc_rom *rom, const char *path) {
     }
 
     // Read the header and see how many ROM banks are required
-    get_rom_info(header, rom); 
+    get_rom_info(header, rom);
     free(header);
 
     // Allocate memory for all the rom banks
@@ -103,8 +103,10 @@ void print_rom_info(struct gbc_rom *rom) {
     
     // Print the rom information
     printf(CYEL "Title: " CNRM "%s\n", rom->title);
-    printf(CYEL "CGB Flag: " CNRM "%d\n", rom->cgb_flag);
+    printf(CYEL "CGB Flag: " CNRM "%02X\n", rom->cgb_flag);
     printf(CYEL "Cartridge Type: " CNRM "%02X\n", rom->cart_type);
     printf(CYEL "ROM Size: " CNRM "%d x %d KB\n", rom->rom_size, ROM_BANK_SIZE);
     printf(CYEL "RAM Size: " CNRM "%d x %d KB\n", rom->ram_size, EXTRAM_BANK_SIZE);
+    printf(CYEL "Destination Code: " CNRM "%02X\n", rom->dest_code);
+    printf(CYEL "Version Number: " CNRM "%02X\n", rom->ver_no);
 }
