@@ -2,6 +2,7 @@
 #include "cpu.h"
 #include "ram.h"
 
+// Initialises the CPU registers
 void init_cpu(struct gbc_system *gbc) {
 
     // Initialize the registers
@@ -1283,7 +1284,7 @@ static void op_ld_a_cp(struct gbc_system *gbc, unsigned char operand) {
 
 // 0xF3: DI (- - - -)
 static void op_di(struct gbc_system *gbc) {
-    gbc->interrupts_enabled = 0; 
+    printf("Unimplemented Instruction: DI\n");
 }
 
 // 0xF5: PUSH AF (- - - -)
@@ -1318,7 +1319,7 @@ static void op_ld_a_a16p(struct gbc_system *gbc, unsigned short operand) {
 
 // 0xFB: EI (- - - -)
 static void op_ei(struct gbc_system *gbc) {
-    gbc->interrupts_enabled = 1;
+    printf("Unimplemented Instruction: EI\n");
 }
 
 // 0xFE: CP d8 (Z 1 H C)
@@ -3129,6 +3130,7 @@ struct gbc_instr cb_instructions[CB_INSTRUCTION_COUNT] = {
     {"SET 7, A", 2, 8, 1, 0, op_set_7_a} // 0xCBFF
 };
 
+// Returns an instruction struct of the provided opcode
 struct gbc_instr find_instr(const unsigned char opcode, struct gbc_system *gbc) {
     // If the opcode has the CB prefix
     if(opcode == 0xCB) {
@@ -3141,6 +3143,7 @@ struct gbc_instr find_instr(const unsigned char opcode, struct gbc_system *gbc) 
     }
 }
 
+// Reads an opcode at the program counter and calls the function associated with it
 void execute_instr(struct gbc_system *gbc) {
 
     // Get the opcode at the program counter
@@ -3180,6 +3183,7 @@ void execute_instr(struct gbc_system *gbc) {
     }
 }
 
+// Returns the bit no of the specified flag in the F register
 static char get_flag_offset(const char flag) {
     
     // Find the offset of the bit
@@ -3192,6 +3196,7 @@ static char get_flag_offset(const char flag) {
     }
 }
 
+// Sets a flag in the F register
 static void set_flag(const char flag, const unsigned char value, unsigned char *regis) {
 
     char offset = get_flag_offset(flag);
@@ -3204,6 +3209,7 @@ static void set_flag(const char flag, const unsigned char value, unsigned char *
     }
 }
 
+// Returns the value of a flag in the F register
 static char get_flag(const char flag, const unsigned char regis) {
 
     char offset = get_flag_offset(flag);

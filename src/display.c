@@ -1,6 +1,7 @@
 #include "lxgbc.h"
 #include "display.h"
 
+// Opens a SDL window, WIP
 void init_display(struct gbc_display *display) {
 
     // Init video subsystem

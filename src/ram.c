@@ -9,18 +9,21 @@ void init_ram(struct gbc_ram *ram) {
     ram->extram = NULL;
 
     ram->vram = calloc(VRAM_SIZE, sizeof(char));
-    ram->wram00 = calloc(WRAM_BANK_SIZE, sizeof(char));
+    ram->wram_banks = malloc(sizeof(char *) * WRAM_BANK_COUNT); 
 
-    // Allocate the switchable ram bank directly as we are not emulating a SGB
-    ram->wramNN = calloc(WRAM_BANK_SIZE, sizeof(char));
+    // Allocate memory for all the WRAM banks
+    for(int i = 0; i < WRAM_BANK_COUNT; i++) {
+        ram->wram_banks[i] = calloc(WRAM_BANK_SIZE, sizeof(char));
+    }
 
+    // Point the WRAM to the default banks
+    ram->wram00 = ram->wram_banks[0];
+    ram->wramNN = ram->wram_banks[1];
+    
     ram->oam = calloc(OAM_SIZE, sizeof(char));
     ram->io = calloc(IO_SIZE, sizeof(char));
     ram->hram = calloc(HRAM_SIZE, sizeof(char));
     ram->ier = calloc(1, sizeof(char));
-
-    ram->wram_bank = 1;
-    ram->rom_bank = 1;
 }
 
 // Returns a pointer to the memory location of the specified address
@@ -113,6 +116,8 @@ void write_byte(struct gbc_ram *ram, const unsigned short address, const unsigne
     unsigned short rel_address = address;
 
     unsigned char *mem = get_memory_location(ram, &rel_address);
+
+    // TODO: Implement bank switching
 
     // Write the byte in memory
     mem[rel_address] = value;

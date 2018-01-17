@@ -1,13 +1,14 @@
 #include "lxgbc.h"
 #include "cpu.h"
 #include "ram.h"
+#include "mbc.h"
 #include "rom.h"
 #include "debugger.h"
 #include "display.h"
 
 int main(int argc, char **argv) {
 
-    printf(LOGO);
+    printf(CGRN LOGO CNRM);
 
     // Allocate memory for the gbc
     struct gbc_system *gbc = malloc(sizeof(*gbc));
@@ -29,9 +30,7 @@ int main(int argc, char **argv) {
     init_ram(gbc->ram);
     //init_display(&display);
 
-    // TODO: Remove temporary 
     gbc->is_running = 1;
-    gbc->interrupts_enabled = 1;
 
     // Load the rom into memory
     if(!load_rom(gbc->ram, rom, cmd->rom_path)) {
@@ -39,7 +38,7 @@ int main(int argc, char **argv) {
         exit(0);
     }
 
-    print_rom_info(rom); 
+    print_rom_info(rom);
     
     // Show a message and initialise the debugger 
     if(cmd->debug) {
@@ -61,6 +60,7 @@ int main(int argc, char **argv) {
     return 0;
 }
 
+// Populates the cmd_options struct with the selected options from the command line
 static char get_cl_arguments(int argc, char **argv, struct cmd_options *cmd) {
 
     int option;

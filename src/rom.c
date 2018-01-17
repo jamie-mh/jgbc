@@ -2,60 +2,72 @@
 #include "ram.h"
 #include "rom.h"
 
+// Load a ROM file into the RAM memory location
 char load_rom(struct gbc_ram *ram, struct gbc_rom *rom, const char *path) {
 
-    // Read the file at the specified path
+    // Open the file at the specified path
     FILE *file;
     file = fopen(path, "r");
-    rom->rom_banks = NULL;
+    if(!file) return 0;
 
-    int byte;
-    int index = 0;
-    char bank = -1;
+    // Allocate copy just the header to temporary memory
+    unsigned char *header = malloc(sizeof(char) * (ROM_HEADER_END - ROM_HEADER_START)); 
+    fseek(file, ROM_HEADER_START, SEEK_SET);
+    int character;
 
-    if(file) {
+    for(int i = ROM_HEADER_START; i < ROM_HEADER_END; i++) {
 
-        // Read the file to the end
-        while ((byte = fgetc(file)) != EOF) {
-
-            // Switch banks and allocate sufficent memory
-            // Usually cartidges hold 32KB, so there will be two banks of 16KB
-            if(index == ROM_BANK_SIZE || index == 0) {
-                bank++;
-                index = 0;
-
-                rom->rom_banks = realloc(rom->rom_banks, (bank + 1) * sizeof(char *));
-                rom->rom_banks[bank] = calloc(ROM_BANK_SIZE, sizeof(char));
-            }
-
-            // Add the byte to memory
-            rom->rom_banks[bank][index] = (unsigned char) byte;
-
-            index++;
+        // If we cannot read this location, then the file is invalid
+        if((character = fgetc(file)) == EOF) {
+            return 0;
         }
-
-        fclose(file);
-    } else {
-        // Return false if the rom file could not be read
-        return 0;
+        
+        // Add the byte to the header memory
+        header[i - ROM_HEADER_START] = (unsigned char) character;
     }
 
+    // Read the header and see how many ROM banks are required
+    get_rom_info(header, rom); 
+    free(header);
+
+    // Allocate memory for all the rom banks
+    rom->rom_banks = malloc(sizeof(char *) * rom->rom_size); 
+    for(int i = 0; i < rom->rom_size; i++) {
+        rom->rom_banks[i] = calloc(ROM_BANK_SIZE, sizeof(char)); 
+    }
+    
+    // Allocate memory for all the ext ram banks
+    rom->ram_banks = malloc(sizeof(char *) * rom->ram_size);
+    for(int i = 0; i < rom->ram_size; i++) {
+        rom->ram_banks[i] = calloc(EXTRAM_BANK_SIZE, sizeof(char));
+    }
+    
     // Point the cartridge ram locations to the first rom banks
     // With ROM0 being fixed at the first rom bank
-    // And romNN starting with the second one, if it exists
+    // And romNN starting with the second one
     ram->rom00 = rom->rom_banks[0];
+    ram->romNN = rom->rom_banks[1];
 
-    if(bank >= 1) {
-        ram->romNN = rom->rom_banks[1];
+    // Return to the start of the file
+    fseek(file, 0, SEEK_SET);
+    unsigned short address = 0;
+
+    // Copy the full ROM file to memory
+    while((character = fgetc(file)) != EOF) {
+        
+        // TODO: Implement bank switching based on MBC type
+        
+        // Write the character to ram
+        write_byte(ram, address, (unsigned char) character);
+        address++; 
     }
-   
-    // Parse the rom information
-    get_rom_info(ram, rom);
+    fclose(file);
 
     return 1;
 }
 
-static void get_rom_info(struct gbc_ram *ram, struct gbc_rom *rom) {
+// Parse the ROM header and get its information
+static void get_rom_info(unsigned char *header, struct gbc_rom *rom) {
 
     // Read the title from the header    
     // The title is 16 characters maximum, uppercase ASCII
@@ -63,7 +75,7 @@ static void get_rom_info(struct gbc_ram *ram, struct gbc_rom *rom) {
     int i;
 
     for(i = 0; i < 16; i++) {
-        title[i] = read_byte(ram, 0x134 + i);
+        title[i] = header[0x134 - ROM_HEADER_START + i];
     }
 
     title[strlen(title)] = '\0';
@@ -71,18 +83,28 @@ static void get_rom_info(struct gbc_ram *ram, struct gbc_rom *rom) {
     strcpy(rom->title, title);
     free(title);
 
-    // Check if the rom has GB color features
-    unsigned char cgb_byte = read_byte(ram, 0x143);
-    rom->is_cgb = (cgb_byte == 0x80) ? 1 : 0;
+    // Get the rest of the cartridge information 
+    rom->cgb_flag = header[0x143 - ROM_HEADER_START]; 
+    rom->cart_type = header[0x147 - ROM_HEADER_START];
+    rom->rom_size = (2*ROM_BANK_SIZE << header[0x148 - ROM_HEADER_START]) / ROM_BANK_SIZE;
     
-    // Read the cartridge type
-    rom->cartridge_type = read_byte(ram, 0x147);
+    switch(header[0x149 - ROM_HEADER_START]) {
+        case 0x0: rom->ram_size = 0; break;
+        case 0x1: case 0x2: rom->ram_size = 1; break;
+        case 0x3: rom->ram_size = 4; break;
+    }
+    
+    rom->dest_code = header[0x14A - ROM_HEADER_START];
+    rom->ver_no = header[0x14C - ROM_HEADER_START];
 }
 
+// Display the ROM information in the console
 void print_rom_info(struct gbc_rom *rom) {
     
     // Print the rom information
-    printf("Title: %s\n", rom->title);
-    printf("CGB Features: %d\n", rom->is_cgb);
-    printf("Type: %02X\n", rom->cartridge_type);
+    printf(CYEL "Title: " CNRM "%s\n", rom->title);
+    printf(CYEL "CGB Flag: " CNRM "%d\n", rom->cgb_flag);
+    printf(CYEL "Cartridge Type: " CNRM "%02X\n", rom->cart_type);
+    printf(CYEL "ROM Size: " CNRM "%d x %d KB\n", rom->rom_size, ROM_BANK_SIZE);
+    printf(CYEL "RAM Size: " CNRM "%d x %d KB\n", rom->ram_size, EXTRAM_BANK_SIZE);
 }

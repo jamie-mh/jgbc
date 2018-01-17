@@ -51,6 +51,7 @@ struct gbc_registers {
 
     unsigned short PC; // Program Counter
     unsigned short SP; // Stack Pointer
+    unsigned char IME; // Interrupt Master Enable
 };
 
 struct gbc_instr {

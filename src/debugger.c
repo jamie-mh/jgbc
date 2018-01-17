@@ -3,6 +3,7 @@
 #include "cpu.h"
 #include "ram.h"
 
+// Shows the current instruction and the instructions that follow it
 static struct debug_box *dbox_instr(struct gbc_system *gbc, struct gbc_debugger *debugger) {
     
     // Allocate memory for the box
@@ -93,6 +94,7 @@ static struct debug_box *dbox_instr(struct gbc_system *gbc, struct gbc_debugger 
     return box;
 }
 
+// Shows the content of the CPU registers
 static struct debug_box *dbox_regis(struct gbc_system *gbc, struct gbc_debugger *debugger) {
 
     // Allocate memory for the box
@@ -164,6 +166,7 @@ static struct debug_box *dbox_regis(struct gbc_system *gbc, struct gbc_debugger 
     return box;
 }
 
+// Parses the F register and prints the values of each flag
 static struct debug_box *dbox_flags(struct gbc_system *gbc, struct gbc_debugger *debugger) {
 
     // Allocate memory for the box
@@ -189,6 +192,7 @@ static struct debug_box *dbox_flags(struct gbc_system *gbc, struct gbc_debugger 
     return box;
 }
 
+// Shows varied info
 static struct debug_box *dbox_info(struct gbc_system *gbc, struct gbc_debugger *debugger) {
    
     // Allocate memory for the box
@@ -209,17 +213,20 @@ static struct debug_box *dbox_info(struct gbc_system *gbc, struct gbc_debugger *
     strcpy(box->rows[0], "OPCODE:");
     sprintf(box->rows[1], "-> %02X", read_byte(gbc->ram, gbc->registers->PC));
     strcpy(box->rows[2], "INTERR:");
-    sprintf(box->rows[3], "-> %d", gbc->interrupts_enabled);
+    //sprintf(box->rows[3], "-> %d", gbc->interrupts_enabled);
+    sprintf(box->rows[3], "-> UNKN");
 
     return box;
 }
 
+// Prints a line of hyphens
 static void print_separator(const int width) {
     int i = 0; 
     for(; i < width; printf("-"), i++);
     printf("\n");
 }
 
+// Prints all the selected dboxes to the screen
 static void print_debug(struct gbc_system *gbc, struct gbc_debugger *debugger) {
 
     // Create an array of boxes
@@ -271,6 +278,7 @@ static void print_debug(struct gbc_system *gbc, struct gbc_debugger *debugger) {
     }
 }
 
+// Handles debug commands and prints to the screen
 void debug(struct gbc_system *gbc, struct gbc_debugger *debugger) {
 
     // If the emulator is running
@@ -398,6 +406,7 @@ void debug(struct gbc_system *gbc, struct gbc_debugger *debugger) {
     }
 }
 
+// Prepares the debugger struct
 void init_debugger(struct gbc_debugger *debugger) {
     
     // Set the defaults
@@ -410,6 +419,7 @@ void init_debugger(struct gbc_debugger *debugger) {
     printf("(dbg) ");
 }
 
+// Adds a breakpoint element to the breakpoint linked list
 static char add_breakpoint(const unsigned short address, struct gbc_debugger *debugger) {
 
     // Check for duplicate breakpoints
@@ -438,6 +448,7 @@ static char add_breakpoint(const unsigned short address, struct gbc_debugger *de
     return 0; 
 }
 
+// Removes a breakpoint element from the breakpoint linked list
 static char remove_breakpoint(const unsigned short address, struct gbc_debugger *debugger) {
 
     // Remove the item from the linked list
@@ -482,6 +493,7 @@ static char remove_breakpoint(const unsigned short address, struct gbc_debugger 
     return 0;
 }
 
+// Returns a pointer to the breakpoint element with the specifed address in the breakpoint linked list provided it exists
 static struct breakpoint *find_breakpoint(const unsigned short address, struct gbc_debugger *debugger) {
 
     if(debugger->breakpoint_count > 0) {
@@ -501,6 +513,7 @@ static struct breakpoint *find_breakpoint(const unsigned short address, struct g
     return NULL; 
 }
 
+// Dumps the contents of the RAM into a binary file
 static char dump_ram(struct gbc_ram *ram, const char *filename) {
    
     // Open the file for writing
