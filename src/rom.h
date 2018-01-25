@@ -3,7 +3,7 @@
 #define ROM_HEADER_START 0x100
 #define ROM_HEADER_END 0x14F
 
-struct gbc_rom {
+typedef struct gbc_rom {
     char *title; // Uppercase ASCII Game Name
     char cgb_flag; // Color Support Flag
     unsigned char cart_type; // Cartridge Type Code
@@ -14,8 +14,8 @@ struct gbc_rom {
 
     unsigned char **rom_banks;
     unsigned char **ram_banks;
-};
+} gbc_rom;
 
-char load_rom(struct gbc_ram *, struct gbc_rom *, const char *);
-static void get_rom_info(unsigned char *, struct gbc_rom *);
-void print_rom_info(struct gbc_rom *);
+char load_rom(gbc_ram *, gbc_rom *, const char *);
+static void get_rom_info(unsigned char *, gbc_rom *);
+void print_rom_info(gbc_rom *);

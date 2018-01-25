@@ -13,7 +13,7 @@
 #define FLAG_HALFCARRY 'H'
 #define FLAG_CARRY 'C'
 
-struct gbc_registers {
+typedef struct gbc_registers {
 
     // Combined register idea thanks to
     // https://cturt.github.io/cinoop.html
@@ -52,20 +52,20 @@ struct gbc_registers {
     unsigned short PC; // Program Counter
     unsigned short SP; // Stack Pointer
     unsigned char IME; // Interrupt Master Enable
-};
+} gbc_registers;
 
-struct gbc_instr {
+typedef struct gbc_instr {
     char *disassembly;
     char length;
     char cycles;
     char increment_PC;
     char signed_operand;
     void *execute;
-};
+} gbc_instr;
 
-void init_cpu(struct gbc_system *);
-struct gbc_instr find_instr(const unsigned char, struct gbc_system *);
-void execute_instr(struct gbc_system *);
+void init_cpu(gbc_system *);
+gbc_instr find_instr(const unsigned char, gbc_system *);
+void execute_instr(gbc_system *);
 
 static void set_flag(const char, const unsigned char, unsigned char *);
 static char get_flag(const char, const unsigned char);

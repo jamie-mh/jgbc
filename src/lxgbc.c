@@ -4,21 +4,22 @@
 #include "mbc.h"
 #include "rom.h"
 #include "debugger.h"
-#include "display.h"
+#include "gpu.h"
+#include "sound.h"
 
 int main(int argc, char **argv) {
 
     printf(CGRN LOGO CNRM);
 
     // Allocate memory for the gbc
-    struct gbc_system *gbc = malloc(sizeof(*gbc));
-    gbc->ram = malloc(sizeof(struct gbc_ram));
-    struct gbc_rom *rom = malloc(sizeof(*rom));
-    struct gbc_display *display = malloc(sizeof(*display));
-    struct gbc_debugger *debugger = NULL;
+    gbc_system *gbc = malloc(sizeof(gbc_system));
+    gbc->ram = malloc(sizeof(gbc_ram));
+    gbc_rom *rom = malloc(sizeof(gbc_rom));
+    gbc_gpu *gpu = malloc(sizeof(gbc_gpu));
+    gbc_debugger *debugger = malloc(sizeof(gbc_debugger));
 
     // Get the command line arguments
-    struct cmd_options *cmd = calloc(1, sizeof(*cmd));
+    cmd_options *cmd = malloc(sizeof(cmd_options));
     cmd->rom_path = malloc(sizeof(char) * ROM_PATH_LENGTH);
 
     if(!get_cl_arguments(argc, argv, cmd)) {
@@ -28,7 +29,7 @@ int main(int argc, char **argv) {
     // Initialize the system
     init_cpu(gbc);
     init_ram(gbc->ram);
-    //init_display(&display);
+    //init_gpu(gpu, cmd->scale);
 
     gbc->is_running = 1;
 
@@ -42,8 +43,7 @@ int main(int argc, char **argv) {
     
     // Show a message and initialise the debugger 
     if(cmd->debug) {
-        printf("\nLXGBC "CRED"DEBUGGER RUNNING"CNRM"\nType 'h' for information on the available commands.\n");
-        debugger = malloc(sizeof(*debugger));
+        printf("\nLXGBC DEBUGGER RUNNING\nType 'h' for information on the available commands.\n");
         init_debugger(debugger);
     }
 
@@ -61,24 +61,29 @@ int main(int argc, char **argv) {
 }
 
 // Populates the cmd_options struct with the selected options from the command line
-static char get_cl_arguments(int argc, char **argv, struct cmd_options *cmd) {
+static char get_cl_arguments(int argc, char **argv, cmd_options *cmd) {
 
     int option;
-    int f_flag = 0;
+    int f_flag, s_flag = 0;
 
-    while((option = getopt(argc, argv, "f:d")) != -1) {
+    while((option = getopt(argc, argv, "f:gs:")) != -1) {
         switch (option) {
             case 'f':
                 cmd->rom_path = optarg;
                 f_flag = 1;
                 break;
             
-            case 'd':
+            case 'g':
                 cmd->debug = 1;
                 break;
 
+            case 's':
+                cmd->scale = atoi(optarg);
+                s_flag = 1;
+                break;
+
             default: 
-                printf("Usage: -f rom [-d debug mode]\n"); 
+                printf("Usage: -f rom [-g debug mode] [-s screen scale]\n"); 
                 return 0;
         }
     }
@@ -86,6 +91,10 @@ static char get_cl_arguments(int argc, char **argv, struct cmd_options *cmd) {
     if(!f_flag) {
         printf("%s: missing -f option\n", argv[0]);
         return 0;
+    }
+
+    if(!s_flag) {
+        cmd->scale = 1;
     }
 
     return 1;

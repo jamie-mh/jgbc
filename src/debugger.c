@@ -1,13 +1,13 @@
 #include "lxgbc.h"
+#include "ram.h"
 #include "debugger.h"
 #include "cpu.h"
-#include "ram.h"
 
 // Shows the current instruction and the instructions that follow it
-static struct debug_box *dbox_instr(struct gbc_system *gbc, struct gbc_debugger *debugger) {
+static debug_box *dbox_instr(gbc_system *gbc, gbc_debugger *debugger) {
     
     // Allocate memory for the box
-    struct debug_box *box = malloc(sizeof(*box));
+    debug_box *box = malloc(sizeof(*box));
     box->rows = malloc(sizeof(box->rows) * DBOX_INSTR_ROWS);
 
     // Set its properties
@@ -55,7 +55,7 @@ static struct debug_box *dbox_instr(struct gbc_system *gbc, struct gbc_debugger 
         else {
 
             // Read byte at the pointer and find the instruction
-            struct gbc_instr instr = find_instr(read_byte(gbc->ram, pointer), gbc);
+            gbc_instr instr = find_instr(read_byte(gbc->ram, pointer), gbc);
 
             // Read the operand and format the string
             if(instr.length > 1) {
@@ -95,10 +95,10 @@ static struct debug_box *dbox_instr(struct gbc_system *gbc, struct gbc_debugger 
 }
 
 // Shows the content of the CPU registers
-static struct debug_box *dbox_regis(struct gbc_system *gbc, struct gbc_debugger *debugger) {
+static debug_box *dbox_regis(gbc_system *gbc, gbc_debugger *debugger) {
 
     // Allocate memory for the box
-    struct debug_box *box = malloc(sizeof(*box));
+    debug_box *box = malloc(sizeof(*box));
     box->rows = malloc(sizeof(box->rows) * DBOX_REGIS_ROWS);
 
     // Set its properties
@@ -167,10 +167,10 @@ static struct debug_box *dbox_regis(struct gbc_system *gbc, struct gbc_debugger 
 }
 
 // Parses the F register and prints the values of each flag
-static struct debug_box *dbox_flags(struct gbc_system *gbc, struct gbc_debugger *debugger) {
+static debug_box *dbox_flags(gbc_system *gbc, gbc_debugger *debugger) {
 
     // Allocate memory for the box
-    struct debug_box *box = malloc(sizeof(*box));
+    debug_box *box = malloc(sizeof(*box));
     box->rows = malloc(sizeof(box->rows) * DBOX_FLAGS_ROWS);
 
     // Set its properties
@@ -193,10 +193,10 @@ static struct debug_box *dbox_flags(struct gbc_system *gbc, struct gbc_debugger 
 }
 
 // Shows varied info
-static struct debug_box *dbox_info(struct gbc_system *gbc, struct gbc_debugger *debugger) {
+static debug_box *dbox_info(gbc_system *gbc, gbc_debugger *debugger) {
    
     // Allocate memory for the box
-    struct debug_box *box = malloc(sizeof(*box));
+    debug_box *box = malloc(sizeof(*box));
     box->rows = malloc(sizeof(box->rows) * DBOX_INFO_ROWS);
  
     // Set its properties
@@ -227,11 +227,11 @@ static void print_separator(const int width) {
 }
 
 // Prints all the selected dboxes to the screen
-static void print_debug(struct gbc_system *gbc, struct gbc_debugger *debugger) {
+static void print_debug(gbc_system *gbc, gbc_debugger *debugger) {
 
     // Create an array of boxes
     // A box is a formatted debug table in the console window
-    struct debug_box *boxes[DBOX_COUNT];
+    debug_box *boxes[DBOX_COUNT];
     boxes[0] = dbox_instr(gbc, debugger);
     boxes[1] = dbox_regis(gbc, debugger);
     boxes[2] = dbox_flags(gbc, debugger);
@@ -241,8 +241,8 @@ static void print_debug(struct gbc_system *gbc, struct gbc_debugger *debugger) {
     int i;
     for(i = 0; i < DBOX_COUNT; i += 2) {
 
-        struct debug_box *box_one = boxes[i];
-        struct debug_box *box_two = boxes[i + 1];
+        debug_box *box_one = boxes[i];
+        debug_box *box_two = boxes[i + 1];
 
         print_separator(box_one->width + box_two->width + 8);
         int height = max(box_one->height, box_two->height);
@@ -279,19 +279,18 @@ static void print_debug(struct gbc_system *gbc, struct gbc_debugger *debugger) {
 }
 
 // Handles debug commands and prints to the screen
-void debug(struct gbc_system *gbc, struct gbc_debugger *debugger) {
+void debug(gbc_system *gbc, gbc_debugger *debugger) {
 
     // If the emulator is running
     if(debugger->running) {
 
-        struct breakpoint *bp = find_breakpoint(gbc->registers->PC, debugger);
+        breakpoint *bp = find_breakpoint(gbc->registers->PC, debugger);
 
         // If there is a breakpoint at this instruction
         if(bp) {
             debugger->running = 0;
             print_debug(gbc, debugger);
             printf(CYEL "Stopped at breakpoint 0x%04X\n" CNRM, bp->address);
-            remove_breakpoint(bp->address, debugger);
         } else {
             return;
         }
@@ -361,7 +360,7 @@ void debug(struct gbc_system *gbc, struct gbc_debugger *debugger) {
             // List breakpoints
             case 'l': {
 
-                struct breakpoint *item = debugger->breakpoint_head;
+                breakpoint *item = debugger->breakpoint_head;
                 int i = 1;
                 while(item) {
                     printf("%d: 0x%04X\n", i, item->address);
@@ -407,7 +406,7 @@ void debug(struct gbc_system *gbc, struct gbc_debugger *debugger) {
 }
 
 // Prepares the debugger struct
-void init_debugger(struct gbc_debugger *debugger) {
+void init_debugger(gbc_debugger *debugger) {
     
     // Set the defaults
     debugger->breakpoint_head = NULL;
@@ -420,15 +419,15 @@ void init_debugger(struct gbc_debugger *debugger) {
 }
 
 // Adds a breakpoint element to the breakpoint linked list
-static char add_breakpoint(const unsigned short address, struct gbc_debugger *debugger) {
+static char add_breakpoint(const unsigned short address, gbc_debugger *debugger) {
 
     // Check for duplicate breakpoints
-    struct breakpoint *found = find_breakpoint(address, debugger);
+    breakpoint *found = find_breakpoint(address, debugger);
    
     if(found == NULL) {
         
         // Create a new breakpoint element
-        struct breakpoint *new = malloc(sizeof(*new));
+        breakpoint *new = malloc(sizeof(*new));
         new->address = address;
 
         // If there are no breakpoints, set it as the head
@@ -449,11 +448,11 @@ static char add_breakpoint(const unsigned short address, struct gbc_debugger *de
 }
 
 // Removes a breakpoint element from the breakpoint linked list
-static char remove_breakpoint(const unsigned short address, struct gbc_debugger *debugger) {
+static char remove_breakpoint(const unsigned short address, gbc_debugger *debugger) {
 
     // Remove the item from the linked list
-    struct breakpoint *prev = NULL;
-    struct breakpoint *curr= NULL;
+    breakpoint *prev = NULL;
+    breakpoint *curr= NULL;
 
     if(debugger->breakpoint_count > 0) {
        
@@ -494,12 +493,12 @@ static char remove_breakpoint(const unsigned short address, struct gbc_debugger 
 }
 
 // Returns a pointer to the breakpoint element with the specifed address in the breakpoint linked list provided it exists
-static struct breakpoint *find_breakpoint(const unsigned short address, struct gbc_debugger *debugger) {
+static breakpoint *find_breakpoint(const unsigned short address, gbc_debugger *debugger) {
 
     if(debugger->breakpoint_count > 0) {
 
         // Iterate through the breakpoints and find one with the correct address
-        struct breakpoint *item = debugger->breakpoint_head;
+        breakpoint *item = debugger->breakpoint_head;
         while(item) {
             
             if(item->address == address) {
@@ -514,7 +513,7 @@ static struct breakpoint *find_breakpoint(const unsigned short address, struct g
 }
 
 // Dumps the contents of the RAM into a binary file
-static char dump_ram(struct gbc_ram *ram, const char *filename) {
+static char dump_ram(gbc_ram *ram, const char *filename) {
    
     // Open the file for writing
     FILE *fp = NULL;

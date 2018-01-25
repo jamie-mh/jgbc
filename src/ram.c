@@ -2,7 +2,7 @@
 #include "ram.h"
 
 // Allocates memory
-void init_ram(struct gbc_ram *ram) {
+void init_ram(gbc_ram *ram) {
 
     ram->rom00 = NULL;
     ram->romNN = NULL;
@@ -28,7 +28,7 @@ void init_ram(struct gbc_ram *ram) {
 
 // Returns a pointer to the memory location of the specified address
 // and changes the input address to the relative location inside this section.
-static unsigned char *get_memory_location(struct gbc_ram *ram, unsigned short *address) {
+static unsigned char *get_memory_location(gbc_ram *ram, unsigned short *address) {
 
     // 16KB ROM Bank 00 
     if(*address >= 0x0 && *address <= 0x3FFF) {
@@ -87,7 +87,7 @@ static unsigned char *get_memory_location(struct gbc_ram *ram, unsigned short *a
 }
 
 // Reads a byte from the specified location in memory
-unsigned char read_byte(struct gbc_ram *ram, const unsigned short address) {
+unsigned char read_byte(gbc_ram *ram, const unsigned short address) {
 
     // Get the memory location and the relative address inside this memory
     unsigned short rel_address = address;
@@ -99,7 +99,7 @@ unsigned char read_byte(struct gbc_ram *ram, const unsigned short address) {
 
 // Reads a short (2 bytes) from the specified location in memory
 // Returns the LS byte first
-unsigned short read_short(struct gbc_ram *ram, const unsigned short address) {
+unsigned short read_short(gbc_ram *ram, const unsigned short address) {
 
     // Get the two consecutive bytes
     unsigned char byte_a = read_byte(ram, address);
@@ -110,7 +110,7 @@ unsigned short read_short(struct gbc_ram *ram, const unsigned short address) {
 }
 
 // Writes a byte in memory at the address
-void write_byte(struct gbc_ram *ram, const unsigned short address, const unsigned char value) {
+void write_byte(gbc_ram *ram, const unsigned short address, const unsigned char value) {
     
     // Get the memory location with the relative address
     unsigned short rel_address = address;
@@ -124,7 +124,7 @@ void write_byte(struct gbc_ram *ram, const unsigned short address, const unsigne
 }
 
 // Writes two bytes in memory starting at the address
-void write_short(struct gbc_ram *ram, const unsigned short address, const unsigned short value) {
+void write_short(gbc_ram *ram, const unsigned short address, const unsigned short value) {
 
     // Split the short into two bytes
     unsigned char byte_a = (value & 0x00FF);

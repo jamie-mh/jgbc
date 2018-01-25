@@ -19,15 +19,16 @@
 #define CWHT "\x1B[37m"
 
 // GameBoy Specification
-struct gbc_system {
+typedef struct gbc_system {
     char is_running;
     struct gbc_registers *registers;
     struct gbc_ram *ram;
-};
+} gbc_system;
 
-struct cmd_options {
+typedef struct cmd_options {
     char *rom_path;
     char debug;
-};
+    char scale;
+} cmd_options;
 
-static char get_cl_arguments(int, char **, struct cmd_options *); 
+static char get_cl_arguments(int, char **, cmd_options *); 

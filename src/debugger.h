@@ -24,31 +24,31 @@
     #define min(a, b) (((a) < (b)) ? (a) : (b))
 #endif
 
-struct gbc_debugger {
+typedef struct gbc_debugger {
     struct breakpoint *breakpoint_head;
     int breakpoint_count;
     char skip_instr;
     char running;
     char print;
-};
+} gbc_debugger;
 
 // Breakpoint linked list element
-struct breakpoint {
+typedef struct breakpoint {
     unsigned short address;
     struct breakpoint *next;
-};
+} breakpoint;
 
-struct debug_box {
+typedef struct debug_box {
     int width;
     int height;
     char **rows;
-};
+} debug_box;
 
-void init_debugger(struct gbc_debugger *);
-static void print_debug(struct gbc_system *, struct gbc_debugger *);
-void debug(struct gbc_system *, struct gbc_debugger *);
+void init_debugger(gbc_debugger *);
+static void print_debug(gbc_system *, gbc_debugger *);
+void debug(gbc_system *, gbc_debugger *);
 
-static char add_breakpoint(const unsigned short, struct gbc_debugger *);
-static char remove_breakpoint(const unsigned short, struct gbc_debugger *);
-static struct breakpoint *find_breakpoint(const unsigned short, struct gbc_debugger *);
-static char dump_ram(struct gbc_ram *, const char *);
+static char add_breakpoint(const unsigned short, gbc_debugger *);
+static char remove_breakpoint(const unsigned short, gbc_debugger *);
+static breakpoint *find_breakpoint(const unsigned short, gbc_debugger *);
+static char dump_ram(gbc_ram *, const char *);

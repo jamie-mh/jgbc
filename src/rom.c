@@ -3,7 +3,7 @@
 #include "rom.h"
 
 // Load a ROM file into the RAM memory location
-char load_rom(struct gbc_ram *ram, struct gbc_rom *rom, const char *path) {
+char load_rom(gbc_ram *ram, gbc_rom *rom, const char *path) {
 
     // Open the file at the specified path
     FILE *file;
@@ -67,7 +67,7 @@ char load_rom(struct gbc_ram *ram, struct gbc_rom *rom, const char *path) {
 }
 
 // Parse the ROM header and get its information
-static void get_rom_info(unsigned char *header, struct gbc_rom *rom) {
+static void get_rom_info(unsigned char *header, gbc_rom *rom) {
 
     // Read the title from the header    
     // The title is 16 characters maximum, uppercase ASCII
@@ -99,14 +99,14 @@ static void get_rom_info(unsigned char *header, struct gbc_rom *rom) {
 }
 
 // Display the ROM information in the console
-void print_rom_info(struct gbc_rom *rom) {
+void print_rom_info(gbc_rom *rom) {
     
     // Print the rom information
-    printf(CYEL "Title: " CNRM "%s\n", rom->title);
-    printf(CYEL "CGB Flag: " CNRM "%02X\n", rom->cgb_flag);
-    printf(CYEL "Cartridge Type: " CNRM "%02X\n", rom->cart_type);
-    printf(CYEL "ROM Size: " CNRM "%d x %d KB\n", rom->rom_size, ROM_BANK_SIZE);
-    printf(CYEL "RAM Size: " CNRM "%d x %d KB\n", rom->ram_size, EXTRAM_BANK_SIZE);
-    printf(CYEL "Destination Code: " CNRM "%02X\n", rom->dest_code);
-    printf(CYEL "Version Number: " CNRM "%02X\n", rom->ver_no);
+    printf(CMAG "Title: " CNRM "%s\n", rom->title);
+    printf(CMAG "CGB Flag: " CNRM "%02X\n", rom->cgb_flag);
+    printf(CMAG "Cartridge Type: " CNRM "%02X\n", rom->cart_type);
+    printf(CMAG "ROM Size: " CNRM "%d x %d KB\n", rom->rom_size, ROM_BANK_SIZE);
+    printf(CMAG "RAM Size: " CNRM "%d x %d KB\n", rom->ram_size, EXTRAM_BANK_SIZE);
+    printf(CMAG "Destination Code: " CNRM "%02X\n", rom->dest_code);
+    printf(CMAG "Version Number: " CNRM "%02X\n", rom->ver_no);
 }
