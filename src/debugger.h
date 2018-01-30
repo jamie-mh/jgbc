@@ -26,7 +26,6 @@
 
 typedef struct gbc_debugger {
     struct breakpoint *breakpoint_head;
-    int breakpoint_count;
     char skip_instr;
     char running;
     char print;
