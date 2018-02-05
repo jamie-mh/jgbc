@@ -17,6 +17,9 @@ void init_cpu(gbc_system *gbc) {
     // Set the pointers to their default value
     gbc->registers->PC = DEFAULT_PC;
     gbc->registers->SP = DEFAULT_SP;
+
+    // Enable interrupts
+    gbc->registers->IME = 1;
 }
 
 /*
@@ -1284,7 +1287,7 @@ static void op_ld_a_cp(gbc_system *gbc, unsigned char operand) {
 
 // 0xF3: DI (- - - -)
 static void op_di(gbc_system *gbc) {
-    printf("Unimplemented Instruction: DI\n");
+   gbc->registers->IME = 0; 
 }
 
 // 0xF5: PUSH AF (- - - -)
@@ -1319,7 +1322,7 @@ static void op_ld_a_a16p(gbc_system *gbc, unsigned short operand) {
 
 // 0xFB: EI (- - - -)
 static void op_ei(gbc_system *gbc) {
-    printf("Unimplemented Instruction: EI\n");
+    gbc->registers->IME = 1;
 }
 
 // 0xFE: CP d8 (Z 1 H C)

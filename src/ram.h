@@ -51,3 +51,6 @@ unsigned short read_short(gbc_ram *, const unsigned short);
 
 void write_byte(gbc_ram *, const unsigned short, const unsigned char);
 void write_short(gbc_ram *, const unsigned short, const unsigned short);
+
+void set_register(gbc_ram *, const unsigned short, const unsigned char, const unsigned char);
+unsigned char read_register(gbc_ram *, const unsigned short, const unsigned char);

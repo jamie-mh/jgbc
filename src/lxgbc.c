@@ -55,6 +55,9 @@ int main(int argc, char **argv) {
 
         // Run the debugger if specified
         if(cmd->debug) debug(gbc, debugger);
+
+        // Temp
+        render(gbc->ram, gpu);
     }
 
     return 0;

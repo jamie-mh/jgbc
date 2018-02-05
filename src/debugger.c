@@ -213,8 +213,7 @@ static debug_box *dbox_info(gbc_system *gbc, gbc_debugger *debugger) {
     strcpy(box->rows[0], "OPCODE:");
     sprintf(box->rows[1], "-> %02X", read_byte(gbc->ram, gbc->registers->PC));
     strcpy(box->rows[2], "INTERR:");
-    //sprintf(box->rows[3], "-> %d", gbc->interrupts_enabled);
-    sprintf(box->rows[3], "-> UNKN");
+    sprintf(box->rows[3], "-> %d", gbc->registers->IME);
 
     return box;
 }

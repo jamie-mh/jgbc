@@ -1,5 +1,6 @@
 #include "lxgbc.h"
 #include "ram.h"
+#include "gpu.h"
 
 // Allocates memory
 void init_ram(gbc_ram *ram) {
@@ -118,8 +119,8 @@ void write_byte(gbc_ram *ram, const unsigned short address, const unsigned char 
     unsigned char *mem = get_memory_location(ram, &rel_address);
 
     // TODO: Implement bank switching
-
-    // Write the byte in memory
+    
+    // Write the byte to memory
     mem[rel_address] = value;
 }
 
@@ -133,4 +134,21 @@ void write_short(gbc_ram *ram, const unsigned short address, const unsigned shor
     // Write the two bytes
     write_byte(ram, address, byte_a);
     write_byte(ram, address + 1, byte_b);
+}
+
+// Writes to memory register at a certain location
+void write_register(gbc_ram *ram, const unsigned short address, const unsigned char bit, const unsigned char value) {
+
+    // Read the byte set the nth bit and write it back
+    unsigned char byte = read_byte(ram, address);
+    byte |= 1 << bit; 
+    write_byte(ram, address, byte);
+}
+
+// Reads a memory register at a certain location
+unsigned char read_register(gbc_ram *ram, const unsigned short address, const unsigned char bit) {
+   
+    // Return the nth bit of the register
+    unsigned char byte = read_byte(ram, address);
+    return (byte >> bit) & 1;
 }

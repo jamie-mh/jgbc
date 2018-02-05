@@ -71,4 +71,6 @@ typedef struct gbc_gpu {
     SDL_Event *event;
 } gbc_gpu;
 
-void init_gpu(gbc_gpu *, char scale);
+void init_gpu(gbc_gpu *, const char scale);
+void render(gbc_ram *, gbc_gpu *gpu);
+char is_vblank(gbc_ram *);
