@@ -79,7 +79,7 @@ static unsigned char *get_memory_location(gbc_ram *ram, unsigned short *address)
     else if(*address >= 0xFF80 && *address <= 0xFFFE) {
         *address -= 0xFF80;
         return ram->hram;
-    } 
+    }
     // Interrupt Enable Register
     else if(*address == 0xFFFF) {
         *address = 0;
@@ -89,6 +89,11 @@ static unsigned char *get_memory_location(gbc_ram *ram, unsigned short *address)
 
 // Reads a byte from the specified location in memory
 unsigned char read_byte(gbc_ram *ram, const unsigned short address) {
+
+    // If the memory is unusable, return 0
+    if(address >= 0xFEA0 && address <= 0xFEFF) {
+        return 0x0; 
+    }
 
     // Get the memory location and the relative address inside this memory
     unsigned short rel_address = address;
@@ -113,9 +118,13 @@ unsigned short read_short(gbc_ram *ram, const unsigned short address) {
 // Writes a byte in memory at the address
 void write_byte(gbc_ram *ram, const unsigned short address, const unsigned char value) {
     
+    // If the memory is unusable, do nothing 
+    if(address >= 0xFEA0 && address <= 0xFEFF) {
+        return; 
+    }
+
     // Get the memory location with the relative address
     unsigned short rel_address = address;
-
     unsigned char *mem = get_memory_location(ram, &rel_address);
 
     // TODO: Implement bank switching
