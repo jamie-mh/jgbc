@@ -236,7 +236,6 @@ static unsigned char swap(const unsigned char operand, unsigned char *flag) {
 
 static void test_bit(const unsigned char regis, const unsigned char bit, unsigned char *flag) {
 
-    unsigned char value = 
 }
 
 static unsigned char reset_bit(const unsigned char regis, const unsigned char bit, unsigned char *flag) {
