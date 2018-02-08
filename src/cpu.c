@@ -27,36 +27,81 @@ void init_cpu(gbc_system *gbc) {
 */
 
 static unsigned char and(const unsigned char a, const unsigned char b, unsigned char *flag) {
+    
+    unsigned char result = a & b;
 
+    if(result == 0) {
+        set_flag(FLAG_ZERO, 1, flag);
+    } else {
+        set_flag(FLAG_ZERO, 0, flag); 
+    }
+   
+    set_flag(FLAG_SUBTRACT, 0, flag);
+    set_flag(FLAG_HALFCARRY, 1, flag);
+    set_flag(FLAG_CARRY, 0, flag);
+
+    return result;
 }
 
 static unsigned char or(const unsigned char a, const unsigned char b, unsigned char *flag) {
 
+    unsigned char result = a | b;
+
+    if(result == 0) {
+        set_flag(FLAG_ZERO, 1, flag);
+    } else {
+        set_flag(FLAG_ZERO, 0, flag); 
+    }
+
+    set_flag(FLAG_SUBTRACT, 0, flag);
+    set_flag(FLAG_HALFCARRY, 0, flag);
+    set_flag(FLAG_CARRY, 0, flag);
+
+    return result;
 }
 
 static unsigned char xor(const unsigned char a, const unsigned char b, unsigned char *flag) {
     
     unsigned char result = a ^ b;
 
-    if(!result) {
+    if(result == 0) {
         set_flag(FLAG_ZERO, 1, flag);
-        set_flag(FLAG_SUBTRACT, 0, flag);
-        set_flag(FLAG_HALFCARRY, 0, flag);
-        set_flag(FLAG_CARRY, 0, flag);
+    } else {
+        set_flag(FLAG_ZERO, 0, flag); 
     }
+
+    set_flag(FLAG_SUBTRACT, 0, flag);
+    set_flag(FLAG_HALFCARRY, 0, flag);
+    set_flag(FLAG_CARRY, 0, flag);
 
     return result;
 }
 
 static unsigned char inc(const unsigned char operand, unsigned char *flag) {
 
+    unsigned char result = operand + 1;
+
+    if(result == 0) {
+        set_flag(FLAG_ZERO, 1, flag); 
+    } else {
+        set_flag(FLAG_ZERO, 0, flag); 
+    }
+    
+    set_flag(FLAG_SUBTRACT, 0, flag);
+
+    if(operand & 0xF == 0xF) {
+        set_flag(FLAG_HALFCARRY, 1, flag);
+    } else {
+        set_flag(FLAG_HALFCARRY, 0, flag);
+    } 
+
+    return result;
 }
 
 static unsigned char dec(const unsigned char operand, unsigned char *flag) {
 
     unsigned char result = operand - 1;
 
-    // Check if the result is 0
     if(result == 0) {
         set_flag(FLAG_ZERO, 1, flag);
     } else {
@@ -65,7 +110,6 @@ static unsigned char dec(const unsigned char operand, unsigned char *flag) {
 
     set_flag(FLAG_SUBTRACT, 1, flag);
 
-    // Check for bit 4 borrow 
     if(operand & 0x0f) {
         set_flag(FLAG_HALFCARRY, 0, flag);
     } else {
@@ -75,39 +119,10 @@ static unsigned char dec(const unsigned char operand, unsigned char *flag) {
     return result;
 }
 
-static void compare(const unsigned char a, const unsigned char b, unsigned char *flag) {
-
-    unsigned char result = a - b;
-
-    // Check if the result is 0
-    if(result == 0) {
-        set_flag(FLAG_ZERO, 1, flag);
-    } else {
-        set_flag(FLAG_ZERO, 0, flag);
-    }
-
-    set_flag(FLAG_SUBTRACT, 1, flag);
-
-    // Check for borrow from bit 4
-    if(((a & 0xf) - (b & 0xf)) & 0x10 == 0x10) {
-        set_flag(FLAG_HALFCARRY, 1, flag);
-    } else {
-        set_flag(FLAG_HALFCARRY, 0, flag);
-    }
-    
-    // Check for no borrow
-    if(a < b) {
-        set_flag(FLAG_CARRY, 1, flag);
-    } else {
-        set_flag(FLAG_CARRY, 0, flag);
-    }
-}
-
 static unsigned char add_byte(const unsigned char a, const unsigned char b, unsigned char *flag) {
     
-    unsigned char result = a + b;
+    unsigned short result = a + b;
 
-    // Check if the result is 0
     if(result == 0) {
         set_flag(FLAG_ZERO, 1, flag);
     } else {
@@ -117,31 +132,53 @@ static unsigned char add_byte(const unsigned char a, const unsigned char b, unsi
     set_flag(FLAG_SUBTRACT, 0, flag);
 
     // Check for a carry from bit 3
-    if(result & 0x10 == 0x10) {
+    if(((a & 0xF) + (b & 0xF)) > 0xF) {
         set_flag(FLAG_HALFCARRY, 1, flag); 
     } else {
         set_flag(FLAG_HALFCARRY, 0, flag); 
     }
 
     // Check for carry
-    if(a < b) {
+    if((result & 0xFF00) > 0) {
         set_flag(FLAG_CARRY, 1, flag);
     } else {
         set_flag(FLAG_CARRY, 0, flag); 
     }
     
-    return result;
+    return result & 0xFF;
 }
 
 static unsigned char sub_byte(const unsigned char a, const unsigned char b, unsigned char *flag) {
 
+    unsigned short result = a - b;
+
+    if(result == 0) {
+        set_flag(FLAG_ZERO, 1, flag); 
+    } else {
+        set_flag(FLAG_ZERO, 0, flag); 
+    }
+
+    set_flag(FLAG_SUBTRACT, 1, flag);
+
+    if((a & 0xF) > (b & 0xF)) {
+        set_flag(FLAG_HALFCARRY, 1, flag); 
+    } else {
+        set_flag(FLAG_HALFCARRY, 0, flag); 
+    }
+
+    if((result & 0xFF00) > 0) {
+        set_flag(FLAG_CARRY, 1, flag);
+    } else {
+        set_flag(FLAG_CARRY, 0, flag); 
+    }
+
+    return result & 0xFF;
 }
 
 static unsigned short add_short(const unsigned short a, const unsigned short b, unsigned char *flag) {
     
-    unsigned short result = a + b;
+    unsigned int result = a + b;
 
-    // Check if the result is 0
     if(result == 0) {
         set_flag(FLAG_ZERO, 1, flag);
     } else {
@@ -150,21 +187,19 @@ static unsigned short add_short(const unsigned short a, const unsigned short b, 
 
     set_flag(FLAG_SUBTRACT, 0, flag);
 
-    // Check for a carry from bit 3
-    if((a & 0xFFF) + (b & 0xFFF) > 0xFFF) {
+    if((a & 0xF) > (b & 0xF)) {
         set_flag(FLAG_HALFCARRY, 1, flag); 
     } else {
         set_flag(FLAG_HALFCARRY, 0, flag); 
     }
 
-    // Check for carry
-    if(a < b) {
+    if((result & 0xFFFF0000) > 0) {
         set_flag(FLAG_CARRY, 1, flag);
     } else {
         set_flag(FLAG_CARRY, 0, flag); 
     }
 
-    return result;
+    return result & 0xFFFF;
 }
 
 static unsigned char rotate_left(const unsigned char operand, unsigned char *flag) {
@@ -201,6 +236,7 @@ static unsigned char swap(const unsigned char operand, unsigned char *flag) {
 
 static void test_bit(const unsigned char regis, const unsigned char bit, unsigned char *flag) {
 
+    unsigned char value = 
 }
 
 static unsigned char reset_bit(const unsigned char regis, const unsigned char bit, unsigned char *flag) {
@@ -1193,44 +1229,44 @@ static void op_or_a(gbc_system *gbc) {
 
 // 0xB8: CP B (Z 1 H C)
 static void op_cp_b(gbc_system *gbc) {
-    compare(gbc->registers->A, gbc->registers->B, &gbc->registers->F);
+    sub_byte(gbc->registers->A, gbc->registers->B, &gbc->registers->F);
 }
 
 // 0xB9: CP C (Z 1 H C)
 static void op_cp_c(gbc_system *gbc) {
-    compare(gbc->registers->A, gbc->registers->C, &gbc->registers->F);
+    sub_byte(gbc->registers->A, gbc->registers->C, &gbc->registers->F);
 }
 
 // 0xBA: CP D (Z 1 H C)
 static void op_cp_d(gbc_system *gbc) {
-    compare(gbc->registers->A, gbc->registers->D, &gbc->registers->F);
+    sub_byte(gbc->registers->A, gbc->registers->D, &gbc->registers->F);
 }
 
 // 0xBB: CP E (Z 1 H C)
 static void op_cp_e(gbc_system *gbc) {
-    compare(gbc->registers->A, gbc->registers->E, &gbc->registers->F);
+    sub_byte(gbc->registers->A, gbc->registers->E, &gbc->registers->F);
 }
 
 // 0xBC: CP H (Z 1 H C)
 static void op_cp_h(gbc_system *gbc) {
-    compare(gbc->registers->A, gbc->registers->H, &gbc->registers->F);
+    sub_byte(gbc->registers->A, gbc->registers->H, &gbc->registers->F);
 }
 
 // 0xBD: CP L (Z 1 H C)
 static void op_cp_l(gbc_system *gbc) {
-    compare(gbc->registers->A, gbc->registers->L, &gbc->registers->F);
+    sub_byte(gbc->registers->A, gbc->registers->L, &gbc->registers->F);
 }
 
 // 0xBE: CP (HL) (Z 1 H C)
 static void op_cp_hlp(gbc_system *gbc) {
-    compare(gbc->registers->A,
+    sub_byte(gbc->registers->A,
             read_byte(gbc->ram, gbc->registers->HL),
             &gbc->registers->F);
 }
 
 // 0xBF: CP A (Z 1 H C)
 static void op_cp_a(gbc_system *gbc) {
-    compare(gbc->registers->A, gbc->registers->A, &gbc->registers->F);
+    sub_byte(gbc->registers->A, gbc->registers->A, &gbc->registers->F);
 }
 
 // 0xC0: RET NZ (- - - -)
@@ -1532,7 +1568,7 @@ static void op_ei(gbc_system *gbc) {
 
 // 0xFE: CP d8 (Z 1 H C)
 static void op_cp_d8(gbc_system *gbc, unsigned char operand) {
-    compare(gbc->registers->A, operand, &gbc->registers->F);
+    sub_byte(gbc->registers->A, operand, &gbc->registers->F);
 }
 
 // 0xFF: RST 38H (- - - -)
