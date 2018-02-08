@@ -26,6 +26,14 @@ void init_cpu(gbc_system *gbc) {
 *   Common CPU operations
 */
 
+static unsigned char and(const unsigned char a, const unsigned char b, unsigned char *flag) {
+
+}
+
+static unsigned char or(const unsigned char a, const unsigned char b, unsigned char *flag) {
+
+}
+
 static unsigned char xor(const unsigned char a, const unsigned char b, unsigned char *flag) {
     
     unsigned char result = a ^ b;
@@ -40,7 +48,11 @@ static unsigned char xor(const unsigned char a, const unsigned char b, unsigned 
     return result;
 }
 
-static unsigned char dec_byte(const unsigned char operand, unsigned char *flag) {
+static unsigned char inc(const unsigned char operand, unsigned char *flag) {
+
+}
+
+static unsigned char dec(const unsigned char operand, unsigned char *flag) {
 
     unsigned char result = operand - 1;
 
@@ -91,7 +103,7 @@ static void compare(const unsigned char a, const unsigned char b, unsigned char 
     }
 }
 
-static unsigned char add_byte(unsigned char a, unsigned char b, unsigned char *flag) {
+static unsigned char add_byte(const unsigned char a, const unsigned char b, unsigned char *flag) {
     
     unsigned char result = a + b;
 
@@ -121,7 +133,11 @@ static unsigned char add_byte(unsigned char a, unsigned char b, unsigned char *f
     return result;
 }
 
-static unsigned short add_short(unsigned short a, unsigned short b, unsigned char *flag) {
+static unsigned char sub_byte(const unsigned char a, const unsigned char b, unsigned char *flag) {
+
+}
+
+static unsigned short add_short(const unsigned short a, const unsigned short b, unsigned char *flag) {
     
     unsigned short result = a + b;
 
@@ -151,6 +167,50 @@ static unsigned short add_short(unsigned short a, unsigned short b, unsigned cha
     return result;
 }
 
+static unsigned char rotate_left(const unsigned char operand, unsigned char *flag) {
+
+}
+
+static unsigned char rotate_right(const unsigned char operand, unsigned char *flag) {
+
+}
+
+static unsigned char rotate_left_carry(const unsigned char operand, unsigned char *flag) {
+
+}
+
+static unsigned char rotate_right_carry(const unsigned char operand, unsigned char *flag) {
+
+}
+
+static unsigned char shift_left_arith(const unsigned char operand, unsigned char *flag) {
+
+}
+
+static unsigned char shift_right_arith(const unsigned char operand, unsigned char *flag) {
+
+}
+
+static unsigned char shift_right_logic(const unsigned char operand, unsigned char *flag) {
+
+}
+
+static unsigned char swap(const unsigned char operand, unsigned char *flag) {
+
+}
+
+static void test_bit(const unsigned char regis, const unsigned char bit, unsigned char *flag) {
+
+}
+
+static unsigned char reset_bit(const unsigned char regis, const unsigned char bit, unsigned char *flag) {
+
+}
+
+static unsigned char set_bit(const unsigned char regis, const unsigned char bit, unsigned char *flag) {
+
+}
+
 /*
 *   CPU instructions
 */
@@ -172,17 +232,17 @@ static void op_ld_bcp_a(gbc_system *gbc) {
 
 // 0x03: INC BC (- - - -)
 static void op_inc_bc(gbc_system *gbc) {
-    printf("Unimplemented Instruction: INC BC\n");
+    gbc->registers->BC++;
 }
 
 // 0x04: INC B (Z 0 H -)
 static void op_inc_b(gbc_system *gbc) {
-    printf("Unimplemented Instruction: INC B\n");
+    gbc->registers->B = inc(gbc->registers->B, &gbc->registers->F);
 }
 
 // 0x05: DEC B (Z 1 H -)
 static void op_dec_b(gbc_system *gbc) {
-    gbc->registers->B = dec_byte(gbc->registers->B, &gbc->registers->F);
+    gbc->registers->B = dec(gbc->registers->B, &gbc->registers->F);
 }
 
 // 0x06: LD B, d8 (- - - -)
@@ -197,7 +257,7 @@ static void op_rlca(gbc_system *gbc) {
 
 // 0x08: LD (a16), SP (- - - -)
 static void op_ld_a16p_sp(gbc_system *gbc, unsigned short operand) {
-    printf("Unimplemented Instruction: LD (a16), SP\n");
+    write_byte(gbc->ram, operand, gbc->registers->SP);
 }
 
 // 0x09: ADD HL, BC (- 0 H C)
@@ -212,17 +272,17 @@ static void op_ld_a_bcp(gbc_system *gbc) {
 
 // 0x0B: DEC BC (- - - -)
 static void op_dec_bc(gbc_system *gbc) {
-    printf("Unimplemented Instruction: DEC BC\n");
+    gbc->registers->BC--;
 }
 
 // 0x0C: INC C (Z 0 H -)
 static void op_inc_c(gbc_system *gbc) {
-    printf("Unimplemented Instruction: INC C\n");
+    gbc->registers->C = inc(gbc->registers->C, &gbc->registers->F);
 }
 
 // 0x0D: DEC C (Z 1 H -)
 static void op_dec_c(gbc_system *gbc) {
-    gbc->registers->C = dec_byte(gbc->registers->C, &gbc->registers->F);
+    gbc->registers->C = dec(gbc->registers->C, &gbc->registers->F);
 }
 
 // 0x0E: LD C, d8 (- - - -)
@@ -252,17 +312,17 @@ static void op_ld_dep_a(gbc_system *gbc) {
 
 // 0x13: INC DE (- - - -)
 static void op_inc_de(gbc_system *gbc) {
-    printf("Unimplemented Instruction: INC DE\n");
+    gbc->registers->DE++;
 }
 
 // 0x14: INC D (Z 0 H -)
 static void op_inc_d(gbc_system *gbc) {
-    printf("Unimplemented Instruction: INC D\n");
+    
 }
 
 // 0x15: DEC D (Z 1 H -)
 static void op_dec_d(gbc_system *gbc) {
-    gbc->registers->D = dec_byte(gbc->registers->D, &gbc->registers->F);
+    gbc->registers->D = dec(gbc->registers->D, &gbc->registers->F);
 }
 
 // 0x16: LD D, d8 (- - - -)
@@ -277,7 +337,7 @@ static void op_rla(gbc_system *gbc) {
 
 // 0x18: JR r8 (- - - -)
 static void op_jr_r8(gbc_system *gbc, char operand) {
-    printf("Unimplemented Instruction: JR r8\n");
+    gbc->registers->PC += operand;
 }
 
 // 0x19: ADD HL, DE (- 0 H C)
@@ -292,17 +352,17 @@ static void op_ld_a_dep(gbc_system *gbc) {
 
 // 0x1B: DEC DE (- - - -)
 static void op_dec_de(gbc_system *gbc) {
-    printf("Unimplemented Instruction: DEC DE\n");
+    gbc->registers->DE--;
 }
 
 // 0x1C: INC E (Z 0 H -)
 static void op_inc_e(gbc_system *gbc) {
-    printf("Unimplemented Instruction: INC E\n");
+    gbc->registers->E = inc(gbc->registers->E, &gbc->registers->F);
 }
 
 // 0x1D: DEC E (Z 1 H -)
 static void op_dec_e(gbc_system *gbc) {
-    gbc->registers->E = dec_byte(gbc->registers->E, &gbc->registers->F);
+    gbc->registers->E = dec(gbc->registers->E, &gbc->registers->F);
 }
 
 // 0x1E: LD E, d8 (- - - -)
@@ -329,22 +389,23 @@ static void op_ld_hl_d16(gbc_system *gbc, unsigned short operand) {
 
 // 0x22: LD (HL+), A (- - - -)
 static void op_ld_hlpp_a(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD (HL+), A\n");
+    write_byte(gbc->ram, gbc->registers->HL, gbc->registers->A);
+    gbc->registers->HL++;
 }
 
 // 0x23: INC HL (- - - -)
 static void op_inc_hl(gbc_system *gbc) {
-    printf("Unimplemented Instruction: INC HL\n");
+    gbc->registers->HL++;
 }
 
 // 0x24: INC H (Z 0 H -)
 static void op_inc_h(gbc_system *gbc) {
-    printf("Unimplemented Instruction: INC H\n");
+    gbc->registers->H = inc(gbc->registers->H, &gbc->registers->F);
 }
 
 // 0x25: DEC H (Z 1 H -)
 static void op_dec_h(gbc_system *gbc) {
-    gbc->registers->H = dec_byte(gbc->registers->H, &gbc->registers->F);
+    gbc->registers->H = dec(gbc->registers->H, &gbc->registers->F);
 }
 
 // 0x26: LD H, d8 (- - - -)
@@ -371,22 +432,23 @@ static void op_add_hl_hl(gbc_system *gbc) {
 
 // 0x2A: LD A, (HL+) (- - - -)
 static void op_ld_a_hlpp(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD A, (HL+)\n");
+    gbc->registers->A = read_byte(gbc->ram, gbc->registers->HL);
+    gbc->registers->HL++;
 }
 
 // 0x2B: DEC HL (- - - -)
 static void op_dec_hl(gbc_system *gbc) {
-    printf("Unimplemented Instruction: DEC HL\n");
+    gbc->registers->HL--;
 }
 
 // 0x2C: INC L (Z 0 H -)
 static void op_inc_l(gbc_system *gbc) {
-    printf("Unimplemented Instruction: INC L\n");
+    gbc->registers->L = inc(gbc->registers->L, &gbc->registers->F);
 }
 
 // 0x2D: DEC L (Z 1 H -)
 static void op_dec_l(gbc_system *gbc) {
-    gbc->registers->L = dec_byte(gbc->registers->L, &gbc->registers->F);
+    gbc->registers->L = dec(gbc->registers->L, &gbc->registers->F);
 }
 
 // 0x2E: LD L, d8 (- - - -)
@@ -396,7 +458,9 @@ static void op_ld_l_d8(gbc_system *gbc, unsigned char operand) {
 
 // 0x2F: CPL (- 1 1 -)
 static void op_cpl(gbc_system *gbc) {
-    printf("Unimplemented Instruction: CPL\n");
+    gbc->registers->A = ~(gbc->registers->A);
+    set_flag(FLAG_SUBTRACT, 1, &gbc->registers->F);
+    set_flag(FLAG_HALFCARRY, 1, &gbc->registers->F);
 }
 
 // 0x30: JR NC, r8 (- - - -)
@@ -419,29 +483,33 @@ static void op_ld_hlmp_a(gbc_system *gbc) {
 
 // 0x33: INC SP (- - - -)
 static void op_inc_sp(gbc_system *gbc) {
-    printf("Unimplemented Instruction: INC SP\n");
+    gbc->registers->SP++;
 }
 
 // 0x34: INC (HL) (Z 0 H -)
 static void op_inc_hlp(gbc_system *gbc) {
-    printf("Unimplemented Instruction: INC (HL)\n");
+    write_byte(gbc->ram, 
+               gbc->registers->HL, 
+               inc(read_byte(gbc->ram, gbc->registers->HL), &gbc->registers->F));
 }
 
 // 0x35: DEC (HL) (Z 1 H -)
 static void op_dec_hlp(gbc_system *gbc) {
     write_byte(gbc->ram,
                gbc->registers->HL,
-               dec_byte(read_byte(gbc->ram, gbc->registers->HL), &gbc->registers->F));
+               dec(read_byte(gbc->ram, gbc->registers->HL), &gbc->registers->F));
 }
 
 // 0x36: LD (HL), d8 (- - - -)
 static void op_ld_hlp_d8(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: LD (HL), d8\n");
+    write_byte(gbc->ram, gbc->registers->HL, operand);
 }
 
 // 0x37: SCF (- 0 0 1)
 static void op_scf(gbc_system *gbc) {
-    printf("Unimplemented Instruction: SCF\n");
+    set_flag(FLAG_SUBTRACT, 0, &gbc->registers->F);
+    set_flag(FLAG_HALFCARRY, 0, &gbc->registers->F);
+    set_flag(FLAG_CARRY, 1, &gbc->registers->F);
 }
 
 // 0x38: JR C, r8 (- - - -)
@@ -458,22 +526,23 @@ static void op_add_hl_sp(gbc_system *gbc) {
 
 // 0x3A: LD A, (HL-) (- - - -)
 static void op_ld_a_hlmp(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD A, (HL-)\n");
+    gbc->registers->A = read_byte(gbc->ram, gbc->registers->HL);
+    gbc->registers->HL--;
 }
 
 // 0x3B: DEC SP (- - - -)
 static void op_dec_sp(gbc_system *gbc) {
-    printf("Unimplemented Instruction: DEC SP\n");
+    gbc->registers->SP--;
 }
 
 // 0x3C: INC A (Z 0 H -)
 static void op_inc_a(gbc_system *gbc) {
-    printf("Unimplemented Instruction: INC A\n");
+    gbc->registers->A = inc(gbc->registers->A, &gbc->registers->F);
 }
 
 // 0x3D: DEC A (Z 1 H -)
 static void op_dec_a(gbc_system *gbc) {
-    gbc->registers->A = dec_byte(gbc->registers->A, &gbc->registers->F);
+    gbc->registers->A = dec(gbc->registers->A, &gbc->registers->F);
 }
 
 // 0x3E: LD A, d8 (- - - -)
@@ -483,42 +552,44 @@ static void op_ld_a_d8(gbc_system *gbc, unsigned char operand) {
 
 // 0x3F: CCF (- 0 0 C)
 static void op_ccf(gbc_system *gbc) {
-    printf("Unimplemented Instruction: CCF\n");
+    set_flag(FLAG_SUBTRACT, 0, &gbc->registers->F);
+    set_flag(FLAG_HALFCARRY, 0, &gbc->registers->F);
+    set_flag(FLAG_CARRY, !get_flag(FLAG_CARRY, gbc->registers->F), &gbc->registers->F);
 }
 
 // 0x40: LD B, B (- - - -)
 static void op_ld_b_b(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD B, B\n");
+    gbc->registers->B = gbc->registers->B;
 }
 
 // 0x41: LD B, C (- - - -)
 static void op_ld_b_c(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD B, C\n");
+    gbc->registers->B = gbc->registers->C;
 }
 
 // 0x42: LD B, D (- - - -)
 static void op_ld_b_d(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD B, D\n");
+    gbc->registers->B = gbc->registers->D;
 }
 
 // 0x43: LD B, E (- - - -)
 static void op_ld_b_e(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD B, E\n");
+    gbc->registers->B = gbc->registers->E;
 }
 
 // 0x44: LD B, H (- - - -)
 static void op_ld_b_h(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD B, H\n");
+    gbc->registers->B = gbc->registers->H;
 }
 
 // 0x45: LD B, L (- - - -)
 static void op_ld_b_l(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD B, L\n");
+    gbc->registers->B = gbc->registers->L;
 }
 
 // 0x46: LD B, (HL) (- - - -)
 static void op_ld_b_hlp(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD B, (HL)\n");
+    gbc->registers->B = read_byte(gbc->ram, gbc->registers->HL);
 }
 
 // 0x47: LD B, A (- - - -)
@@ -528,37 +599,37 @@ static void op_ld_b_a(gbc_system *gbc) {
 
 // 0x48: LD C, B (- - - -)
 static void op_ld_c_b(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD C, B\n");
+    gbc->registers->C = gbc->registers->B;
 }
 
 // 0x49: LD C, C (- - - -)
 static void op_ld_c_c(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD C, C\n");
+    gbc->registers->C = gbc->registers->C;
 }
 
 // 0x4A: LD C, D (- - - -)
 static void op_ld_c_d(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD C, D\n");
+    gbc->registers->C = gbc->registers->D;
 }
 
 // 0x4B: LD C, E (- - - -)
 static void op_ld_c_e(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD C, E\n");
+    gbc->registers->C = gbc->registers->E;
 }
 
 // 0x4C: LD C, H (- - - -)
 static void op_ld_c_h(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD C, H\n");
+    gbc->registers->C = gbc->registers->H;
 }
 
 // 0x4D: LD C, L (- - - -)
 static void op_ld_c_l(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD C, L\n");
+    gbc->registers->C = gbc->registers->L;
 }
 
 // 0x4E: LD C, (HL) (- - - -)
 static void op_ld_c_hlp(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD C, (HL)\n");
+    gbc->registers->C = read_byte(gbc->ram, gbc->registers->HL);
 }
 
 // 0x4F: LD C, A (- - - -)
@@ -568,37 +639,37 @@ static void op_ld_c_a(gbc_system *gbc) {
 
 // 0x50: LD D, B (- - - -)
 static void op_ld_d_b(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD D, B\n");
+    gbc->registers->D = gbc->registers->B;
 }
 
 // 0x51: LD D, C (- - - -)
 static void op_ld_d_c(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD D, C\n");
+    gbc->registers->D = gbc->registers->C;
 }
 
 // 0x52: LD D, D (- - - -)
 static void op_ld_d_d(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD D, D\n");
+    gbc->registers->D = gbc->registers->D;
 }
 
 // 0x53: LD D, E (- - - -)
 static void op_ld_d_e(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD D, E\n");
+    gbc->registers->D = gbc->registers->E;
 }
 
 // 0x54: LD D, H (- - - -)
 static void op_ld_d_h(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD D, H\n");
+    gbc->registers->D = gbc->registers->H;
 }
 
 // 0x55: LD D, L (- - - -)
 static void op_ld_d_l(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD D, L\n");
+    gbc->registers->D = gbc->registers->L;
 }
 
 // 0x56: LD D, (HL) (- - - -)
 static void op_ld_d_hlp(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD D, (HL)\n");
+    gbc->registers->D = read_byte(gbc->ram, gbc->registers->HL);
 }
 
 // 0x57: LD D, A (- - - -)
@@ -608,37 +679,37 @@ static void op_ld_d_a(gbc_system *gbc) {
 
 // 0x58: LD E, B (- - - -)
 static void op_ld_e_b(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD E, B\n");
+    gbc->registers->E = gbc->registers->B;
 }
 
 // 0x59: LD E, C (- - - -)
 static void op_ld_e_c(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD E, C\n");
+    gbc->registers->E = gbc->registers->C;
 }
 
 // 0x5A: LD E, D (- - - -)
 static void op_ld_e_d(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD E, D\n");
+    gbc->registers->E = gbc->registers->D;
 }
 
 // 0x5B: LD E, E (- - - -)
 static void op_ld_e_e(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD E, E\n");
+    gbc->registers->E = gbc->registers->E;
 }
 
 // 0x5C: LD E, H (- - - -)
 static void op_ld_e_h(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD E, H\n");
+    gbc->registers->E = gbc->registers->H;
 }
 
 // 0x5D: LD E, L (- - - -)
 static void op_ld_e_l(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD E, L\n");
+    gbc->registers->E = gbc->registers->L;
 }
 
 // 0x5E: LD E, (HL) (- - - -)
 static void op_ld_e_hlp(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD E, (HL)\n");
+    gbc->registers->E = read_byte(gbc->ram, gbc->registers->HL);
 }
 
 // 0x5F: LD E, A (- - - -)
@@ -648,37 +719,37 @@ static void op_ld_e_a(gbc_system *gbc) {
 
 // 0x60: LD H, B (- - - -)
 static void op_ld_h_b(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD H, B\n");
+    gbc->registers->H = gbc->registers->B;
 }
 
 // 0x61: LD H, C (- - - -)
 static void op_ld_h_c(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD H, C\n");
+    gbc->registers->H = gbc->registers->C;
 }
 
 // 0x62: LD H, D (- - - -)
 static void op_ld_h_d(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD H, D\n");
+    gbc->registers->H = gbc->registers->D;
 }
 
 // 0x63: LD H, E (- - - -)
 static void op_ld_h_e(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD H, E\n");
+    gbc->registers->H = gbc->registers->E;
 }
 
 // 0x64: LD H, H (- - - -)
 static void op_ld_h_h(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD H, H\n");
+    gbc->registers->H = gbc->registers->H;
 }
 
 // 0x65: LD H, L (- - - -)
 static void op_ld_h_l(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD H, L\n");
+    gbc->registers->H = gbc->registers->L;
 }
 
 // 0x66: LD H, (HL) (- - - -)
 static void op_ld_h_hlp(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD H, (HL)\n");
+    gbc->registers->H = read_byte(gbc->ram, gbc->registers->HL);
 }
 
 // 0x67: LD H, A (- - - -)
@@ -688,37 +759,37 @@ static void op_ld_h_a(gbc_system *gbc) {
 
 // 0x68: LD L, B (- - - -)
 static void op_ld_l_b(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD L, B\n");
+    gbc->registers->L = gbc->registers->B;
 }
 
 // 0x69: LD L, C (- - - -)
 static void op_ld_l_c(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD L, C\n");
+    gbc->registers->L = gbc->registers->C;
 }
 
 // 0x6A: LD L, D (- - - -)
 static void op_ld_l_d(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD L, D\n");
+    gbc->registers->L = gbc->registers->D;
 }
 
 // 0x6B: LD L, E (- - - -)
 static void op_ld_l_e(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD L, E\n");
+    gbc->registers->L = gbc->registers->E;
 }
 
 // 0x6C: LD L, H (- - - -)
 static void op_ld_l_h(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD L, H\n");
+    gbc->registers->L = gbc->registers->H;
 }
 
 // 0x6D: LD L, L (- - - -)
 static void op_ld_l_l(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD L, L\n");
+    gbc->registers->L = gbc->registers->L;
 }
 
 // 0x6E: LD L, (HL) (- - - -)
 static void op_ld_l_hlp(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD L, (HL)\n");
+    gbc->registers->L = read_byte(gbc->ram, gbc->registers->HL);
 }
 
 // 0x6F: LD L, A (- - - -)
@@ -728,32 +799,32 @@ static void op_ld_l_a(gbc_system *gbc) {
 
 // 0x70: LD (HL), B (- - - -)
 static void op_ld_hlp_b(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD (HL), B\n");
+    write_byte(gbc->ram, gbc->registers->HL, gbc->registers->B);
 }
 
 // 0x71: LD (HL), C (- - - -)
 static void op_ld_hlp_c(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD (HL), C\n");
+    write_byte(gbc->ram, gbc->registers->HL, gbc->registers->C);
 }
 
 // 0x72: LD (HL), D (- - - -)
 static void op_ld_hlp_d(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD (HL), D\n");
+    write_byte(gbc->ram, gbc->registers->HL, gbc->registers->D);
 }
 
 // 0x73: LD (HL), E (- - - -)
 static void op_ld_hlp_e(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD (HL), E\n");
+    write_byte(gbc->ram, gbc->registers->HL, gbc->registers->E);
 }
 
 // 0x74: LD (HL), H (- - - -)
 static void op_ld_hlp_h(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD (HL), H\n");
+    write_byte(gbc->ram, gbc->registers->HL, gbc->registers->H);
 }
 
 // 0x75: LD (HL), L (- - - -)
 static void op_ld_hlp_l(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD (HL), L\n");
+    write_byte(gbc->ram, gbc->registers->HL, gbc->registers->L);
 }
 
 // 0x76: HALT (- - - -)
@@ -848,162 +919,194 @@ static void op_add_a_a(gbc_system *gbc) {
 
 // 0x88: ADC A, B (Z 0 H C)
 static void op_adc_a_b(gbc_system *gbc) {
-    printf("Unimplemented Instruction: ADC A, B\n");
+    gbc->registers->A = add_byte(gbc->registers->A, 
+                                 gbc->registers->B + get_flag(FLAG_CARRY, gbc->registers->F),
+                                 &gbc->registers->F);
 }
 
 // 0x89: ADC A, C (Z 0 H C)
 static void op_adc_a_c(gbc_system *gbc) {
-    printf("Unimplemented Instruction: ADC A, C\n");
+    gbc->registers->A = add_byte(gbc->registers->A, 
+                                 gbc->registers->C + get_flag(FLAG_CARRY, gbc->registers->F),
+                                 &gbc->registers->F);
 }
 
 // 0x8A: ADC A, D (Z 0 H C)
 static void op_adc_a_d(gbc_system *gbc) {
-    printf("Unimplemented Instruction: ADC A, D\n");
+    gbc->registers->A = add_byte(gbc->registers->A, 
+                                 gbc->registers->D + get_flag(FLAG_CARRY, gbc->registers->F),
+                                 &gbc->registers->F);
 }
 
 // 0x8B: ADC A, E (Z 0 H C)
 static void op_adc_a_e(gbc_system *gbc) {
-    printf("Unimplemented Instruction: ADC A, E\n");
+    gbc->registers->A = add_byte(gbc->registers->A, 
+                                 gbc->registers->E + get_flag(FLAG_CARRY, gbc->registers->F),
+                                 &gbc->registers->F);
 }
 
 // 0x8C: ADC A, H (Z 0 H C)
 static void op_adc_a_h(gbc_system *gbc) {
-    printf("Unimplemented Instruction: ADC A, H\n");
+    gbc->registers->A = add_byte(gbc->registers->A, 
+                                 gbc->registers->H + get_flag(FLAG_CARRY, gbc->registers->F),
+                                 &gbc->registers->F);
 }
 
 // 0x8D: ADC A, L (Z 0 H C)
 static void op_adc_a_l(gbc_system *gbc) {
-    printf("Unimplemented Instruction: ADC A, L\n");
+    gbc->registers->A = add_byte(gbc->registers->A, 
+                                 gbc->registers->L + get_flag(FLAG_CARRY, gbc->registers->F),
+                                 &gbc->registers->F);
 }
 
 // 0x8E: ADC A, (HL) (Z 0 H C)
 static void op_adc_a_hlp(gbc_system *gbc) {
-    printf("Unimplemented Instruction: ADC A, (HL)\n");
+    gbc->registers->A = add_byte(gbc->registers->A, 
+                                 read_byte(gbc->ram, gbc->registers->HL) + get_flag(FLAG_CARRY, gbc->registers->F),
+                                 &gbc->registers->F);
 }
 
 // 0x8F: ADC A, A (Z 0 H C)
 static void op_adc_a_a(gbc_system *gbc) {
-    printf("Unimplemented Instruction: ADC A, A\n");
+    gbc->registers->A = add_byte(gbc->registers->A, 
+                                 gbc->registers->A + get_flag(FLAG_CARRY, gbc->registers->F),
+                                 &gbc->registers->F);
 }
 
 // 0x90: SUB B (Z 1 H C)
 static void op_sub_b(gbc_system *gbc) {
-    printf("Unimplemented Instruction: SUB B\n");
+    gbc->registers->A = sub_byte(gbc->registers->A, gbc->registers->B, &gbc->registers->F);
 }
 
 // 0x91: SUB C (Z 1 H C)
 static void op_sub_c(gbc_system *gbc) {
-    printf("Unimplemented Instruction: SUB C\n");
+    gbc->registers->A = sub_byte(gbc->registers->A, gbc->registers->C, &gbc->registers->F);
 }
 
 // 0x92: SUB D (Z 1 H C)
 static void op_sub_d(gbc_system *gbc) {
-    printf("Unimplemented Instruction: SUB D\n");
+    gbc->registers->A = sub_byte(gbc->registers->A, gbc->registers->D, &gbc->registers->F);
 }
 
 // 0x93: SUB E (Z 1 H C)
 static void op_sub_e(gbc_system *gbc) {
-    printf("Unimplemented Instruction: SUB E\n");
+    gbc->registers->A = sub_byte(gbc->registers->A, gbc->registers->E, &gbc->registers->F);
 }
 
 // 0x94: SUB H (Z 1 H C)
 static void op_sub_h(gbc_system *gbc) {
-    printf("Unimplemented Instruction: SUB H\n");
+    gbc->registers->A = sub_byte(gbc->registers->A, gbc->registers->H, &gbc->registers->F);
 }
 
 // 0x95: SUB L (Z 1 H C)
 static void op_sub_l(gbc_system *gbc) {
-    printf("Unimplemented Instruction: SUB L\n");
+    gbc->registers->A = sub_byte(gbc->registers->A, gbc->registers->L, &gbc->registers->F);
 }
 
 // 0x96: SUB (HL) (Z 1 H C)
 static void op_sub_hlp(gbc_system *gbc) {
-    printf("Unimplemented Instruction: SUB (HL)\n");
+    gbc->registers->A = sub_byte(gbc->registers->A, read_byte(gbc->ram, gbc->registers->HL), &gbc->registers->F);
 }
 
 // 0x97: SUB A (Z 1 H C)
 static void op_sub_a(gbc_system *gbc) {
-    printf("Unimplemented Instruction: SUB A\n");
+    gbc->registers->A = sub_byte(gbc->registers->A, gbc->registers->A, &gbc->registers->F);
 }
 
 // 0x98: SBC A, B (Z 1 H C)
 static void op_sbc_a_b(gbc_system *gbc) {
-    printf("Unimplemented Instruction: SBC A, B\n");
+    gbc->registers->A = sub_byte(gbc->registers->A, 
+                                 gbc->registers->B + get_flag(FLAG_CARRY, gbc->registers->F),
+                                 &gbc->registers->F);
 }
 
 // 0x99: SBC A, C (Z 1 H C)
 static void op_sbc_a_c(gbc_system *gbc) {
-    printf("Unimplemented Instruction: SBC A, C\n");
+    gbc->registers->A = sub_byte(gbc->registers->A, 
+                                 gbc->registers->C + get_flag(FLAG_CARRY, gbc->registers->F),
+                                 &gbc->registers->F);
 }
 
 // 0x9A: SBC A, D (Z 1 H C)
 static void op_sbc_a_d(gbc_system *gbc) {
-    printf("Unimplemented Instruction: SBC A, D\n");
+    gbc->registers->A = sub_byte(gbc->registers->A, 
+                                 gbc->registers->D + get_flag(FLAG_CARRY, gbc->registers->F),
+                                 &gbc->registers->F);
 }
 
 // 0x9B: SBC A, E (Z 1 H C)
 static void op_sbc_a_e(gbc_system *gbc) {
-    printf("Unimplemented Instruction: SBC A, E\n");
+    gbc->registers->A = sub_byte(gbc->registers->A, 
+                                 gbc->registers->E + get_flag(FLAG_CARRY, gbc->registers->F),
+                                 &gbc->registers->F);
 }
 
 // 0x9C: SBC A, H (Z 1 H C)
 static void op_sbc_a_h(gbc_system *gbc) {
-    printf("Unimplemented Instruction: SBC A, H\n");
+    gbc->registers->A = sub_byte(gbc->registers->A, 
+                                 gbc->registers->H + get_flag(FLAG_CARRY, gbc->registers->F),
+                                 &gbc->registers->F);
 }
 
 // 0x9D: SBC A, L (Z 1 H C)
 static void op_sbc_a_l(gbc_system *gbc) {
-    printf("Unimplemented Instruction: SBC A, L\n");
+    gbc->registers->A = sub_byte(gbc->registers->A, 
+                                 gbc->registers->L + get_flag(FLAG_CARRY, gbc->registers->F),
+                                 &gbc->registers->F);
 }
 
 // 0x9E: SBC A, (HL) (Z 1 H C)
 static void op_sbc_a_hlp(gbc_system *gbc) {
-    printf("Unimplemented Instruction: SBC A, (HL)\n");
+    gbc->registers->A = sub_byte(gbc->registers->A, 
+                                 read_byte(gbc->ram, gbc->registers->HL) + get_flag(FLAG_CARRY, gbc->registers->F),
+                                 &gbc->registers->F);
 }
 
 // 0x9F: SBC A, A (Z 1 H C)
 static void op_sbc_a_a(gbc_system *gbc) {
-    printf("Unimplemented Instruction: SBC A, A\n");
+    gbc->registers->A = sub_byte(gbc->registers->A, 
+                                 gbc->registers->A + get_flag(FLAG_CARRY, gbc->registers->F),
+                                 &gbc->registers->F);
 }
 
 // 0xA0: AND B (Z 0 1 0)
 static void op_and_b(gbc_system *gbc) {
-    printf("Unimplemented Instruction: AND B\n");
+    gbc->registers->A = and(gbc->registers->A, gbc->registers->B, &gbc->registers->F);
 }
 
 // 0xA1: AND C (Z 0 1 0)
 static void op_and_c(gbc_system *gbc) {
-    printf("Unimplemented Instruction: AND C\n");
+    gbc->registers->A = and(gbc->registers->A, gbc->registers->C, &gbc->registers->F);
 }
 
 // 0xA2: AND D (Z 0 1 0)
 static void op_and_d(gbc_system *gbc) {
-    printf("Unimplemented Instruction: AND D\n");
+    gbc->registers->A = and(gbc->registers->A, gbc->registers->D, &gbc->registers->F);
 }
 
 // 0xA3: AND E (Z 0 1 0)
 static void op_and_e(gbc_system *gbc) {
-    printf("Unimplemented Instruction: AND E\n");
+    gbc->registers->A = and(gbc->registers->A, gbc->registers->E, &gbc->registers->F);
 }
 
 // 0xA4: AND H (Z 0 1 0)
 static void op_and_h(gbc_system *gbc) {
-    printf("Unimplemented Instruction: AND H\n");
+    gbc->registers->A = and(gbc->registers->A, gbc->registers->H, &gbc->registers->F);
 }
 
 // 0xA5: AND L (Z 0 1 0)
 static void op_and_l(gbc_system *gbc) {
-    printf("Unimplemented Instruction: AND L\n");
+    gbc->registers->A = and(gbc->registers->A, gbc->registers->L, &gbc->registers->F);
 }
 
 // 0xA6: AND (HL) (Z 0 1 0)
 static void op_and_hlp(gbc_system *gbc) {
-    printf("Unimplemented Instruction: AND (HL)\n");
+    gbc->registers->A = and(gbc->registers->A, read_byte(gbc->ram, gbc->registers->HL), &gbc->registers->F);
 }
 
 // 0xA7: AND A (Z 0 1 0)
 static void op_and_a(gbc_system *gbc) {
-    printf("Unimplemented Instruction: AND A\n");
+    gbc->registers->A = and(gbc->registers->A, gbc->registers->A, &gbc->registers->F);
 }
 
 // 0xA8: XOR B (Z 0 0 0)
@@ -1050,42 +1153,42 @@ static void op_xor_a(gbc_system *gbc) {
 
 // 0xB0: OR B (Z 0 0 0)
 static void op_or_b(gbc_system *gbc) {
-    printf("Unimplemented Instruction: OR B\n");
+    gbc->registers->A = or(gbc->registers->A, gbc->registers->B, &gbc->registers->F);
 }
 
 // 0xB1: OR C (Z 0 0 0)
 static void op_or_c(gbc_system *gbc) {
-    printf("Unimplemented Instruction: OR C\n");
+    gbc->registers->A = or(gbc->registers->A, gbc->registers->C, &gbc->registers->F);
 }
 
 // 0xB2: OR D (Z 0 0 0)
 static void op_or_d(gbc_system *gbc) {
-    printf("Unimplemented Instruction: OR D\n");
+    gbc->registers->A = or(gbc->registers->A, gbc->registers->D, &gbc->registers->F);
 }
 
 // 0xB3: OR E (Z 0 0 0)
 static void op_or_e(gbc_system *gbc) {
-    printf("Unimplemented Instruction: OR E\n");
+    gbc->registers->A = or(gbc->registers->A, gbc->registers->E, &gbc->registers->F);
 }
 
 // 0xB4: OR H (Z 0 0 0)
 static void op_or_h(gbc_system *gbc) {
-    printf("Unimplemented Instruction: OR H\n");
+    gbc->registers->A = or(gbc->registers->A, gbc->registers->H, &gbc->registers->F);
 }
 
 // 0xB5: OR L (Z 0 0 0)
 static void op_or_l(gbc_system *gbc) {
-    printf("Unimplemented Instruction: OR L\n");
+    gbc->registers->A = or(gbc->registers->A, gbc->registers->L, &gbc->registers->F);
 }
 
 // 0xB6: OR (HL) (Z 0 0 0)
 static void op_or_hlp(gbc_system *gbc) {
-    printf("Unimplemented Instruction: OR (HL)\n");
+    gbc->registers->A = or(gbc->registers->A, read_byte(gbc->ram, gbc->registers->HL), &gbc->registers->F);
 }
 
 // 0xB7: OR A (Z 0 0 0)
 static void op_or_a(gbc_system *gbc) {
-    printf("Unimplemented Instruction: OR A\n");
+    gbc->registers->A = or(gbc->registers->A, gbc->registers->A, &gbc->registers->F);
 }
 
 // 0xB8: CP B (Z 1 H C)
@@ -1132,7 +1235,9 @@ static void op_cp_a(gbc_system *gbc) {
 
 // 0xC0: RET NZ (- - - -)
 static void op_ret_nz(gbc_system *gbc) {
-    printf("Unimplemented Instruction: RET NZ\n");
+    if(!get_flag(FLAG_ZERO, gbc->registers->F)) {
+        op_ret(gbc); 
+    } 
 }
 
 // 0xC1: POP BC (- - - -)
@@ -1142,7 +1247,9 @@ static void op_pop_bc(gbc_system *gbc) {
 
 // 0xC2: JP NZ, a16 (- - - -)
 static void op_jp_nz_a16(gbc_system *gbc, unsigned short operand) {
-    printf("Unimplemented Instruction: JP NZ, a16\n");
+    if(!get_flag(FLAG_ZERO, gbc->registers->F)) {
+        gbc->registers->PC = operand; 
+    } 
 }
 
 // 0xC3: JP a16 (- - - -)
@@ -1152,17 +1259,20 @@ static void op_jp_a16(gbc_system *gbc, unsigned short operand) {
 
 // 0xC4: CALL NZ, a16 (- - - -)
 static void op_call_nz_a16(gbc_system *gbc, unsigned short operand) {
-    printf("Unimplemented Instruction: CALL NZ, a16\n");
+    if(!get_flag(FLAG_ZERO, gbc->registers->F)) {
+        op_call_a16(gbc, operand); 
+    } 
 }
 
 // 0xC5: PUSH BC (- - - -)
 static void op_push_bc(gbc_system *gbc) {
-    printf("Unimplemented Instruction: PUSH BC\n");
+    stack_push(gbc->registers->B, gbc->ram, &gbc->registers->SP);
+    stack_push(gbc->registers->C, gbc->ram, &gbc->registers->SP);
 }
 
 // 0xC6: ADD A, d8 (Z 0 H C)
 static void op_add_a_d8(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: ADD A, d8\n");
+    gbc->registers->A = add_byte(gbc->registers->A, operand, &gbc->registers->F);
 }
 
 // 0xC7: RST 00H (- - - -)
@@ -1173,7 +1283,9 @@ static void op_rst_00h(gbc_system *gbc) {
 
 // 0xC8: RET Z (- - - -)
 static void op_ret_z(gbc_system *gbc) {
-    printf("Unimplemented Instruction: RET Z\n");
+    if(get_flag(FLAG_ZERO, gbc->registers->F)) {
+        op_ret(gbc); 
+    } 
 }
 
 // 0xC9: RET (- - - -)
@@ -1183,17 +1295,21 @@ static void op_ret(gbc_system *gbc) {
 
 // 0xCA: JP Z, a16 (- - - -)
 static void op_jp_z_a16(gbc_system *gbc, unsigned short operand) {
-    printf("Unimplemented Instruction: JP Z, a16\n");
+    if(get_flag(FLAG_ZERO, gbc->registers->F)) {
+        gbc->registers->PC = operand; 
+    } 
 }
 
 // 0xCB: PREFIX CB (- - - -)
 static void op_prefix_cb(gbc_system *gbc) {
-    printf("Unimplemented Instruction: PREFIX CB\n");
+    // Do nothing, placeholder function
 }
 
 // 0xCC: CALL Z, a16 (- - - -)
 static void op_call_z_a16(gbc_system *gbc, unsigned short operand) {
-    printf("Unimplemented Instruction: CALL Z, a16\n");
+    if(get_flag(FLAG_ZERO, gbc->registers->F)) {
+        op_call_a16(gbc, operand); 
+    } 
 }
 
 // 0xCD: CALL a16 (- - - -)
@@ -1205,7 +1321,9 @@ static void op_call_a16(gbc_system *gbc, unsigned short operand) {
 
 // 0xCE: ADC A, d8 (Z 0 H C)
 static void op_adc_a_d8(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: ADC A, d8\n");
+    gbc->registers->A = add_byte(gbc->registers->A,
+                                 operand + get_flag(FLAG_CARRY, gbc->registers->F),
+                                 &gbc->registers->F);
 }
 
 // 0xCF: RST 08H (- - - -)
@@ -1216,7 +1334,9 @@ static void op_rst_08h(gbc_system *gbc) {
 
 // 0xD0: RET NC (- - - -)
 static void op_ret_nc(gbc_system *gbc) {
-    printf("Unimplemented Instruction: RET NC\n");
+    if(!get_flag(FLAG_CARRY, gbc->registers->F)) {
+        op_ret(gbc); 
+    }
 }
 
 // 0xD1: POP DE (- - - -)
@@ -1226,22 +1346,27 @@ static void op_pop_de(gbc_system *gbc) {
 
 // 0xD2: JP NC, a16 (- - - -)
 static void op_jp_nc_a16(gbc_system *gbc, unsigned short operand) {
-    printf("Unimplemented Instruction: JP NC, a16\n");
+    if(!get_flag(FLAG_CARRY, gbc->registers->F)) {
+        gbc->registers->PC = operand; 
+    }
 }
 
 // 0xD4: CALL NC, a16 (- - - -)
 static void op_call_nc_a16(gbc_system *gbc, unsigned short operand) {
-    printf("Unimplemented Instruction: CALL NC, a16\n");
+    if(!get_flag(FLAG_CARRY, gbc->registers->F)) {
+        op_call_a16(gbc, operand); 
+    }
 }
 
 // 0xD5: PUSH DE (- - - -)
 static void op_push_de(gbc_system *gbc) {
-    printf("Unimplemented Instruction: PUSH DE\n");
+    stack_push(gbc->registers->D, gbc->ram, &gbc->registers->SP);
+    stack_push(gbc->registers->E, gbc->ram, &gbc->registers->SP);
 }
 
 // 0xD6: SUB d8 (Z 1 H C)
 static void op_sub_d8(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SUB d8\n");
+    gbc->registers->A = sub_byte(gbc->registers->A, operand, &gbc->registers->F);
 }
 
 // 0xD7: RST 10H (- - - -)
@@ -1252,27 +1377,36 @@ static void op_rst_10h(gbc_system *gbc) {
 
 // 0xD8: RET C (- - - -)
 static void op_ret_c(gbc_system *gbc) {
-    printf("Unimplemented Instruction: RET C\n");
+    if(get_flag(FLAG_CARRY, gbc->registers->F)) {
+        op_ret(gbc); 
+    }
 }
 
 // 0xD9: RETI (- - - -)
 static void op_reti(gbc_system *gbc) {
-    printf("Unimplemented Instruction: RETI\n");
+    op_ret(gbc);
+    op_ei(gbc);
 }
 
 // 0xDA: JP C, a16 (- - - -)
 static void op_jp_c_a16(gbc_system *gbc, unsigned short operand) {
-    printf("Unimplemented Instruction: JP C, a16\n");
+    if(get_flag(FLAG_CARRY, gbc->registers->F)) {
+        gbc->registers->PC = operand; 
+    }
 }
 
 // 0xDC: CALL C, a16 (- - - -)
 static void op_call_c_a16(gbc_system *gbc, unsigned short operand) {
-    printf("Unimplemented Instruction: CALL C, a16\n");
+    if(get_flag(FLAG_CARRY, gbc->registers->F)) {
+        op_call_a16(gbc, operand); 
+    }
 }
 
 // 0xDE: SBC A, d8 (Z 1 H C)
 static void op_sbc_a_d8(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SBC A, d8\n");
+    gbc->registers->A = sub_byte(gbc->registers->A,
+                                 operand + get_flag(FLAG_CARRY, gbc->registers->F),
+                                 &gbc->registers->F);
 }
 
 // 0xDF: RST 18H (- - - -)
@@ -1293,17 +1427,18 @@ static void op_pop_hl(gbc_system *gbc) {
 
 // 0xE2: LD (C), A (- - - -)
 static void op_ld_cp_a(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: LD (C), A\n");
+    write_byte(gbc->ram, 0xFF00 + gbc->registers->C, gbc->registers->A);
 }
 
 // 0xE5: PUSH HL (- - - -)
 static void op_push_hl(gbc_system *gbc) {
-    printf("Unimplemented Instruction: PUSH HL\n");
+    stack_push(gbc->registers->H, gbc->ram, &gbc->registers->SP);
+    stack_push(gbc->registers->L, gbc->ram, &gbc->registers->SP);
 }
 
 // 0xE6: AND d8 (Z 0 1 0)
 static void op_and_d8(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: AND d8\n");
+    gbc->registers->A = and(gbc->registers->A, operand, &gbc->registers->F);
 }
 
 // 0xE7: RST 20H (- - - -)
@@ -1314,7 +1449,7 @@ static void op_rst_20h(gbc_system *gbc) {
 
 // 0xE8: ADD SP, r8 (0 0 H C)
 static void op_add_sp_r8(gbc_system *gbc, char operand) {
-    printf("Unimplemented Instruction: ADD SP, r8\n");
+    gbc->registers->SP = add_short(gbc->registers->SP, operand, &gbc->registers->F); 
 }
 
 // 0xE9: JP (HL) (- - - -)
@@ -1350,7 +1485,7 @@ static void op_pop_af(gbc_system *gbc) {
 
 // 0xF2: LD A, (C) (- - - -)
 static void op_ld_a_cp(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: LD A, (C)\n");
+    gbc->registers->A = read_byte(gbc->ram, 0xFF00 + gbc->registers->C);
 }
 
 // 0xF3: DI (- - - -)
@@ -1360,12 +1495,13 @@ static void op_di(gbc_system *gbc) {
 
 // 0xF5: PUSH AF (- - - -)
 static void op_push_af(gbc_system *gbc) {
-    printf("Unimplemented Instruction: PUSH AF\n");
+    stack_push(gbc->registers->A, gbc->ram, &gbc->registers->SP);
+    stack_push(gbc->registers->F, gbc->ram, &gbc->registers->SP);
 }
 
 // 0xF6: OR d8 (Z 0 0 0)
 static void op_or_d8(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: OR d8\n");
+    gbc->registers->A = or(gbc->registers->A, operand, &gbc->registers->F);
 }
 
 // 0xF7: RST 30H (- - - -)
@@ -1381,7 +1517,7 @@ static void op_ld_hl_sppr8(gbc_system *gbc, char operand) {
 
 // 0xF9: LD SP, HL (- - - -)
 static void op_ld_sp_hl(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD SP, HL\n");
+    gbc->registers->SP = gbc->registers->HL;
 }
 
 // 0xFA: LD A, (a16) (- - - -)
@@ -1665,1283 +1801,1331 @@ gbc_instr instructions[INSTRUCTION_COUNT] = {
 };
 
 // 0xCB00: RLC B (Z 0 0 C)
-static void op_rlc_b(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RLC B\n");
+static void op_rlc_b(gbc_system *gbc) {
+    gbc->registers->B = rotate_left(gbc->registers->B, &gbc->registers->F);
 }
 
 // 0xCB01: RLC C (Z 0 0 C)
-static void op_rlc_c(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RLC C\n");
+static void op_rlc_c(gbc_system *gbc) {
+    gbc->registers->C = rotate_left(gbc->registers->C, &gbc->registers->F);
 }
 
 // 0xCB02: RLC D (Z 0 0 C)
-static void op_rlc_d(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RLC D\n");
+static void op_rlc_d(gbc_system *gbc) {
+    gbc->registers->D = rotate_left(gbc->registers->D, &gbc->registers->F);
 }
 
 // 0xCB03: RLC E (Z 0 0 C)
-static void op_rlc_e(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RLC E\n");
+static void op_rlc_e(gbc_system *gbc) {
+    gbc->registers->E = rotate_left(gbc->registers->E, &gbc->registers->F);
 }
 
 // 0xCB04: RLC H (Z 0 0 C)
-static void op_rlc_h(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RLC H\n");
+static void op_rlc_h(gbc_system *gbc) {
+    gbc->registers->H = rotate_left(gbc->registers->H, &gbc->registers->F);
 }
 
 // 0xCB05: RLC L (Z 0 0 C)
-static void op_rlc_l(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RLC L\n");
+static void op_rlc_l(gbc_system *gbc) {
+    gbc->registers->L = rotate_left(gbc->registers->L, &gbc->registers->F);
 }
 
 // 0xCB06: RLC (HL) (Z 0 0 C)
-static void op_rlc_hlp(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RLC (HL)\n");
+static void op_rlc_hlp(gbc_system *gbc) {
+    write_byte(gbc->ram,
+               gbc->registers->HL,
+               rotate_left(read_byte(gbc->ram, gbc->registers->HL), &gbc->registers->F));
 }
 
 // 0xCB07: RLC A (Z 0 0 C)
-static void op_rlc_a(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RLC A\n");
+static void op_rlc_a(gbc_system *gbc) {
+    gbc->registers->A = rotate_left(gbc->registers->A, &gbc->registers->F);
 }
 
 // 0xCB08: RRC B (Z 0 0 C)
-static void op_rrc_b(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RRC B\n");
+static void op_rrc_b(gbc_system *gbc) {
+    gbc->registers->B = rotate_right(gbc->registers->B, &gbc->registers->F);
 }
 
 // 0xCB09: RRC C (Z 0 0 C)
-static void op_rrc_c(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RRC C\n");
+static void op_rrc_c(gbc_system *gbc) {
+    gbc->registers->C = rotate_right(gbc->registers->C, &gbc->registers->F);
 }
 
 // 0xCB0A: RRC D (Z 0 0 C)
-static void op_rrc_d(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RRC D\n");
+static void op_rrc_d(gbc_system *gbc) {
+    gbc->registers->D = rotate_right(gbc->registers->D, &gbc->registers->F);
 }
 
 // 0xCB0B: RRC E (Z 0 0 C)
-static void op_rrc_e(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RRC E\n");
+static void op_rrc_e(gbc_system *gbc) {
+    gbc->registers->E = rotate_right(gbc->registers->E, &gbc->registers->F);
 }
 
 // 0xCB0C: RRC H (Z 0 0 C)
-static void op_rrc_h(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RRC H\n");
+static void op_rrc_h(gbc_system *gbc) {
+    gbc->registers->H = rotate_right(gbc->registers->H, &gbc->registers->F);
 }
 
 // 0xCB0D: RRC L (Z 0 0 C)
-static void op_rrc_l(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RRC L\n");
+static void op_rrc_l(gbc_system *gbc) {
+    gbc->registers->L = rotate_right(gbc->registers->L, &gbc->registers->F);
 }
 
 // 0xCB0E: RRC (HL) (Z 0 0 C)
-static void op_rrc_hlp(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RRC (HL)\n");
+static void op_rrc_hlp(gbc_system *gbc) {
+    write_byte(gbc->ram,
+               gbc->registers->HL,
+               rotate_right(read_byte(gbc->ram, gbc->registers->HL), &gbc->registers->F));
 }
 
 // 0xCB0F: RRC A (Z 0 0 C)
-static void op_rrc_a(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RRC A\n");
+static void op_rrc_a(gbc_system *gbc) {
+    gbc->registers->C = rotate_right(gbc->registers->C, &gbc->registers->F);
 }
 
 // 0xCB10: RL B (Z 0 0 C)
-static void op_rl_b(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RL B\n");
+static void op_rl_b(gbc_system *gbc) {
+    gbc->registers->B = rotate_left_carry(gbc->registers->B, &gbc->registers->F);
 }
 
 // 0xCB11: RL C (Z 0 0 C)
-static void op_rl_c(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RL C\n");
+static void op_rl_c(gbc_system *gbc) {
+    gbc->registers->C = rotate_left_carry(gbc->registers->C, &gbc->registers->F);
 }
 
 // 0xCB12: RL D (Z 0 0 C)
-static void op_rl_d(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RL D\n");
+static void op_rl_d(gbc_system *gbc) {
+    gbc->registers->D = rotate_left_carry(gbc->registers->D, &gbc->registers->F);
 }
 
 // 0xCB13: RL E (Z 0 0 C)
-static void op_rl_e(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RL E\n");
+static void op_rl_e(gbc_system *gbc) {
+    gbc->registers->E = rotate_left_carry(gbc->registers->E, &gbc->registers->F);
 }
 
 // 0xCB14: RL H (Z 0 0 C)
-static void op_rl_h(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RL H\n");
+static void op_rl_h(gbc_system *gbc) {
+    gbc->registers->H = rotate_left_carry(gbc->registers->H, &gbc->registers->F);
 }
 
 // 0xCB15: RL L (Z 0 0 C)
-static void op_rl_l(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RL L\n");
+static void op_rl_l(gbc_system *gbc) {
+    gbc->registers->L = rotate_left_carry(gbc->registers->L, &gbc->registers->F);
 }
 
 // 0xCB16: RL (HL) (Z 0 0 C)
-static void op_rl_hlp(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RL (HL)\n");
+static void op_rl_hlp(gbc_system *gbc) {
+    write_byte(gbc->ram,
+               gbc->registers->HL,
+               rotate_left_carry(read_byte(gbc->ram, gbc->registers->HL), &gbc->registers->F));
 }
 
 // 0xCB17: RL A (Z 0 0 C)
-static void op_rl_a(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RL A\n");
+static void op_rl_a(gbc_system *gbc) {
+    gbc->registers->A = rotate_left_carry(gbc->registers->A, &gbc->registers->F);
 }
 
 // 0xCB18: RR B (Z 0 0 C)
-static void op_rr_b(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RR B\n");
+static void op_rr_b(gbc_system *gbc) {
+    gbc->registers->B = rotate_right_carry(gbc->registers->B, &gbc->registers->F);
 }
 
 // 0xCB19: RR C (Z 0 0 C)
-static void op_rr_c(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RR C\n");
+static void op_rr_c(gbc_system *gbc) {
+    gbc->registers->C = rotate_right_carry(gbc->registers->C, &gbc->registers->F);
 }
 
 // 0xCB1A: RR D (Z 0 0 C)
-static void op_rr_d(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RR D\n");
+static void op_rr_d(gbc_system *gbc) {
+    gbc->registers->D = rotate_right_carry(gbc->registers->D, &gbc->registers->F);
 }
 
 // 0xCB1B: RR E (Z 0 0 C)
-static void op_rr_e(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RR E\n");
+static void op_rr_e(gbc_system *gbc) {
+    gbc->registers->E = rotate_right_carry(gbc->registers->E, &gbc->registers->F);
 }
 
 // 0xCB1C: RR H (Z 0 0 C)
-static void op_rr_h(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RR H\n");
+static void op_rr_h(gbc_system *gbc) {
+    gbc->registers->H = rotate_right_carry(gbc->registers->H, &gbc->registers->F);
 }
 
 // 0xCB1D: RR L (Z 0 0 C)
-static void op_rr_l(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RR L\n");
+static void op_rr_l(gbc_system *gbc) {
+    gbc->registers->L = rotate_right_carry(gbc->registers->L, &gbc->registers->F);
 }
 
 // 0xCB1E: RR (HL) (Z 0 0 C)
-static void op_rr_hlp(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RR (HL)\n");
+static void op_rr_hlp(gbc_system *gbc) {
+    write_byte(gbc->ram,
+               gbc->registers->HL,
+               rotate_right_carry(read_byte(gbc->ram, gbc->registers->HL), &gbc->registers->F));
 }
 
 // 0xCB1F: RR A (Z 0 0 C)
-static void op_rr_a(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RR A\n");
+static void op_rr_a(gbc_system *gbc) {
+    gbc->registers->A = rotate_right_carry(gbc->registers->A, &gbc->registers->F);
 }
 
 // 0xCB20: SLA B (Z 0 0 C)
-static void op_sla_b(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SLA B\n");
+static void op_sla_b(gbc_system *gbc) {
+    gbc->registers->B = shift_left_arith(gbc->registers->B, &gbc->registers->F);
 }
 
 // 0xCB21: SLA C (Z 0 0 C)
-static void op_sla_c(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SLA C\n");
+static void op_sla_c(gbc_system *gbc) {
+    gbc->registers->C = shift_left_arith(gbc->registers->C, &gbc->registers->F);
 }
 
 // 0xCB22: SLA D (Z 0 0 C)
-static void op_sla_d(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SLA D\n");
+static void op_sla_d(gbc_system *gbc) {
+    gbc->registers->D = shift_left_arith(gbc->registers->D, &gbc->registers->F);
 }
 
 // 0xCB23: SLA E (Z 0 0 C)
-static void op_sla_e(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SLA E\n");
+static void op_sla_e(gbc_system *gbc) {
+    gbc->registers->E = shift_left_arith(gbc->registers->E, &gbc->registers->F);
 }
 
 // 0xCB24: SLA H (Z 0 0 C)
-static void op_sla_h(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SLA H\n");
+static void op_sla_h(gbc_system *gbc) {
+    gbc->registers->H = shift_left_arith(gbc->registers->H, &gbc->registers->F);
 }
 
 // 0xCB25: SLA L (Z 0 0 C)
-static void op_sla_l(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SLA L\n");
+static void op_sla_l(gbc_system *gbc) {
+    gbc->registers->L = shift_left_arith(gbc->registers->L, &gbc->registers->F);
 }
 
 // 0xCB26: SLA (HL) (Z 0 0 C)
-static void op_sla_hlp(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SLA (HL)\n");
+static void op_sla_hlp(gbc_system *gbc) {
+    write_byte(gbc->ram,
+               gbc->registers->HL,
+               shift_left_arith(read_byte(gbc->ram, gbc->registers->HL), &gbc->registers->F));
 }
 
 // 0xCB27: SLA A (Z 0 0 C)
-static void op_sla_a(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SLA A\n");
+static void op_sla_a(gbc_system *gbc) {
+    gbc->registers->A = shift_left_arith(gbc->registers->A, &gbc->registers->F);
 }
 
 // 0xCB28: SRA B (Z 0 0 0)
-static void op_sra_b(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SRA B\n");
+static void op_sra_b(gbc_system *gbc) {
+    gbc->registers->B = shift_right_arith(gbc->registers->B, &gbc->registers->F);
 }
 
 // 0xCB29: SRA C (Z 0 0 0)
-static void op_sra_c(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SRA C\n");
+static void op_sra_c(gbc_system *gbc) {
+    gbc->registers->C = shift_right_arith(gbc->registers->C, &gbc->registers->F);
 }
 
 // 0xCB2A: SRA D (Z 0 0 0)
-static void op_sra_d(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SRA D\n");
+static void op_sra_d(gbc_system *gbc) {
+    gbc->registers->D = shift_right_arith(gbc->registers->D, &gbc->registers->F);
 }
 
 // 0xCB2B: SRA E (Z 0 0 0)
-static void op_sra_e(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SRA E\n");
+static void op_sra_e(gbc_system *gbc) {
+    gbc->registers->E = shift_right_arith(gbc->registers->E, &gbc->registers->F);
 }
 
 // 0xCB2C: SRA H (Z 0 0 0)
-static void op_sra_h(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SRA H\n");
+static void op_sra_h(gbc_system *gbc) {
+    gbc->registers->H = shift_right_arith(gbc->registers->H, &gbc->registers->F);
 }
 
 // 0xCB2D: SRA L (Z 0 0 0)
-static void op_sra_l(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SRA L\n");
+static void op_sra_l(gbc_system *gbc) {
+    gbc->registers->L = shift_right_arith(gbc->registers->L, &gbc->registers->F);
 }
 
 // 0xCB2E: SRA (HL) (Z 0 0 0)
-static void op_sra_hlp(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SRA (HL)\n");
+static void op_sra_hlp(gbc_system *gbc) {
+    write_byte(gbc->ram,
+               gbc->registers->HL,
+               shift_right_arith(read_byte(gbc->ram, gbc->registers->HL), &gbc->registers->F));
 }
 
 // 0xCB2F: SRA A (Z 0 0 0)
-static void op_sra_a(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SRA A\n");
+static void op_sra_a(gbc_system *gbc) {
+    gbc->registers->A = shift_right_arith(gbc->registers->A, &gbc->registers->F);
 }
 
 // 0xCB30: SWAP B (Z 0 0 0)
-static void op_swap_b(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SWAP B\n");
+static void op_swap_b(gbc_system *gbc) {
+    gbc->registers->B = swap(gbc->registers->B, &gbc->registers->F);
 }
 
 // 0xCB31: SWAP C (Z 0 0 0)
-static void op_swap_c(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SWAP C\n");
+static void op_swap_c(gbc_system *gbc) {
+    gbc->registers->C = swap(gbc->registers->C, &gbc->registers->F);
 }
 
 // 0xCB32: SWAP D (Z 0 0 0)
-static void op_swap_d(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SWAP D\n");
+static void op_swap_d(gbc_system *gbc) {
+    gbc->registers->D = swap(gbc->registers->D, &gbc->registers->F);
 }
 
 // 0xCB33: SWAP E (Z 0 0 0)
-static void op_swap_e(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SWAP E\n");
+static void op_swap_e(gbc_system *gbc) {
+    gbc->registers->E = swap(gbc->registers->E, &gbc->registers->F);
 }
 
 // 0xCB34: SWAP H (Z 0 0 0)
-static void op_swap_h(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SWAP H\n");
+static void op_swap_h(gbc_system *gbc) {
+    gbc->registers->H = swap(gbc->registers->H, &gbc->registers->F);
 }
 
 // 0xCB35: SWAP L (Z 0 0 0)
-static void op_swap_l(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SWAP L\n");
+static void op_swap_l(gbc_system *gbc) {
+    gbc->registers->L = swap(gbc->registers->L, &gbc->registers->F);
 }
 
 // 0xCB36: SWAP (HL) (Z 0 0 0)
-static void op_swap_hlp(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SWAP (HL)\n");
+static void op_swap_hlp(gbc_system *gbc) {
+    write_byte(gbc->ram,
+               gbc->registers->HL,
+               swap(read_byte(gbc->ram, gbc->registers->HL), &gbc->registers->F));
 }
 
 // 0xCB37: SWAP A (Z 0 0 0)
-static void op_swap_a(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SWAP A\n");
+static void op_swap_a(gbc_system *gbc) {
+    gbc->registers->A = swap(gbc->registers->A, &gbc->registers->F);
 }
 
 // 0xCB38: SRL B (Z 0 0 C)
-static void op_srl_b(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SRL B\n");
+static void op_srl_b(gbc_system *gbc) {
+    gbc->registers->B = shift_right_logic(gbc->registers->B, &gbc->registers->F); 
 }
 
 // 0xCB39: SRL C (Z 0 0 C)
-static void op_srl_c(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SRL C\n");
+static void op_srl_c(gbc_system *gbc) {
+    gbc->registers->C = shift_right_logic(gbc->registers->C, &gbc->registers->F); 
 }
 
 // 0xCB3A: SRL D (Z 0 0 C)
-static void op_srl_d(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SRL D\n");
+static void op_srl_d(gbc_system *gbc) {
+    gbc->registers->D = shift_right_logic(gbc->registers->D, &gbc->registers->F); 
 }
 
 // 0xCB3B: SRL E (Z 0 0 C)
-static void op_srl_e(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SRL E\n");
+static void op_srl_e(gbc_system *gbc) {
+    gbc->registers->E = shift_right_logic(gbc->registers->E, &gbc->registers->F); 
 }
 
 // 0xCB3C: SRL H (Z 0 0 C)
-static void op_srl_h(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SRL H\n");
+static void op_srl_h(gbc_system *gbc) {
+    gbc->registers->H = shift_right_logic(gbc->registers->H, &gbc->registers->F); 
 }
 
 // 0xCB3D: SRL L (Z 0 0 C)
-static void op_srl_l(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SRL L\n");
+static void op_srl_l(gbc_system *gbc) {
+    gbc->registers->L = shift_right_logic(gbc->registers->L, &gbc->registers->F); 
 }
 
 // 0xCB3E: SRL (HL) (Z 0 0 C)
-static void op_srl_hlp(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SRL (HL)\n");
+static void op_srl_hlp(gbc_system *gbc) {
+    write_byte(gbc->ram,
+               gbc->registers->HL,
+               shift_right_logic(read_byte(gbc->ram, gbc->registers->HL), &gbc->registers->F)); 
 }
 
 // 0xCB3F: SRL A (Z 0 0 C)
-static void op_srl_a(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SRL A\n");
+static void op_srl_a(gbc_system *gbc) {
+    gbc->registers->A = shift_right_logic(gbc->registers->A, &gbc->registers->F); 
 }
 
 // 0xCB40: BIT 0, B (Z 0 1 -)
-static void op_bit_0_b(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 0, B\n");
+static void op_bit_0_b(gbc_system *gbc) {
+    test_bit(gbc->registers->B, 0, &gbc->registers->F); 
 }
 
 // 0xCB41: BIT 0, C (Z 0 1 -)
-static void op_bit_0_c(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 0, C\n");
+static void op_bit_0_c(gbc_system *gbc) {
+    test_bit(gbc->registers->C, 0, &gbc->registers->F); 
 }
 
 // 0xCB42: BIT 0, D (Z 0 1 -)
-static void op_bit_0_d(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 0, D\n");
+static void op_bit_0_d(gbc_system *gbc) {
+    test_bit(gbc->registers->D, 0, &gbc->registers->F); 
 }
 
 // 0xCB43: BIT 0, E (Z 0 1 -)
-static void op_bit_0_e(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 0, E\n");
+static void op_bit_0_e(gbc_system *gbc) {
+    test_bit(gbc->registers->E, 0, &gbc->registers->F); 
 }
 
 // 0xCB44: BIT 0, H (Z 0 1 -)
-static void op_bit_0_h(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 0, H\n");
+static void op_bit_0_h(gbc_system *gbc) {
+    test_bit(gbc->registers->H, 0, &gbc->registers->F); 
 }
 
 // 0xCB45: BIT 0, L (Z 0 1 -)
-static void op_bit_0_l(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 0, L\n");
+static void op_bit_0_l(gbc_system *gbc) {
+    test_bit(gbc->registers->L, 0, &gbc->registers->F); 
 }
 
 // 0xCB46: BIT 0, (HL) (Z 0 1 -)
-static void op_bit_0_hlp(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 0, (HL)\n");
+static void op_bit_0_hlp(gbc_system *gbc) {
+    test_bit(read_byte(gbc->ram, gbc->registers->HL), 0, &gbc->registers->F); 
 }
 
 // 0xCB47: BIT 0, A (Z 0 1 -)
-static void op_bit_0_a(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 0, A\n");
+static void op_bit_0_a(gbc_system *gbc) {
+    test_bit(gbc->registers->A, 0, &gbc->registers->F); 
 }
 
 // 0xCB48: BIT 1, B (Z 0 1 -)
-static void op_bit_1_b(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 1, B\n");
+static void op_bit_1_b(gbc_system *gbc) {
+    test_bit(gbc->registers->B, 1, &gbc->registers->F); 
 }
 
 // 0xCB49: BIT 1, C (Z 0 1 -)
-static void op_bit_1_c(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 1, C\n");
+static void op_bit_1_c(gbc_system *gbc) {
+    test_bit(gbc->registers->C, 1, &gbc->registers->F); 
 }
 
 // 0xCB4A: BIT 1, D (Z 0 1 -)
-static void op_bit_1_d(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 1, D\n");
+static void op_bit_1_d(gbc_system *gbc) {
+    test_bit(gbc->registers->D, 1, &gbc->registers->F); 
 }
 
 // 0xCB4B: BIT 1, E (Z 0 1 -)
-static void op_bit_1_e(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 1, E\n");
+static void op_bit_1_e(gbc_system *gbc) {
+    test_bit(gbc->registers->E, 1, &gbc->registers->F); 
 }
 
 // 0xCB4C: BIT 1, H (Z 0 1 -)
-static void op_bit_1_h(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 1, H\n");
+static void op_bit_1_h(gbc_system *gbc) {
+    test_bit(gbc->registers->H, 1, &gbc->registers->F); 
 }
 
 // 0xCB4D: BIT 1, L (Z 0 1 -)
-static void op_bit_1_l(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 1, L\n");
+static void op_bit_1_l(gbc_system *gbc) {
+    test_bit(gbc->registers->L, 1, &gbc->registers->F); 
 }
 
 // 0xCB4E: BIT 1, (HL) (Z 0 1 -)
-static void op_bit_1_hlp(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 1, (HL)\n");
+static void op_bit_1_hlp(gbc_system *gbc) {
+    test_bit(read_byte(gbc->ram, gbc->registers->HL), 1, &gbc->registers->F); 
 }
 
 // 0xCB4F: BIT 1, A (Z 0 1 -)
-static void op_bit_1_a(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 1, A\n");
+static void op_bit_1_a(gbc_system *gbc) {
+    test_bit(gbc->registers->A, 1, &gbc->registers->F); 
 }
 
 // 0xCB50: BIT 2, B (Z 0 1 -)
-static void op_bit_2_b(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 2, B\n");
+static void op_bit_2_b(gbc_system *gbc) {
+    test_bit(gbc->registers->B, 2, &gbc->registers->F); 
 }
 
 // 0xCB51: BIT 2, C (Z 0 1 -)
-static void op_bit_2_c(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 2, C\n");
+static void op_bit_2_c(gbc_system *gbc) {
+    test_bit(gbc->registers->C, 2, &gbc->registers->F); 
 }
 
 // 0xCB52: BIT 2, D (Z 0 1 -)
-static void op_bit_2_d(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 2, D\n");
+static void op_bit_2_d(gbc_system *gbc) {
+    test_bit(gbc->registers->D, 2, &gbc->registers->F); 
 }
 
 // 0xCB53: BIT 2, E (Z 0 1 -)
-static void op_bit_2_e(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 2, E\n");
+static void op_bit_2_e(gbc_system *gbc) {
+    test_bit(gbc->registers->E, 2, &gbc->registers->F); 
 }
 
 // 0xCB54: BIT 2, H (Z 0 1 -)
-static void op_bit_2_h(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 2, H\n");
+static void op_bit_2_h(gbc_system *gbc) {
+    test_bit(gbc->registers->H, 2, &gbc->registers->F); 
 }
 
 // 0xCB55: BIT 2, L (Z 0 1 -)
-static void op_bit_2_l(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 2, L\n");
+static void op_bit_2_l(gbc_system *gbc) {
+    test_bit(gbc->registers->L, 2, &gbc->registers->F); 
 }
 
 // 0xCB56: BIT 2, (HL) (Z 0 1 -)
-static void op_bit_2_hlp(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 2, (HL)\n");
+static void op_bit_2_hlp(gbc_system *gbc) {
+    test_bit(read_byte(gbc->ram, gbc->registers->HL), 2, &gbc->registers->F); 
 }
 
 // 0xCB57: BIT 2, A (Z 0 1 -)
-static void op_bit_2_a(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 2, A\n");
+static void op_bit_2_a(gbc_system *gbc) {
+    test_bit(gbc->registers->A, 2, &gbc->registers->F); 
 }
 
 // 0xCB58: BIT 3, B (Z 0 1 -)
-static void op_bit_3_b(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 3, B\n");
+static void op_bit_3_b(gbc_system *gbc) {
+    test_bit(gbc->registers->B, 3, &gbc->registers->F); 
 }
 
 // 0xCB59: BIT 3, C (Z 0 1 -)
-static void op_bit_3_c(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 3, C\n");
+static void op_bit_3_c(gbc_system *gbc) {
+    test_bit(gbc->registers->C, 3, &gbc->registers->F); 
 }
 
 // 0xCB5A: BIT 3, D (Z 0 1 -)
-static void op_bit_3_d(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 3, D\n");
+static void op_bit_3_d(gbc_system *gbc) {
+    test_bit(gbc->registers->D, 3, &gbc->registers->F); 
 }
 
 // 0xCB5B: BIT 3, E (Z 0 1 -)
-static void op_bit_3_e(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 3, E\n");
+static void op_bit_3_e(gbc_system *gbc) {
+    test_bit(gbc->registers->E, 3, &gbc->registers->F); 
 }
 
 // 0xCB5C: BIT 3, H (Z 0 1 -)
-static void op_bit_3_h(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 3, H\n");
+static void op_bit_3_h(gbc_system *gbc) {
+    test_bit(gbc->registers->H, 3, &gbc->registers->F); 
 }
 
 // 0xCB5D: BIT 3, L (Z 0 1 -)
-static void op_bit_3_l(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 3, L\n");
+static void op_bit_3_l(gbc_system *gbc) {
+    test_bit(gbc->registers->L, 3, &gbc->registers->F); 
 }
 
 // 0xCB5E: BIT 3, (HL) (Z 0 1 -)
-static void op_bit_3_hlp(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 3, (HL)\n");
+static void op_bit_3_hlp(gbc_system *gbc) {
+    test_bit(read_byte(gbc->ram, gbc->registers->HL), 3, &gbc->registers->F); 
 }
 
 // 0xCB5F: BIT 3, A (Z 0 1 -)
-static void op_bit_3_a(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 3, A\n");
+static void op_bit_3_a(gbc_system *gbc) {
+    test_bit(gbc->registers->A, 3, &gbc->registers->F); 
 }
 
 // 0xCB60: BIT 4, B (Z 0 1 -)
-static void op_bit_4_b(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 4, B\n");
+static void op_bit_4_b(gbc_system *gbc) {
+    test_bit(gbc->registers->B, 4, &gbc->registers->F); 
 }
 
 // 0xCB61: BIT 4, C (Z 0 1 -)
-static void op_bit_4_c(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 4, C\n");
+static void op_bit_4_c(gbc_system *gbc) {
+    test_bit(gbc->registers->C, 4, &gbc->registers->F); 
 }
 
 // 0xCB62: BIT 4, D (Z 0 1 -)
-static void op_bit_4_d(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 4, D\n");
+static void op_bit_4_d(gbc_system *gbc) {
+    test_bit(gbc->registers->D, 4, &gbc->registers->F); 
 }
 
 // 0xCB63: BIT 4, E (Z 0 1 -)
-static void op_bit_4_e(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 4, E\n");
+static void op_bit_4_e(gbc_system *gbc) {
+    test_bit(gbc->registers->E, 4, &gbc->registers->F); 
 }
 
 // 0xCB64: BIT 4, H (Z 0 1 -)
-static void op_bit_4_h(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 4, H\n");
+static void op_bit_4_h(gbc_system *gbc) {
+    test_bit(gbc->registers->H, 4, &gbc->registers->F); 
 }
 
 // 0xCB65: BIT 4, L (Z 0 1 -)
-static void op_bit_4_l(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 4, L\n");
+static void op_bit_4_l(gbc_system *gbc) {
+    test_bit(gbc->registers->L, 4, &gbc->registers->F); 
 }
 
 // 0xCB66: BIT 4, (HL) (Z 0 1 -)
-static void op_bit_4_hlp(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 4, (HL)\n");
+static void op_bit_4_hlp(gbc_system *gbc) {
+    test_bit(read_byte(gbc->ram, gbc->registers->HL), 4, &gbc->registers->F); 
 }
 
 // 0xCB67: BIT 4, A (Z 0 1 -)
-static void op_bit_4_a(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 4, A\n");
+static void op_bit_4_a(gbc_system *gbc) {
+    test_bit(gbc->registers->A, 4, &gbc->registers->F); 
 }
 
 // 0xCB68: BIT 5, B (Z 0 1 -)
-static void op_bit_5_b(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 5, B\n");
+static void op_bit_5_b(gbc_system *gbc) {
+    test_bit(gbc->registers->B, 5, &gbc->registers->F); 
 }
 
 // 0xCB69: BIT 5, C (Z 0 1 -)
-static void op_bit_5_c(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 5, C\n");
+static void op_bit_5_c(gbc_system *gbc) {
+    test_bit(gbc->registers->C, 5, &gbc->registers->F); 
 }
 
 // 0xCB6A: BIT 5, D (Z 0 1 -)
-static void op_bit_5_d(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 5, D\n");
+static void op_bit_5_d(gbc_system *gbc) {
+    test_bit(gbc->registers->D, 5, &gbc->registers->F); 
 }
 
 // 0xCB6B: BIT 5, E (Z 0 1 -)
-static void op_bit_5_e(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 5, E\n");
+static void op_bit_5_e(gbc_system *gbc) {
+    test_bit(gbc->registers->E, 5, &gbc->registers->F); 
 }
 
 // 0xCB6C: BIT 5, H (Z 0 1 -)
-static void op_bit_5_h(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 5, H\n");
+static void op_bit_5_h(gbc_system *gbc) {
+    test_bit(gbc->registers->H, 5, &gbc->registers->F); 
 }
 
 // 0xCB6D: BIT 5, L (Z 0 1 -)
-static void op_bit_5_l(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 5, L\n");
+static void op_bit_5_l(gbc_system *gbc) {
+    test_bit(gbc->registers->L, 5, &gbc->registers->F); 
 }
 
 // 0xCB6E: BIT 5, (HL) (Z 0 1 -)
-static void op_bit_5_hlp(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 5, (HL)\n");
+static void op_bit_5_hlp(gbc_system *gbc) {
+    test_bit(read_byte(gbc->ram, gbc->registers->HL), 5, &gbc->registers->F); 
 }
 
 // 0xCB6F: BIT 5, A (Z 0 1 -)
-static void op_bit_5_a(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 5, A\n");
+static void op_bit_5_a(gbc_system *gbc) {
+    test_bit(gbc->registers->A, 5, &gbc->registers->F); 
 }
 
 // 0xCB70: BIT 6, B (Z 0 1 -)
-static void op_bit_6_b(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 6, B\n");
+static void op_bit_6_b(gbc_system *gbc) {
+    test_bit(gbc->registers->B, 6, &gbc->registers->F); 
 }
 
 // 0xCB71: BIT 6, C (Z 0 1 -)
-static void op_bit_6_c(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 6, C\n");
+static void op_bit_6_c(gbc_system *gbc) {
+    test_bit(gbc->registers->C, 6, &gbc->registers->F); 
 }
 
 // 0xCB72: BIT 6, D (Z 0 1 -)
-static void op_bit_6_d(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 6, D\n");
+static void op_bit_6_d(gbc_system *gbc) {
+    test_bit(gbc->registers->D, 6, &gbc->registers->F); 
 }
 
 // 0xCB73: BIT 6, E (Z 0 1 -)
-static void op_bit_6_e(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 6, E\n");
+static void op_bit_6_e(gbc_system *gbc) {
+    test_bit(gbc->registers->E, 6, &gbc->registers->F); 
 }
 
 // 0xCB74: BIT 6, H (Z 0 1 -)
-static void op_bit_6_h(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 6, H\n");
+static void op_bit_6_h(gbc_system *gbc) {
+    test_bit(gbc->registers->H, 6, &gbc->registers->F); 
 }
 
 // 0xCB75: BIT 6, L (Z 0 1 -)
-static void op_bit_6_l(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 6, L\n");
+static void op_bit_6_l(gbc_system *gbc) {
+    test_bit(gbc->registers->L, 6, &gbc->registers->F); 
 }
 
 // 0xCB76: BIT 6, (HL) (Z 0 1 -)
-static void op_bit_6_hlp(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 6, (HL)\n");
+static void op_bit_6_hlp(gbc_system *gbc) {
+    test_bit(read_byte(gbc->ram, gbc->registers->HL), 6, &gbc->registers->F); 
 }
 
 // 0xCB77: BIT 6, A (Z 0 1 -)
-static void op_bit_6_a(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 6, A\n");
+static void op_bit_6_a(gbc_system *gbc) {
+    test_bit(gbc->registers->A, 6, &gbc->registers->F); 
 }
 
 // 0xCB78: BIT 7, B (Z 0 1 -)
-static void op_bit_7_b(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 7, B\n");
+static void op_bit_7_b(gbc_system *gbc) {
+    test_bit(gbc->registers->B, 7, &gbc->registers->F); 
 }
 
 // 0xCB79: BIT 7, C (Z 0 1 -)
-static void op_bit_7_c(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 7, C\n");
+static void op_bit_7_c(gbc_system *gbc) {
+    test_bit(gbc->registers->C, 7, &gbc->registers->F); 
 }
 
 // 0xCB7A: BIT 7, D (Z 0 1 -)
-static void op_bit_7_d(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 7, D\n");
+static void op_bit_7_d(gbc_system *gbc) {
+    test_bit(gbc->registers->D, 7, &gbc->registers->F); 
 }
 
 // 0xCB7B: BIT 7, E (Z 0 1 -)
-static void op_bit_7_e(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 7, E\n");
+static void op_bit_7_e(gbc_system *gbc) {
+    test_bit(gbc->registers->E, 7, &gbc->registers->F); 
 }
 
 // 0xCB7C: BIT 7, H (Z 0 1 -)
-static void op_bit_7_h(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 7, H\n");
+static void op_bit_7_h(gbc_system *gbc) {
+    test_bit(gbc->registers->H, 7, &gbc->registers->F); 
 }
 
 // 0xCB7D: BIT 7, L (Z 0 1 -)
-static void op_bit_7_l(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 7, L\n");
+static void op_bit_7_l(gbc_system *gbc) {
+    test_bit(gbc->registers->L, 7, &gbc->registers->F); 
 }
 
 // 0xCB7E: BIT 7, (HL) (Z 0 1 -)
-static void op_bit_7_hlp(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 7, (HL)\n");
+static void op_bit_7_hlp(gbc_system *gbc) {
+    test_bit(read_byte(gbc->ram, gbc->registers->HL), 7, &gbc->registers->F); 
 }
 
 // 0xCB7F: BIT 7, A (Z 0 1 -)
-static void op_bit_7_a(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: BIT 7, A\n");
+static void op_bit_7_a(gbc_system *gbc) {
+    test_bit(gbc->registers->A, 7, &gbc->registers->F); 
 }
 
 // 0xCB80: RES 0, B (- - - -)
-static void op_res_0_b(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 0, B\n");
+static void op_res_0_b(gbc_system *gbc) {
+    gbc->registers->B = reset_bit(gbc->registers->B, 0, &gbc->registers->F);
 }
 
 // 0xCB81: RES 0, C (- - - -)
-static void op_res_0_c(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 0, C\n");
+static void op_res_0_c(gbc_system *gbc) {
+    gbc->registers->C = reset_bit(gbc->registers->C, 0, &gbc->registers->F);
 }
 
 // 0xCB82: RES 0, D (- - - -)
-static void op_res_0_d(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 0, D\n");
+static void op_res_0_d(gbc_system *gbc) {
+    gbc->registers->D = reset_bit(gbc->registers->D, 0, &gbc->registers->F);
 }
 
 // 0xCB83: RES 0, E (- - - -)
-static void op_res_0_e(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 0, E\n");
+static void op_res_0_e(gbc_system *gbc) {
+    gbc->registers->E = reset_bit(gbc->registers->E, 0, &gbc->registers->F);
 }
 
 // 0xCB84: RES 0, H (- - - -)
-static void op_res_0_h(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 0, H\n");
+static void op_res_0_h(gbc_system *gbc) {
+    gbc->registers->H = reset_bit(gbc->registers->H, 0, &gbc->registers->F);
 }
 
 // 0xCB85: RES 0, L (- - - -)
-static void op_res_0_l(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 0, L\n");
+static void op_res_0_l(gbc_system *gbc) {
+    gbc->registers->L = reset_bit(gbc->registers->L, 0, &gbc->registers->F);
 }
 
 // 0xCB86: RES 0, (HL) (- - - -)
-static void op_res_0_hlp(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 0, (HL)\n");
+static void op_res_0_hlp(gbc_system *gbc) {
+    write_byte(gbc->ram,
+               gbc->registers->HL,
+               reset_bit(read_byte(gbc->ram, gbc->registers->HL), 0, &gbc->registers->F));
 }
 
 // 0xCB87: RES 0, A (- - - -)
-static void op_res_0_a(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 0, A\n");
+static void op_res_0_a(gbc_system *gbc) {
+    gbc->registers->A = reset_bit(gbc->registers->A, 0, &gbc->registers->F);
 }
 
 // 0xCB88: RES 1, B (- - - -)
-static void op_res_1_b(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 1, B\n");
+static void op_res_1_b(gbc_system *gbc) {
+    gbc->registers->B = reset_bit(gbc->registers->B, 1, &gbc->registers->F);
 }
 
 // 0xCB89: RES 1, C (- - - -)
-static void op_res_1_c(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 1, C\n");
+static void op_res_1_c(gbc_system *gbc) {
+    gbc->registers->C = reset_bit(gbc->registers->C, 1, &gbc->registers->F);
 }
 
 // 0xCB8A: RES 1, D (- - - -)
-static void op_res_1_d(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 1, D\n");
+static void op_res_1_d(gbc_system *gbc) {
+    gbc->registers->D = reset_bit(gbc->registers->D, 1, &gbc->registers->F);
 }
 
 // 0xCB8B: RES 1, E (- - - -)
-static void op_res_1_e(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 1, E\n");
+static void op_res_1_e(gbc_system *gbc) {
+    gbc->registers->E = reset_bit(gbc->registers->E, 1, &gbc->registers->F);
 }
 
 // 0xCB8C: RES 1, H (- - - -)
-static void op_res_1_h(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 1, H\n");
+static void op_res_1_h(gbc_system *gbc) {
+    gbc->registers->H = reset_bit(gbc->registers->H, 1, &gbc->registers->F);
 }
 
 // 0xCB8D: RES 1, L (- - - -)
-static void op_res_1_l(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 1, L\n");
+static void op_res_1_l(gbc_system *gbc) {
+    gbc->registers->L = reset_bit(gbc->registers->L, 1, &gbc->registers->F);
 }
 
 // 0xCB8E: RES 1, (HL) (- - - -)
-static void op_res_1_hlp(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 1, (HL)\n");
+static void op_res_1_hlp(gbc_system *gbc) {
+    write_byte(gbc->ram,
+               gbc->registers->HL,
+               reset_bit(read_byte(gbc->ram, gbc->registers->HL), 1, &gbc->registers->F));
 }
 
 // 0xCB8F: RES 1, A (- - - -)
-static void op_res_1_a(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 1, A\n");
+static void op_res_1_a(gbc_system *gbc) {
+    gbc->registers->A = reset_bit(gbc->registers->A, 1, &gbc->registers->F);
 }
 
 // 0xCB90: RES 2, B (- - - -)
-static void op_res_2_b(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 2, B\n");
+static void op_res_2_b(gbc_system *gbc) {
+    gbc->registers->B = reset_bit(gbc->registers->B, 2, &gbc->registers->F);
 }
 
 // 0xCB91: RES 2, C (- - - -)
-static void op_res_2_c(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 2, C\n");
+static void op_res_2_c(gbc_system *gbc) {
+    gbc->registers->C = reset_bit(gbc->registers->C, 2, &gbc->registers->F);
 }
 
 // 0xCB92: RES 2, D (- - - -)
-static void op_res_2_d(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 2, D\n");
+static void op_res_2_d(gbc_system *gbc) {
+    gbc->registers->D = reset_bit(gbc->registers->D, 2, &gbc->registers->F);
 }
 
 // 0xCB93: RES 2, E (- - - -)
-static void op_res_2_e(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 2, E\n");
+static void op_res_2_e(gbc_system *gbc) {
+    gbc->registers->E = reset_bit(gbc->registers->E, 2, &gbc->registers->F);
 }
 
 // 0xCB94: RES 2, H (- - - -)
-static void op_res_2_h(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 2, H\n");
+static void op_res_2_h(gbc_system *gbc) {
+    gbc->registers->H = reset_bit(gbc->registers->H, 2, &gbc->registers->F);
 }
 
 // 0xCB95: RES 2, L (- - - -)
-static void op_res_2_l(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 2, L\n");
+static void op_res_2_l(gbc_system *gbc) {
+    gbc->registers->L = reset_bit(gbc->registers->L, 2, &gbc->registers->F);
 }
 
 // 0xCB96: RES 2, (HL) (- - - -)
-static void op_res_2_hlp(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 2, (HL)\n");
+static void op_res_2_hlp(gbc_system *gbc) {
+    write_byte(gbc->ram,
+               gbc->registers->HL,
+               reset_bit(read_byte(gbc->ram, gbc->registers->HL), 2, &gbc->registers->F));
 }
 
 // 0xCB97: RES 2, A (- - - -)
-static void op_res_2_a(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 2, A\n");
+static void op_res_2_a(gbc_system *gbc) {
+    gbc->registers->A = reset_bit(gbc->registers->A, 2, &gbc->registers->F);
 }
 
 // 0xCB98: RES 3, B (- - - -)
-static void op_res_3_b(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 3, B\n");
+static void op_res_3_b(gbc_system *gbc) {
+    gbc->registers->B = reset_bit(gbc->registers->B, 3, &gbc->registers->F);
 }
 
 // 0xCB99: RES 3, C (- - - -)
-static void op_res_3_c(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 3, C\n");
+static void op_res_3_c(gbc_system *gbc) {
+    gbc->registers->C = reset_bit(gbc->registers->C, 3, &gbc->registers->F);
 }
 
 // 0xCB9A: RES 3, D (- - - -)
-static void op_res_3_d(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 3, D\n");
+static void op_res_3_d(gbc_system *gbc) {
+    gbc->registers->D = reset_bit(gbc->registers->D, 3, &gbc->registers->F);
 }
 
 // 0xCB9B: RES 3, E (- - - -)
-static void op_res_3_e(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 3, E\n");
+static void op_res_3_e(gbc_system *gbc) {
+    gbc->registers->E = reset_bit(gbc->registers->E, 3, &gbc->registers->F);
 }
 
 // 0xCB9C: RES 3, H (- - - -)
-static void op_res_3_h(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 3, H\n");
+static void op_res_3_h(gbc_system *gbc) {
+    gbc->registers->H = reset_bit(gbc->registers->H, 3, &gbc->registers->F);
 }
 
 // 0xCB9D: RES 3, L (- - - -)
-static void op_res_3_l(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 3, L\n");
+static void op_res_3_l(gbc_system *gbc) {
+    gbc->registers->L = reset_bit(gbc->registers->L, 3, &gbc->registers->F);
 }
 
 // 0xCB9E: RES 3, (HL) (- - - -)
-static void op_res_3_hlp(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 3, (HL)\n");
+static void op_res_3_hlp(gbc_system *gbc) {
+    write_byte(gbc->ram,
+               gbc->registers->HL,
+               reset_bit(read_byte(gbc->ram, gbc->registers->HL), 3, &gbc->registers->F));
 }
 
 // 0xCB9F: RES 3, A (- - - -)
-static void op_res_3_a(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 3, A\n");
+static void op_res_3_a(gbc_system *gbc) {
+    gbc->registers->A = reset_bit(gbc->registers->A, 3, &gbc->registers->F);
 }
 
 // 0xCBA0: RES 4, B (- - - -)
-static void op_res_4_b(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 4, B\n");
+static void op_res_4_b(gbc_system *gbc) {
+    gbc->registers->B = reset_bit(gbc->registers->B, 4, &gbc->registers->F);
 }
 
 // 0xCBA1: RES 4, C (- - - -)
-static void op_res_4_c(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 4, C\n");
+static void op_res_4_c(gbc_system *gbc) {
+    gbc->registers->C = reset_bit(gbc->registers->C, 4, &gbc->registers->F);
 }
 
 // 0xCBA2: RES 4, D (- - - -)
-static void op_res_4_d(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 4, D\n");
+static void op_res_4_d(gbc_system *gbc) {
+    gbc->registers->D = reset_bit(gbc->registers->D, 4, &gbc->registers->F);
 }
 
 // 0xCBA3: RES 4, E (- - - -)
-static void op_res_4_e(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 4, E\n");
+static void op_res_4_e(gbc_system *gbc) {
+    gbc->registers->E = reset_bit(gbc->registers->E, 4, &gbc->registers->F);
 }
 
 // 0xCBA4: RES 4, H (- - - -)
-static void op_res_4_h(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 4, H\n");
+static void op_res_4_h(gbc_system *gbc) {
+    gbc->registers->H = reset_bit(gbc->registers->H, 4, &gbc->registers->F);
 }
 
 // 0xCBA5: RES 4, L (- - - -)
-static void op_res_4_l(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 4, L\n");
+static void op_res_4_l(gbc_system *gbc) {
+    gbc->registers->L = reset_bit(gbc->registers->L, 4, &gbc->registers->F);
 }
 
 // 0xCBA6: RES 4, (HL) (- - - -)
-static void op_res_4_hlp(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 4, (HL)\n");
+static void op_res_4_hlp(gbc_system *gbc) {
+    write_byte(gbc->ram,
+               gbc->registers->HL,
+               reset_bit(read_byte(gbc->ram, gbc->registers->HL), 4, &gbc->registers->F));
 }
 
 // 0xCBA7: RES 4, A (- - - -)
-static void op_res_4_a(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 4, A\n");
+static void op_res_4_a(gbc_system *gbc) {
+    gbc->registers->A = reset_bit(gbc->registers->A, 4, &gbc->registers->F);
 }
 
 // 0xCBA8: RES 5, B (- - - -)
-static void op_res_5_b(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 5, B\n");
+static void op_res_5_b(gbc_system *gbc) {
+    gbc->registers->B = reset_bit(gbc->registers->B, 5, &gbc->registers->F);
 }
 
 // 0xCBA9: RES 5, C (- - - -)
-static void op_res_5_c(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 5, C\n");
+static void op_res_5_c(gbc_system *gbc) {
+    gbc->registers->C = reset_bit(gbc->registers->C, 5, &gbc->registers->F);
 }
 
 // 0xCBAA: RES 5, D (- - - -)
-static void op_res_5_d(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 5, D\n");
+static void op_res_5_d(gbc_system *gbc) {
+    gbc->registers->D = reset_bit(gbc->registers->D, 5, &gbc->registers->F);
 }
 
 // 0xCBAB: RES 5, E (- - - -)
-static void op_res_5_e(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 5, E\n");
+static void op_res_5_e(gbc_system *gbc) {
+    gbc->registers->E = reset_bit(gbc->registers->E, 5, &gbc->registers->F);
 }
 
 // 0xCBAC: RES 5, H (- - - -)
-static void op_res_5_h(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 5, H\n");
+static void op_res_5_h(gbc_system *gbc) {
+    gbc->registers->H = reset_bit(gbc->registers->H, 5, &gbc->registers->F);
 }
 
 // 0xCBAD: RES 5, L (- - - -)
-static void op_res_5_l(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 5, L\n");
+static void op_res_5_l(gbc_system *gbc) {
+    gbc->registers->L = reset_bit(gbc->registers->L, 5, &gbc->registers->F);
 }
 
 // 0xCBAE: RES 5, (HL) (- - - -)
-static void op_res_5_hlp(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 5, (HL)\n");
+static void op_res_5_hlp(gbc_system *gbc) {
+    write_byte(gbc->ram,
+               gbc->registers->HL,
+               reset_bit(read_byte(gbc->ram, gbc->registers->HL), 5, &gbc->registers->F));
 }
 
 // 0xCBAF: RES 5, A (- - - -)
-static void op_res_5_a(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 5, A\n");
+static void op_res_5_a(gbc_system *gbc) {
+    gbc->registers->A = reset_bit(gbc->registers->A, 5, &gbc->registers->F);
 }
 
 // 0xCBB0: RES 6, B (- - - -)
-static void op_res_6_b(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 6, B\n");
+static void op_res_6_b(gbc_system *gbc) {
+    gbc->registers->B = reset_bit(gbc->registers->B, 6, &gbc->registers->F);
 }
 
 // 0xCBB1: RES 6, C (- - - -)
-static void op_res_6_c(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 6, C\n");
+static void op_res_6_c(gbc_system *gbc) {
+    gbc->registers->C = reset_bit(gbc->registers->C, 6, &gbc->registers->F);
 }
 
 // 0xCBB2: RES 6, D (- - - -)
-static void op_res_6_d(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 6, D\n");
+static void op_res_6_d(gbc_system *gbc) {
+    gbc->registers->D = reset_bit(gbc->registers->D, 6, &gbc->registers->F);
 }
 
 // 0xCBB3: RES 6, E (- - - -)
-static void op_res_6_e(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 6, E\n");
+static void op_res_6_e(gbc_system *gbc) {
+    gbc->registers->E = reset_bit(gbc->registers->E, 6, &gbc->registers->F);
 }
 
 // 0xCBB4: RES 6, H (- - - -)
-static void op_res_6_h(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 6, H\n");
+static void op_res_6_h(gbc_system *gbc) {
+    gbc->registers->H = reset_bit(gbc->registers->H, 6, &gbc->registers->F);
 }
 
 // 0xCBB5: RES 6, L (- - - -)
-static void op_res_6_l(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 6, L\n");
+static void op_res_6_l(gbc_system *gbc) {
+    gbc->registers->L = reset_bit(gbc->registers->L, 6, &gbc->registers->F);
 }
 
 // 0xCBB6: RES 6, (HL) (- - - -)
-static void op_res_6_hlp(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 6, (HL)\n");
+static void op_res_6_hlp(gbc_system *gbc) {
+    write_byte(gbc->ram,
+               gbc->registers->HL,
+               reset_bit(read_byte(gbc->ram, gbc->registers->HL), 6, &gbc->registers->F));
 }
 
 // 0xCBB7: RES 6, A (- - - -)
-static void op_res_6_a(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 6, A\n");
+static void op_res_6_a(gbc_system *gbc) {
+    gbc->registers->A = reset_bit(gbc->registers->A, 6, &gbc->registers->F);
 }
 
 // 0xCBB8: RES 7, B (- - - -)
-static void op_res_7_b(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 7, B\n");
+static void op_res_7_b(gbc_system *gbc) {
+    gbc->registers->B = reset_bit(gbc->registers->B, 7, &gbc->registers->F);
 }
 
 // 0xCBB9: RES 7, C (- - - -)
-static void op_res_7_c(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 7, C\n");
+static void op_res_7_c(gbc_system *gbc) {
+    gbc->registers->C = reset_bit(gbc->registers->C, 7, &gbc->registers->F);
 }
 
 // 0xCBBA: RES 7, D (- - - -)
-static void op_res_7_d(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 7, D\n");
+static void op_res_7_d(gbc_system *gbc) {
+    gbc->registers->D = reset_bit(gbc->registers->D, 7, &gbc->registers->F);
 }
 
 // 0xCBBB: RES 7, E (- - - -)
-static void op_res_7_e(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 7, E\n");
+static void op_res_7_e(gbc_system *gbc) {
+    gbc->registers->E = reset_bit(gbc->registers->E, 7, &gbc->registers->F);
 }
 
 // 0xCBBC: RES 7, H (- - - -)
-static void op_res_7_h(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 7, H\n");
+static void op_res_7_h(gbc_system *gbc) {
+    gbc->registers->H = reset_bit(gbc->registers->H, 7, &gbc->registers->F);
 }
 
 // 0xCBBD: RES 7, L (- - - -)
-static void op_res_7_l(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 7, L\n");
+static void op_res_7_l(gbc_system *gbc) {
+    gbc->registers->L = reset_bit(gbc->registers->L, 7, &gbc->registers->F);
 }
 
 // 0xCBBE: RES 7, (HL) (- - - -)
-static void op_res_7_hlp(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 7, (HL)\n");
+static void op_res_7_hlp(gbc_system *gbc) {
+    write_byte(gbc->ram,
+               gbc->registers->HL,
+               reset_bit(read_byte(gbc->ram, gbc->registers->HL), 7, &gbc->registers->F));
 }
 
 // 0xCBBF: RES 7, A (- - - -)
-static void op_res_7_a(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: RES 7, A\n");
+static void op_res_7_a(gbc_system *gbc) {
+    gbc->registers->A = reset_bit(gbc->registers->A, 7, &gbc->registers->F);
 }
 
 // 0xCBC0: SET 0, B (- - - -)
-static void op_set_0_b(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 0, B\n");
+static void op_set_0_b(gbc_system *gbc) {
+   gbc->registers->A = set_bit(gbc->registers->B, 0, &gbc->registers->F);
 }
 
 // 0xCBC1: SET 0, C (- - - -)
-static void op_set_0_c(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 0, C\n");
+static void op_set_0_c(gbc_system *gbc) {
+   gbc->registers->A = set_bit(gbc->registers->C, 0, &gbc->registers->F);
 }
 
 // 0xCBC2: SET 0, D (- - - -)
-static void op_set_0_d(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 0, D\n");
+static void op_set_0_d(gbc_system *gbc) {
+   gbc->registers->A = set_bit(gbc->registers->D, 0, &gbc->registers->F);
 }
 
 // 0xCBC3: SET 0, E (- - - -)
-static void op_set_0_e(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 0, E\n");
+static void op_set_0_e(gbc_system *gbc) {
+   gbc->registers->A = set_bit(gbc->registers->E, 0, &gbc->registers->F);
 }
 
 // 0xCBC4: SET 0, H (- - - -)
-static void op_set_0_h(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 0, H\n");
+static void op_set_0_h(gbc_system *gbc) {
+   gbc->registers->A = set_bit(gbc->registers->H, 0, &gbc->registers->F);
 }
 
 // 0xCBC5: SET 0, L (- - - -)
-static void op_set_0_l(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 0, L\n");
+static void op_set_0_l(gbc_system *gbc) {
+   gbc->registers->A = set_bit(gbc->registers->L, 0, &gbc->registers->F);
 }
 
 // 0xCBC6: SET 0, (HL) (- - - -)
-static void op_set_0_hlp(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 0, (HL)\n");
+static void op_set_0_hlp(gbc_system *gbc) {
+    write_byte(gbc->ram,
+               gbc->registers->HL,
+               set_bit(read_byte(gbc->ram, gbc->registers->HL), 0, &gbc->registers->F));
 }
 
 // 0xCBC7: SET 0, A (- - - -)
-static void op_set_0_a(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 0, A\n");
+static void op_set_0_a(gbc_system *gbc) {
+    gbc->registers->A = set_bit(gbc->registers->A, 0, &gbc->registers->F);
 }
 
 // 0xCBC8: SET 1, B (- - - -)
-static void op_set_1_b(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 1, B\n");
+static void op_set_1_b(gbc_system *gbc) {
+    gbc->registers->B = set_bit(gbc->registers->A, 1, &gbc->registers->F);
 }
 
 // 0xCBC9: SET 1, C (- - - -)
-static void op_set_1_c(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 1, C\n");
+static void op_set_1_c(gbc_system *gbc) {
+    gbc->registers->C = set_bit(gbc->registers->C, 1, &gbc->registers->F);
 }
 
 // 0xCBCA: SET 1, D (- - - -)
-static void op_set_1_d(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 1, D\n");
+static void op_set_1_d(gbc_system *gbc) {
+    gbc->registers->D = set_bit(gbc->registers->D, 1, &gbc->registers->F);
 }
 
 // 0xCBCB: SET 1, E (- - - -)
-static void op_set_1_e(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 1, E\n");
+static void op_set_1_e(gbc_system *gbc) {
+    gbc->registers->E = set_bit(gbc->registers->E, 1, &gbc->registers->F);
 }
 
 // 0xCBCC: SET 1, H (- - - -)
-static void op_set_1_h(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 1, H\n");
+static void op_set_1_h(gbc_system *gbc) {
+    gbc->registers->H = set_bit(gbc->registers->H, 1, &gbc->registers->F);
 }
 
 // 0xCBCD: SET 1, L (- - - -)
-static void op_set_1_l(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 1, L\n");
+static void op_set_1_l(gbc_system *gbc) {
+    gbc->registers->L = set_bit(gbc->registers->L, 1, &gbc->registers->F);
 }
 
 // 0xCBCE: SET 1, (HL) (- - - -)
-static void op_set_1_hlp(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 1, (HL)\n");
+static void op_set_1_hlp(gbc_system *gbc) {
+    write_byte(gbc->ram,
+               gbc->registers->HL,
+               set_bit(gbc->registers->A, 1, &gbc->registers->F));
 }
 
 // 0xCBCF: SET 1, A (- - - -)
-static void op_set_1_a(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 1, A\n");
+static void op_set_1_a(gbc_system *gbc) {
+    gbc->registers->A = set_bit(gbc->registers->A, 1, &gbc->registers->F);
 }
 
 // 0xCBD0: SET 2, B (- - - -)
-static void op_set_2_b(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 2, B\n");
+static void op_set_2_b(gbc_system *gbc) {
+    gbc->registers->B = set_bit(gbc->registers->B, 2, &gbc->registers->F);
 }
 
 // 0xCBD1: SET 2, C (- - - -)
-static void op_set_2_c(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 2, C\n");
+static void op_set_2_c(gbc_system *gbc) {
+    gbc->registers->C = set_bit(gbc->registers->C, 2, &gbc->registers->F);
 }
 
 // 0xCBD2: SET 2, D (- - - -)
-static void op_set_2_d(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 2, D\n");
+static void op_set_2_d(gbc_system *gbc) {
+    gbc->registers->D = set_bit(gbc->registers->D, 2, &gbc->registers->F);
 }
 
 // 0xCBD3: SET 2, E (- - - -)
-static void op_set_2_e(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 2, E\n");
+static void op_set_2_e(gbc_system *gbc) {
+    gbc->registers->E = set_bit(gbc->registers->E, 2, &gbc->registers->F);
 }
 
 // 0xCBD4: SET 2, H (- - - -)
-static void op_set_2_h(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 2, H\n");
+static void op_set_2_h(gbc_system *gbc) {
+    gbc->registers->H = set_bit(gbc->registers->H, 2, &gbc->registers->F);
 }
 
 // 0xCBD5: SET 2, L (- - - -)
-static void op_set_2_l(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 2, L\n");
+static void op_set_2_l(gbc_system *gbc) {
+    gbc->registers->L = set_bit(gbc->registers->L, 2, &gbc->registers->F);
 }
 
 // 0xCBD6: SET 2, (HL) (- - - -)
-static void op_set_2_hlp(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 2, (HL)\n");
+static void op_set_2_hlp(gbc_system *gbc) {
+    write_byte(gbc->ram,
+               gbc->registers->HL,
+               set_bit(gbc->registers->L, 2, &gbc->registers->F));
 }
 
 // 0xCBD7: SET 2, A (- - - -)
-static void op_set_2_a(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 2, A\n");
+static void op_set_2_a(gbc_system *gbc) {
+    gbc->registers->A = set_bit(gbc->registers->A, 2, &gbc->registers->F);
 }
 
 // 0xCBD8: SET 3, B (- - - -)
-static void op_set_3_b(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 3, B\n");
+static void op_set_3_b(gbc_system *gbc) {
+    gbc->registers->B = set_bit(gbc->registers->B, 3, &gbc->registers->F);
 }
 
 // 0xCBD9: SET 3, C (- - - -)
-static void op_set_3_c(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 3, C\n");
+static void op_set_3_c(gbc_system *gbc) {
+    gbc->registers->C = set_bit(gbc->registers->C, 3, &gbc->registers->F);
 }
 
 // 0xCBDA: SET 3, D (- - - -)
-static void op_set_3_d(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 3, D\n");
+static void op_set_3_d(gbc_system *gbc) {
+    gbc->registers->D = set_bit(gbc->registers->D, 3, &gbc->registers->F);
 }
 
 // 0xCBDB: SET 3, E (- - - -)
-static void op_set_3_e(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 3, E\n");
+static void op_set_3_e(gbc_system *gbc) {
+    gbc->registers->E = set_bit(gbc->registers->E, 3, &gbc->registers->F);
 }
 
 // 0xCBDC: SET 3, H (- - - -)
-static void op_set_3_h(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 3, H\n");
+static void op_set_3_h(gbc_system *gbc) {
+    gbc->registers->H = set_bit(gbc->registers->H, 3, &gbc->registers->F);
 }
 
 // 0xCBDD: SET 3, L (- - - -)
-static void op_set_3_l(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 3, L\n");
+static void op_set_3_l(gbc_system *gbc) {
+    gbc->registers->L = set_bit(gbc->registers->L, 3, &gbc->registers->F);
 }
 
 // 0xCBDE: SET 3, (HL) (- - - -)
-static void op_set_3_hlp(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 3, (HL)\n");
+static void op_set_3_hlp(gbc_system *gbc) {
+    write_byte(gbc->ram,
+               gbc->registers->HL,
+               set_bit(gbc->registers->A, 3, &gbc->registers->F));
 }
 
 // 0xCBDF: SET 3, A (- - - -)
-static void op_set_3_a(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 3, A\n");
+static void op_set_3_a(gbc_system *gbc) {
+    gbc->registers->A = set_bit(gbc->registers->A, 3, &gbc->registers->F);
 }
 
 // 0xCBE0: SET 4, B (- - - -)
-static void op_set_4_b(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 4, B\n");
+static void op_set_4_b(gbc_system *gbc) {
+    gbc->registers->B = set_bit(gbc->registers->B, 4, &gbc->registers->F);
 }
 
 // 0xCBE1: SET 4, C (- - - -)
-static void op_set_4_c(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 4, C\n");
+static void op_set_4_c(gbc_system *gbc) {
+    gbc->registers->C = set_bit(gbc->registers->C, 4, &gbc->registers->F);
 }
 
 // 0xCBE2: SET 4, D (- - - -)
-static void op_set_4_d(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 4, D\n");
+static void op_set_4_d(gbc_system *gbc) {
+    gbc->registers->D = set_bit(gbc->registers->D, 4, &gbc->registers->F);
 }
 
 // 0xCBE3: SET 4, E (- - - -)
-static void op_set_4_e(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 4, E\n");
+static void op_set_4_e(gbc_system *gbc) {
+    gbc->registers->E = set_bit(gbc->registers->E, 4, &gbc->registers->F);
 }
 
 // 0xCBE4: SET 4, H (- - - -)
-static void op_set_4_h(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 4, H\n");
+static void op_set_4_h(gbc_system *gbc) {
+    gbc->registers->H = set_bit(gbc->registers->H, 4, &gbc->registers->F);
 }
 
 // 0xCBE5: SET 4, L (- - - -)
-static void op_set_4_l(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 4, L\n");
+static void op_set_4_l(gbc_system *gbc) {
+    gbc->registers->L = set_bit(gbc->registers->L, 4, &gbc->registers->F);
 }
 
 // 0xCBE6: SET 4, (HL) (- - - -)
-static void op_set_4_hlp(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 4, (HL)\n");
+static void op_set_4_hlp(gbc_system *gbc) {
+    write_byte(gbc->ram,
+               gbc->registers->HL,
+               set_bit(gbc->registers->L, 4, &gbc->registers->F));
 }
 
 // 0xCBE7: SET 4, A (- - - -)
-static void op_set_4_a(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 4, A\n");
+static void op_set_4_a(gbc_system *gbc) {
+    gbc->registers->A = set_bit(gbc->registers->A, 4, &gbc->registers->F);
 }
 
 // 0xCBE8: SET 5, B (- - - -)
-static void op_set_5_b(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 5, B\n");
+static void op_set_5_b(gbc_system *gbc) {
+    gbc->registers->B = set_bit(gbc->registers->B, 5, &gbc->registers->F);
 }
 
 // 0xCBE9: SET 5, C (- - - -)
-static void op_set_5_c(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 5, C\n");
+static void op_set_5_c(gbc_system *gbc) {
+    gbc->registers->C = set_bit(gbc->registers->C, 5, &gbc->registers->F);
 }
 
 // 0xCBEA: SET 5, D (- - - -)
-static void op_set_5_d(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 5, D\n");
+static void op_set_5_d(gbc_system *gbc) {
+    gbc->registers->D = set_bit(gbc->registers->D, 5, &gbc->registers->F);
 }
 
 // 0xCBEB: SET 5, E (- - - -)
-static void op_set_5_e(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 5, E\n");
+static void op_set_5_e(gbc_system *gbc) {
+    gbc->registers->E = set_bit(gbc->registers->E, 5, &gbc->registers->F);
 }
 
 // 0xCBEC: SET 5, H (- - - -)
-static void op_set_5_h(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 5, H\n");
+static void op_set_5_h(gbc_system *gbc) {
+    gbc->registers->H = set_bit(gbc->registers->H, 5, &gbc->registers->F);
 }
 
 // 0xCBED: SET 5, L (- - - -)
-static void op_set_5_l(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 5, L\n");
+static void op_set_5_l(gbc_system *gbc) {
+    gbc->registers->L = set_bit(gbc->registers->L, 5, &gbc->registers->F);
 }
 
 // 0xCBEE: SET 5, (HL) (- - - -)
-static void op_set_5_hlp(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 5, (HL)\n");
+static void op_set_5_hlp(gbc_system *gbc) {
+    write_byte(gbc->ram,
+               gbc->registers->HL,
+               set_bit(gbc->registers->L, 5, &gbc->registers->F));
 }
 
 // 0xCBEF: SET 5, A (- - - -)
-static void op_set_5_a(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 5, A\n");
+static void op_set_5_a(gbc_system *gbc) {
+    gbc->registers->A = set_bit(gbc->registers->A, 5, &gbc->registers->F);
 }
 
 // 0xCBF0: SET 6, B (- - - -)
-static void op_set_6_b(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 6, B\n");
+static void op_set_6_b(gbc_system *gbc) {
+    gbc->registers->B = set_bit(gbc->registers->B, 6, &gbc->registers->F);
 }
 
 // 0xCBF1: SET 6, C (- - - -)
-static void op_set_6_c(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 6, C\n");
+static void op_set_6_c(gbc_system *gbc) {
+    gbc->registers->C = set_bit(gbc->registers->C, 6, &gbc->registers->F);
 }
 
 // 0xCBF2: SET 6, D (- - - -)
-static void op_set_6_d(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 6, D\n");
+static void op_set_6_d(gbc_system *gbc) {
+    gbc->registers->D = set_bit(gbc->registers->D, 6, &gbc->registers->F);
 }
 
 // 0xCBF3: SET 6, E (- - - -)
-static void op_set_6_e(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 6, E\n");
+static void op_set_6_e(gbc_system *gbc) {
+    gbc->registers->E = set_bit(gbc->registers->E, 6, &gbc->registers->F);
 }
 
 // 0xCBF4: SET 6, H (- - - -)
-static void op_set_6_h(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 6, H\n");
+static void op_set_6_h(gbc_system *gbc) {
+    gbc->registers->H = set_bit(gbc->registers->H, 6, &gbc->registers->F);
 }
 
 // 0xCBF5: SET 6, L (- - - -)
-static void op_set_6_l(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 6, L\n");
+static void op_set_6_l(gbc_system *gbc) {
+    gbc->registers->L = set_bit(gbc->registers->L, 6, &gbc->registers->F);
 }
 
 // 0xCBF6: SET 6, (HL) (- - - -)
-static void op_set_6_hlp(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 6, (HL)\n");
+static void op_set_6_hlp(gbc_system *gbc) {
+    write_byte(gbc->ram,
+               gbc->registers->HL,
+               set_bit(gbc->registers->A, 6, &gbc->registers->F));
 }
 
 // 0xCBF7: SET 6, A (- - - -)
-static void op_set_6_a(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 6, A\n");
+static void op_set_6_a(gbc_system *gbc) {
+    gbc->registers->A = set_bit(gbc->registers->A, 6, &gbc->registers->F);
 }
 
 // 0xCBF8: SET 7, B (- - - -)
-static void op_set_7_b(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 7, B\n");
+static void op_set_7_b(gbc_system *gbc) {
+    gbc->registers->B = set_bit(gbc->registers->B, 7, &gbc->registers->F);
 }
 
 // 0xCBF9: SET 7, C (- - - -)
-static void op_set_7_c(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 7, C\n");
+static void op_set_7_c(gbc_system *gbc) {
+    gbc->registers->C = set_bit(gbc->registers->C, 7, &gbc->registers->F);
 }
 
 // 0xCBFA: SET 7, D (- - - -)
-static void op_set_7_d(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 7, D\n");
+static void op_set_7_d(gbc_system *gbc) {
+    gbc->registers->D = set_bit(gbc->registers->D, 7, &gbc->registers->F);
 }
 
 // 0xCBFB: SET 7, E (- - - -)
-static void op_set_7_e(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 7, E\n");
+static void op_set_7_e(gbc_system *gbc) {
+    gbc->registers->E = set_bit(gbc->registers->E, 7, &gbc->registers->F);
 }
 
 // 0xCBFC: SET 7, H (- - - -)
-static void op_set_7_h(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 7, H\n");
+static void op_set_7_h(gbc_system *gbc) {
+    gbc->registers->H = set_bit(gbc->registers->H, 7, &gbc->registers->F);
 }
 
 // 0xCBFD: SET 7, L (- - - -)
-static void op_set_7_l(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 7, L\n");
+static void op_set_7_l(gbc_system *gbc) {
+    gbc->registers->L = set_bit(gbc->registers->L, 7, &gbc->registers->F);
 }
 
 // 0xCBFE: SET 7, (HL) (- - - -)
-static void op_set_7_hlp(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 7, (HL)\n");
+static void op_set_7_hlp(gbc_system *gbc) {
+    write_byte(gbc->ram, 
+               gbc->registers->HL,
+               set_bit(gbc->registers->A, 7, &gbc->registers->F));
 }
 
 // 0xCBFF: SET 7, A (- - - -)
-static void op_set_7_a(gbc_system *gbc, unsigned char operand) {
-    printf("Unimplemented Instruction: SET 7, A\n");
+static void op_set_7_a(gbc_system *gbc) {
+    gbc->registers->A = set_bit(gbc->registers->A, 7, &gbc->registers->F);
 }
 
 gbc_instr cb_instructions[CB_INSTRUCTION_COUNT] = {
@@ -3232,6 +3416,11 @@ void execute_instr(gbc_system *gbc) {
     // Execute the instruction based on the length of the operand
     char opcode_len = instruction.length - 1;
     unsigned short operand;
+
+    // If it is a CB instruction, is shorter
+    if(opcode == 0xCB) {
+        opcode_len--; 
+    }
 
     switch(opcode_len) {
 
