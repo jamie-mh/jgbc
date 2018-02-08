@@ -137,7 +137,7 @@ static void op_ld_bc_d16(gbc_system *gbc, unsigned short operand) {
 
 // 0x02: LD (BC), A (- - - -)
 static void op_ld_bcp_a(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD (BC), A\n");
+    write_byte(gbc->ram, gbc->registers->BC, gbc->registers->A);
 }
 
 // 0x03: INC BC (- - - -)
@@ -217,7 +217,7 @@ static void op_ld_de_d16(gbc_system *gbc, unsigned short operand) {
 
 // 0x12: LD (DE), A (- - - -)
 static void op_ld_dep_a(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD (DE), A\n");
+    write_byte(gbc->ram, gbc->registers->DE, gbc->registers->A);
 }
 
 // 0x13: INC DE (- - - -)
@@ -493,7 +493,7 @@ static void op_ld_b_hlp(gbc_system *gbc) {
 
 // 0x47: LD B, A (- - - -)
 static void op_ld_b_a(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD B, A\n");
+    gbc->registers->B = gbc->registers->A;
 }
 
 // 0x48: LD C, B (- - - -)
@@ -533,7 +533,7 @@ static void op_ld_c_hlp(gbc_system *gbc) {
 
 // 0x4F: LD C, A (- - - -)
 static void op_ld_c_a(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD C, A\n");
+    gbc->registers->C = gbc->registers->A;
 }
 
 // 0x50: LD D, B (- - - -)
@@ -573,7 +573,7 @@ static void op_ld_d_hlp(gbc_system *gbc) {
 
 // 0x57: LD D, A (- - - -)
 static void op_ld_d_a(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD D, A\n");
+    gbc->registers->D = gbc->registers->A;
 }
 
 // 0x58: LD E, B (- - - -)
@@ -613,7 +613,7 @@ static void op_ld_e_hlp(gbc_system *gbc) {
 
 // 0x5F: LD E, A (- - - -)
 static void op_ld_e_a(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD E, A\n");
+    gbc->registers->E = gbc->registers->A;
 }
 
 // 0x60: LD H, B (- - - -)
@@ -653,7 +653,7 @@ static void op_ld_h_hlp(gbc_system *gbc) {
 
 // 0x67: LD H, A (- - - -)
 static void op_ld_h_a(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD H, A\n");
+    gbc->registers->H = gbc->registers->A;
 }
 
 // 0x68: LD L, B (- - - -)
@@ -693,7 +693,7 @@ static void op_ld_l_hlp(gbc_system *gbc) {
 
 // 0x6F: LD L, A (- - - -)
 static void op_ld_l_a(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD L, A\n");
+    gbc->registers->L = gbc->registers->A;
 }
 
 // 0x70: LD (HL), B (- - - -)
@@ -733,7 +733,7 @@ static void op_halt(gbc_system *gbc) {
 
 // 0x77: LD (HL), A (- - - -)
 static void op_ld_hlp_a(gbc_system *gbc) {
-    printf("Unimplemented Instruction: LD (HL), A\n");
+    write_byte(gbc->ram, gbc->registers->HL, gbc->registers->A);
 }
 
 // 0x78: LD A, B (- - - -)
@@ -1294,7 +1294,7 @@ static void op_jp_hlp(gbc_system *gbc) {
 
 // 0xEA: LD (a16), A (- - - -)
 static void op_ld_a16p_a(gbc_system *gbc, unsigned short operand) {
-    printf("Unimplemented Instruction: LD (a16), A\n");
+    write_byte(gbc->ram, operand, gbc->registers->A);
 }
 
 // 0xEE: XOR d8 (Z 0 0 0)
