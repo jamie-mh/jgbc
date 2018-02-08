@@ -1077,7 +1077,7 @@ static void op_ret_nz(gbc_system *gbc) {
 
 // 0xC1: POP BC (- - - -)
 static void op_pop_bc(gbc_system *gbc) {
-    printf("Unimplemented Instruction: POP BC\n");
+    gbc->registers->BC = stack_pop(gbc->ram, &gbc->registers->SP) | (stack_pop(gbc->ram, &gbc->registers->SP) << 8);
 }
 
 // 0xC2: JP NZ, a16 (- - - -)
@@ -1161,7 +1161,7 @@ static void op_ret_nc(gbc_system *gbc) {
 
 // 0xD1: POP DE (- - - -)
 static void op_pop_de(gbc_system *gbc) {
-    printf("Unimplemented Instruction: POP DE\n");
+    gbc->registers->DE = stack_pop(gbc->ram, &gbc->registers->SP) | (stack_pop(gbc->ram, &gbc->registers->SP) << 8);
 }
 
 // 0xD2: JP NC, a16 (- - - -)
@@ -1228,7 +1228,7 @@ static void op_ldh_a8p_a(gbc_system *gbc, unsigned char operand) {
 
 // 0xE1: POP HL (- - - -)
 static void op_pop_hl(gbc_system *gbc) {
-    printf("Unimplemented Instruction: POP HL\n");
+    gbc->registers->HL = stack_pop(gbc->ram, &gbc->registers->SP) | (stack_pop(gbc->ram, &gbc->registers->SP) << 8);
 }
 
 // 0xE2: LD (C), A (- - - -)
@@ -1285,7 +1285,7 @@ static void op_ldh_a_a8p(gbc_system *gbc, unsigned char operand) {
 
 // 0xF1: POP AF (Z N H C)
 static void op_pop_af(gbc_system *gbc) {
-    printf("Unimplemented Instruction: POP AF\n");
+    gbc->registers->AF = stack_pop(gbc->ram, &gbc->registers->SP) | (stack_pop(gbc->ram, &gbc->registers->SP) << 8);
 }
 
 // 0xF2: LD A, (C) (- - - -)
