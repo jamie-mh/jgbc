@@ -38,11 +38,11 @@ int main(int argc, char **argv) {
         printf("ERROR: Could not load rom file!\n\n");
         exit(0);
     }
-
-    print_rom_info(rom);
     
     // Show a message and initialise the debugger 
     if(cmd->debug) {
+        print_rom_info(rom);
+
         printf("\nLXGBC DEBUGGER RUNNING\nType 'h' for information on the available commands.\n");
         init_debugger(debugger);
     }
