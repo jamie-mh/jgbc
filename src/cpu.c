@@ -91,6 +91,36 @@ static void compare(const unsigned char a, const unsigned char b, unsigned char 
     }
 }
 
+static unsigned char add(unsigned char a, unsigned char b, unsigned char *flag) {
+    
+    unsigned char result = a + b;
+
+    // Check if the result is 0
+    if(result == 0) {
+        set_flag(FLAG_ZERO, 1, flag);
+    } else {
+        set_flag(FLAG_ZERO, 0, flag); 
+    }
+
+    set_flag(FLAG_SUBTRACT, 0, flag);
+
+    // Check for a carry from bit 3
+    if(result & 0x10 == 0x10) {
+        set_flag(FLAG_HALFCARRY, 1, flag); 
+    } else {
+        set_flag(FLAG_HALFCARRY, 0, flag); 
+    }
+
+    // Check for carry
+    if(a < b) {
+        set_flag(FLAG_CARRY, 1, flag);
+    } else {
+        set_flag(FLAG_CARRY, 0, flag); 
+    }
+    
+    return result;
+} 
+
 /*
 *   CPU instructions
 */
@@ -748,42 +778,42 @@ static void op_ld_a_a(gbc_system *gbc) {
 
 // 0x80: ADD A, B (Z 0 H C)
 static void op_add_a_b(gbc_system *gbc) {
-    printf("Unimplemented Instruction: ADD A, B\n");
+    gbc->registers->A = add(gbc->registers->A, gbc->registers->B, &gbc->registers->F);
 }
 
 // 0x81: ADD A, C (Z 0 H C)
 static void op_add_a_c(gbc_system *gbc) {
-    printf("Unimplemented Instruction: ADD A, C\n");
+    gbc->registers->A = add(gbc->registers->A, gbc->registers->C, &gbc->registers->F);
 }
 
 // 0x82: ADD A, D (Z 0 H C)
 static void op_add_a_d(gbc_system *gbc) {
-    printf("Unimplemented Instruction: ADD A, D\n");
+    gbc->registers->A = add(gbc->registers->A, gbc->registers->D, &gbc->registers->F);
 }
 
 // 0x83: ADD A, E (Z 0 H C)
 static void op_add_a_e(gbc_system *gbc) {
-    printf("Unimplemented Instruction: ADD A, E\n");
+    gbc->registers->A = add(gbc->registers->A, gbc->registers->E, &gbc->registers->F);
 }
 
 // 0x84: ADD A, H (Z 0 H C)
 static void op_add_a_h(gbc_system *gbc) {
-    printf("Unimplemented Instruction: ADD A, H\n");
+    gbc->registers->A = add(gbc->registers->A, gbc->registers->H, &gbc->registers->F);
 }
 
 // 0x85: ADD A, L (Z 0 H C)
 static void op_add_a_l(gbc_system *gbc) {
-    printf("Unimplemented Instruction: ADD A, L\n");
+    gbc->registers->A = add(gbc->registers->A, gbc->registers->L, &gbc->registers->F);
 }
 
 // 0x86: ADD A, (HL) (Z 0 H C)
 static void op_add_a_hlp(gbc_system *gbc) {
-    printf("Unimplemented Instruction: ADD A, (HL)\n");
+    gbc->registers->A = add(gbc->registers->A, read_byte(gbc->ram, gbc->registers->HL), &gbc->registers->F);
 }
 
 // 0x87: ADD A, A (Z 0 H C)
 static void op_add_a_a(gbc_system *gbc) {
-    printf("Unimplemented Instruction: ADD A, A\n");
+    gbc->registers->A = add(gbc->registers->A, gbc->registers->A, &gbc->registers->F);
 }
 
 // 0x88: ADC A, B (Z 0 H C)
