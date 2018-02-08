@@ -1259,7 +1259,7 @@ static void op_add_sp_r8(gbc_system *gbc, char operand) {
 
 // 0xE9: JP (HL) (- - - -)
 static void op_jp_hlp(gbc_system *gbc) {
-    printf("Unimplemented Instruction: JP (HL)\n");
+    gbc->registers->PC = gbc->registers->HL;
 }
 
 // 0xEA: LD (a16), A (- - - -)
