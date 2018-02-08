@@ -3232,7 +3232,7 @@ static char get_flag(const char flag, const unsigned char regis) {
 }
 
 // Pushes a byte to the stack after decrementing the stack pointer
-static void stack_push(const unsigned char value, gbc_ram *ram, unsigned short **sp) {
+static void stack_push(const unsigned char value, gbc_ram *ram, unsigned short *sp) {
    
     // Decrement the stack pointer
     *sp -= sizeof(char);
@@ -3242,7 +3242,7 @@ static void stack_push(const unsigned char value, gbc_ram *ram, unsigned short *
 }
 
 // Pops a byte from the stack and increments the stack pointer
-static unsigned char stack_pop(gbc_ram *ram, unsigned short **sp) {
+static unsigned char stack_pop(gbc_ram *ram, unsigned short *sp) {
     
     // Read the value
     unsigned char value = read_byte(ram, *sp);
