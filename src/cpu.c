@@ -1,6 +1,6 @@
 #include "lxgbc.h"
-#include "cpu.h"
 #include "ram.h"
+#include "cpu.h"
 
 // Initialises the CPU registers
 void init_cpu(gbc_system *gbc) {
@@ -1137,6 +1137,8 @@ static void op_call_z_a16(gbc_system *gbc, unsigned short operand) {
 
 // 0xCD: CALL a16 (- - - -)
 static void op_call_a16(gbc_system *gbc, unsigned short operand) {
+    stack_push(gbc->registers->PC + 3, gbc->ram, &gbc->registers->SP);
+    gbc->registers->PC = operand;
     printf("Unimplemented Instruction: CALL a16\n");
 }
 
@@ -3219,4 +3221,26 @@ static char get_flag(const char flag, const unsigned char regis) {
 
     // Read the nth bit of the register
     return (regis >> offset) & 1;
+}
+
+// Pushes a byte to the stack after decrementing the stack pointer
+static void stack_push(const unsigned char value, gbc_ram *ram, unsigned short *sp) {
+   
+    // Decrement the stack pointer
+    *sp -= (sizeof(value) / sizeof(char));
+
+    // Write the value
+    write_byte(ram, *sp, value);
+}
+
+// Pops a byte from the stack and increments the stack pointer
+static unsigned char stack_pop(gbc_ram *ram, unsigned short *sp) {
+    
+    // Read the value
+    unsigned char value = read_byte(ram, *sp);
+    
+    // Increment the stack pointer
+    *sp += sizeof(char);
+
+    return value;
 }

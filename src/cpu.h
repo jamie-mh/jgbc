@@ -69,3 +69,6 @@ void execute_instr(gbc_system *);
 
 static void set_flag(const char, const unsigned char, unsigned char *);
 static char get_flag(const char, const unsigned char);
+
+static void stack_push(const unsigned char, gbc_ram *, unsigned short *);
+static unsigned char stack_pop(gbc_ram *, unsigned short *);
