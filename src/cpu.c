@@ -1107,7 +1107,8 @@ static void op_add_a_d8(gbc_system *gbc, unsigned char operand) {
 
 // 0xC7: RST 00H (- - - -)
 static void op_rst_00h(gbc_system *gbc) {
-    printf("Unimplemented Instruction: RST 00H\n");
+    stack_push(gbc->registers->PC, gbc->ram, &gbc->registers->SP);
+    gbc->registers->PC = 0x0;
 }
 
 // 0xC8: RET Z (- - - -)
@@ -1149,7 +1150,8 @@ static void op_adc_a_d8(gbc_system *gbc, unsigned char operand) {
 
 // 0xCF: RST 08H (- - - -)
 static void op_rst_08h(gbc_system *gbc) {
-    printf("Unimplemented Instruction: RST 08H\n");
+    stack_push(gbc->registers->PC, gbc->ram, &gbc->registers->SP);
+    gbc->registers->PC = 0x8;
 }
 
 // 0xD0: RET NC (- - - -)
@@ -1184,7 +1186,8 @@ static void op_sub_d8(gbc_system *gbc, unsigned char operand) {
 
 // 0xD7: RST 10H (- - - -)
 static void op_rst_10h(gbc_system *gbc) {
-    printf("Unimplemented Instruction: RST 10H\n");
+    stack_push(gbc->registers->PC, gbc->ram, &gbc->registers->SP);
+    gbc->registers->PC = 0x10;
 }
 
 // 0xD8: RET C (- - - -)
@@ -1214,7 +1217,8 @@ static void op_sbc_a_d8(gbc_system *gbc, unsigned char operand) {
 
 // 0xDF: RST 18H (- - - -)
 static void op_rst_18h(gbc_system *gbc) {
-    printf("Unimplemented Instruction: RST 18H\n");
+    stack_push(gbc->registers->PC, gbc->ram, &gbc->registers->SP);
+    gbc->registers->PC = 0x18;
 }
 
 // 0xE0: LDH (a8), A (- - - -)
@@ -1244,7 +1248,8 @@ static void op_and_d8(gbc_system *gbc, unsigned char operand) {
 
 // 0xE7: RST 20H (- - - -)
 static void op_rst_20h(gbc_system *gbc) {
-    printf("Unimplemented Instruction: RST 20H\n");
+    stack_push(gbc->registers->PC, gbc->ram, &gbc->registers->SP);
+    gbc->registers->PC = 0x20;
 }
 
 // 0xE8: ADD SP, r8 (0 0 H C)
@@ -1269,7 +1274,8 @@ static void op_xor_d8(gbc_system *gbc, unsigned char operand) {
 
 // 0xEF: RST 28H (- - - -)
 static void op_rst_28h(gbc_system *gbc) {
-    printf("Unimplemented Instruction: RST 28H\n");
+    stack_push(gbc->registers->PC, gbc->ram, &gbc->registers->SP);
+    gbc->registers->PC = 0x28;
 }
 
 // 0xF0: LDH A, (a8) (- - - -)
@@ -1304,7 +1310,8 @@ static void op_or_d8(gbc_system *gbc, unsigned char operand) {
 
 // 0xF7: RST 30H (- - - -)
 static void op_rst_30h(gbc_system *gbc) {
-    printf("Unimplemented Instruction: RST 30H\n");
+    stack_push(gbc->registers->PC, gbc->ram, &gbc->registers->SP);
+    gbc->registers->PC = 0x30;
 }
 
 // 0xF8: LD HL, SP+r8 (0 0 H C)
@@ -1334,7 +1341,8 @@ static void op_cp_d8(gbc_system *gbc, unsigned char operand) {
 
 // 0xFF: RST 38H (- - - -)
 static void op_rst_38h(gbc_system *gbc) {
-    printf("Unimplemented Instruction: RST 38H\n");
+    stack_push(gbc->registers->PC, gbc->ram, &gbc->registers->SP);
+    gbc->registers->PC = 0x38;
 }
 
 gbc_instr instructions[INSTRUCTION_COUNT] = {
