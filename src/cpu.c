@@ -1117,7 +1117,7 @@ static void op_ret_z(gbc_system *gbc) {
 
 // 0xC9: RET (- - - -)
 static void op_ret(gbc_system *gbc) {
-    printf("Unimplemented Instruction: RET\n");
+    gbc->registers->PC = stack_pop(gbc->ram, &gbc->registers->SP) | (stack_pop(gbc->ram, &gbc->registers->SP) << 8);
 }
 
 // 0xCA: JP Z, a16 (- - - -)
@@ -1137,9 +1137,9 @@ static void op_call_z_a16(gbc_system *gbc, unsigned short operand) {
 
 // 0xCD: CALL a16 (- - - -)
 static void op_call_a16(gbc_system *gbc, unsigned short operand) {
-    stack_push(gbc->registers->PC + 3, gbc->ram, &gbc->registers->SP);
+    stack_push(((gbc->registers->PC + 3 * sizeof(char)) & 0xFF00) >> 8, gbc->ram, &gbc->registers->SP);
+    stack_push(((gbc->registers->PC + 3 * sizeof(char)) & 0x00FF), gbc->ram, &gbc->registers->SP);
     gbc->registers->PC = operand;
-    printf("Unimplemented Instruction: CALL a16\n");
 }
 
 // 0xCE: ADC A, d8 (Z 0 H C)
@@ -3224,17 +3224,17 @@ static char get_flag(const char flag, const unsigned char regis) {
 }
 
 // Pushes a byte to the stack after decrementing the stack pointer
-static void stack_push(const unsigned char value, gbc_ram *ram, unsigned short *sp) {
+static void stack_push(const unsigned char value, gbc_ram *ram, unsigned short **sp) {
    
     // Decrement the stack pointer
-    *sp -= (sizeof(value) / sizeof(char));
+    *sp -= sizeof(char);
 
     // Write the value
     write_byte(ram, *sp, value);
 }
 
 // Pops a byte from the stack and increments the stack pointer
-static unsigned char stack_pop(gbc_ram *ram, unsigned short *sp) {
+static unsigned char stack_pop(gbc_ram *ram, unsigned short **sp) {
     
     // Read the value
     unsigned char value = read_byte(ram, *sp);
