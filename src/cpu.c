@@ -91,7 +91,7 @@ static void compare(const unsigned char a, const unsigned char b, unsigned char 
     }
 }
 
-static unsigned char add(unsigned char a, unsigned char b, unsigned char *flag) {
+static unsigned char add_byte(unsigned char a, unsigned char b, unsigned char *flag) {
     
     unsigned char result = a + b;
 
@@ -119,7 +119,37 @@ static unsigned char add(unsigned char a, unsigned char b, unsigned char *flag) 
     }
     
     return result;
-} 
+}
+
+static unsigned short add_short(unsigned short a, unsigned short b, unsigned char *flag) {
+    
+    unsigned short result = a + b;
+
+    // Check if the result is 0
+    if(result == 0) {
+        set_flag(FLAG_ZERO, 1, flag);
+    } else {
+        set_flag(FLAG_ZERO, 0, flag); 
+    }
+
+    set_flag(FLAG_SUBTRACT, 0, flag);
+
+    // Check for a carry from bit 3
+    if((a & 0xFFF) + (b & 0xFFF) > 0xFFF) {
+        set_flag(FLAG_HALFCARRY, 1, flag); 
+    } else {
+        set_flag(FLAG_HALFCARRY, 0, flag); 
+    }
+
+    // Check for carry
+    if(a < b) {
+        set_flag(FLAG_CARRY, 1, flag);
+    } else {
+        set_flag(FLAG_CARRY, 0, flag); 
+    }
+
+    return result;
+}
 
 /*
 *   CPU instructions
@@ -172,7 +202,7 @@ static void op_ld_a16p_sp(gbc_system *gbc, unsigned short operand) {
 
 // 0x09: ADD HL, BC (- 0 H C)
 static void op_add_hl_bc(gbc_system *gbc) {
-    printf("Unimplemented Instruction: ADD HL, BC\n");
+    gbc->registers->HL = add_short(gbc->registers->HL, gbc->registers->BC, &gbc->registers->F);
 }
 
 // 0x0A: LD A, (BC) (- - - -)
@@ -252,7 +282,7 @@ static void op_jr_r8(gbc_system *gbc, char operand) {
 
 // 0x19: ADD HL, DE (- 0 H C)
 static void op_add_hl_de(gbc_system *gbc) {
-    printf("Unimplemented Instruction: ADD HL, DE\n");
+    gbc->registers->HL = add_short(gbc->registers->HL, gbc->registers->DE, &gbc->registers->F);
 }
 
 // 0x1A: LD A, (DE) (- - - -)
@@ -336,7 +366,7 @@ static void op_jr_z_r8(gbc_system *gbc, char operand) {
 
 // 0x29: ADD HL, HL (- 0 H C)
 static void op_add_hl_hl(gbc_system *gbc) {
-    printf("Unimplemented Instruction: ADD HL, HL\n");
+    gbc->registers->HL = add_short(gbc->registers->HL, gbc->registers->HL, &gbc->registers->F);
 }
 
 // 0x2A: LD A, (HL+) (- - - -)
@@ -423,7 +453,7 @@ static void op_jr_c_r8(gbc_system *gbc, char operand) {
 
 // 0x39: ADD HL, SP (- 0 H C)
 static void op_add_hl_sp(gbc_system *gbc) {
-    printf("Unimplemented Instruction: ADD HL, SP\n");
+    gbc->registers->HL = add_short(gbc->registers->HL, gbc->registers->SP, &gbc->registers->F);
 }
 
 // 0x3A: LD A, (HL-) (- - - -)
@@ -778,42 +808,42 @@ static void op_ld_a_a(gbc_system *gbc) {
 
 // 0x80: ADD A, B (Z 0 H C)
 static void op_add_a_b(gbc_system *gbc) {
-    gbc->registers->A = add(gbc->registers->A, gbc->registers->B, &gbc->registers->F);
+    gbc->registers->A = add_byte(gbc->registers->A, gbc->registers->B, &gbc->registers->F);
 }
 
 // 0x81: ADD A, C (Z 0 H C)
 static void op_add_a_c(gbc_system *gbc) {
-    gbc->registers->A = add(gbc->registers->A, gbc->registers->C, &gbc->registers->F);
+    gbc->registers->A = add_byte(gbc->registers->A, gbc->registers->C, &gbc->registers->F);
 }
 
 // 0x82: ADD A, D (Z 0 H C)
 static void op_add_a_d(gbc_system *gbc) {
-    gbc->registers->A = add(gbc->registers->A, gbc->registers->D, &gbc->registers->F);
+    gbc->registers->A = add_byte(gbc->registers->A, gbc->registers->D, &gbc->registers->F);
 }
 
 // 0x83: ADD A, E (Z 0 H C)
 static void op_add_a_e(gbc_system *gbc) {
-    gbc->registers->A = add(gbc->registers->A, gbc->registers->E, &gbc->registers->F);
+    gbc->registers->A = add_byte(gbc->registers->A, gbc->registers->E, &gbc->registers->F);
 }
 
 // 0x84: ADD A, H (Z 0 H C)
 static void op_add_a_h(gbc_system *gbc) {
-    gbc->registers->A = add(gbc->registers->A, gbc->registers->H, &gbc->registers->F);
+    gbc->registers->A = add_byte(gbc->registers->A, gbc->registers->H, &gbc->registers->F);
 }
 
 // 0x85: ADD A, L (Z 0 H C)
 static void op_add_a_l(gbc_system *gbc) {
-    gbc->registers->A = add(gbc->registers->A, gbc->registers->L, &gbc->registers->F);
+    gbc->registers->A = add_byte(gbc->registers->A, gbc->registers->L, &gbc->registers->F);
 }
 
 // 0x86: ADD A, (HL) (Z 0 H C)
 static void op_add_a_hlp(gbc_system *gbc) {
-    gbc->registers->A = add(gbc->registers->A, read_byte(gbc->ram, gbc->registers->HL), &gbc->registers->F);
+    gbc->registers->A = add_byte(gbc->registers->A, read_byte(gbc->ram, gbc->registers->HL), &gbc->registers->F);
 }
 
 // 0x87: ADD A, A (Z 0 H C)
 static void op_add_a_a(gbc_system *gbc) {
-    gbc->registers->A = add(gbc->registers->A, gbc->registers->A, &gbc->registers->F);
+    gbc->registers->A = add_byte(gbc->registers->A, gbc->registers->A, &gbc->registers->F);
 }
 
 // 0x88: ADC A, B (Z 0 H C)
