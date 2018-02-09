@@ -1611,7 +1611,7 @@ gbc_instr instructions[INSTRUCTION_COUNT] = {
     {"RRA", 1, 4, 1, 0, op_rra}, // 0x1F
     {"JR NZ, %02x", 2, 12, 1, 1, op_jr_nz_r8}, // 0x20
     {"LD HL, %04x", 3, 12, 1, 0, op_ld_hl_d16}, // 0x21
-    {"LD (HL+), A", 1, 8, 1, 0, op_ld_hlp_a}, // 0x22
+    {"LD (HL+), A", 1, 8, 1, 0, op_ld_hlpp_a}, // 0x22
     {"INC HL", 1, 8, 1, 0, op_inc_hl}, // 0x23
     {"INC H", 1, 4, 1, 0, op_inc_h}, // 0x24
     {"DEC H", 1, 4, 1, 0, op_dec_h}, // 0x25
@@ -1619,7 +1619,7 @@ gbc_instr instructions[INSTRUCTION_COUNT] = {
     {"DAA", 1, 4, 1, 0, op_daa}, // 0x27
     {"JR Z, %02x", 2, 12, 1, 1, op_jr_z_r8}, // 0x28
     {"ADD HL, HL", 1, 8, 1, 0, op_add_hl_hl}, // 0x29
-    {"LD A, (HL+)", 1, 8, 1, 0, op_ld_a_hlp}, // 0x2A
+    {"LD A, (HL+)", 1, 8, 1, 0, op_ld_a_hlpp}, // 0x2A
     {"DEC HL", 1, 8, 1, 0, op_dec_hl}, // 0x2B
     {"INC L", 1, 4, 1, 0, op_inc_l}, // 0x2C
     {"DEC L", 1, 4, 1, 0, op_dec_l}, // 0x2D
@@ -1635,7 +1635,7 @@ gbc_instr instructions[INSTRUCTION_COUNT] = {
     {"SCF", 1, 4, 1, 0, op_scf}, // 0x37
     {"JR C, %02x", 2, 12, 1, 1, op_jr_c_r8}, // 0x38
     {"ADD HL, SP", 1, 8, 1, 0, op_add_hl_sp}, // 0x39
-    {"LD A, (HL-)", 1, 8, 1, 0, op_ld_a_hlp}, // 0x3A
+    {"LD A, (HL-)", 1, 8, 1, 0, op_ld_a_hlmp}, // 0x3A
     {"DEC SP", 1, 8, 1, 0, op_dec_sp}, // 0x3B
     {"INC A", 1, 4, 1, 0, op_inc_a}, // 0x3C
     {"DEC A", 1, 4, 1, 0, op_dec_a}, // 0x3D
