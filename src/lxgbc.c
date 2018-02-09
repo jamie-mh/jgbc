@@ -38,6 +38,9 @@ int main(int argc, char **argv) {
         printf("ERROR: Could not load rom file!\n\n");
         exit(0);
     }
+
+    // Load the bootstrap program
+    load_bootstrap(gbc->ram);
     
     // Show a message and initialise the debugger 
     if(cmd->debug) {

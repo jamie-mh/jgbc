@@ -352,7 +352,7 @@ static void op_inc_de(gbc_system *gbc) {
 
 // 0x14: INC D (Z 0 H -)
 static void op_inc_d(gbc_system *gbc) {
-    
+    gbc->registers->D = inc(gbc->registers->D, &gbc->registers->F);
 }
 
 // 0x15: DEC D (Z 1 H -)

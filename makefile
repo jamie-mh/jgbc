@@ -21,4 +21,4 @@ $(OBJ)/%.o: $(SRC)/%.c
 	$(CC) -c $< -o $@ $(CFLAGS)
 
 clean:
-	rm -rf $(OBJ)/* $(BIN)/*
+	rm -rf $(OBJ)/* $(BIN)/$(OUTNAME)

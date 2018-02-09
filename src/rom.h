@@ -16,6 +16,7 @@ typedef struct gbc_rom {
     unsigned char **ram_banks;
 } gbc_rom;
 
+void load_bootstrap(gbc_ram *);
 char load_rom(gbc_ram *, gbc_rom *, const char *);
 static void get_rom_info(unsigned char *, gbc_rom *);
 void print_rom_info(gbc_rom *);
