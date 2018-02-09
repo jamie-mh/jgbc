@@ -50,11 +50,11 @@ int main(int argc, char **argv) {
     // Main endless loop 
     while(gbc->is_running) {
 
-        // Execute the instruction at the program counter 
-        execute_instr(gbc);
-
         // Run the debugger if specified
         if(cmd->debug) debug(gbc, debugger);
+
+        // Execute the instruction at the program counter 
+        execute_instr(gbc);
 
         // Temp
         render(gbc->ram, gpu);
