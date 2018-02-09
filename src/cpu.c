@@ -1803,7 +1803,7 @@ gbc_instr instructions[INSTRUCTION_COUNT] = {
     {"RST 18H", 1, 16, 0, 0, op_rst_18h}, // 0xDF
     {"LDH (%02x), A", 2, 12, 1, 0, op_ldh_a8p_a}, // 0xE0
     {"POP HL", 1, 12, 1, 0, op_pop_hl}, // 0xE1
-    {"LD (C), A", 2, 8, 1, 0, op_ld_cp_a}, // 0xE2
+    {"LD (C), A", 1, 8, 1, 0, op_ld_cp_a}, // 0xE2
     {"NOP", 1, 4, 1, 0, op_nop}, // 0xE3
     {"NOP", 1, 4, 1, 0, op_nop}, // 0xE4
     {"PUSH HL", 1, 16, 1, 0, op_push_hl}, // 0xE5
@@ -3449,15 +3449,15 @@ void execute_instr(gbc_system *gbc) {
     opcode_function = instruction.execute;
 
     // Execute the instruction based on the length of the operand
-    char opcode_len = instruction.length - 1;
+    char operand_len = instruction.length - 1;
     unsigned short operand;
 
     // If it is a CB instruction, is shorter
     if(opcode == 0xCB) {
-        opcode_len--; 
+        operand_len--; 
     }
 
-    switch(opcode_len) {
+    switch(operand_len) {
 
         case 0:
             opcode_function(gbc);
