@@ -3,15 +3,15 @@
 #define MAIN_WINDOW_TITLE "LXGBC"
 
 // LCDC: LCD Control Register 
-#define LDCD 0xFF40
-#define LDCD_LCD_ENABLE 7 // LCD Display Enable
-#define LDCD_WINDOW_TILE_MAP 6 // Window Tile Map Display Select
-#define LDCD_WINDOW_DISPLAY 5 // Window Display Enable
-#define LDCD_BG_WINDOW_TILE_DATA 4 // BG & Window Tile Data Select
-#define LDCD_BG_TILE_MAP 3 // BG Tile Map Display Select
-#define LDCD_OBJ_SIZE 2 // OBJ (Sprite) Size 
-#define LDCD_OBJ_DISPLAY 1 // OBJ (Sprite) Display Enable
-#define LDCD_BG_DISPLAY 0 // BG Display
+#define LCDC 0xFF40
+#define LCDC_LCD_ENABLE 7 // LCD Display Enable
+#define LCDC_WINDOW_TILE_MAP 6 // Window Tile Map Display Select
+#define LCDC_WINDOW_DISPLAY 5 // Window Display Enable
+#define LCDC_BG_WINDOW_TILE_DATA 4 // BG & Window Tile Data Select
+#define LCDC_BG_TILE_MAP 3 // BG Tile Map Display Select
+#define LCDC_OBJ_SIZE 2 // OBJ (Sprite) Size 
+#define LCDC_OBJ_DISPLAY 1 // OBJ (Sprite) Display Enable
+#define LCDC_BG_DISPLAY 0 // BG Display
 
 // STAT: LCDC Status Register
 #define STAT 0xFF41
@@ -29,7 +29,7 @@
 // SCX: Scroll X
 #define SCX 0xFF43
 
-// LY: LDCD Y-Coordinate
+// LY: LCDC Y-Coordinate
 #define LY 0xFF44
 
 // LYC: LY Compare
@@ -65,6 +65,16 @@
 #define HDMA4 0xFF54
 #define HDMA5 0xFF55
 
-void init_gpu(gbc_gpu *, const char scale);
-void gpu_do_clock(gbc_system *);
-void simulate_gpu(gbc_system *);
+// GameBoy Monochrome Palette
+#define WHITE 255, 255, 255, 255
+#define BLACK 0, 0, 0, 255
+#define DGREY 76, 76, 76, 255
+#define LGREY 170, 170, 170, 255
+
+void init_ppu(gbc_ppu *, const char scale);
+void ppu_do_clock(gbc_system *);
+void simulate_ppu(gbc_system *);
+static void render_tile(gbc_system *, unsigned char, unsigned char, unsigned short);
+
+static SDL_Colour get_shade(unsigned char);
+static void fill_shade_table(gbc_system *, SDL_Colour *);

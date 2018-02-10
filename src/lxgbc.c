@@ -4,17 +4,18 @@
 #include "mbc.h"
 #include "rom.h"
 #include "debugger.h"
-#include "gpu.h"
+#include "ppu.h"
 #include "sound.h"
 
 int main(int argc, char **argv) {
 
     printf(CGRN LOGO CNRM);
+    SDL_Event event;
 
     // Allocate memory for the gbc
     gbc_system *gbc = malloc(sizeof(gbc_system));
     gbc->cpu = malloc(sizeof(gbc_cpu));
-    gbc->gpu = malloc(sizeof(gbc_gpu));
+    gbc->ppu = malloc(sizeof(gbc_ppu));
     gbc->ram = malloc(sizeof(gbc_ram));
     gbc->rom = malloc(sizeof(gbc_rom));
     gbc->debugger = malloc(sizeof(gbc_debugger));
@@ -38,7 +39,7 @@ int main(int argc, char **argv) {
         printf("ERROR: Could not load rom file!\n\n");
         exit(0);
     }
-    
+
     // Show a message and initialise the debugger 
     if(cmd->debug) {
         print_rom_info(gbc->rom);
@@ -48,7 +49,15 @@ int main(int argc, char **argv) {
     } else {
         
         // If the debugger is not running, show the display
-        init_gpu(gbc->gpu, cmd->scale);
+        init_ppu(gbc->ppu, cmd->scale);
+        
+        // Append the game title to the window title
+        char *title = malloc(sizeof(24 * sizeof(char)));
+        strcpy(title, MAIN_WINDOW_TITLE);
+        strcat(title, " - ");
+        strcat(title, gbc->rom->title);
+
+        SDL_SetWindowTitle(gbc->ppu->window, title);
     }
 
     // Main endless loop 
@@ -62,13 +71,23 @@ int main(int argc, char **argv) {
             // Execute the instruction at the program counter 
             simulate_cpu(gbc);
     
-            // Simulate scan line rendering of the gpu
-            simulate_gpu(gbc);
+            // Simulate scan line rendering of the ppu
+            simulate_ppu(gbc);
         }
-        // In normal mode, do a cpu and gpu clock
+        // In normal mode, do a cpu and ppu clock
         else {
             cpu_do_clock(gbc);
-            gpu_do_clock(gbc);
+
+            // Render only if the screen is on
+            if(read_register(gbc->ram, LCDC, LCDC_LCD_ENABLE)) {
+                ppu_do_clock(gbc);
+            }
+
+            // TODO: Remove this
+            SDL_PollEvent(&event);
+            if(event.type == SDL_QUIT) {
+                gbc->is_running = 0; 
+            }
         }
     }
 

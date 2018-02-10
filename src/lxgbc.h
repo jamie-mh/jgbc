@@ -61,15 +61,15 @@ typedef struct gbc_registers {
 
 typedef struct gbc_cpu {
     gbc_registers *registers;
-    char clock;
-    char run_for;
+    unsigned char clock;
+    unsigned char run_for;
 } gbc_cpu;
 
-typedef struct gbc_gpu {
+typedef struct gbc_ppu {
     SDL_Window *window;
     SDL_Renderer *renderer;
-    SDL_Event *event;
-} gbc_gpu;
+    unsigned char clock;
+} gbc_ppu;
 
 typedef struct gbc_ram {
     unsigned char *rom00; // 16KB ROM Bank
@@ -114,7 +114,7 @@ typedef struct gbc_debugger {
 typedef struct gbc_system {
     char is_running;
     gbc_cpu *cpu; 
-    gbc_gpu *gpu;
+    gbc_ppu *ppu;
     gbc_ram *ram;
     gbc_rom *rom;
     gbc_debugger *debugger;
