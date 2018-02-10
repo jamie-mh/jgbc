@@ -1,6 +1,5 @@
 #include "lxgbc.h"
 #include "ram.h"
-#include "gpu.h"
 
 // Allocates memory
 void init_ram(gbc_ram *ram) {

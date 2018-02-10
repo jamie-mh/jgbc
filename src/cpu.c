@@ -1,5 +1,4 @@
 #include "lxgbc.h"
-#include "ram.h"
 #include "cpu.h"
 
 // Initialises the CPU registers
