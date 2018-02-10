@@ -1,4 +1,5 @@
 #include "lxgbc.h"
+#include "ram.h"
 #include "cpu.h"
 
 // Initialises the CPU registers
@@ -19,6 +20,10 @@ void init_cpu(gbc_cpu *cpu) {
 
     // Enable interrupts
     cpu->registers->IME = 1;
+
+    // Reset the clock
+    cpu->clock = 0;
+    cpu->run_for = 0;
 }
 
 /*
@@ -3423,6 +3428,7 @@ gbc_instr cb_instructions[CB_INSTRUCTION_COUNT] = {
 
 // Returns an instruction struct of the provided opcode
 gbc_instr find_instr(const unsigned char opcode, gbc_system *gbc) {
+
     // If the opcode has the CB prefix
     if(opcode == 0xCB) {
         unsigned char next_opcode = read_byte(gbc->ram, gbc->cpu->registers->PC + 1);
@@ -3434,15 +3440,8 @@ gbc_instr find_instr(const unsigned char opcode, gbc_system *gbc) {
     }
 }
 
-// Reads an opcode at the program counter and calls the function associated with it
-// Only used in debug mode
-void execute_instr(gbc_system *gbc) {
-
-    // Get the opcode at the program counter
-    unsigned char opcode = read_byte(gbc->ram, gbc->cpu->registers->PC);
-
-    // Get the instruction structure
-    gbc_instr instruction = find_instr(opcode, gbc);
+// Executes an instruction by calling the function associated with it 
+static void execute_instr(gbc_instr instruction, gbc_system *gbc) {
 
     // Create a pointer to the function to execute
     void (*opcode_function)();
@@ -3452,8 +3451,8 @@ void execute_instr(gbc_system *gbc) {
     char operand_len = instruction.length - 1;
     unsigned short operand;
 
-    // If it is a CB instruction, is shorter
-    if(opcode == 0xCB) {
+    // If it is a CB instruction, it's shorter
+    if(strcmp(instruction.disassembly, "PREFIX CB") == 0) {
         operand_len--; 
     }
 
@@ -3483,7 +3482,37 @@ void execute_instr(gbc_system *gbc) {
 // Execute a cpu instruction and respect its duration in clock cycles
 void cpu_do_clock(gbc_system *gbc) {
     
+    // Wait until the current instruction is finished
+    if(gbc->cpu->clock < gbc->cpu->run_for) {
+        gbc->cpu->clock++;
+    }
+    // We've moved to the next instruction
+    else {
+   
+        // Execute the instruction
+        gbc_instr instruction = get_curr_instr(gbc);
+        execute_instr(instruction, gbc);
 
+        // Set the clock accordingly
+        gbc->cpu->clock = 0;
+        gbc->cpu->run_for = instruction.cycles;
+    }
+}
+
+// Gets the current instruction at the program counter
+static gbc_instr get_curr_instr(gbc_system *gbc) {
+    
+    // Get the opcode at the program counter
+    unsigned char opcode = read_byte(gbc->ram, gbc->cpu->registers->PC);
+
+    // Get the instruction structure
+    return find_instr(opcode, gbc);
+}
+
+// Runs a cpu instruction immediately and ignores the clock
+// Used in debug mode, for stepping through a program
+void simulate_cpu(gbc_system *gbc) {
+    execute_instr(get_curr_instr(gbc), gbc); 
 }
 
 // Returns the bit no of the specified flag in the F register

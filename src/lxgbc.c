@@ -60,7 +60,7 @@ int main(int argc, char **argv) {
             debug(gbc);
 
             // Execute the instruction at the program counter 
-            execute_instr(gbc);
+            simulate_cpu(gbc);
     
             // Simulate scan line rendering of the gpu
             simulate_gpu(gbc);

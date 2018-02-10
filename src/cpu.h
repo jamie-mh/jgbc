@@ -24,7 +24,11 @@ typedef struct gbc_instr {
 
 void init_cpu(gbc_cpu *);
 gbc_instr find_instr(const unsigned char, gbc_system *);
-void execute_instr(gbc_system *);
+
+static void execute_instr(gbc_instr, gbc_system *);
+static gbc_instr get_curr_instr(gbc_system *);
+
+void simulate_cpu(gbc_system *);
 void cpu_do_clock(gbc_system *);
 
 static void set_flag(const char, const unsigned char, unsigned char *);

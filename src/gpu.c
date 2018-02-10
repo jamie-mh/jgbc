@@ -1,4 +1,5 @@
 #include "lxgbc.h"
+#include "ram.h"
 #include "gpu.h"
 
 // Opens a SDL window, WIP
