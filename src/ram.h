@@ -28,21 +28,6 @@
 #define REG_IE 0xFFFF
 #define REG_IF 0xFF0F
 
-typedef struct gbc_ram {
-    unsigned char *rom00; // 16KB ROM Bank
-    unsigned char *romNN; // 16KB Switchable ROM Bank
-    unsigned char *vram; // 8KB Video RAM
-    unsigned char *extram; // 8KB External Ram (cartridge)
-    unsigned char *wram00; // 4KB Work RAM bank 0
-    unsigned char *wramNN; // 4KB Work RAM bank 1-7 (switchable) 
-    unsigned char *oam; // 1.59KB Sprite Attribute Table
-    unsigned char *io; // 128B IO Ports
-    unsigned char *hram; // 128B High RAM
-    unsigned char *ier; // 1B Interrupt Enable Register
-
-    unsigned char **wram_banks; // 8x4KB WRAM Banks (CGB Only)
-} gbc_ram;
-
 void init_ram(gbc_ram *);
 static unsigned char *get_memory_location(gbc_ram *, unsigned short *);
 

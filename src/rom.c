@@ -3,14 +3,14 @@
 #include "rom.h"
 
 // Load a ROM file into the RAM memory location
-char load_rom(gbc_ram *ram, gbc_rom *rom, const char *path) {
+char load_rom(gbc_system *gbc, const char *path) {
 
     // Open the file at the specified path
     FILE *file;
     file = fopen(path, "r");
     if(!file) return 0;
 
-    // Allocate copy just the header to temporary memory
+    // Allocate temp memory and copy just the header 
     unsigned char *header = malloc(sizeof(char) * (ROM_HEADER_END - ROM_HEADER_START)); 
     fseek(file, ROM_HEADER_START, SEEK_SET);
     int character;
@@ -27,26 +27,26 @@ char load_rom(gbc_ram *ram, gbc_rom *rom, const char *path) {
     }
 
     // Read the header and see how many ROM banks are required
-    get_rom_info(header, rom);
+    get_rom_info(header, gbc->rom);
     free(header);
 
     // Allocate memory for all the rom banks
-    rom->rom_banks = malloc(sizeof(char *) * rom->rom_size); 
-    for(int i = 0; i < rom->rom_size; i++) {
-        rom->rom_banks[i] = calloc(ROM_BANK_SIZE, sizeof(char)); 
+    gbc->rom->rom_banks = malloc(sizeof(char *) * gbc->rom->rom_size); 
+    for(int i = 0; i < gbc->rom->rom_size; i++) {
+        gbc->rom->rom_banks[i] = calloc(ROM_BANK_SIZE, sizeof(char)); 
     }
     
     // Allocate memory for all the ext ram banks
-    rom->ram_banks = malloc(sizeof(char *) * rom->ram_size);
-    for(int i = 0; i < rom->ram_size; i++) {
-        rom->ram_banks[i] = calloc(EXTRAM_BANK_SIZE, sizeof(char));
+    gbc->rom->ram_banks = malloc(sizeof(char *) * gbc->rom->ram_size);
+    for(int i = 0; i < gbc->rom->ram_size; i++) {
+        gbc->rom->ram_banks[i] = calloc(EXTRAM_BANK_SIZE, sizeof(char));
     }
     
     // Point the cartridge ram locations to the first rom banks
     // With ROM0 being fixed at the first rom bank
     // And romNN starting with the second one
-    ram->rom00 = rom->rom_banks[0];
-    ram->romNN = rom->rom_banks[1];
+    gbc->ram->rom00 = gbc->rom->rom_banks[0];
+    gbc->ram->romNN = gbc->rom->rom_banks[1];
 
     // Return to the start of the file
     fseek(file, 0, SEEK_SET);
@@ -58,7 +58,7 @@ char load_rom(gbc_ram *ram, gbc_rom *rom, const char *path) {
         // TODO: Implement bank switching based on MBC type
         
         // Write the character to ram
-        write_byte(ram, address, (unsigned char) character);
+        write_byte(gbc->ram, address, (unsigned char) character);
         address++; 
     }
     fclose(file);

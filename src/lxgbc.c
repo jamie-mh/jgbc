@@ -13,10 +13,13 @@ int main(int argc, char **argv) {
 
     // Allocate memory for the gbc
     gbc_system *gbc = malloc(sizeof(gbc_system));
+    gbc->cpu = malloc(sizeof(gbc_cpu));
+    gbc->gpu = malloc(sizeof(gbc_gpu));
     gbc->ram = malloc(sizeof(gbc_ram));
-    gbc_rom *rom = malloc(sizeof(gbc_rom));
-    gbc_gpu *gpu = malloc(sizeof(gbc_gpu));
-    gbc_debugger *debugger = malloc(sizeof(gbc_debugger));
+    gbc->rom = malloc(sizeof(gbc_rom));
+    gbc->debugger = malloc(sizeof(gbc_debugger));
+
+    gbc->is_running = 1;
 
     // Get the command line arguments
     cmd_options *cmd = malloc(sizeof(cmd_options));
@@ -27,37 +30,46 @@ int main(int argc, char **argv) {
     }
 
     // Initialize the system
-    init_cpu(gbc);
+    init_cpu(gbc->cpu);
     init_ram(gbc->ram);
-    //init_gpu(gpu, cmd->scale);
-
-    gbc->is_running = 1;
 
     // Load the rom into memory
-    if(!load_rom(gbc->ram, rom, cmd->rom_path)) {
+    if(!load_rom(gbc, cmd->rom_path)) {
         printf("ERROR: Could not load rom file!\n\n");
         exit(0);
     }
     
     // Show a message and initialise the debugger 
     if(cmd->debug) {
-        print_rom_info(rom);
+        print_rom_info(gbc->rom);
 
         printf("\nLXGBC DEBUGGER RUNNING\nType 'h' for information on the available commands.\n");
-        init_debugger(debugger);
+        init_debugger(gbc->debugger);
+    } else {
+        
+        // If the debugger is not running, show the display
+        init_gpu(gbc->gpu, cmd->scale);
     }
 
     // Main endless loop 
+    // One execution of this loop represents one cpu clock in non debug mode
     while(gbc->is_running) {
 
-        // Run the debugger if specified
-        if(cmd->debug) debug(gbc, debugger);
+        // In debug mode, execute instruction by instruction 
+        if(cmd->debug) {
+            debug(gbc);
 
-        // Execute the instruction at the program counter 
-        execute_instr(gbc);
-
-        // Temp
-        render(gbc->ram, gpu);
+            // Execute the instruction at the program counter 
+            execute_instr(gbc);
+    
+            // Simulate scan line rendering of the gpu
+            simulate_gpu(gbc);
+        }
+        // In normal mode, do a cpu and gpu clock
+        else {
+            cpu_do_clock(gbc);
+            gpu_do_clock(gbc);
+        }
     }
 
     return 0;

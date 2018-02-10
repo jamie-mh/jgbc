@@ -22,27 +22,19 @@ void init_gpu(gbc_gpu *gpu, const char scale) {
     SDL_RenderSetScale(gpu->renderer, scale, scale);
 }
 
-void render(gbc_ram *ram, gbc_gpu *gpu) {
-    
-    // Increment the Y coordinate register
-    unsigned char y = read_byte(ram, LY);
-    if(y < 153) {
-        write_byte(ram, LY, y + 1);
-    } else {
-        write_byte(ram, LY, 0x0);
-    }
+void gpu_do_clock(gbc_system *gbc) {
 
-    
 }
 
-// Checks if we are in a vblank period
-char is_vblank(gbc_ram *ram) {
-
-    unsigned char y = read_byte(ram, LY);
-
-    if(y >= 144 && y <= 153) {
-        return 1; 
+// Simulates the renderering of the lcd in debug mode
+// so that programs don't hang waiting for a v-blank or h-blank
+void simulate_gpu(gbc_system *gbc) {
+    
+    // Increment the Y coordinate register
+    unsigned char y = read_byte(gbc->ram, LY);
+    if(y < 153) {
+        write_byte(gbc->ram, LY, y + 1);
     } else {
-        return 0; 
+        write_byte(gbc->ram, LY, 0x0);
     }
 }

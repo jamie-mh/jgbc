@@ -65,12 +65,6 @@
 #define HDMA4 0xFF54
 #define HDMA5 0xFF55
 
-typedef struct gbc_gpu {
-    SDL_Window *window;
-    SDL_Renderer *renderer;
-    SDL_Event *event;
-} gbc_gpu;
-
 void init_gpu(gbc_gpu *, const char scale);
-void render(gbc_ram *, gbc_gpu *gpu);
-char is_vblank(gbc_ram *);
+void gpu_do_clock(gbc_system *);
+void simulate_gpu(gbc_system *);

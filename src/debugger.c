@@ -4,7 +4,7 @@
 #include "cpu.h"
 
 // Shows the current instruction and the instructions that follow it
-static debug_box *dbox_instr(gbc_system *gbc, gbc_debugger *debugger) {
+static debug_box *dbox_instr(gbc_system *gbc) {
     
     // Allocate memory for the box
     debug_box *box = malloc(sizeof(*box));
@@ -15,7 +15,7 @@ static debug_box *dbox_instr(gbc_system *gbc, gbc_debugger *debugger) {
     box->width = DBOX_INSTR_WIDTH;
 
     // Write to the row array
-    unsigned int pointer = gbc->registers->PC;
+    unsigned int pointer = gbc->cpu->registers->PC;
     int i;
     for(i = 0; i < DBOX_INSTR_ROWS; i++) {
 
@@ -34,7 +34,7 @@ static debug_box *dbox_instr(gbc_system *gbc, gbc_debugger *debugger) {
             strcat(box->rows[i], "-> ");
         } else {
             // If the instruction is at a breakpoint
-            if(find_breakpoint(pointer, debugger)) {
+            if(find_breakpoint(pointer, gbc->debugger)) {
                 strcat(box->rows[i], "@  ");
             } else {
                 strcat(box->rows[i], "   ");
@@ -95,7 +95,7 @@ static debug_box *dbox_instr(gbc_system *gbc, gbc_debugger *debugger) {
 }
 
 // Shows the content of the CPU registers
-static debug_box *dbox_regis(gbc_system *gbc, gbc_debugger *debugger) {
+static debug_box *dbox_regis(gbc_system *gbc) {
 
     // Allocate memory for the box
     debug_box *box = malloc(sizeof(*box));
@@ -108,55 +108,55 @@ static debug_box *dbox_regis(gbc_system *gbc, gbc_debugger *debugger) {
     char *line = malloc(DBOX_REGIS_ROWS);
 
     // TODO: Replace this at some point
-    sprintf(line, "A : %02X", gbc->registers->A);
+    sprintf(line, "A : %02X", gbc->cpu->registers->A);
     box->rows[0] = malloc(sizeof(char) * strlen(line));
     strcpy(box->rows[0], line);
 
-    sprintf(line, "B : %02X", gbc->registers->B);
+    sprintf(line, "B : %02X", gbc->cpu->registers->B);
     box->rows[1] = malloc(sizeof(char) * strlen(line));
     strcpy(box->rows[1], line);
 
-    sprintf(line, "C : %02X", gbc->registers->C);
+    sprintf(line, "C : %02X", gbc->cpu->registers->C);
     box->rows[2] = malloc(sizeof(char) * strlen(line));
     strcpy(box->rows[2], line);
 
-    sprintf(line, "D : %02X", gbc->registers->D);
+    sprintf(line, "D : %02X", gbc->cpu->registers->D);
     box->rows[3] = malloc(sizeof(char) * strlen(line));
     strcpy(box->rows[3], line);
 
-    sprintf(line, "E : %02X", gbc->registers->E);
+    sprintf(line, "E : %02X", gbc->cpu->registers->E);
     box->rows[4] = malloc(sizeof(char) * strlen(line));
     strcpy(box->rows[4], line);
 
-    sprintf(line, "H : %02X", gbc->registers->H);
+    sprintf(line, "H : %02X", gbc->cpu->registers->H);
     box->rows[5] = malloc(sizeof(char) * strlen(line));
     strcpy(box->rows[5], line);
 
-    sprintf(line, "L : %02X", gbc->registers->L);
+    sprintf(line, "L : %02X", gbc->cpu->registers->L);
     box->rows[6] = malloc(sizeof(char) * strlen(line));
     strcpy(box->rows[6], line);
 
-    sprintf(line, "AF: %04X", gbc->registers->AF);
+    sprintf(line, "AF: %04X", gbc->cpu->registers->AF);
     box->rows[7] = malloc(sizeof(char) * strlen(line));
     strcpy(box->rows[7], line);
 
-    sprintf(line, "BC: %04X", gbc->registers->BC);
+    sprintf(line, "BC: %04X", gbc->cpu->registers->BC);
     box->rows[8] = malloc(sizeof(char) * strlen(line));
     strcpy(box->rows[8], line);
 
-    sprintf(line, "DE: %04X", gbc->registers->DE);
+    sprintf(line, "DE: %04X", gbc->cpu->registers->DE);
     box->rows[9] = malloc(sizeof(char) * strlen(line));
     strcpy(box->rows[9], line);
 
-    sprintf(line, "HL: %04X", gbc->registers->HL);
+    sprintf(line, "HL: %04X", gbc->cpu->registers->HL);
     box->rows[10] = malloc(sizeof(char) * strlen(line));
     strcpy(box->rows[10], line);
 
-    sprintf(line, "PC: %04X", gbc->registers->PC);
+    sprintf(line, "PC: %04X", gbc->cpu->registers->PC);
     box->rows[11] = malloc(sizeof(char) * strlen(line));
     strcpy(box->rows[11], line);
 
-    sprintf(line, "SP: %04X", gbc->registers->SP);
+    sprintf(line, "SP: %04X", gbc->cpu->registers->SP);
     box->rows[12] = malloc(sizeof(char) * strlen(line));
     strcpy(box->rows[12], line);
 
@@ -167,7 +167,7 @@ static debug_box *dbox_regis(gbc_system *gbc, gbc_debugger *debugger) {
 }
 
 // Parses the F register and prints the values of each flag
-static debug_box *dbox_flags(gbc_system *gbc, gbc_debugger *debugger) {
+static debug_box *dbox_flags(gbc_system *gbc) {
 
     // Allocate memory for the box
     debug_box *box = malloc(sizeof(*box));
@@ -184,16 +184,16 @@ static debug_box *dbox_flags(gbc_system *gbc, gbc_debugger *debugger) {
     } 
     
     // Create the rows
-    sprintf(box->rows[0], "Z: %d", (gbc->registers->F >> 7) & 1);
-    sprintf(box->rows[1], "N: %d", (gbc->registers->F >> 6) & 1); 
-    sprintf(box->rows[2], "H: %d", (gbc->registers->F >> 5) & 1);
-    sprintf(box->rows[3], "C: %d", (gbc->registers->F >> 4) & 1);
+    sprintf(box->rows[0], "Z: %d", (gbc->cpu->registers->F >> 7) & 1);
+    sprintf(box->rows[1], "N: %d", (gbc->cpu->registers->F >> 6) & 1); 
+    sprintf(box->rows[2], "H: %d", (gbc->cpu->registers->F >> 5) & 1);
+    sprintf(box->rows[3], "C: %d", (gbc->cpu->registers->F >> 4) & 1);
         
     return box;
 }
 
 // Shows varied info
-static debug_box *dbox_info(gbc_system *gbc, gbc_debugger *debugger) {
+static debug_box *dbox_info(gbc_system *gbc) {
    
     // Allocate memory for the box
     debug_box *box = malloc(sizeof(*box));
@@ -211,9 +211,9 @@ static debug_box *dbox_info(gbc_system *gbc, gbc_debugger *debugger) {
 
     // Write some information
     strcpy(box->rows[0], "OPCODE:");
-    sprintf(box->rows[1], "-> %02X", read_byte(gbc->ram, gbc->registers->PC));
+    sprintf(box->rows[1], "-> %02X", read_byte(gbc->ram, gbc->cpu->registers->PC));
     strcpy(box->rows[2], "INTERR:");
-    sprintf(box->rows[3], "-> %d", gbc->registers->IME);
+    sprintf(box->rows[3], "-> %d", gbc->cpu->registers->IME);
 
     return box;
 }
@@ -226,15 +226,15 @@ static void print_separator(const int width) {
 }
 
 // Prints all the selected dboxes to the screen
-static void print_debug(gbc_system *gbc, gbc_debugger *debugger) {
+static void print_debug(gbc_system *gbc) {
 
     // Create an array of boxes
     // A box is a formatted debug table in the console window
     debug_box *boxes[DBOX_COUNT];
-    boxes[0] = dbox_instr(gbc, debugger);
-    boxes[1] = dbox_regis(gbc, debugger);
-    boxes[2] = dbox_flags(gbc, debugger);
-    boxes[3] = dbox_info(gbc, debugger);
+    boxes[0] = dbox_instr(gbc);
+    boxes[1] = dbox_regis(gbc);
+    boxes[2] = dbox_flags(gbc);
+    boxes[3] = dbox_info(gbc);
 
     // Render the various boxes in columns of 2
     int i;
@@ -278,17 +278,17 @@ static void print_debug(gbc_system *gbc, gbc_debugger *debugger) {
 }
 
 // Handles debug commands and prints to the screen
-void debug(gbc_system *gbc, gbc_debugger *debugger) {
+void debug(gbc_system *gbc) {
 
     // If the emulator is running
-    if(debugger->running) {
+    if(gbc->debugger->running) {
 
-        breakpoint *bp = find_breakpoint(gbc->registers->PC, debugger);
+        breakpoint *bp = find_breakpoint(gbc->cpu->registers->PC, gbc->debugger);
 
         // If there is a breakpoint at this instruction
         if(bp) {
-            debugger->running = 0;
-            print_debug(gbc, debugger);
+            gbc->debugger->running = 0;
+            print_debug(gbc);
             printf(CYEL "Stopped at breakpoint 0x%04X\n" CNRM, bp->address);
         } else {
             return;
@@ -296,8 +296,8 @@ void debug(gbc_system *gbc, gbc_debugger *debugger) {
     }
 
     // If we need to skip some instructions
-    if(debugger->skip_instr > 0) {
-        debugger->skip_instr--;
+    if(gbc->debugger->skip_instr > 0) {
+        gbc->debugger->skip_instr--;
         return;
     }
 
@@ -306,9 +306,9 @@ void debug(gbc_system *gbc, gbc_debugger *debugger) {
     // Get a command from the user
     while((command = getchar()) != EOF) {
         
-        if(debugger->print) {
-            print_debug(gbc, debugger);
-            debugger->print = 0;
+        if(gbc->debugger->print) {
+            print_debug(gbc);
+            gbc->debugger->print = 0;
         }
     
         switch(command) {
@@ -322,8 +322,8 @@ void debug(gbc_system *gbc, gbc_debugger *debugger) {
             case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
 
                 // Subtract '0' to get the digit
-                debugger->skip_instr = command - '0' - 1;
-                debugger->print = 1;
+                gbc->debugger->skip_instr = command - '0' - 1;
+                gbc->debugger->print = 1;
                 return;
 
             // Add breakpoint command
@@ -333,7 +333,7 @@ void debug(gbc_system *gbc, gbc_debugger *debugger) {
                 scanf("%x", &address);
 
                 // Add the breakpoint 
-                if(add_breakpoint(address, debugger)) {
+                if(add_breakpoint(address, gbc->debugger)) {
                     printf(CGRN "Breakpoint added at 0x%04X\n" CNRM, address);
                 } else {
                     printf(CRED "Breakpoint already exists\n" CNRM);
@@ -348,7 +348,7 @@ void debug(gbc_system *gbc, gbc_debugger *debugger) {
                 scanf("%x", &address);
 
                 // Remove the breakpoint 
-                if(remove_breakpoint(address, debugger)) {
+                if(remove_breakpoint(address, gbc->debugger)) {
                     printf(CGRN "Breakpoint at 0x%04X removed\n" CNRM, address);
                 } else {
                     printf(CRED "Breakpoint does not exist\n" CNRM);
@@ -359,7 +359,7 @@ void debug(gbc_system *gbc, gbc_debugger *debugger) {
             // List breakpoints
             case 'l': {
 
-                breakpoint *item = debugger->breakpoint_head;
+                breakpoint *item = gbc->debugger->breakpoint_head;
                 int i = 1;
                 while(item) {
                     printf("%d: 0x%04X\n", i, item->address);
@@ -371,12 +371,12 @@ void debug(gbc_system *gbc, gbc_debugger *debugger) {
 
             // Run command
             case 'r':
-                debugger->running = 1;
+                gbc->debugger->running = 1;
                 return;
             
             // Print debug information
             case 'p':
-                print_debug(gbc, debugger);
+                print_debug(gbc);
                 continue;
 
             // Dump RAM to a file
