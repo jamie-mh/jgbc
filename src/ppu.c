@@ -31,27 +31,33 @@ void init_ppu(gbc_ppu *ppu, const char scale) {
 // Renders the picture on the screen scanline by scanline
 void ppu_do_clock(gbc_system *gbc) {
 
+    // Wait until the current instruction is finished
+    if(gbc->ppu->clock < gbc->ppu->run_for) {
+        gbc->ppu->clock++;
+        return;
+    }
+
     // Set the mode according to the clock
     unsigned char ly_val = read_byte(gbc->ram, LY);
     unsigned char mode;
 
     // V-Blank (10 lines)
-    if(ly_val > 144 && ly_val >= 154) {
+    if(ly_val > 144 && ly_val <= 154) {
         mode = 1; 
     }
     // Screen rendering (144 lines aka height of screen in px)
     else {
     
         // OAM Transfer (20 clocks)
-        if(gbc->ppu->clock >= 0 && gbc->ppu->clock < 20) {
+        if(gbc->ppu->scan_clock >= 0 && gbc->ppu->scan_clock < 20) {
             mode = 2;
         }
         // Pixel Transfer (43 clocks)
-        else if(gbc->ppu->clock >= 20 && gbc->ppu->clock < 63) {
+        else if(gbc->ppu->scan_clock >= 20 && gbc->ppu->scan_clock < 63) {
             mode = 3;  
         } 
         // H-Blank (51 clocks) 
-        else if(gbc->ppu->clock >= 63 && gbc->ppu->clock <= 114) {
+        else if(gbc->ppu->scan_clock >= 63 && gbc->ppu->scan_clock <= 114) {
             mode = 0; 
         }
     }
@@ -60,45 +66,50 @@ void ppu_do_clock(gbc_system *gbc) {
     write_register(gbc->ram, STAT, STAT_MODE0, (mode >> 1) & 1);
     write_register(gbc->ram, STAT, STAT_MODE1, (mode >> 0) & 1);
     
-    // Get the memory locations of the background tile data and map
-    unsigned short bg_tile_data = (read_register(gbc->ram, LCDC, LCDC_BG_WINDOW_TILE_DATA) ? 0x8000 : 0x8800);
-    unsigned short bg_tile_map = (read_register(gbc->ram, LCDC, LCDC_BG_TILE_MAP) ? 0x9C00 : 0x9800);
-
-    // Get the current background scroll position
-    unsigned char x = read_byte(gbc->ram, SCX);
-    unsigned char y = read_byte(gbc->ram, SCY);
+    // Render pixels to the screen in screen rendering mode
+    // The drawing of a background tile takes two clocks but the rendering lasts for 43 clocks
+    // We need to render these tiles in first 40 clocks, ignoring the last 3
+    // It's not super accurate but it's good enough
+    // Also we only need to render a tile every 8 scanlines because a tile is 8 pixels high
+    if(mode == 3 && gbc->ppu->scan_clock < 60 && ly_val % 8 == 0) {
     
-    // Render the background tiles
-    for(; x < 32; x++) {
-        for(; y < 32; y++) {
+        // Render the background tiles
+        // Get the memory locations of the background tile data and map
+        unsigned short bg_tile_data = (read_register(gbc->ram, LCDC, LCDC_BG_WINDOW_TILE_DATA) ? 0x8000 : 0x8800);
+        unsigned short bg_tile_map = (read_register(gbc->ram, LCDC, LCDC_BG_TILE_MAP) ? 0x9C00 : 0x9800);
 
-            // Get the tile to render
-            unsigned char tile_number = read_byte(gbc->ram, bg_tile_map + (x * y));
-            unsigned short tile_pointer = read_byte(gbc->ram, bg_tile_data + tile_number);
+        // Get the current background scroll position
+        unsigned char x = read_byte(gbc->ram, SCX);
+        unsigned char y = read_byte(gbc->ram, SCY);
 
-            // Render the tile on the screen
-            render_tile(gbc, x * 8, y * 8, tile_pointer);
-        } 
+        // Get the palette data
+        SDL_Colour shades[4];
+        fill_shade_table(gbc, shades);
+   
+        // Get the position of the tile to render based on the clock and scanline
+        unsigned char tile_number = read_byte(gbc->ram, bg_tile_map + (gbc->ppu->scan_clock - 20));
+        unsigned short tile_pointer = read_byte(gbc->ram, bg_tile_data + tile_number);
+        render_tile(gbc, ((gbc->ppu->scan_clock - 20) / 2) * 8, ly_val, tile_pointer, shades);
+        
+        // Run for two clocks
+        gbc->ppu->clock = 0;
+        gbc->ppu->run_for = 2;
+    }
+
+    // End of scanline
+    if(gbc->ppu->scan_clock == 114) {
+        gbc->ppu->scan_clock = 0;
+    } else {
+        gbc->ppu->scan_clock++;
     }
 
     // Increment the vertical line register
-    // End of scanline
-    if(gbc->ppu->clock == 114) {
-        gbc->ppu->clock = 0;
-    } else {
-        write_byte(gbc->ram, LY, (ly_val == 153) ? 0 : ly_val + 1);
-    }
-
-    gbc->ppu->clock++;
+    write_byte(gbc->ram, LY, (ly_val == 153) ? 0 : ly_val + 1);
 }
 
 // Renders a tile to the display at the specified coordinates
 // Gets tile data from ram at the pointer given
-static void render_tile(gbc_system *gbc, const unsigned char x, const unsigned char y, const unsigned short addr) {
-
-    // Get the palette data
-    SDL_Colour shades[4];
-    fill_shade_table(gbc, shades);
+static void render_tile(gbc_system *gbc, const unsigned char x, const unsigned char y, const unsigned short addr, SDL_Colour *shades) {
 
     // Render the rows of the tile
     for(unsigned char row = 0; row < 8; row++) {
@@ -116,7 +127,7 @@ static void render_tile(gbc_system *gbc, const unsigned char x, const unsigned c
 
             // Change the colour and render the pixel
             SDL_SetRenderDrawColor(gbc->ppu->renderer, shade.r, shade.g, shade.b, shade.a);
-            SDL_RenderDrawPoint(gbc->ppu->renderer, x, y);
+            SDL_RenderDrawPoint(gbc->ppu->renderer, x + i, y + row);
         }
 
         SDL_RenderPresent(gbc->ppu->renderer);
@@ -159,18 +170,5 @@ static void fill_shade_table(gbc_system *gbc, SDL_Colour *table) {
 
         // Add the shade
         table[i] = get_shade(shade_num); 
-    }
-}
-
-// Simulates the renderering of the lcd in debug mode
-// so that programs don't hang waiting for a v-blank or h-blank
-// TODO: Improve
-void simulate_ppu(gbc_system *gbc) {
-    
-    // Increment the Y coordinate register
-    unsigned char y = read_byte(gbc->ram, LY);
-    if(y < 153) {
-        write_byte(gbc->ram, LY, y + 1);
-    } else { write_byte(gbc->ram, LY, 0x0);
     }
 }

@@ -73,8 +73,7 @@
 
 void init_ppu(gbc_ppu *, const char scale);
 void ppu_do_clock(gbc_system *);
-void simulate_ppu(gbc_system *);
-static void render_tile(gbc_system *, const unsigned char, const unsigned char, const unsigned short);
+static void render_tile(gbc_system *, const unsigned char, const unsigned char, const unsigned short, SDL_Colour *);
 
 static SDL_Colour get_shade(const unsigned char);
 static void fill_shade_table(gbc_system *, SDL_Colour *);

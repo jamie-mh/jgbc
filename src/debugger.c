@@ -315,7 +315,7 @@ void debug(gbc_system *gbc) {
 
             // Help command
             case 'h':
-                printf("\nAvailable Commands:\n(1-9): Run X instructions\nb: Create a breakpoint\nd: Remove a breakpoint\nl: List all breakpoints\nr: Run\np: Print debug information\nf: Dump RAM to a file\nq: Quit\n");
+                printf("\nAvailable Commands:\n(1-9): Run X instructions\nb: Create a breakpoint\nd: Remove a breakpoint\nl: List all breakpoints\nr: Run\np: Print debug information\ns: Read byte in memory\nf: Dump RAM to a file\nq: Quit\n");
                 continue;
 
             // Number input to run for X instructions before stopping
@@ -328,7 +328,7 @@ void debug(gbc_system *gbc) {
 
             // Add breakpoint command
             case 'b': {
-                unsigned int address;
+                unsigned short address;
                 printf("\nNew breakpoint\nAddress (HEX) 0x");
                 scanf("%x", &address);
 
@@ -343,7 +343,7 @@ void debug(gbc_system *gbc) {
 
             // Remove breakpoint
             case 'd': {
-                unsigned int address;
+                unsigned short address;
                 printf("\nRemove breakpoint\nAddress (HEX) 0x");
                 scanf("%x", &address);
 
@@ -378,6 +378,16 @@ void debug(gbc_system *gbc) {
             case 'p':
                 print_debug(gbc);
                 continue;
+
+            // Read value at address in memory
+            case 's': {
+                unsigned short address;
+                printf("\nRead byte\nAddress (HEX) 0x");
+                scanf("%x", &address);
+
+                printf("Result: 0x%02X\n\n", read_byte(gbc->ram, address));
+                continue;
+            }
 
             // Dump RAM to a file
             case 'f': {

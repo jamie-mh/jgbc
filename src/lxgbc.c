@@ -33,6 +33,7 @@ int main(int argc, char **argv) {
     // Initialize the system
     init_cpu(gbc->cpu);
     init_ram(gbc->ram);
+    init_ppu(gbc->ppu, cmd->scale);
 
     // Load the rom into memory
     if(!load_rom(gbc, cmd->rom_path)) {
@@ -46,19 +47,15 @@ int main(int argc, char **argv) {
 
         printf("\nLXGBC DEBUGGER RUNNING\nType 'h' for information on the available commands.\n");
         init_debugger(gbc->debugger);
-    } else {
-        
-        // If the debugger is not running, show the display
-        init_ppu(gbc->ppu, cmd->scale);
-        
-        // Append the game title to the window title
-        char *title = malloc(sizeof(24 * sizeof(char)));
-        strcpy(title, MAIN_WINDOW_TITLE);
-        strcat(title, " - ");
-        strcat(title, gbc->rom->title);
-
-        SDL_SetWindowTitle(gbc->ppu->window, title);
     }
+       
+    // Append the game title to the window title
+    char *title = malloc(sizeof(24 * sizeof(char)));
+    strcpy(title, MAIN_WINDOW_TITLE);
+    strcat(title, " - ");
+    strcat(title, gbc->rom->title);
+
+    SDL_SetWindowTitle(gbc->ppu->window, title);
 
     // Main endless loop 
     // One execution of this loop represents one cpu clock in non debug mode
@@ -70,24 +67,21 @@ int main(int argc, char **argv) {
 
             // Execute the instruction at the program counter 
             simulate_cpu(gbc);
-    
-            // Simulate scan line rendering of the ppu
-            simulate_ppu(gbc);
         }
         // In normal mode, do a cpu and ppu clock
         else {
             cpu_do_clock(gbc);
-
-            // Render only if the screen is on
-            if(read_register(gbc->ram, LCDC, LCDC_LCD_ENABLE)) {
-                ppu_do_clock(gbc);
-            }
 
             // TODO: Remove this
             SDL_PollEvent(&event);
             if(event.type == SDL_QUIT) {
                 gbc->is_running = 0; 
             }
+        }
+
+        // Render only if the screen is on
+        if(read_register(gbc->ram, LCDC, LCDC_LCD_ENABLE)) {
+            ppu_do_clock(gbc);
         }
     }
 
