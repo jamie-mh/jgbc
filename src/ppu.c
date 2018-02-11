@@ -19,6 +19,10 @@ void init_ppu(gbc_ppu *ppu, const char scale) {
 
     // Set the rendering scale
     SDL_RenderSetScale(ppu->renderer, scale, scale);
+
+    // Set the screen to white
+    SDL_SetRenderDrawColor(ppu->renderer, 255, 255, 255, 255);
+    SDL_RenderClear(ppu->renderer);
     
     // Reset the clock
     ppu->clock = 0;
@@ -90,7 +94,7 @@ void ppu_do_clock(gbc_system *gbc) {
 
 // Renders a tile to the display at the specified coordinates
 // Gets tile data from ram at the pointer given
-static void render_tile(gbc_system *gbc, unsigned char x, unsigned char y, unsigned short addr) {
+static void render_tile(gbc_system *gbc, const unsigned char x, const unsigned char y, const unsigned short addr) {
 
     // Get the palette data
     SDL_Colour shades[4];
@@ -121,7 +125,7 @@ static void render_tile(gbc_system *gbc, unsigned char x, unsigned char y, unsig
 
 // Returns the colour associated with a shade number
 // Monochrome GameBoy only
-static SDL_Colour get_shade(unsigned char num) {
+static SDL_Colour get_shade(const unsigned char num) {
 
     static const SDL_Colour white = {WHITE};
     static const SDL_Colour black = {BLACK};
