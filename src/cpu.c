@@ -1580,7 +1580,7 @@ static void op_rst_38h(gbc_system *gbc) {
     gbc->cpu->registers->PC = 0x38;
 }
 
-gbc_instr instructions[INSTRUCTION_COUNT] = {
+gbc_instruction instructions[INSTRUCTION_COUNT] = {
     {"NOP", 1, 4, 1, 0, op_nop}, // 0x00
     {"LD BC, %04x", 3, 12, 1, 0, op_ld_bc_d16}, // 0x01
     {"LD (BC), A", 1, 8, 1, 0, op_ld_bcp_a}, // 0x02
@@ -3167,7 +3167,7 @@ static void op_set_7_a(gbc_system *gbc) {
     gbc->cpu->registers->A = set_bit(gbc->cpu->registers->A, 7, &gbc->cpu->registers->F);
 }
 
-gbc_instr cb_instructions[CB_INSTRUCTION_COUNT] = {
+gbc_instruction cb_instructions[CB_INSTRUCTION_COUNT] = {
     {"RLC B", 2, 8, 1, 0, op_rlc_b}, // 0xCB00
     {"RLC C", 2, 8, 1, 0, op_rlc_c}, // 0xCB01
     {"RLC D", 2, 8, 1, 0, op_rlc_d}, // 0xCB02
@@ -3427,7 +3427,7 @@ gbc_instr cb_instructions[CB_INSTRUCTION_COUNT] = {
 };
 
 // Returns an instruction struct of the provided opcode
-gbc_instr find_instr(const unsigned char opcode, gbc_system *gbc) {
+gbc_instruction find_instr(const unsigned char opcode, gbc_system *gbc) {
 
     // If the opcode has the CB prefix
     if(opcode == 0xCB) {
@@ -3441,7 +3441,7 @@ gbc_instr find_instr(const unsigned char opcode, gbc_system *gbc) {
 }
 
 // Executes an instruction by calling the function associated with it 
-static void execute_instr(gbc_instr instruction, gbc_system *gbc) {
+static void execute_instr(gbc_instruction instruction, gbc_system *gbc) {
 
     // Create a pointer to the function to execute
     void (*opcode_function)();
@@ -3490,7 +3490,7 @@ void cpu_do_clock(gbc_system *gbc) {
     else {
    
         // Execute the instruction
-        gbc_instr instruction = get_curr_instr(gbc);
+        gbc_instruction instruction = get_curr_instr(gbc);
         execute_instr(instruction, gbc);
 
         // Set the clock accordingly
@@ -3500,7 +3500,7 @@ void cpu_do_clock(gbc_system *gbc) {
 }
 
 // Gets the current instruction at the program counter
-static gbc_instr get_curr_instr(gbc_system *gbc) {
+static gbc_instruction get_curr_instr(gbc_system *gbc) {
     
     // Get the opcode at the program counter
     unsigned char opcode = read_byte(gbc->ram, gbc->cpu->registers->PC);

@@ -36,5 +36,5 @@ void debug(gbc_system *);
 
 static char add_breakpoint(const unsigned short, gbc_debugger *);
 static char remove_breakpoint(const unsigned short, gbc_debugger *);
-static breakpoint *find_breakpoint(const unsigned short, gbc_debugger *);
+static gbc_breakpoint *find_breakpoint(const unsigned short, gbc_debugger *);
 static char dump_ram(gbc_ram *, const char *);

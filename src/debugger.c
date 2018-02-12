@@ -55,7 +55,7 @@ static debug_box *dbox_instr(gbc_system *gbc) {
         else {
 
             // Read byte at the pointer and find the instruction
-            gbc_instr instr = find_instr(read_byte(gbc->ram, pointer), gbc);
+            gbc_instruction instr = find_instr(read_byte(gbc->ram, pointer), gbc);
 
             // Read the operand and format the string
             if(instr.length > 1) {
@@ -283,7 +283,7 @@ void debug(gbc_system *gbc) {
     // If the emulator is running
     if(gbc->debugger->running) {
 
-        breakpoint *bp = find_breakpoint(gbc->cpu->registers->PC, gbc->debugger);
+        gbc_breakpoint *bp = find_breakpoint(gbc->cpu->registers->PC, gbc->debugger);
 
         // If there is a breakpoint at this instruction
         if(bp) {
@@ -359,7 +359,7 @@ void debug(gbc_system *gbc) {
             // List breakpoints
             case 'l': {
 
-                breakpoint *item = gbc->debugger->breakpoint_head;
+                gbc_breakpoint *item = gbc->debugger->breakpoint_head;
                 int i = 1;
                 while(item) {
                     printf("%d: 0x%04X\n", i, item->address);
@@ -430,12 +430,12 @@ void init_debugger(gbc_debugger *debugger) {
 static char add_breakpoint(const unsigned short address, gbc_debugger *debugger) {
 
     // Check for duplicate breakpoints
-    breakpoint *found = find_breakpoint(address, debugger);
+    gbc_breakpoint *found = find_breakpoint(address, debugger);
    
     if(found == NULL) {
         
         // Create a new breakpoint element
-        breakpoint *new = malloc(sizeof(*new));
+        gbc_breakpoint *new = malloc(sizeof(*new));
         new->address = address;
 
         // If there are no breakpoints, set it as the head
@@ -458,8 +458,8 @@ static char add_breakpoint(const unsigned short address, gbc_debugger *debugger)
 static char remove_breakpoint(const unsigned short address, gbc_debugger *debugger) {
 
     // Remove the item from the linked list
-    breakpoint *prev = NULL;
-    breakpoint *curr= NULL;
+    gbc_breakpoint *prev = NULL;
+    gbc_breakpoint *curr= NULL;
 
     if(debugger->breakpoint_head != NULL) {
        
@@ -499,12 +499,12 @@ static char remove_breakpoint(const unsigned short address, gbc_debugger *debugg
 }
 
 // Returns a pointer to the breakpoint element with the specifed address in the breakpoint linked list provided it exists
-static breakpoint *find_breakpoint(const unsigned short address, gbc_debugger *debugger) {
+static gbc_breakpoint *find_breakpoint(const unsigned short address, gbc_debugger *debugger) {
 
     if(debugger->breakpoint_head != NULL) {
 
         // Iterate through the breakpoints and find one with the correct address
-        breakpoint *item = debugger->breakpoint_head;
+        gbc_breakpoint *item = debugger->breakpoint_head;
         while(item) {
             
             if(item->address == address) {

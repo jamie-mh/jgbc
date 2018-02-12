@@ -13,20 +13,20 @@
 #define FLAG_HALFCARRY 'H'
 #define FLAG_CARRY 'C'
 
-typedef struct gbc_instr {
+typedef struct gbc_instruction {
     char *disassembly;
     char length;
     char cycles;
     char increment_PC;
     char signed_operand;
     void *execute;
-} gbc_instr;
+} gbc_instruction;
 
 void init_cpu(gbc_cpu *);
-gbc_instr find_instr(const unsigned char, gbc_system *);
+gbc_instruction find_instr(const unsigned char, gbc_system *);
 
-static void execute_instr(gbc_instr, gbc_system *);
-static gbc_instr get_curr_instr(gbc_system *);
+static void execute_instr(gbc_instruction, gbc_system *);
+static gbc_instruction get_curr_instr(gbc_system *);
 
 void simulate_cpu(gbc_system *);
 void cpu_do_clock(gbc_system *);

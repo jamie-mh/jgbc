@@ -101,13 +101,13 @@ typedef struct gbc_rom {
     unsigned char **ram_banks;
 } gbc_rom;
 
-typedef struct breakpoint {
+typedef struct gbc_breakpoint {
     unsigned short address;
-    struct breakpoint *next;
-} breakpoint;
+    struct gbc_breakpoint *next;
+} gbc_breakpoint;
 
 typedef struct gbc_debugger {
-    breakpoint *breakpoint_head;
+    gbc_breakpoint *breakpoint_head;
     char skip_instr;
     char running;
     char print;

@@ -1,6 +1,7 @@
 #include "lxgbc.h"
 #include "ram.h"
 #include "cpu.h"
+#include "interrupt.h"
 #include "mbc.h"
 #include "rom.h"
 #include "debugger.h"
