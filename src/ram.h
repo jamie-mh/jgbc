@@ -7,7 +7,6 @@
 
 #define WRAM_BANK_COUNT 8
 
-
 // Sound Registers
 // TODO: Implement
 
@@ -25,8 +24,13 @@
 #define SVBK 0xFF70
 
 // Interrupt Registers
-#define REG_IE 0xFFFF
-#define REG_IF 0xFF0F
+#define IE 0xFFFF
+#define IF 0xFF0F
+#define IEF_VBLANK 0
+#define IEF_LCD_STAT 1
+#define IEF_TIMER 2
+#define IEF_SERIAL 3
+#define IEF_JOYPAD 4
 
 void init_ram(gbc_ram *);
 static unsigned char *get_memory_location(gbc_ram *, unsigned short *);

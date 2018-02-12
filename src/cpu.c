@@ -1423,7 +1423,7 @@ static void op_ret_c(gbc_system *gbc) {
 
 // 0xD9: RETI (- - - -)
 static void op_reti(gbc_system *gbc) {
-    op_ret(gbc);
+    op_ret(gbc); 
     op_ei(gbc);
 }
 
@@ -3511,8 +3511,12 @@ static gbc_instruction get_curr_instr(gbc_system *gbc) {
 
 // Runs a cpu instruction immediately and ignores the clock
 // Used in debug mode, for stepping through a program
+// Sets the run for clock to keep the ppu in sync
 void simulate_cpu(gbc_system *gbc) {
-    execute_instr(get_curr_instr(gbc), gbc); 
+    
+    gbc_instruction curr = get_curr_instr(gbc);
+    gbc->cpu->run_for = curr.cycles;
+    execute_instr(curr, gbc); 
 }
 
 // Returns the bit no of the specified flag in the F register
@@ -3570,4 +3574,53 @@ static unsigned char stack_pop(gbc_ram *ram, unsigned short *sp) {
     *sp += sizeof(char);
 
     return value;
+}
+
+// Checks if the cpu has pending interrupts and services them 
+void check_interrupt(gbc_system *gbc) {
+    
+    // If interrupts are globally enabled
+    if(gbc->cpu->registers->IME) {
+        
+        // Read the interrupt enable and request registers
+        unsigned char enabled = read_byte(gbc->ram, IE);
+        unsigned char flag = read_byte(gbc->ram, IF);
+
+        // Find the enabled and requested interrupts
+        for(int i = 0; i < 5; i++) {
+            
+            // If this interrupt is enabled and requested
+            // This just checks that the i'th bit is set in both bytes
+            if(((enabled >> i) & 1) && ((flag >> i) & 1)) {
+                service_interrupt(gbc, i); 
+            }
+        }
+    }
+}
+
+// Calls the interrupt subroutine after storing the program counter on the stack
+static void service_interrupt(gbc_system *gbc, const unsigned char number) {
+    
+    static const unsigned short interrupt[5] = {
+        INT_VBLANK,
+        INT_LCD_STAT,
+        INT_TIMER,
+        INT_SERIAL,
+        INT_JOYPAD
+    };
+
+    if(number <= 5) {
+
+        // Push the current program counter to the stack
+        stack_push((gbc->cpu->registers->PC & 0xFF00) >> 8, gbc->ram, &gbc->cpu->registers->SP);
+        stack_push((gbc->cpu->registers->PC & 0x00FF), gbc->ram, &gbc->cpu->registers->SP);
+        
+        // Disable the interrupt request
+        write_register(gbc->ram, IE, number, 0);
+        write_register(gbc->ram, IF, number, 0);
+        gbc->cpu->registers->IME = 0;
+
+        // Jump to the interrupt subroutine
+        gbc->cpu->registers->PC = interrupt[number];
+    }  
 }

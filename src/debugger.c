@@ -2,6 +2,7 @@
 #include "ram.h"
 #include "debugger.h"
 #include "cpu.h"
+#include "ppu.h"
 
 // Shows the current instruction and the instructions that follow it
 static debug_box *dbox_instr(gbc_system *gbc) {
@@ -160,6 +161,10 @@ static debug_box *dbox_regis(gbc_system *gbc) {
     box->rows[12] = malloc(sizeof(char) * strlen(line));
     strcpy(box->rows[12], line);
 
+    sprintf(line, "IME: %d", gbc->cpu->registers->IME);
+    box->rows[13] = malloc(sizeof(char) * strlen(line));
+    strcpy(box->rows[13], line);
+
     // Free memory
     free(line);
 
@@ -212,8 +217,8 @@ static debug_box *dbox_info(gbc_system *gbc) {
     // Write some information
     strcpy(box->rows[0], "OPCODE:");
     sprintf(box->rows[1], "-> %02X", read_byte(gbc->ram, gbc->cpu->registers->PC));
-    strcpy(box->rows[2], "INTERR:");
-    sprintf(box->rows[3], "-> %d", gbc->cpu->registers->IME);
+    strcpy(box->rows[2], "LY:");
+    sprintf(box->rows[3], "-> %02X", read_byte(gbc->ram, LY));
 
     return box;
 }

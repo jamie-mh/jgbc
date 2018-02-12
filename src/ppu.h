@@ -16,9 +16,9 @@
 // STAT: LCDC Status Register
 #define STAT 0xFF41
 #define STAT_LYC_LY_COINCID 6 // LYC=LY Coincidence Interrupt
-#define STAT_MODE2_OAM 5 // Mode 2 OAM Interrupt
-#define STAT_MODE1_VBLANK 4 // Mode 1 V-Blank Interrupt
-#define STAT_MODE0_HBLANK 3 // Mode 0 H-Blank Interrupt
+#define STAT_OAM 5 // Mode 2 OAM Interrupt
+#define STAT_VBLANK 4 // Mode 1 V-Blank Interrupt
+#define STAT_HBLANK 3 // Mode 0 H-Blank Interrupt
 #define STAT_COINCID_FLAG 2 // Coincidence Flag
 #define STAT_MODE0 1 // Mode Flag 1/2 
 #define STAT_MODE1 0 // Mode Flag 2/2
@@ -68,12 +68,12 @@
 // GameBoy Monochrome Palette
 #define WHITE 255, 255, 255, 255
 #define BLACK 0, 0, 0, 255
-#define DGREY 76, 76, 76, 255
-#define LGREY 170, 170, 170, 255
+#define DGREY 192, 192, 192, 255
+#define LGREY 96, 96, 96, 255
 
 void init_ppu(gbc_ppu *, const char scale);
 void ppu_do_clock(gbc_system *);
-static void render_tile(gbc_system *, const unsigned char, const unsigned char, const unsigned short, SDL_Colour *);
+static void render_bg_scan(gbc_system *, unsigned char ly);
 
 static SDL_Colour get_shade(const unsigned char);
 static void fill_shade_table(gbc_system *, SDL_Colour *);

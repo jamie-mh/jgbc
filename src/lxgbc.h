@@ -69,8 +69,6 @@ typedef struct gbc_ppu {
     SDL_Window *window;
     SDL_Renderer *renderer;
     unsigned char clock;
-    unsigned char scan_clock;
-    unsigned char run_for;
 } gbc_ppu;
 
 typedef struct gbc_ram {
@@ -115,7 +113,7 @@ typedef struct gbc_debugger {
 
 typedef struct gbc_system {
     char is_running;
-    gbc_cpu *cpu; 
+    gbc_cpu *cpu;
     gbc_ppu *ppu;
     gbc_ram *ram;
     gbc_rom *rom;

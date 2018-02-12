@@ -1,7 +1,6 @@
 #include "lxgbc.h"
 #include "ram.h"
 #include "cpu.h"
-#include "interrupt.h"
 #include "mbc.h"
 #include "rom.h"
 #include "debugger.h"
@@ -21,8 +20,6 @@ int main(int argc, char **argv) {
     gbc->rom = malloc(sizeof(gbc_rom));
     gbc->debugger = malloc(sizeof(gbc_debugger));
 
-    gbc->is_running = 1;
-
     // Get the command line arguments
     cmd_options *cmd = malloc(sizeof(cmd_options));
     cmd->rom_path = malloc(sizeof(char) * ROM_PATH_LENGTH);
@@ -35,6 +32,8 @@ int main(int argc, char **argv) {
     init_cpu(gbc->cpu);
     init_ram(gbc->ram);
     init_ppu(gbc->ppu, cmd->scale);
+
+    gbc->is_running = 1;
 
     // Load the rom into memory
     if(!load_rom(gbc, cmd->rom_path)) {
@@ -62,27 +61,42 @@ int main(int argc, char **argv) {
     // One execution of this loop represents one cpu clock in non debug mode
     while(gbc->is_running) {
 
+        unsigned char lcd_on = read_register(gbc->ram, LCDC, LCDC_LCD_ENABLE);
+
         // In debug mode, execute instruction by instruction 
         if(cmd->debug) {
             debug(gbc);
 
             // Execute the instruction at the program counter 
             simulate_cpu(gbc);
+                
+            // Run the same amount of ppu clocks as cpu clocks
+            // Also check for interrupts
+            for(int i = 0; i < gbc->cpu->run_for; i++) {
+                if(lcd_on) {
+                    ppu_do_clock(gbc);
+                }
+                check_interrupt(gbc);
+            }
+            
+            // Reset the count
+            gbc->cpu->run_for = 0;
         }
         // In normal mode, do a cpu and ppu clock
         else {
             cpu_do_clock(gbc);
+
+            if(lcd_on) {
+                ppu_do_clock(gbc);
+            }
+
+            check_interrupt(gbc);
 
             // TODO: Remove this
             SDL_PollEvent(&event);
             if(event.type == SDL_QUIT) {
                 gbc->is_running = 0; 
             }
-        }
-
-        // Render only if the screen is on
-        if(read_register(gbc->ram, LCDC, LCDC_LCD_ENABLE)) {
-            ppu_do_clock(gbc);
         }
     }
 

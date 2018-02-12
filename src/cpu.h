@@ -13,6 +13,12 @@
 #define FLAG_HALFCARRY 'H'
 #define FLAG_CARRY 'C'
 
+#define INT_VBLANK 0x40
+#define INT_LCD_STAT 0x48
+#define INT_TIMER 0x50
+#define INT_SERIAL 0x58
+#define INT_JOYPAD 0x60 
+
 typedef struct gbc_instruction {
     char *disassembly;
     char length;
@@ -36,6 +42,9 @@ static char get_flag(const char, const unsigned char);
 
 static void stack_push(const unsigned char, gbc_ram *, unsigned short *);
 static unsigned char stack_pop(gbc_ram *, unsigned short *);
+
+void check_interrupt(gbc_system *);
+static void service_interrupt(gbc_system *, const unsigned char);
 
 // CPU Instructions
 static void op_ld_a_d(gbc_system *);

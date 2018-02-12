@@ -146,10 +146,10 @@ void write_short(gbc_ram *ram, const unsigned short address, const unsigned shor
 
 // Writes to memory register at a certain location
 void write_register(gbc_ram *ram, const unsigned short address, const unsigned char bit, const unsigned char value) {
-
-    // Read the byte set the nth bit and write it back
+    
+    // Read and write the modified byte
     unsigned char byte = read_byte(ram, address);
-    byte |= 1 << bit; 
+    byte ^= (-value ^ byte) & (1 << bit);
     write_byte(ram, address, byte);
 }
 
