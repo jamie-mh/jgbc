@@ -3495,7 +3495,7 @@ void cpu_do_clock(gbc_system *gbc) {
 
         // Set the clock accordingly
         gbc->cpu->clock = 0;
-        gbc->cpu->run_for = instruction.cycles;
+        gbc->cpu->run_for = instruction.clocks;
     }
 }
 
@@ -3515,7 +3515,7 @@ static gbc_instruction get_curr_instr(gbc_system *gbc) {
 void simulate_cpu(gbc_system *gbc) {
     
     gbc_instruction curr = get_curr_instr(gbc);
-    gbc->cpu->run_for = curr.cycles;
+    gbc->cpu->run_for = curr.clocks;
     execute_instr(curr, gbc); 
 }
 

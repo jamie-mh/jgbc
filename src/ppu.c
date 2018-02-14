@@ -97,7 +97,15 @@ static void render_bg_scan(gbc_system *gbc, unsigned char ly) {
     // The tile numbers are unsigned (0 to 255)
     // When this bit is disabled, the tile data is stored starting at 0x8800 (pattern 0 at 0x9000)
     // The tile numbers are signed (-128 to 127)
-    unsigned short bg_tile_data_start = (read_register(gbc->ram, LCDC, LCDC_BG_WINDOW_TILE_DATA) ? 0x8000 : 0x9000);
+    char signed_tile_num;
+    unsigned short bg_tile_data_start;
+    if(read_register(gbc->ram, LCDC, LCDC_BG_WINDOW_TILE_DATA)) {
+        bg_tile_data_start = 0x8000;
+        signed_tile_num = 0;
+    } else {
+        bg_tile_data_start = 0x9000;
+        signed_tile_num = 1;
+    }
 
     // Get the current background scroll position
     unsigned char scroll_x = read_byte(gbc->ram, SCX);
@@ -108,30 +116,38 @@ static void render_bg_scan(gbc_system *gbc, unsigned char ly) {
     fill_shade_table(gbc, shades);
 
     short tile_number;
-    unsigned char x;
-    unsigned char y;
     
-    // Render the tile scans and fill the screen horizontally
-    for(unsigned char i = 0; i < SCREEN_WIDTH; i++) {
-    
-        // Get the offset of the tile in the memory map
-        unsigned char map_offset = floor((double) i / 8.0) * floor((double) ly / 8.0);
-        
-        // Get the address current tile (16 bytes per tile)
-        unsigned char tile_start = bg_tile_data_start + (map_offset * 16);
+    // Render a scanline of background tiles 
+    for(unsigned char x = 0; x < SCREEN_WIDTH; x++) {
 
-        // Get the row of pixels in the tile
-        unsigned char ls_byte = read_byte(gbc->ram, tile_start + (ly * 2));
-        unsigned char ms_byte = read_byte(gbc->ram, tile_start + (ly * 2) + 1);
-       
+        // Get the offset of the tile in the memory map, the lowest multiple of 8
+        unsigned char map_offset = (floor((x + ly * SCREEN_WIDTH) / 8)) * 8;
+
+        // Read the tile number at the offset position, however it may be signed
+        if(signed_tile_num) {
+            tile_number = (signed char) read_byte(gbc->ram, bg_tile_map_start + map_offset); 
+        } else {
+            tile_number = read_byte(gbc->ram, bg_tile_map_start + map_offset); 
+        }
+
+        // Get the offset of the tile data
+        unsigned short tile_offset = bg_tile_data_start + tile_number;
+    
+        // Read two bytes from memory at the pixel row location
+        unsigned short pixel_row = read_short(gbc->ram, tile_offset + (ly % 8) * 2);
+
+        // Split the most and least significant bytes
+        unsigned char ls_byte = (pixel_row & 0xFF) >> 8;
+        unsigned char ms_byte = (pixel_row & 0x00FF);
+    
         // Get the colour from the most the most and least significant bits
-        
-        /*unsigned char shade_num = ((ls_byte >> bit) & 1) | (((ms_byte > bit) & 1) << 1);*/
-        /*SDL_Colour shade = shades[shade_num];*/
+        unsigned char bit = x % 8;
+        unsigned char shade_num = ((ls_byte >> bit) & 1) | (((ms_byte > bit) & 1) << 1);
+        SDL_Colour shade = shades[shade_num];
     
         // Draw the pixel on the screen
-        /*SDL_SetRenderDrawColor(gbc->ppu->renderer, shade.r, shade.g, shade.b, shade.a);*/
-        /*SDL_RenderDrawPoint(gbc->ppu->renderer, i, ly * SCREEN_WIDTH);*/
+        SDL_SetRenderDrawColor(gbc->ppu->renderer, shade.r, shade.g, shade.b, shade.a);
+        SDL_RenderDrawPoint(gbc->ppu->renderer, x, ly);
     }
 
     SDL_RenderPresent(gbc->ppu->renderer);

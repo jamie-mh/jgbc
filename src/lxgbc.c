@@ -92,11 +92,12 @@ int main(int argc, char **argv) {
 
             check_interrupt(gbc);
 
-            // TODO: Remove this
-            SDL_PollEvent(&event);
-            if(event.type == SDL_QUIT) {
-                gbc->is_running = 0; 
-            }
+        }
+
+        // TODO: Remove this
+        SDL_PollEvent(&event);
+        if(event.type == SDL_QUIT) {
+            gbc->is_running = 0; 
         }
     }
 

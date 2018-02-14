@@ -22,7 +22,7 @@
 typedef struct gbc_instruction {
     char *disassembly;
     char length;
-    char cycles;
+    char clocks;
     char increment_PC;
     char signed_operand;
     void *execute;
