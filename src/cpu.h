@@ -39,8 +39,10 @@ void cpu_do_clock(gbc_system *);
 static void set_flag(const char, const unsigned char, unsigned char *);
 static char get_flag(const char, const unsigned char);
 
-static void stack_push(const unsigned char, gbc_ram *, unsigned short *);
-static unsigned char stack_pop(gbc_ram *, unsigned short *);
+static void stack_push_byte(gbc_ram *, unsigned short *, const unsigned char);
+static void stack_push_short(gbc_ram *, unsigned short *, const unsigned short);
+static unsigned char stack_pop_byte(gbc_ram *, unsigned short *);
+static unsigned short stack_pop_short(gbc_ram *, unsigned short *);
 
 void check_interrupt(gbc_system *);
 static void service_interrupt(gbc_system *, const unsigned char);

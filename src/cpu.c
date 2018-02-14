@@ -23,6 +23,7 @@ void init_cpu(gbc_cpu *cpu) {
 
     // Reset the clock
     cpu->clock = 0;
+    cpu->run_for = 1;
 }
 
 /*
@@ -1280,7 +1281,7 @@ static void op_ret_nz(gbc_system *gbc) {
 
 // 0xC1: POP BC (- - - -)
 static void op_pop_bc(gbc_system *gbc) {
-    gbc->cpu->registers->BC = stack_pop(gbc->ram, &gbc->cpu->registers->SP) | (stack_pop(gbc->ram, &gbc->cpu->registers->SP) << 8);
+    gbc->cpu->registers->BC = stack_pop_short(gbc->ram, &gbc->cpu->registers->SP);
 }
 
 // 0xC2: JP NZ, a16 (- - - -)
@@ -1304,8 +1305,7 @@ static void op_call_nz_a16(gbc_system *gbc, unsigned short operand) {
 
 // 0xC5: PUSH BC (- - - -)
 static void op_push_bc(gbc_system *gbc) {
-    stack_push(gbc->cpu->registers->B, gbc->ram, &gbc->cpu->registers->SP);
-    stack_push(gbc->cpu->registers->C, gbc->ram, &gbc->cpu->registers->SP);
+    stack_push_short(gbc->ram, &gbc->cpu->registers->SP, gbc->cpu->registers->BC);
 }
 
 // 0xC6: ADD A, d8 (Z 0 H C)
@@ -1315,7 +1315,7 @@ static void op_add_a_d8(gbc_system *gbc, unsigned char operand) {
 
 // 0xC7: RST 00H (- - - -)
 static void op_rst_00h(gbc_system *gbc) {
-    stack_push(gbc->cpu->registers->PC, gbc->ram, &gbc->cpu->registers->SP);
+    stack_push_short(gbc->ram, &gbc->cpu->registers->SP, gbc->cpu->registers->PC);
     gbc->cpu->registers->PC = 0x0;
 }
 
@@ -1328,7 +1328,7 @@ static void op_ret_z(gbc_system *gbc) {
 
 // 0xC9: RET (- - - -)
 static void op_ret(gbc_system *gbc) {
-    gbc->cpu->registers->PC = stack_pop(gbc->ram, &gbc->cpu->registers->SP) | (stack_pop(gbc->ram, &gbc->cpu->registers->SP) << 8);
+    gbc->cpu->registers->PC = stack_pop_short(gbc->ram, &gbc->cpu->registers->SP);
 }
 
 // 0xCA: JP Z, a16 (- - - -)
@@ -1352,8 +1352,7 @@ static void op_call_z_a16(gbc_system *gbc, unsigned short operand) {
 
 // 0xCD: CALL a16 (- - - -)
 static void op_call_a16(gbc_system *gbc, unsigned short operand) {
-    stack_push((gbc->cpu->registers->PC & 0xFF00) >> 8, gbc->ram, &gbc->cpu->registers->SP);
-    stack_push(gbc->cpu->registers->PC & 0x00FF, gbc->ram, &gbc->cpu->registers->SP);
+    stack_push_short(gbc->ram, &gbc->cpu->registers->SP, gbc->cpu->registers->PC);
     gbc->cpu->registers->PC = operand;
 }
 
@@ -1366,7 +1365,7 @@ static void op_adc_a_d8(gbc_system *gbc, unsigned char operand) {
 
 // 0xCF: RST 08H (- - - -)
 static void op_rst_08h(gbc_system *gbc) {
-    stack_push(gbc->cpu->registers->PC, gbc->ram, &gbc->cpu->registers->SP);
+    stack_push_short(gbc->ram, &gbc->cpu->registers->SP, gbc->cpu->registers->PC);
     gbc->cpu->registers->PC = 0x8;
 }
 
@@ -1379,7 +1378,7 @@ static void op_ret_nc(gbc_system *gbc) {
 
 // 0xD1: POP DE (- - - -)
 static void op_pop_de(gbc_system *gbc) {
-    gbc->cpu->registers->DE = stack_pop(gbc->ram, &gbc->cpu->registers->SP) | (stack_pop(gbc->ram, &gbc->cpu->registers->SP) << 8);
+    gbc->cpu->registers->DE = stack_pop_short(gbc->ram, &gbc->cpu->registers->SP);
 }
 
 // 0xD2: JP NC, a16 (- - - -)
@@ -1398,8 +1397,7 @@ static void op_call_nc_a16(gbc_system *gbc, unsigned short operand) {
 
 // 0xD5: PUSH DE (- - - -)
 static void op_push_de(gbc_system *gbc) {
-    stack_push(gbc->cpu->registers->D, gbc->ram, &gbc->cpu->registers->SP);
-    stack_push(gbc->cpu->registers->E, gbc->ram, &gbc->cpu->registers->SP);
+    stack_push_short(gbc->ram, &gbc->cpu->registers->SP, gbc->cpu->registers->DE);
 }
 
 // 0xD6: SUB d8 (Z 1 H C)
@@ -1409,7 +1407,7 @@ static void op_sub_d8(gbc_system *gbc, unsigned char operand) {
 
 // 0xD7: RST 10H (- - - -)
 static void op_rst_10h(gbc_system *gbc) {
-    stack_push(gbc->cpu->registers->PC, gbc->ram, &gbc->cpu->registers->SP);
+    stack_push_short(gbc->ram, &gbc->cpu->registers->SP, gbc->cpu->registers->PC);
     gbc->cpu->registers->PC = 0x10;
 }
 
@@ -1449,7 +1447,7 @@ static void op_sbc_a_d8(gbc_system *gbc, unsigned char operand) {
 
 // 0xDF: RST 18H (- - - -)
 static void op_rst_18h(gbc_system *gbc) {
-    stack_push(gbc->cpu->registers->PC, gbc->ram, &gbc->cpu->registers->SP);
+    stack_push_short(gbc->ram, &gbc->cpu->registers->SP, gbc->cpu->registers->PC);
     gbc->cpu->registers->PC = 0x18;
 }
 
@@ -1460,7 +1458,7 @@ static void op_ldh_a8p_a(gbc_system *gbc, unsigned char operand) {
 
 // 0xE1: POP HL (- - - -)
 static void op_pop_hl(gbc_system *gbc) {
-    gbc->cpu->registers->HL = stack_pop(gbc->ram, &gbc->cpu->registers->SP) | (stack_pop(gbc->ram, &gbc->cpu->registers->SP) << 8);
+    gbc->cpu->registers->HL = stack_pop_short(gbc->ram, &gbc->cpu->registers->SP);
 }
 
 // 0xE2: LD (C), A (- - - -)
@@ -1470,8 +1468,7 @@ static void op_ld_cp_a(gbc_system *gbc, unsigned char operand) {
 
 // 0xE5: PUSH HL (- - - -)
 static void op_push_hl(gbc_system *gbc) {
-    stack_push(gbc->cpu->registers->H, gbc->ram, &gbc->cpu->registers->SP);
-    stack_push(gbc->cpu->registers->L, gbc->ram, &gbc->cpu->registers->SP);
+    stack_push_short(gbc->ram, &gbc->cpu->registers->SP, gbc->cpu->registers->HL);
 }
 
 // 0xE6: AND d8 (Z 0 1 0)
@@ -1481,7 +1478,7 @@ static void op_and_d8(gbc_system *gbc, unsigned char operand) {
 
 // 0xE7: RST 20H (- - - -)
 static void op_rst_20h(gbc_system *gbc) {
-    stack_push(gbc->cpu->registers->PC, gbc->ram, &gbc->cpu->registers->SP);
+    stack_push_short(gbc->ram, &gbc->cpu->registers->SP, gbc->cpu->registers->PC);
     gbc->cpu->registers->PC = 0x20;
 }
 
@@ -1507,7 +1504,7 @@ static void op_xor_d8(gbc_system *gbc, unsigned char operand) {
 
 // 0xEF: RST 28H (- - - -)
 static void op_rst_28h(gbc_system *gbc) {
-    stack_push(gbc->cpu->registers->PC, gbc->ram, &gbc->cpu->registers->SP);
+    stack_push_short(gbc->ram, &gbc->cpu->registers->SP, gbc->cpu->registers->PC);
     gbc->cpu->registers->PC = 0x28;
 }
 
@@ -1518,7 +1515,7 @@ static void op_ldh_a_a8p(gbc_system *gbc, unsigned char operand) {
 
 // 0xF1: POP AF (Z N H C)
 static void op_pop_af(gbc_system *gbc) {
-    gbc->cpu->registers->AF = stack_pop(gbc->ram, &gbc->cpu->registers->SP) | (stack_pop(gbc->ram, &gbc->cpu->registers->SP) << 8);
+    gbc->cpu->registers->AF = stack_pop_short(gbc->ram, &gbc->cpu->registers->SP);
 }
 
 // 0xF2: LD A, (C) (- - - -)
@@ -1533,8 +1530,7 @@ static void op_di(gbc_system *gbc) {
 
 // 0xF5: PUSH AF (- - - -)
 static void op_push_af(gbc_system *gbc) {
-    stack_push(gbc->cpu->registers->A, gbc->ram, &gbc->cpu->registers->SP);
-    stack_push(gbc->cpu->registers->F, gbc->ram, &gbc->cpu->registers->SP);
+    stack_push_short(gbc->ram, &gbc->cpu->registers->SP, gbc->cpu->registers->AF);
 }
 
 // 0xF6: OR d8 (Z 0 0 0)
@@ -1544,7 +1540,7 @@ static void op_or_d8(gbc_system *gbc, unsigned char operand) {
 
 // 0xF7: RST 30H (- - - -)
 static void op_rst_30h(gbc_system *gbc) {
-    stack_push(gbc->cpu->registers->PC, gbc->ram, &gbc->cpu->registers->SP);
+    stack_push_short(gbc->ram, &gbc->cpu->registers->SP, gbc->cpu->registers->PC);
     gbc->cpu->registers->PC = 0x30;
 }
 
@@ -1575,7 +1571,7 @@ static void op_cp_d8(gbc_system *gbc, unsigned char operand) {
 
 // 0xFF: RST 38H (- - - -)
 static void op_rst_38h(gbc_system *gbc) {
-    stack_push(gbc->cpu->registers->PC, gbc->ram, &gbc->cpu->registers->SP);
+    stack_push_short(gbc->ram, &gbc->cpu->registers->SP, gbc->cpu->registers->PC);
     gbc->cpu->registers->PC = 0x38;
 }
 
@@ -3479,9 +3475,22 @@ static void execute_instr(gbc_instruction instruction, gbc_system *gbc) {
 
 // Execute a cpu instruction and respect its duration in clock cycles
 void cpu_do_clock(gbc_system *gbc) {
-    gbc_instruction curr = get_curr_instr(gbc);
-    gbc->cpu->clock = curr.clocks;
-    execute_instr(curr, gbc); 
+
+    // Wait until the current instruction is finished
+    if(gbc->cpu->clock < gbc->cpu->run_for) {
+        gbc->cpu->clock++;
+    }
+    // We've moved to the next instruction
+    else {
+
+        // Execute the instruction
+        gbc_instruction instruction = get_curr_instr(gbc);
+        execute_instr(instruction, gbc);
+
+        // Set the clock accordingly
+        gbc->cpu->clock = 0;
+        gbc->cpu->run_for = instruction.clocks;
+    }
 }
 
 // Gets the current instruction at the program counter
@@ -3530,7 +3539,7 @@ static char get_flag(const char flag, const unsigned char regis) {
 }
 
 // Pushes a byte to the stack after decrementing the stack pointer
-static void stack_push(const unsigned char value, gbc_ram *ram, unsigned short *sp) {
+static void stack_push_byte(gbc_ram *ram, unsigned short *sp, const unsigned char value) {
    
     // Decrement the stack pointer
     *sp -= sizeof(char);
@@ -3539,8 +3548,16 @@ static void stack_push(const unsigned char value, gbc_ram *ram, unsigned short *
     write_byte(ram, *sp, value);
 }
 
+// Pushes a short to the stack after decrementing the stack pointer
+static void stack_push_short(gbc_ram *ram, unsigned short *sp, const unsigned short value) {
+    
+    // Push the short to the stack as two bytes
+    stack_push_byte(ram, sp, (value & 0xFF00) >> 8);
+    stack_push_byte(ram, sp, value & 0x00FF);
+}
+
 // Pops a byte from the stack and increments the stack pointer
-static unsigned char stack_pop(gbc_ram *ram, unsigned short *sp) {
+static unsigned char stack_pop_byte(gbc_ram *ram, unsigned short *sp) {
     
     // Read the value
     unsigned char value = read_byte(ram, *sp);
@@ -3549,6 +3566,17 @@ static unsigned char stack_pop(gbc_ram *ram, unsigned short *sp) {
     *sp += sizeof(char);
 
     return value;
+}
+
+// Pops a short from the stack and increments the stack pointer
+static unsigned short stack_pop_short(gbc_ram *ram, unsigned short *sp) {
+    
+    // Get two bytes from the stack 
+    unsigned char byte_a = stack_pop_byte(ram, sp); 
+    unsigned char byte_b = stack_pop_byte(ram, sp); 
+
+    // Combine them
+    return byte_a | (byte_b << 8);
 }
 
 // Checks if the cpu has pending interrupts and services them 
@@ -3587,8 +3615,7 @@ static void service_interrupt(gbc_system *gbc, const unsigned char number) {
     if(number <= 5) {
 
         // Push the current program counter to the stack
-        stack_push((gbc->cpu->registers->PC & 0xFF00) >> 8, gbc->ram, &gbc->cpu->registers->SP);
-        stack_push((gbc->cpu->registers->PC & 0x00FF), gbc->ram, &gbc->cpu->registers->SP);
+        stack_push_short(gbc->ram, &gbc->cpu->registers->SP, gbc->cpu->registers->PC);
         
         // Disable the interrupt request
         write_register(gbc->ram, IE, number, 0);

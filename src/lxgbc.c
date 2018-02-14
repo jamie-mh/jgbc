@@ -66,6 +66,18 @@ int main(int argc, char **argv) {
         // In debug mode, execute instruction by instruction 
         if(cmd->debug) {
             debug(gbc);
+
+        }
+        
+        // Run as many clocks are required
+        for(int i = 0; i < gbc->cpu->run_for; i++) {
+            cpu_do_clock(gbc);
+
+            if(lcd_on) {
+                ppu_do_clock(gbc);
+            }
+
+            check_interrupt(gbc);
         }
         
         // TODO: Remove this
@@ -73,20 +85,6 @@ int main(int argc, char **argv) {
         if(event.type == SDL_QUIT) {
             gbc->is_running = 0; 
         }
-        
-        cpu_do_clock(gbc);
-    
-        // Run as many ppu cycles as cpu cycles
-        for(int i = 0; i < gbc->cpu->clock; i++) {
-
-            if(lcd_on) {
-                ppu_do_clock(gbc);
-            }
-            check_interrupt(gbc);
-        }
-            
-        // Reset the count
-        gbc->cpu->clock = 0;
     }
 
     return 0;

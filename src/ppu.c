@@ -23,10 +23,20 @@ void init_ppu(gbc_ppu *ppu, const char scale) {
 
     // Reset the clock
     ppu->clock = 0;
+    ppu->run_for = 0;
 }
 
 // Renders the picture on the screen scanline by scanline
 void ppu_do_clock(gbc_system *gbc) {
+
+    // Wait until the current instruction is finished
+    if(gbc->ppu->clock < gbc->ppu->run_for) {
+        gbc->ppu->clock++;
+        return;
+    } else {
+        gbc->ppu->clock = 0;
+        gbc->ppu->run_for = 0;
+    }
 
     // Set the mode according to the clock
     unsigned char ly_val = read_byte(gbc->ram, LY);
@@ -69,13 +79,9 @@ void ppu_do_clock(gbc_system *gbc) {
 
         // Render the background scanline
         render_bg_scan(gbc, ly_val);
-    }
 
-    // End of scanline
-    if(gbc->ppu->clock == 114) {
-        gbc->ppu->clock = 0;
-    } else {
-        gbc->ppu->clock++;
+        // Run for 43 clocks
+        gbc->ppu->run_for = 43;
     }
 
     // Increment the vertical line register
