@@ -153,11 +153,11 @@ static debug_box *dbox_regis(gbc_system *gbc) {
     box->rows[10] = malloc(sizeof(char) * strlen(line));
     strcpy(box->rows[10], line);
 
-    sprintf(line, "PC: %04X", gbc->cpu->registers->PC);
+    sprintf(line, "SP: %04X", gbc->cpu->registers->SP);
     box->rows[11] = malloc(sizeof(char) * strlen(line));
     strcpy(box->rows[11], line);
-
-    sprintf(line, "SP: %04X", gbc->cpu->registers->SP);
+    
+    sprintf(line, "PC: %04X", gbc->cpu->registers->PC);
     box->rows[12] = malloc(sizeof(char) * strlen(line));
     strcpy(box->rows[12], line);
 
