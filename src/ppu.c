@@ -21,10 +21,6 @@ void init_ppu(gbc_ppu *ppu, const char scale) {
     // Set the rendering scale
     SDL_RenderSetScale(ppu->renderer, scale, scale);
 
-    // Set the screen to white
-    SDL_SetRenderDrawColor(ppu->renderer, 255, 255, 255, 255);
-    SDL_RenderClear(ppu->renderer);
-    
     // Reset the clock
     ppu->clock = 0;
 }

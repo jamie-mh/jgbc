@@ -34,7 +34,6 @@ gbc_instruction find_instr(const unsigned char, gbc_system *);
 static void execute_instr(gbc_instruction, gbc_system *);
 static gbc_instruction get_curr_instr(gbc_system *);
 
-void simulate_cpu(gbc_system *);
 void cpu_do_clock(gbc_system *);
 
 static void set_flag(const char, const unsigned char, unsigned char *);

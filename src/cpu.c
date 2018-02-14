@@ -23,7 +23,6 @@ void init_cpu(gbc_cpu *cpu) {
 
     // Reset the clock
     cpu->clock = 0;
-    cpu->run_for = 0;
 }
 
 /*
@@ -1353,8 +1352,8 @@ static void op_call_z_a16(gbc_system *gbc, unsigned short operand) {
 
 // 0xCD: CALL a16 (- - - -)
 static void op_call_a16(gbc_system *gbc, unsigned short operand) {
-    stack_push(((gbc->cpu->registers->PC + 3 * sizeof(char)) & 0xFF00) >> 8, gbc->ram, &gbc->cpu->registers->SP);
-    stack_push(((gbc->cpu->registers->PC + 3 * sizeof(char)) & 0x00FF), gbc->ram, &gbc->cpu->registers->SP);
+    stack_push((gbc->cpu->registers->PC & 0xFF00) >> 8, gbc->ram, &gbc->cpu->registers->SP);
+    stack_push(gbc->cpu->registers->PC & 0x00FF, gbc->ram, &gbc->cpu->registers->SP);
     gbc->cpu->registers->PC = operand;
 }
 
@@ -3456,6 +3455,10 @@ static void execute_instr(gbc_instruction instruction, gbc_system *gbc) {
         operand_len--; 
     }
 
+    // Increment the program counter
+    unsigned short instr_start = gbc->cpu->registers->PC;
+    gbc->cpu->registers->PC += instruction.length;
+
     switch(operand_len) {
 
         case 0:
@@ -3463,40 +3466,22 @@ static void execute_instr(gbc_instruction instruction, gbc_system *gbc) {
             break;
 
         case 1:
-            operand = read_byte(gbc->ram, gbc->cpu->registers->PC + 1);
+            operand = read_byte(gbc->ram, instr_start + 1);
             opcode_function(gbc, (unsigned char) operand);
             break;
 
         case 2:
-            operand = read_short(gbc->ram, gbc->cpu->registers->PC + 1);
+            operand = read_short(gbc->ram, instr_start + 1);
             opcode_function(gbc, operand);
             break;
-    }
-
-    // If the instruction is not a jump, return, etc... Increment the PC
-    if(instruction.increment_PC) {
-        gbc->cpu->registers->PC += instruction.length;
     }
 }
 
 // Execute a cpu instruction and respect its duration in clock cycles
 void cpu_do_clock(gbc_system *gbc) {
-    
-    // Wait until the current instruction is finished
-    if(gbc->cpu->clock < gbc->cpu->run_for) {
-        gbc->cpu->clock++;
-    }
-    // We've moved to the next instruction
-    else {
-   
-        // Execute the instruction
-        gbc_instruction instruction = get_curr_instr(gbc);
-        execute_instr(instruction, gbc);
-
-        // Set the clock accordingly
-        gbc->cpu->clock = 0;
-        gbc->cpu->run_for = instruction.clocks;
-    }
+    gbc_instruction curr = get_curr_instr(gbc);
+    gbc->cpu->clock = curr.clocks;
+    execute_instr(curr, gbc); 
 }
 
 // Gets the current instruction at the program counter
@@ -3507,16 +3492,6 @@ static gbc_instruction get_curr_instr(gbc_system *gbc) {
 
     // Get the instruction structure
     return find_instr(opcode, gbc);
-}
-
-// Runs a cpu instruction immediately and ignores the clock
-// Used in debug mode, for stepping through a program
-// Sets the run for clock to keep the ppu in sync
-void simulate_cpu(gbc_system *gbc) {
-    
-    gbc_instruction curr = get_curr_instr(gbc);
-    gbc->cpu->run_for = curr.clocks;
-    execute_instr(curr, gbc); 
 }
 
 // Returns the bit no of the specified flag in the F register

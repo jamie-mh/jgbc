@@ -66,39 +66,27 @@ int main(int argc, char **argv) {
         // In debug mode, execute instruction by instruction 
         if(cmd->debug) {
             debug(gbc);
-
-            // Execute the instruction at the program counter 
-            simulate_cpu(gbc);
-                
-            // Run the same amount of ppu clocks as cpu clocks
-            // Also check for interrupts
-            for(int i = 0; i < gbc->cpu->run_for; i++) {
-                if(lcd_on) {
-                    ppu_do_clock(gbc);
-                }
-                check_interrupt(gbc);
-            }
-            
-            // Reset the count
-            gbc->cpu->run_for = 0;
         }
-        // In normal mode, do a cpu and ppu clock
-        else {
-            cpu_do_clock(gbc);
-
-            if(lcd_on) {
-                ppu_do_clock(gbc);
-            }
-
-            check_interrupt(gbc);
-
-        }
-
+        
         // TODO: Remove this
         SDL_PollEvent(&event);
         if(event.type == SDL_QUIT) {
             gbc->is_running = 0; 
         }
+        
+        cpu_do_clock(gbc);
+    
+        // Run as many ppu cycles as cpu cycles
+        for(int i = 0; i < gbc->cpu->clock; i++) {
+
+            if(lcd_on) {
+                ppu_do_clock(gbc);
+            }
+            check_interrupt(gbc);
+        }
+            
+        // Reset the count
+        gbc->cpu->clock = 0;
     }
 
     return 0;
