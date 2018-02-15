@@ -151,13 +151,13 @@ static void render_bg_scan(gbc_system *gbc, unsigned char ly) {
         unsigned short pixel_row = read_short(gbc->ram, tile_start + (bg_y % 8) * 2);
 
         // Split the most and least significant bytes
-        unsigned char ls_byte = (pixel_row & 0xFF) >> 8;
+        unsigned char ls_byte = (pixel_row & 0xFF00) >> 8;
         unsigned char ms_byte = (pixel_row & 0x00FF);
     
         // Get the colour from the most the most and least significant bits
         unsigned char bit = 7 - (x % 8);
-        unsigned char shade_num = ((ms_byte >> bit) & 1) | 
-                                  (((ls_byte >> bit) & 1) << 1);
+        unsigned char shade_num = ((ls_byte >> bit) & 1) | (((ms_byte >> bit) & 1) << 1);
+        printf("%d ", shade_num);
         SDL_Colour shade = shades[shade_num];
     
         // Draw the pixel on the screen
@@ -200,7 +200,7 @@ static void fill_shade_table(gbc_system *gbc, SDL_Colour *table) {
     for(unsigned char i = 0; i < 8; i += 2) {
 
         // Get the number from two bits at a time
-        unsigned char shade_num = ((palette >> i) & 1) | ((palette >> (i + 1)) & 1);  
+        unsigned char shade_num = ((palette >> i) & 1) | (((palette >> (i + 1)) & 1) << 1);
 
         // Add the shade
         table[i] = get_shade(shade_num); 
