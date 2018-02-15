@@ -23,7 +23,7 @@ void init_cpu(gbc_cpu *cpu) {
 
     // Reset the clock
     cpu->clock = 0;
-    cpu->run_for = 1;
+    cpu->run_for = 0;
 }
 
 /*

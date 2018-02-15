@@ -23,19 +23,17 @@ void init_ppu(gbc_ppu *ppu, const char scale) {
 
     // Reset the clock
     ppu->clock = 0;
+    ppu->scan_clock = 0;
     ppu->run_for = 0;
 }
 
 // Renders the picture on the screen scanline by scanline
 void ppu_do_clock(gbc_system *gbc) {
-
+    
     // Wait until the current instruction is finished
     if(gbc->ppu->clock < gbc->ppu->run_for) {
         gbc->ppu->clock++;
         return;
-    } else {
-        gbc->ppu->clock = 0;
-        gbc->ppu->run_for = 0;
     }
 
     // Set the mode according to the clock
@@ -55,15 +53,15 @@ void ppu_do_clock(gbc_system *gbc) {
     else {
     
         // OAM Transfer (20 clocks)
-        if(gbc->ppu->clock >= 0 && gbc->ppu->clock < 20) {
+        if(gbc->ppu->scan_clock >= 0 && gbc->ppu->scan_clock < 20) {
             mode = 2;
         }
         // Pixel Transfer (43 clocks)
-        else if(gbc->ppu->clock >= 20 && gbc->ppu->clock < 63) {
+        else if(gbc->ppu->scan_clock >= 20 && gbc->ppu->scan_clock < 63) {
             mode = 3;  
         } 
         // H-Blank (51 clocks) 
-        else if(gbc->ppu->clock >= 63 && gbc->ppu->clock <= 114) {
+        else if(gbc->ppu->scan_clock >= 63 && gbc->ppu->scan_clock <= 114) {
             mode = 0; 
         }
     }
@@ -75,17 +73,25 @@ void ppu_do_clock(gbc_system *gbc) {
     // Render pixels to the screen in screen rendering mode
     // The rendering lasts for 43 clocks, we are going to draw the line and wait
     // It's not super accurate but it's good enough and shouldn't be too noticable
-    if(mode == 3) {
+    if(gbc->ppu->scan_clock == 20) {
 
         // Render the background scanline
         render_bg_scan(gbc, ly_val);
 
         // Run for 43 clocks
         gbc->ppu->run_for = 43;
+        gbc->ppu->clock = 0;
     }
 
-    // Increment the vertical line register
-    write_byte(gbc->ram, LY, (ly_val == 153) ? 0 : ly_val + 1);
+    // End of scanline
+    if(gbc->ppu->scan_clock == 114) {
+        gbc->ppu->scan_clock = 0;
+
+        // Increment the vertical line register
+        write_byte(gbc->ram, LY, (ly_val == 153) ? 0 : ly_val + 1);
+    } else {
+        gbc->ppu->scan_clock++;
+    }
 }
 
 // Renders a tile to the display at the specified coordinates
@@ -105,7 +111,7 @@ static void render_bg_scan(gbc_system *gbc, unsigned char ly) {
         bg_tile_data_start = 0x8000;
         signed_tile_num = 0;
     } else {
-        bg_tile_data_start = 0x9000;
+        bg_tile_data_start = 0x8800;
         signed_tile_num = 1;
     }
 
@@ -118,33 +124,40 @@ static void render_bg_scan(gbc_system *gbc, unsigned char ly) {
     fill_shade_table(gbc, shades);
 
     short tile_number;
+    unsigned short tile_start;
     
     // Render a scanline of background tiles 
     for(unsigned char x = 0; x < SCREEN_WIDTH; x++) {
 
+        unsigned char bg_x = (scroll_x + x > 255) ? (scroll_x + x) - 255 : scroll_x + x; 
+        unsigned char bg_y = (scroll_y + ly > 255) ? (scroll_y + ly) - 255 : scroll_y + ly; 
+
         // Get the offset of the tile in the memory map, the lowest multiple of 8
-        unsigned char map_offset = (floor((x + ly * SCREEN_WIDTH) / 8)) * 8;
+        unsigned short map_offset = floor(bg_x / 8) + (floor(bg_y / 8) * 32); 
 
         // Read the tile number at the offset position, however it may be signed
         if(signed_tile_num) {
-            tile_number = (signed char) read_byte(gbc->ram, bg_tile_map_start + map_offset); 
+            tile_number = (signed char) read_byte(gbc->ram, bg_tile_map_start + map_offset);
+            tile_start = bg_tile_data_start + ((tile_number + 128) * 16);
         } else {
             tile_number = read_byte(gbc->ram, bg_tile_map_start + map_offset); 
+            tile_start = bg_tile_data_start + (tile_number * 16);
         }
-
+        
         // Get the offset of the tile data
-        unsigned short tile_offset = bg_tile_data_start + tile_number;
+        //unsigned short tile_start = bg_tile_data_start + (tile_number * 16);
     
         // Read two bytes from memory at the pixel row location
-        unsigned short pixel_row = read_short(gbc->ram, tile_offset + (ly % 8) * 2);
+        unsigned short pixel_row = read_short(gbc->ram, tile_start + (bg_y % 8) * 2);
 
         // Split the most and least significant bytes
         unsigned char ls_byte = (pixel_row & 0xFF) >> 8;
         unsigned char ms_byte = (pixel_row & 0x00FF);
     
         // Get the colour from the most the most and least significant bits
-        unsigned char bit = x % 8;
-        unsigned char shade_num = ((ls_byte >> bit) & 1) | (((ms_byte > bit) & 1) << 1);
+        unsigned char bit = 7 - (x % 8);
+        unsigned char shade_num = ((ms_byte >> bit) & 1) | 
+                                  (((ls_byte >> bit) & 1) << 1);
         SDL_Colour shade = shades[shade_num];
     
         // Draw the pixel on the screen

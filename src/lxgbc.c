@@ -66,11 +66,23 @@ int main(int argc, char **argv) {
         // In debug mode, execute instruction by instruction 
         if(cmd->debug) {
             debug(gbc);
-
-        }
         
-        // Run as many clocks are required
-        for(int i = 0; i < gbc->cpu->run_for; i++) {
+            cpu_do_clock(gbc);
+
+            // Run as many ppu clocks as cpu clocks
+            for(int i = 0; i < gbc->cpu->run_for; i++) {
+                if(lcd_on) {
+                    ppu_do_clock(gbc);
+                }
+
+                check_interrupt(gbc);
+            }
+
+            gbc->cpu->run_for = 0;
+        }
+        // In normal mode, respect clock cycles
+        else {
+
             cpu_do_clock(gbc);
 
             if(lcd_on) {
