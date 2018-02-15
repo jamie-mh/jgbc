@@ -41,9 +41,6 @@ int main(int argc, char **argv) {
         exit(0);
     }
 
-    // Load the bootstrap program
-    //load_bootstrap(gbc->ram);
-
     // Show a message and initialise the debugger 
     if(cmd->debug) {
         print_rom_info(gbc->rom);

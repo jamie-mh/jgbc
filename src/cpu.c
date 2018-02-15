@@ -207,19 +207,95 @@ static unsigned short add_short(const unsigned short a, const unsigned short b, 
 }
 
 static unsigned char rotate_left(const unsigned char operand, unsigned char *flag) {
+    
+    unsigned char old = operand;
+    unsigned char result = operand;
+    
+    // Shift the carry flag onto the result
+    result = (result << 1) | get_flag(FLAG_CARRY, *flag);
 
+    if(result == 0) {
+        set_flag(FLAG_ZERO, 1, flag);
+    } else {
+        set_flag(FLAG_ZERO, 0, flag); 
+    }
+    
+    set_flag(FLAG_SUBTRACT, 0, flag);
+    set_flag(FLAG_HALFCARRY, 0, flag);
+    
+    // Set the carry flag to the old bit 7
+    set_flag(FLAG_CARRY, (old & 0x80) >> 7, flag);
+
+    return result;
 }
 
 static unsigned char rotate_right(const unsigned char operand, unsigned char *flag) {
 
+    unsigned char old = operand;
+    unsigned char result = operand;
+    
+    // Shift the carry flag onto the result
+    result = (result >> 1) | (get_flag(FLAG_CARRY, *flag) << 7);
+
+    if(result == 0) {
+        set_flag(FLAG_ZERO, 1, flag);
+    } else {
+        set_flag(FLAG_ZERO, 0, flag); 
+    }
+    
+    set_flag(FLAG_SUBTRACT, 0, flag);
+    set_flag(FLAG_HALFCARRY, 0, flag);
+    
+    // Set the carry flag to the old bit 0
+    set_flag(FLAG_CARRY, old & 0x01, flag);
+
+    return result;
 }
 
 static unsigned char rotate_left_carry(const unsigned char operand, unsigned char *flag) {
 
+    unsigned char old = operand;
+    unsigned char result = operand;
+    
+    // Shift bit 0 onto the top 
+    result = (result << 1) | (result & 0x01);
+
+    if(result == 0) {
+        set_flag(FLAG_ZERO, 1, flag);
+    } else {
+        set_flag(FLAG_ZERO, 0, flag); 
+    }
+    
+    set_flag(FLAG_SUBTRACT, 0, flag);
+    set_flag(FLAG_HALFCARRY, 0, flag);
+    
+    // Set the carry flag to the old bit 7
+    set_flag(FLAG_CARRY, (old & 0x80) >> 7, flag);
+
+    return result;
 }
 
 static unsigned char rotate_right_carry(const unsigned char operand, unsigned char *flag) {
 
+    unsigned char old = operand;
+    unsigned char result = operand;
+    
+    // Shift bit 0 onto the top 
+    result = (result >> 1) | ((result & 0x01) << 7);
+
+    if(result == 0) {
+        set_flag(FLAG_ZERO, 1, flag);
+    } else {
+        set_flag(FLAG_ZERO, 0, flag); 
+    }
+    
+    set_flag(FLAG_SUBTRACT, 0, flag);
+    set_flag(FLAG_HALFCARRY, 0, flag);
+    
+    // Set the carry flag to the old bit 0
+    set_flag(FLAG_CARRY, old & 0x01, flag);
+
+    return result;
 }
 
 static unsigned char shift_left_arith(const unsigned char operand, unsigned char *flag) {
@@ -411,7 +487,8 @@ static void op_ld_e_d8(gbc_system *gbc, unsigned char operand) {
 
 // 0x1F: RRA (0 0 0 C)
 static void op_rra(gbc_system *gbc) {
-    printf("Unimplemented Instruction: RRA\n");
+    gbc->cpu->registers->A = rotate_right(gbc->cpu->registers->A, &gbc->cpu->registers->F);
+    set_flag(FLAG_ZERO, 0, &gbc->cpu->registers->F);
 }
 
 // 0x20: JR NZ, r8 (- - - -)
@@ -1546,7 +1623,8 @@ static void op_rst_30h(gbc_system *gbc) {
 
 // 0xF8: LD HL, SP+r8 (0 0 H C)
 static void op_ld_hl_sppr8(gbc_system *gbc, char operand) {
-    printf("Unimplemented Instruction: LD HL, SP+r8\n");
+    gbc->cpu->registers->HL = add_short(gbc->cpu->registers->SP, operand, &gbc->cpu->registers->F);
+    set_flag(FLAG_ZERO, 0, &gbc->cpu->registers->F);
 }
 
 // 0xF9: LD SP, HL (- - - -)
@@ -1878,44 +1956,44 @@ static void op_rlc_a(gbc_system *gbc) {
 
 // 0xCB08: RRC B (Z 0 0 C)
 static void op_rrc_b(gbc_system *gbc) {
-    gbc->cpu->registers->B = rotate_right(gbc->cpu->registers->B, &gbc->cpu->registers->F);
+    gbc->cpu->registers->B = rotate_right_carry(gbc->cpu->registers->B, &gbc->cpu->registers->F);
 }
 
 // 0xCB09: RRC C (Z 0 0 C)
 static void op_rrc_c(gbc_system *gbc) {
-    gbc->cpu->registers->C = rotate_right(gbc->cpu->registers->C, &gbc->cpu->registers->F);
+    gbc->cpu->registers->C = rotate_right_carry(gbc->cpu->registers->C, &gbc->cpu->registers->F);
 }
 
 // 0xCB0A: RRC D (Z 0 0 C)
 static void op_rrc_d(gbc_system *gbc) {
-    gbc->cpu->registers->D = rotate_right(gbc->cpu->registers->D, &gbc->cpu->registers->F);
+    gbc->cpu->registers->D = rotate_right_carry(gbc->cpu->registers->D, &gbc->cpu->registers->F);
 }
 
 // 0xCB0B: RRC E (Z 0 0 C)
 static void op_rrc_e(gbc_system *gbc) {
-    gbc->cpu->registers->E = rotate_right(gbc->cpu->registers->E, &gbc->cpu->registers->F);
+    gbc->cpu->registers->E = rotate_right_carry(gbc->cpu->registers->E, &gbc->cpu->registers->F);
 }
 
 // 0xCB0C: RRC H (Z 0 0 C)
 static void op_rrc_h(gbc_system *gbc) {
-    gbc->cpu->registers->H = rotate_right(gbc->cpu->registers->H, &gbc->cpu->registers->F);
+    gbc->cpu->registers->H = rotate_right_carry(gbc->cpu->registers->H, &gbc->cpu->registers->F);
 }
 
 // 0xCB0D: RRC L (Z 0 0 C)
 static void op_rrc_l(gbc_system *gbc) {
-    gbc->cpu->registers->L = rotate_right(gbc->cpu->registers->L, &gbc->cpu->registers->F);
+    gbc->cpu->registers->L = rotate_right_carry(gbc->cpu->registers->L, &gbc->cpu->registers->F);
 }
 
 // 0xCB0E: RRC (HL) (Z 0 0 C)
 static void op_rrc_hlp(gbc_system *gbc) {
     write_byte(gbc->ram,
                gbc->cpu->registers->HL,
-               rotate_right(read_byte(gbc->ram, gbc->cpu->registers->HL), &gbc->cpu->registers->F));
+               rotate_right_carry(read_byte(gbc->ram, gbc->cpu->registers->HL), &gbc->cpu->registers->F));
 }
 
 // 0xCB0F: RRC A (Z 0 0 C)
 static void op_rrc_a(gbc_system *gbc) {
-    gbc->cpu->registers->C = rotate_right(gbc->cpu->registers->C, &gbc->cpu->registers->F);
+    gbc->cpu->registers->C = rotate_right_carry(gbc->cpu->registers->C, &gbc->cpu->registers->F);
 }
 
 // 0xCB10: RL B (Z 0 0 C)
@@ -1962,44 +2040,44 @@ static void op_rl_a(gbc_system *gbc) {
 
 // 0xCB18: RR B (Z 0 0 C)
 static void op_rr_b(gbc_system *gbc) {
-    gbc->cpu->registers->B = rotate_right_carry(gbc->cpu->registers->B, &gbc->cpu->registers->F);
+    gbc->cpu->registers->B = rotate_right(gbc->cpu->registers->B, &gbc->cpu->registers->F);
 }
 
 // 0xCB19: RR C (Z 0 0 C)
 static void op_rr_c(gbc_system *gbc) {
-    gbc->cpu->registers->C = rotate_right_carry(gbc->cpu->registers->C, &gbc->cpu->registers->F);
+    gbc->cpu->registers->C = rotate_right(gbc->cpu->registers->C, &gbc->cpu->registers->F);
 }
 
 // 0xCB1A: RR D (Z 0 0 C)
 static void op_rr_d(gbc_system *gbc) {
-    gbc->cpu->registers->D = rotate_right_carry(gbc->cpu->registers->D, &gbc->cpu->registers->F);
+    gbc->cpu->registers->D = rotate_right(gbc->cpu->registers->D, &gbc->cpu->registers->F);
 }
 
 // 0xCB1B: RR E (Z 0 0 C)
 static void op_rr_e(gbc_system *gbc) {
-    gbc->cpu->registers->E = rotate_right_carry(gbc->cpu->registers->E, &gbc->cpu->registers->F);
+    gbc->cpu->registers->E = rotate_right(gbc->cpu->registers->E, &gbc->cpu->registers->F);
 }
 
 // 0xCB1C: RR H (Z 0 0 C)
 static void op_rr_h(gbc_system *gbc) {
-    gbc->cpu->registers->H = rotate_right_carry(gbc->cpu->registers->H, &gbc->cpu->registers->F);
+    gbc->cpu->registers->H = rotate_right(gbc->cpu->registers->H, &gbc->cpu->registers->F);
 }
 
 // 0xCB1D: RR L (Z 0 0 C)
 static void op_rr_l(gbc_system *gbc) {
-    gbc->cpu->registers->L = rotate_right_carry(gbc->cpu->registers->L, &gbc->cpu->registers->F);
+    gbc->cpu->registers->L = rotate_right(gbc->cpu->registers->L, &gbc->cpu->registers->F);
 }
 
 // 0xCB1E: RR (HL) (Z 0 0 C)
 static void op_rr_hlp(gbc_system *gbc) {
     write_byte(gbc->ram,
                gbc->cpu->registers->HL,
-               rotate_right_carry(read_byte(gbc->ram, gbc->cpu->registers->HL), &gbc->cpu->registers->F));
+               rotate_right(read_byte(gbc->ram, gbc->cpu->registers->HL), &gbc->cpu->registers->F));
 }
 
 // 0xCB1F: RR A (Z 0 0 C)
 static void op_rr_a(gbc_system *gbc) {
-    gbc->cpu->registers->A = rotate_right_carry(gbc->cpu->registers->A, &gbc->cpu->registers->F);
+    gbc->cpu->registers->A = rotate_right(gbc->cpu->registers->A, &gbc->cpu->registers->F);
 }
 
 // 0xCB20: SLA B (Z 0 0 C)
