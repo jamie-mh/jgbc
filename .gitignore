@@ -55,5 +55,4 @@ dkms.conf
 # Vim
 *.swp
 
-doc/
 rom/

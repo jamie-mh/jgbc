@@ -144,9 +144,6 @@ static void render_bg_scan(gbc_system *gbc, unsigned char ly) {
             tile_start = bg_tile_data_start + (tile_number * 16);
         }
         
-        // Get the offset of the tile data
-        //unsigned short tile_start = bg_tile_data_start + (tile_number * 16);
-    
         // Read two bytes from memory at the pixel row location
         unsigned short pixel_row = read_short(gbc->ram, tile_start + (bg_y % 8) * 2);
 
@@ -157,7 +154,6 @@ static void render_bg_scan(gbc_system *gbc, unsigned char ly) {
         // Get the colour from the most the most and least significant bits
         unsigned char bit = 7 - (x % 8);
         unsigned char shade_num = ((ls_byte >> bit) & 1) | (((ms_byte >> bit) & 1) << 1);
-        printf("%d ", shade_num);
         SDL_Colour shade = shades[shade_num];
     
         // Draw the pixel on the screen

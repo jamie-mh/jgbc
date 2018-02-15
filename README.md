@@ -13,15 +13,17 @@ As it stands, the emulator is not complete enough to play games.
 #### Working
 
 - Loading roms (parsing header, etc...)
-- Some CPU instructions implemented
+- Most CPU instructions implemented
 - Disassembly and debugger
+- Background graphics
+- Interrupts
 
 #### Not Working
 
-- Graphics
+- Sprites / Window
 - Sound
-- Controls
-- GameBoy specific features
+- Joypad
+- GameBoy Color specific features
 
 ### Prerequisites
 
@@ -67,6 +69,9 @@ Don't try and run anything other than GB roms, it will crash (duh).
 ```
 ./bin/lxgbc -f roms/Tetris.gb
 ```
+### Screenshots
+
+![Dr Mario](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/drmario.png)
 
 ### Using the debugger
 
@@ -97,12 +102,14 @@ Type 'h' for information on the available commands.
 You can type a command after the ```(dbg)``` prompt, just hit enter afterwards.
 
 ```
+Available Commands:
 (1-9): Run X instructions
 b: Create a breakpoint
 d: Remove a breakpoint
 l: List all breakpoints
 r: Run
 p: Print debug information
+s: Read byte in memory
 f: Dump RAM to a file
 q: Quit
 ```
@@ -113,28 +120,28 @@ This is what it looks like when you step through instructions. Pretty neat.
 
 The instructions are on the left, the current instruction is indicated by the arrow. On the right you will find the various CPU registers and their values.
 
-Underneath, the various flags of the F register are shown, and just next to that, there is the current opcode and whether or not interrupts are enabled.
-
+Underneath, the various flags of the F register are shown, and just next to that, there is the current opcode and the current scanline.
 ```
 --------------------------------------------
-| 0x028C: -> LD HL, dfff       || A : 00   |
-| 0x028F:    LD C, 10          || B : 00   |
-| 0x0291:    LD B, 00          || C : 13   |
-| 0x0293:    LD (HL-), A       || D : 00   |
-| 0x0294:    DEC B             || E : D8   |
-| 0x0295:    JR NZ, 04         || H : 01   |
-| 0x0297:    DEC C             || L : 4D   |
-| 0x0298:    JR NZ, 07         || AF: 0080 |
-| 0x029A:    LD A, 01          || BC: 0013 |
-| 0x029C:    DI                || DE: 00D8 |
-| 0x029D:    LDH (0f), A       || HL: 014D |
-| 0x029F:    LDH (ff), A       || PC: 028C |
-| 0x02A1:    XOR A             || SP: FFFE |
+| 0x0150: -> JP 01e8           || A : 01   |
+| 0x0153:    LD BC, d00e       || B : 00   |
+| 0x0156:    LD A, (BC)        || C : 13   |
+| 0x0157:    AND A             || D : 00   |
+| 0x0158:    JR NZ, f3         || E : D8   |
+| 0x015A:    LDH A, (cf)       || H : 01   |
+| 0x015C:    CP fe             || L : 4D   |
+| 0x015E:    JR NZ, fc         || AF: 01B0 |
+| 0x0160:    LD A, 01          || BC: 0013 |
+| 0x0162:    JR ff             || DE: 00D8 |
+| 0x0164:    XOR A             || HL: 014D |
+| 0x0165:    LD (BC), A        || SP: FFFE |
+| 0x0166:    RET               || PC: 0150 |
+| 0x0167:    LD A, (d046)      || IME: 1   |
 --------------------------------------------
 -------------------
 | Z: 1 || OPCODE: |
-| N: 0 || -> 21   |
-| H: 0 || INTERR: |
-| C: 0 || -> 1    |
+| N: 0 || -> C3   |
+| H: 1 || LY:     |
+| C: 1 || -> 00   |
 -------------------
 ```
