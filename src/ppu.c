@@ -13,7 +13,7 @@ void init_ppu(gbc_ppu *ppu, const char scale) {
     SDL_CreateWindowAndRenderer(
         SCREEN_WIDTH * scale,
         SCREEN_HEIGHT * scale,
-        0,
+        SDL_RENDERER_ACCELERATED,
         &ppu->window,
         &ppu->renderer                            
     );
