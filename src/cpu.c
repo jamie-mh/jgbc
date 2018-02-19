@@ -531,7 +531,45 @@ static void op_ld_h_d8(gbc_system *gbc, unsigned char operand) {
 
 // 0x27: DAA (Z - 0 C)
 static void op_daa(gbc_system *gbc) {
-    printf("Unimplemented Instruction: DAA\n");
+
+    unsigned short result = gbc->cpu->registers->A;
+
+    if(gbc->cpu->registers->A == 0) {
+        set_flag(FLAG_ZERO, 1, &gbc->cpu->registers->F); 
+    } else {
+        set_flag(FLAG_ZERO, 0, &gbc->cpu->registers->F); 
+    }
+
+    if(get_flag(FLAG_SUBTRACT, gbc->cpu->registers->F)) {
+
+        if(get_flag(FLAG_HALFCARRY, gbc->cpu->registers->F)) {
+            result = (result - 0x06) & 0xFF;
+        }
+
+        if(get_flag(FLAG_CARRY, gbc->cpu->registers->F)) {
+            result -= 0x60;
+        }
+    }
+    else {
+
+        if(get_flag(FLAG_HALFCARRY, gbc->cpu->registers->F) || (result & 0xF) > 9) {
+            result += 0x06;
+        }
+
+        if(get_flag(FLAG_CARRY, gbc->cpu->registers->F) || result > 0x9F) {
+            result += 0x60;
+        }
+    }
+
+    set_flag(FLAG_HALFCARRY, 0, &gbc->cpu->registers->F);
+
+    if(result > 0x100) {
+        set_flag(FLAG_CARRY, 1, &gbc->cpu->registers->F); 
+    } else {
+        set_flag(FLAG_CARRY, 0, &gbc->cpu->registers->F); 
+    }
+
+    gbc->cpu->registers->A = (unsigned char) result;    
 }
 
 // 0x28: JR Z, r8 (- - - -)
