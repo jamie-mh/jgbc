@@ -1593,6 +1593,9 @@ static void op_ldh_a_a8p(gbc_system *gbc, unsigned char operand) {
 // 0xF1: POP AF (Z N H C)
 static void op_pop_af(gbc_system *gbc) {
     gbc->cpu->registers->AF = stack_pop_short(gbc->ram, &gbc->cpu->registers->SP);
+
+    // The unused bits are cleared
+    gbc->cpu->registers->F = gbc->cpu->registers->F & 0xF0;
 }
 
 // 0xF2: LD A, (C) (- - - -)
