@@ -63,11 +63,14 @@ int main(int argc, char **argv) {
 
         unsigned char lcd_on = read_register(gbc->ram, LCDC, LCDC_LCD_ENABLE);
 
+        // TODO: Clean up
         // In debug mode, execute instruction by instruction 
         if(cmd->debug) {
-            debug(gbc);
-        
-            cpu_do_clock(gbc);
+
+            if(gbc->cpu->is_halted == 0) {
+                debug(gbc);
+                cpu_do_clock(gbc);
+            }
 
             // Run as many ppu clocks as cpu clocks
             for(int i = 0; i < gbc->cpu->run_for; i++) {
@@ -78,12 +81,16 @@ int main(int argc, char **argv) {
                 check_interrupt(gbc);
             }
 
-            gbc->cpu->run_for = 0;
+            if(gbc->cpu->is_halted == 0) {
+                gbc->cpu->run_for = 0;
+            }
         }
         // In normal mode, respect clock cycles
         else {
 
-            cpu_do_clock(gbc);
+            if(gbc->cpu->is_halted == 0) {
+                cpu_do_clock(gbc);
+            }
 
             if(lcd_on) {
                 ppu_do_clock(gbc);

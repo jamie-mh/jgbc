@@ -63,6 +63,7 @@ typedef struct gbc_cpu {
     gbc_registers *registers;
     unsigned char clock;
     unsigned char run_for;
+    unsigned char is_halted;
 } gbc_cpu;
 
 typedef struct gbc_ppu {

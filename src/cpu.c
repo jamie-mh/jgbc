@@ -20,6 +20,7 @@ void init_cpu(gbc_cpu *cpu) {
 
     // Enable interrupts
     cpu->registers->IME = 1;
+    cpu->is_halted = 0;
 
     // Reset the clock
     cpu->clock = 0;
@@ -983,7 +984,7 @@ static void op_ld_hlp_l(gbc_system *gbc) {
 
 // 0x76: HALT (- - - -)
 static void op_halt(gbc_system *gbc) {
-    printf("Unimplemented Instruction: HALT\n");
+    gbc->cpu->is_halted = 1;
 }
 
 // 0x77: LD (HL), A (- - - -)
@@ -3701,21 +3702,23 @@ static unsigned short stack_pop_short(gbc_ram *ram, unsigned short *sp) {
 // Checks if the cpu has pending interrupts and services them 
 void check_interrupt(gbc_system *gbc) {
     
-    // If interrupts are globally enabled
-    if(gbc->cpu->registers->IME) {
-        
-        // Read the interrupt enable and request registers
-        unsigned char enabled = read_byte(gbc->ram, IE);
-        unsigned char flag = read_byte(gbc->ram, IF);
+    // Read the interrupt enable and request registers
+    unsigned char enabled = read_byte(gbc->ram, IE);
+    unsigned char flag = read_byte(gbc->ram, IF);
 
-        // Find the enabled and requested interrupts
-        for(int i = 0; i < 5; i++) {
-            
-            // If this interrupt is enabled and requested
-            // This just checks that the i'th bit is set in both bytes
-            if(((enabled >> i) & 1) && ((flag >> i) & 1)) {
-                service_interrupt(gbc, i); 
+    // Find the enabled and requested interrupts
+    for(int i = 0; i < 5; i++) {
+        
+        // If this interrupt is enabled and requested
+        // This just checks that the i'th bit is set in both bytes
+        if(((enabled >> i) & 1) && ((flag >> i) & 1)) {
+
+            // If interrupts are globally enabled
+            if(gbc->cpu->registers->IME) {
+                service_interrupt(gbc, i);
             }
+
+            gbc->cpu->is_halted = 0;
         }
     }
 }
