@@ -3567,7 +3567,7 @@ static void execute_instr(gbc_instruction instruction, gbc_system *gbc) {
     unsigned short operand;
 
     // If it is a CB instruction, it's shorter
-    if(strcmp(instruction.disassembly, "PREFIX CB") == 0) {
+    if(instruction.execute == &op_prefix_cb) {
         operand_len--; 
     }
 
