@@ -3,6 +3,12 @@
 #include "cpu.h"
 #include "ppu.h"
 
+static void render_bg_scan(gbc_system *, unsigned char ly);
+
+static SDL_Colour get_shade(const unsigned char);
+static void fill_shade_table(gbc_system *, SDL_Colour *);
+
+
 // Opens a SDL window, WIP
 void init_ppu(gbc_ppu *ppu, const char scale) {
 
@@ -38,7 +44,7 @@ void ppu_do_clock(gbc_system *gbc) {
 
     // Set the mode according to the clock
     unsigned char ly_val = read_byte(gbc->ram, LY);
-    unsigned char mode;
+    unsigned char mode = 0;
 
     // V-Blank (10 lines)
     if(ly_val >= 144 && ly_val <= 154) {
@@ -53,7 +59,7 @@ void ppu_do_clock(gbc_system *gbc) {
     else {
     
         // OAM Transfer (20 clocks)
-        if(gbc->ppu->scan_clock >= 0 && gbc->ppu->scan_clock < 20) {
+        if(gbc->ppu->scan_clock < 20) {
             mode = 2;
         }
         // Pixel Transfer (43 clocks)
@@ -180,6 +186,7 @@ static SDL_Colour get_shade(const unsigned char num) {
             return lgrey;
         case 2: 
             return dgrey;
+        default:
         case 3: 
             return black;
     } 

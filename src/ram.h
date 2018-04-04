@@ -1,3 +1,5 @@
+#pragma once
+
 #define VRAM_SIZE 8192
 #define EXTRAM_BANK_SIZE 8192
 #define WRAM_BANK_SIZE 4096
@@ -33,7 +35,6 @@
 #define IEF_JOYPAD 4
 
 void init_ram(gbc_ram *);
-static unsigned char *get_memory_location(gbc_ram *, unsigned short *);
 
 unsigned char read_byte(gbc_ram *, const unsigned short);
 unsigned short read_short(gbc_ram *, const unsigned short);

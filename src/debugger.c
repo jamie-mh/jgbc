@@ -4,6 +4,13 @@
 #include "cpu.h"
 #include "ppu.h"
 
+static char add_breakpoint(const unsigned short, gbc_debugger *);
+static char remove_breakpoint(const unsigned short, gbc_debugger *);
+static gbc_breakpoint *find_breakpoint(const unsigned short, gbc_debugger *);
+static char dump_ram(gbc_ram *, const char *);
+static void print_debug(gbc_system *);
+
+
 // Shows the current instruction and the instructions that follow it
 static debug_box *dbox_instr(gbc_system *gbc) {
     
@@ -479,7 +486,7 @@ static char remove_breakpoint(const unsigned short address, gbc_debugger *debugg
                 if(curr == debugger->breakpoint_head) {
 
                     // If there is only one
-                    if(debugger->breakpoint_head->next = NULL) {
+                    if(debugger->breakpoint_head->next == NULL) {
                         debugger->breakpoint_head = NULL;
                     } else {
                         debugger->breakpoint_head = curr->next;

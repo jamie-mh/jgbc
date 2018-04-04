@@ -1,3 +1,5 @@
+#pragma once
+
 #include<stdio.h>
 #include<stdlib.h>
 #include<math.h>
@@ -128,5 +130,3 @@ typedef struct cmd_options {
     char debug;
     char scale;
 } cmd_options;
-
-static char get_cl_arguments(int, char **, cmd_options *); 

@@ -7,6 +7,9 @@
 #include "ppu.h"
 #include "sound.h"
 
+static char get_cl_arguments(int, char **, cmd_options *);
+
+
 int main(int argc, char **argv) {
 
     SDL_Event event;

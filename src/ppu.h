@@ -1,3 +1,5 @@
+#pragma once
+
 #define SCREEN_WIDTH 160
 #define SCREEN_HEIGHT 144
 #define MAIN_WINDOW_TITLE "LXGBC"
@@ -57,7 +59,7 @@
 #define REG_BCPS 0xFF68
 #define REG_BCPD 0xFF69
 #define REG_OCPS 0xFF6A
-#define REG OCPD 0xFF6B
+#define REG_OCPD 0xFF6B
 #define VBK 0xFF4F
 #define HDMA1 0xFF51
 #define HDMA2 0xFF52
@@ -73,7 +75,3 @@
 
 void init_ppu(gbc_ppu *, const char scale);
 void ppu_do_clock(gbc_system *);
-static void render_bg_scan(gbc_system *, unsigned char ly);
-
-static SDL_Colour get_shade(const unsigned char);
-static void fill_shade_table(gbc_system *, SDL_Colour *);

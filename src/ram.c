@@ -1,6 +1,9 @@
 #include "lxgbc.h"
 #include "ram.h"
 
+static unsigned char *get_memory_location(gbc_ram *, unsigned short *);
+
+
 // Allocates memory
 void init_ram(gbc_ram *ram) {
 
@@ -31,7 +34,7 @@ void init_ram(gbc_ram *ram) {
 static unsigned char *get_memory_location(gbc_ram *ram, unsigned short *address) {
 
     // 16KB ROM Bank 00 
-    if(*address >= 0x0 && *address <= 0x3FFF) {
+    if(*address <= 0x3FFF) {
         return ram->rom00;
     } 
     // 16KB ROM Bank NN
@@ -84,6 +87,8 @@ static unsigned char *get_memory_location(gbc_ram *ram, unsigned short *address)
         *address = 0;
         return ram->ier;
     }
+
+    return NULL;
 }
 
 // Reads a byte from the specified location in memory

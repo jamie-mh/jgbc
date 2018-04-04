@@ -2,6 +2,9 @@
 #include "ram.h"
 #include "rom.h"
 
+static void get_rom_info(unsigned char *, gbc_rom *);
+
+
 // Load a ROM file into the RAM memory location
 char load_rom(gbc_system *gbc, const char *path) {
 
