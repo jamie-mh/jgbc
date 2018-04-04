@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
     }
        
     // Append the game title to the window title
-    char *title = malloc(sizeof(24 * sizeof(char)));
+    char title[24];
     strcpy(title, MAIN_WINDOW_TITLE);
     strcat(title, " - ");
     strcat(title, gbc->rom->title);
