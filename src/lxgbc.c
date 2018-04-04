@@ -9,7 +9,6 @@
 
 int main(int argc, char **argv) {
 
-    printf(CGRN LOGO CNRM);
     SDL_Event event;
 
     // Allocate memory for the gbc
@@ -43,6 +42,7 @@ int main(int argc, char **argv) {
 
     // Show a message and initialise the debugger 
     if(cmd->debug) {
+        printf(CGRN LOGO CNRM);
         print_rom_info(gbc->rom);
 
         printf("\nLXGBC DEBUGGER RUNNING\nType 'h' for information on the available commands.\n");

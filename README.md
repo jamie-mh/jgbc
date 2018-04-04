@@ -5,6 +5,7 @@
 A GameBoy and GameBoy Color emulator for Linux. Written in C with SDL2.
 
 - Compiled and tested on Fedora 27 with gcc 7.3.1.
+- Compiled and tested on Ubuntu 16.04 LTS with gcc 5.4.0.
 
 ### Project Status
 
