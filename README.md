@@ -49,7 +49,7 @@ sudo dnf install SDL2-devel
 Compile the program with these commands.
 
 ```
-git clone https://github.com/jamie-mh/lxgbc
+git clone --recurse-submodules https://github.com/jamie-mh/lxgbc
 cd lxgbc
 make
 ```
