@@ -25,7 +25,6 @@ typedef struct gbc_instruction {
     char *disassembly;
     char length;
     char clocks;
-    char increment_PC;
     char signed_operand;
     void *execute;
 } gbc_instruction;

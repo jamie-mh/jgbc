@@ -329,7 +329,7 @@ unsigned char dec(const unsigned char operand, unsigned char *flag) {
 
     set_flag(FLAG_SUBTRACT, 1, flag);
 
-    if(operand & 0x0f) {
+    if(operand & 0x0F) {
         set_flag(FLAG_HALFCARRY, 0, flag);
     } else {
         set_flag(FLAG_HALFCARRY, 1, flag);
@@ -515,28 +515,60 @@ unsigned char rotate_right_carry(const unsigned char operand, unsigned char *fla
 
 unsigned char shift_left_arith(const unsigned char operand, unsigned char *flag) {
 
+    // Set the carry flag to the old bit 7
+    set_flag(FLAG_CARRY, (operand & 0x80) >> 7, flag);
+
+    set_flag(FLAG_SUBTRACT, 0, flag);
+    set_flag(FLAG_HALFCARRY, 0, flag);
+
+    // Shift left (set bit 0 to 0)
+    unsigned char result = operand << 1;
+
+    if(result == 0) {
+        set_flag(FLAG_ZERO, 1, flag);
+    } else {
+        set_flag(FLAG_ZERO, 0, flag); 
+    }
+
+    return result;
 }
 
 unsigned char shift_right_arith(const unsigned char operand, unsigned char *flag) {
-
+    printf("Unimplemented shift right arith\n");
 }
 
 unsigned char shift_right_logic(const unsigned char operand, unsigned char *flag) {
+    
+    // Set the carry flag to the old bit 0
+    set_flag(FLAG_CARRY, operand & 0x01, flag);
 
+    set_flag(FLAG_SUBTRACT, 0, flag);
+    set_flag(FLAG_HALFCARRY, 0, flag);
+
+    // Shift right
+    unsigned char result = operand >> 1;
+
+    if(result == 0) {
+        set_flag(FLAG_ZERO, 1, flag);
+    } else {
+        set_flag(FLAG_ZERO, 0, flag); 
+    }
+
+    return result;
 }
 
 unsigned char swap(const unsigned char operand, unsigned char *flag) {
-
+    printf("Unimplemented swap\n");
 }
 
 void test_bit(const unsigned char regis, const unsigned char bit, unsigned char *flag) {
-
+    printf("Unimplemented test bit\n");
 }
 
 unsigned char reset_bit(const unsigned char regis, const unsigned char bit, unsigned char *flag) {
-
+    printf("Unimplemented reset bit\n");
 }
 
 unsigned char set_bit(const unsigned char regis, const unsigned char bit, unsigned char *flag) {
-
+    printf("Unimplemented set bit\n");
 }
