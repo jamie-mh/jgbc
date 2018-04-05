@@ -32,7 +32,7 @@ static debug_box *dbox_instr(gbc_system *gbc) {
         box->rows[i][0] = '\0';
 
         // Show the address
-        char *label = malloc(8);
+        char *label = malloc(8 + sizeof(int));
         sprintf(label, "0x%04X: ", pointer);
         strcat(box->rows[i], label);
         free(label);
