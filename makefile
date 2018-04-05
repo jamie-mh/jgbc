@@ -5,7 +5,7 @@ OBJ := ./obj
 
 # Compiler
 CC := gcc
-CFLAGS := -I$(SRC)/ -lSDL2 -lm -g -Ofast -Wall -Wextra
+CFLAGS := -I$(SRC)/ -lSDL2 -lm -Ofast -g -Wall -Wextra
 
 # Files
 OUTNAME := lxgbc

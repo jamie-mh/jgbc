@@ -16,13 +16,33 @@ void init_ppu(gbc_ppu *ppu, const char scale) {
     SDL_Init(SDL_INIT_VIDEO);
 
     // Create window
-    SDL_CreateWindowAndRenderer(
+    ppu->window = SDL_CreateWindow(
+        MAIN_WINDOW_TITLE,
+        SDL_WINDOWPOS_UNDEFINED,
+        SDL_WINDOWPOS_UNDEFINED,
         SCREEN_WIDTH * scale,
         SCREEN_HEIGHT * scale,
-        SDL_RENDERER_ACCELERATED,
-        &ppu->window,
-        &ppu->renderer                            
+        SDL_WINDOW_SHOWN
     );
+
+    // Create renderer
+    ppu->renderer = SDL_CreateRenderer(
+        ppu->window,
+        -1,
+        SDL_RENDERER_ACCELERATED
+    );
+
+    // Create a texture that will be copied to the renderer
+    ppu->texture = SDL_CreateTexture(
+        ppu->renderer,
+        SDL_PIXELFORMAT_ARGB8888,
+        SDL_TEXTUREACCESS_STREAMING,
+        SCREEN_WIDTH,
+        SCREEN_HEIGHT
+    );
+
+    // Allocate memory for the framebuffer (4 bytes per pixel)
+    ppu->framebuffer = calloc(SCREEN_WIDTH * SCREEN_HEIGHT * 4, sizeof(char));
 
     // Set the rendering scale
     SDL_RenderSetScale(ppu->renderer, scale, scale);
@@ -93,8 +113,28 @@ void ppu_do_clock(gbc_system *gbc) {
     if(gbc->ppu->scan_clock == 114) {
         gbc->ppu->scan_clock = 0;
 
-        // Increment the vertical line register
-        write_byte(gbc->ram, LY, (ly_val == 153) ? 0 : ly_val + 1);
+        // End of frame rendering
+        if(ly_val == 153) {
+            ly_val = 0;
+
+            // Flush the framebuffer to the texture
+            SDL_UpdateTexture(
+                gbc->ppu->texture,
+                NULL,
+                gbc->ppu->framebuffer,
+                SCREEN_WIDTH * 4
+            );
+
+            // Render the framebuffer
+            SDL_RenderCopy(gbc->ppu->renderer, gbc->ppu->texture, NULL, NULL);
+            SDL_RenderPresent(gbc->ppu->renderer);
+        } else {
+            ly_val++;
+        }
+
+        // Write the vertical line register
+        write_byte(gbc->ram, LY, ly_val);
+
     } else {
         gbc->ppu->scan_clock++;
     }
@@ -122,8 +162,8 @@ static void render_bg_scan(gbc_system *gbc, unsigned char ly) {
     }
 
     // Get the current background scroll position
-    unsigned char scroll_x = read_byte(gbc->ram, SCX);
-    unsigned char scroll_y = read_byte(gbc->ram, SCY);
+    const unsigned char scroll_x = read_byte(gbc->ram, SCX);
+    const unsigned char scroll_y = read_byte(gbc->ram, SCY);
 
     // Get the palette data
     SDL_Colour shades[4];
@@ -135,11 +175,11 @@ static void render_bg_scan(gbc_system *gbc, unsigned char ly) {
     // Render a scanline of background tiles 
     for(unsigned char x = 0; x < SCREEN_WIDTH; x++) {
 
-        unsigned char bg_x = (scroll_x + x > 255) ? (scroll_x + x) - 255 : scroll_x + x; 
-        unsigned char bg_y = (scroll_y + ly > 255) ? (scroll_y + ly) - 255 : scroll_y + ly; 
+        const unsigned char bg_x = (scroll_x + x > 255) ? (scroll_x + x) - 255 : scroll_x + x; 
+        const unsigned char bg_y = (scroll_y + ly > 255) ? (scroll_y + ly) - 255 : scroll_y + ly; 
 
         // Get the offset of the tile in the memory map, the lowest multiple of 8
-        unsigned short map_offset = floor(bg_x / 8) + (floor(bg_y / 8) * 32); 
+        const unsigned short map_offset = floor(bg_x / 8) + (floor(bg_y / 8) * 32); 
 
         // Read the tile number at the offset position, however it may be signed
         if(signed_tile_num) {
@@ -151,23 +191,25 @@ static void render_bg_scan(gbc_system *gbc, unsigned char ly) {
         }
         
         // Read two bytes from memory at the pixel row location
-        unsigned short pixel_row = read_short(gbc->ram, tile_start + (bg_y % 8) * 2);
+        const unsigned short pixel_row = read_short(gbc->ram, tile_start + (bg_y % 8) * 2);
  
         // Split the most and least significant bytes
-        unsigned char ls_byte = (pixel_row & 0xFF00) >> 8;
-        unsigned char ms_byte = (pixel_row & 0x00FF);
+        const unsigned char ls_byte = (pixel_row & 0xFF00) >> 8;
+        const unsigned char ms_byte = (pixel_row & 0x00FF);
     
         // Get the colour from the most the most and least significant bits
-        unsigned char bit = 7 - (x % 8);
-        unsigned char shade_num = ((ms_byte >> bit) & 1) | (((ls_byte >> bit) & 1) << 1);
+        const unsigned char bit = 7 - (x % 8);
+        const unsigned char shade_num = ((ms_byte >> bit) & 1) | (((ls_byte >> bit) & 1) << 1);
         SDL_Colour shade = shades[shade_num];
     
-        // Draw the pixel on the screen
-        SDL_SetRenderDrawColor(gbc->ppu->renderer, shade.r, shade.g, shade.b, shade.a);
-        SDL_RenderDrawPoint(gbc->ppu->renderer, x, ly);
-    }
+        // Draw the pixel in the framebuffer
+        const unsigned int buf_offset = (x * 4) + (ly * SCREEN_WIDTH * 4);
 
-    SDL_RenderPresent(gbc->ppu->renderer);
+        gbc->ppu->framebuffer[buf_offset + 0] = shade.r; // R
+        gbc->ppu->framebuffer[buf_offset + 1] = shade.g; // G
+        gbc->ppu->framebuffer[buf_offset + 2] = shade.b; // B
+        gbc->ppu->framebuffer[buf_offset + 3] = shade.a; // A
+    }
 }
 
 // Returns the colour associated with a shade number

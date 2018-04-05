@@ -71,6 +71,8 @@ typedef struct gbc_cpu {
 typedef struct gbc_ppu {
     SDL_Window *window;
     SDL_Renderer *renderer;
+    SDL_Texture *texture;
+    unsigned char *framebuffer;
     unsigned char clock;
     unsigned char scan_clock;
     unsigned char run_for;

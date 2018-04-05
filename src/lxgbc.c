@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
     cmd->rom_path = malloc(sizeof(char) * ROM_PATH_LENGTH);
 
     if(!get_cl_arguments(argc, argv, cmd)) {
-        exit(0);
+        return -1;
     }
 
     // Initialize the system
@@ -39,8 +39,8 @@ int main(int argc, char **argv) {
 
     // Load the rom into memory
     if(!load_rom(gbc, cmd->rom_path)) {
-        printf("ERROR: Could not load rom file!\n\n");
-        exit(0);
+        fprintf(stderr, "ERROR: Could not load rom file!\n\n");
+        return -1;
     }
 
     // Show a message and initialise the debugger 
@@ -109,6 +109,7 @@ int main(int argc, char **argv) {
         }
     }
 
+    SDL_Quit();
     return 0;
 }
 
