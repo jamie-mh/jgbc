@@ -26,6 +26,22 @@ As it stands, the emulator is not complete enough to play games.
 - Joypad
 - GameBoy Color specific features
 
+#### Blargg's CPU Tests
+
+| Name          | Status | Output |
+| ------------- |:------:|:------:|
+| 01-special | :x: | Stuck |
+| 02-interrupts | :x: | No Timer |
+| 03-op sp,hl | :x: | Stuck |
+| 04-op r,imm | :x: | Stuck |
+| 05-op rp | :x: | Stuck |
+| 06-ld r,r | :heavy_check_mark: | Pass |
+| 07-jr,jp,call,ret,rst | :x: | Stuck |
+| 08-misc instrs | :x: | Stuck |
+| 09-op r,r | :x: | Stuck |
+| 10-bit ops | :x: | Stuck |
+| 11-op a,(hl) | :x: | Stuck |
+
 ### Prerequisites
 
 Install the development tools (gcc) and SDL2.
