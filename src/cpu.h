@@ -61,5 +61,5 @@ unsigned char shift_right_arith(const unsigned char operand, unsigned char *flag
 unsigned char shift_right_logic(const unsigned char operand, unsigned char *flag);
 unsigned char swap(const unsigned char operand, unsigned char *flag);
 void test_bit(const unsigned char regis, const unsigned char bit, unsigned char *flag);
-unsigned char reset_bit(const unsigned char regis, const unsigned char bit, unsigned char *flag);
-unsigned char set_bit(const unsigned char regis, const unsigned char bit, unsigned char *flag);
+unsigned char reset_bit(const unsigned char regis, const unsigned char bit);
+unsigned char set_bit(const unsigned char regis, const unsigned char bit);

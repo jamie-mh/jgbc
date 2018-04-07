@@ -534,7 +534,23 @@ unsigned char shift_left_arith(const unsigned char operand, unsigned char *flag)
 }
 
 unsigned char shift_right_arith(const unsigned char operand, unsigned char *flag) {
-    printf("Unimplemented shift right arith\n");
+
+    // Set the carry flag to the old bit 0
+    set_flag(FLAG_CARRY, operand & 1, flag);
+
+    set_flag(FLAG_SUBTRACT, 0, flag);
+    set_flag(FLAG_HALFCARRY, 0, flag);
+
+    // Shift right
+    unsigned char result = operand >> 1;
+
+    if(result == 0) {
+        set_flag(FLAG_ZERO, 1, flag);
+    } else {
+        set_flag(FLAG_ZERO, 0, flag); 
+    }
+
+    return result;
 }
 
 unsigned char shift_right_logic(const unsigned char operand, unsigned char *flag) {
@@ -558,17 +574,50 @@ unsigned char shift_right_logic(const unsigned char operand, unsigned char *flag
 }
 
 unsigned char swap(const unsigned char operand, unsigned char *flag) {
-    printf("Unimplemented swap\n");
+
+    // Swap the top and bottom halves
+    unsigned char result = ((operand & 0xF0) >> 4) | ((operand & 0x0F) << 4);
+    
+    if(result == 0) {
+        set_flag(FLAG_ZERO, 1, flag);
+    } else {
+        set_flag(FLAG_ZERO, 0, flag); 
+    }
+
+    set_flag(FLAG_SUBTRACT, 0, flag);
+    set_flag(FLAG_HALFCARRY, 0, flag);
+    set_flag(FLAG_CARRY, 0, flag);
+    
+    return result;
 }
 
 void test_bit(const unsigned char regis, const unsigned char bit, unsigned char *flag) {
-    printf("Unimplemented test bit\n");
+
+    // Read the nth bit
+    unsigned char bit_val = (regis >> bit) & 1;
+
+    if(bit_val == 0) {
+        set_flag(FLAG_ZERO, 1, flag);
+    } else {
+        set_flag(FLAG_ZERO, 0, flag); 
+    }
+
+    set_flag(FLAG_SUBTRACT, 0, flag);
+    set_flag(FLAG_HALFCARRY, 0, flag);
 }
 
-unsigned char reset_bit(const unsigned char regis, const unsigned char bit, unsigned char *flag) {
-    printf("Unimplemented reset bit\n");
+unsigned char reset_bit(const unsigned char regis, const unsigned char bit) {
+
+    unsigned char result = regis;
+    result &= ~(1 << bit);
+
+    return result;
 }
 
-unsigned char set_bit(const unsigned char regis, const unsigned char bit, unsigned char *flag) {
-    printf("Unimplemented set bit\n");
+unsigned char set_bit(const unsigned char regis, const unsigned char bit) {
+
+    unsigned char result = regis;
+    result |= 1 << bit;
+
+    return result;
 }

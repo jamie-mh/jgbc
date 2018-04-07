@@ -2025,672 +2025,672 @@ void op_bit_7_a(gbc_system *gbc) {
 
 // 0xCB80: RES 0, B (- - - -)
 void op_res_0_b(gbc_system *gbc) {
-    gbc->cpu->registers->B = reset_bit(gbc->cpu->registers->B, 0, &gbc->cpu->registers->F);
+    gbc->cpu->registers->B = reset_bit(gbc->cpu->registers->B, 0);
 }
 
 // 0xCB81: RES 0, C (- - - -)
 void op_res_0_c(gbc_system *gbc) {
-    gbc->cpu->registers->C = reset_bit(gbc->cpu->registers->C, 0, &gbc->cpu->registers->F);
+    gbc->cpu->registers->C = reset_bit(gbc->cpu->registers->C, 0);
 }
 
 // 0xCB82: RES 0, D (- - - -)
 void op_res_0_d(gbc_system *gbc) {
-    gbc->cpu->registers->D = reset_bit(gbc->cpu->registers->D, 0, &gbc->cpu->registers->F);
+    gbc->cpu->registers->D = reset_bit(gbc->cpu->registers->D, 0);
 }
 
 // 0xCB83: RES 0, E (- - - -)
 void op_res_0_e(gbc_system *gbc) {
-    gbc->cpu->registers->E = reset_bit(gbc->cpu->registers->E, 0, &gbc->cpu->registers->F);
+    gbc->cpu->registers->E = reset_bit(gbc->cpu->registers->E, 0);
 }
 
 // 0xCB84: RES 0, H (- - - -)
 void op_res_0_h(gbc_system *gbc) {
-    gbc->cpu->registers->H = reset_bit(gbc->cpu->registers->H, 0, &gbc->cpu->registers->F);
+    gbc->cpu->registers->H = reset_bit(gbc->cpu->registers->H, 0);
 }
 
 // 0xCB85: RES 0, L (- - - -)
 void op_res_0_l(gbc_system *gbc) {
-    gbc->cpu->registers->L = reset_bit(gbc->cpu->registers->L, 0, &gbc->cpu->registers->F);
+    gbc->cpu->registers->L = reset_bit(gbc->cpu->registers->L, 0);
 }
 
 // 0xCB86: RES 0, (HL) (- - - -)
 void op_res_0_hlp(gbc_system *gbc) {
     write_byte(gbc->ram,
                gbc->cpu->registers->HL,
-               reset_bit(read_byte(gbc->ram, gbc->cpu->registers->HL), 0, &gbc->cpu->registers->F));
+               reset_bit(read_byte(gbc->ram, gbc->cpu->registers->HL), 0));
 }
 
 // 0xCB87: RES 0, A (- - - -)
 void op_res_0_a(gbc_system *gbc) {
-    gbc->cpu->registers->A = reset_bit(gbc->cpu->registers->A, 0, &gbc->cpu->registers->F);
+    gbc->cpu->registers->A = reset_bit(gbc->cpu->registers->A, 0);
 }
 
 // 0xCB88: RES 1, B (- - - -)
 void op_res_1_b(gbc_system *gbc) {
-    gbc->cpu->registers->B = reset_bit(gbc->cpu->registers->B, 1, &gbc->cpu->registers->F);
+    gbc->cpu->registers->B = reset_bit(gbc->cpu->registers->B, 1);
 }
 
 // 0xCB89: RES 1, C (- - - -)
 void op_res_1_c(gbc_system *gbc) {
-    gbc->cpu->registers->C = reset_bit(gbc->cpu->registers->C, 1, &gbc->cpu->registers->F);
+    gbc->cpu->registers->C = reset_bit(gbc->cpu->registers->C, 1);
 }
 
 // 0xCB8A: RES 1, D (- - - -)
 void op_res_1_d(gbc_system *gbc) {
-    gbc->cpu->registers->D = reset_bit(gbc->cpu->registers->D, 1, &gbc->cpu->registers->F);
+    gbc->cpu->registers->D = reset_bit(gbc->cpu->registers->D, 1);
 }
 
 // 0xCB8B: RES 1, E (- - - -)
 void op_res_1_e(gbc_system *gbc) {
-    gbc->cpu->registers->E = reset_bit(gbc->cpu->registers->E, 1, &gbc->cpu->registers->F);
+    gbc->cpu->registers->E = reset_bit(gbc->cpu->registers->E, 1);
 }
 
 // 0xCB8C: RES 1, H (- - - -)
 void op_res_1_h(gbc_system *gbc) {
-    gbc->cpu->registers->H = reset_bit(gbc->cpu->registers->H, 1, &gbc->cpu->registers->F);
+    gbc->cpu->registers->H = reset_bit(gbc->cpu->registers->H, 1);
 }
 
 // 0xCB8D: RES 1, L (- - - -)
 void op_res_1_l(gbc_system *gbc) {
-    gbc->cpu->registers->L = reset_bit(gbc->cpu->registers->L, 1, &gbc->cpu->registers->F);
+    gbc->cpu->registers->L = reset_bit(gbc->cpu->registers->L, 1);
 }
 
 // 0xCB8E: RES 1, (HL) (- - - -)
 void op_res_1_hlp(gbc_system *gbc) {
     write_byte(gbc->ram,
                gbc->cpu->registers->HL,
-               reset_bit(read_byte(gbc->ram, gbc->cpu->registers->HL), 1, &gbc->cpu->registers->F));
+               reset_bit(read_byte(gbc->ram, gbc->cpu->registers->HL), 1));
 }
 
 // 0xCB8F: RES 1, A (- - - -)
 void op_res_1_a(gbc_system *gbc) {
-    gbc->cpu->registers->A = reset_bit(gbc->cpu->registers->A, 1, &gbc->cpu->registers->F);
+    gbc->cpu->registers->A = reset_bit(gbc->cpu->registers->A, 1);
 }
 
 // 0xCB90: RES 2, B (- - - -)
 void op_res_2_b(gbc_system *gbc) {
-    gbc->cpu->registers->B = reset_bit(gbc->cpu->registers->B, 2, &gbc->cpu->registers->F);
+    gbc->cpu->registers->B = reset_bit(gbc->cpu->registers->B, 2);
 }
 
 // 0xCB91: RES 2, C (- - - -)
 void op_res_2_c(gbc_system *gbc) {
-    gbc->cpu->registers->C = reset_bit(gbc->cpu->registers->C, 2, &gbc->cpu->registers->F);
+    gbc->cpu->registers->C = reset_bit(gbc->cpu->registers->C, 2);
 }
 
 // 0xCB92: RES 2, D (- - - -)
 void op_res_2_d(gbc_system *gbc) {
-    gbc->cpu->registers->D = reset_bit(gbc->cpu->registers->D, 2, &gbc->cpu->registers->F);
+    gbc->cpu->registers->D = reset_bit(gbc->cpu->registers->D, 2);
 }
 
 // 0xCB93: RES 2, E (- - - -)
 void op_res_2_e(gbc_system *gbc) {
-    gbc->cpu->registers->E = reset_bit(gbc->cpu->registers->E, 2, &gbc->cpu->registers->F);
+    gbc->cpu->registers->E = reset_bit(gbc->cpu->registers->E, 2);
 }
 
 // 0xCB94: RES 2, H (- - - -)
 void op_res_2_h(gbc_system *gbc) {
-    gbc->cpu->registers->H = reset_bit(gbc->cpu->registers->H, 2, &gbc->cpu->registers->F);
+    gbc->cpu->registers->H = reset_bit(gbc->cpu->registers->H, 2);
 }
 
 // 0xCB95: RES 2, L (- - - -)
 void op_res_2_l(gbc_system *gbc) {
-    gbc->cpu->registers->L = reset_bit(gbc->cpu->registers->L, 2, &gbc->cpu->registers->F);
+    gbc->cpu->registers->L = reset_bit(gbc->cpu->registers->L, 2);
 }
 
 // 0xCB96: RES 2, (HL) (- - - -)
 void op_res_2_hlp(gbc_system *gbc) {
     write_byte(gbc->ram,
                gbc->cpu->registers->HL,
-               reset_bit(read_byte(gbc->ram, gbc->cpu->registers->HL), 2, &gbc->cpu->registers->F));
+               reset_bit(read_byte(gbc->ram, gbc->cpu->registers->HL), 2));
 }
 
 // 0xCB97: RES 2, A (- - - -)
 void op_res_2_a(gbc_system *gbc) {
-    gbc->cpu->registers->A = reset_bit(gbc->cpu->registers->A, 2, &gbc->cpu->registers->F);
+    gbc->cpu->registers->A = reset_bit(gbc->cpu->registers->A, 2);
 }
 
 // 0xCB98: RES 3, B (- - - -)
 void op_res_3_b(gbc_system *gbc) {
-    gbc->cpu->registers->B = reset_bit(gbc->cpu->registers->B, 3, &gbc->cpu->registers->F);
+    gbc->cpu->registers->B = reset_bit(gbc->cpu->registers->B, 3);
 }
 
 // 0xCB99: RES 3, C (- - - -)
 void op_res_3_c(gbc_system *gbc) {
-    gbc->cpu->registers->C = reset_bit(gbc->cpu->registers->C, 3, &gbc->cpu->registers->F);
+    gbc->cpu->registers->C = reset_bit(gbc->cpu->registers->C, 3);
 }
 
 // 0xCB9A: RES 3, D (- - - -)
 void op_res_3_d(gbc_system *gbc) {
-    gbc->cpu->registers->D = reset_bit(gbc->cpu->registers->D, 3, &gbc->cpu->registers->F);
+    gbc->cpu->registers->D = reset_bit(gbc->cpu->registers->D, 3);
 }
 
 // 0xCB9B: RES 3, E (- - - -)
 void op_res_3_e(gbc_system *gbc) {
-    gbc->cpu->registers->E = reset_bit(gbc->cpu->registers->E, 3, &gbc->cpu->registers->F);
+    gbc->cpu->registers->E = reset_bit(gbc->cpu->registers->E, 3);
 }
 
 // 0xCB9C: RES 3, H (- - - -)
 void op_res_3_h(gbc_system *gbc) {
-    gbc->cpu->registers->H = reset_bit(gbc->cpu->registers->H, 3, &gbc->cpu->registers->F);
+    gbc->cpu->registers->H = reset_bit(gbc->cpu->registers->H, 3);
 }
 
 // 0xCB9D: RES 3, L (- - - -)
 void op_res_3_l(gbc_system *gbc) {
-    gbc->cpu->registers->L = reset_bit(gbc->cpu->registers->L, 3, &gbc->cpu->registers->F);
+    gbc->cpu->registers->L = reset_bit(gbc->cpu->registers->L, 3);
 }
 
 // 0xCB9E: RES 3, (HL) (- - - -)
 void op_res_3_hlp(gbc_system *gbc) {
     write_byte(gbc->ram,
                gbc->cpu->registers->HL,
-               reset_bit(read_byte(gbc->ram, gbc->cpu->registers->HL), 3, &gbc->cpu->registers->F));
+               reset_bit(read_byte(gbc->ram, gbc->cpu->registers->HL), 3));
 }
 
 // 0xCB9F: RES 3, A (- - - -)
 void op_res_3_a(gbc_system *gbc) {
-    gbc->cpu->registers->A = reset_bit(gbc->cpu->registers->A, 3, &gbc->cpu->registers->F);
+    gbc->cpu->registers->A = reset_bit(gbc->cpu->registers->A, 3);
 }
 
 // 0xCBA0: RES 4, B (- - - -)
 void op_res_4_b(gbc_system *gbc) {
-    gbc->cpu->registers->B = reset_bit(gbc->cpu->registers->B, 4, &gbc->cpu->registers->F);
+    gbc->cpu->registers->B = reset_bit(gbc->cpu->registers->B, 4);
 }
 
 // 0xCBA1: RES 4, C (- - - -)
 void op_res_4_c(gbc_system *gbc) {
-    gbc->cpu->registers->C = reset_bit(gbc->cpu->registers->C, 4, &gbc->cpu->registers->F);
+    gbc->cpu->registers->C = reset_bit(gbc->cpu->registers->C, 4);
 }
 
 // 0xCBA2: RES 4, D (- - - -)
 void op_res_4_d(gbc_system *gbc) {
-    gbc->cpu->registers->D = reset_bit(gbc->cpu->registers->D, 4, &gbc->cpu->registers->F);
+    gbc->cpu->registers->D = reset_bit(gbc->cpu->registers->D, 4);
 }
 
 // 0xCBA3: RES 4, E (- - - -)
 void op_res_4_e(gbc_system *gbc) {
-    gbc->cpu->registers->E = reset_bit(gbc->cpu->registers->E, 4, &gbc->cpu->registers->F);
+    gbc->cpu->registers->E = reset_bit(gbc->cpu->registers->E, 4);
 }
 
 // 0xCBA4: RES 4, H (- - - -)
 void op_res_4_h(gbc_system *gbc) {
-    gbc->cpu->registers->H = reset_bit(gbc->cpu->registers->H, 4, &gbc->cpu->registers->F);
+    gbc->cpu->registers->H = reset_bit(gbc->cpu->registers->H, 4);
 }
 
 // 0xCBA5: RES 4, L (- - - -)
 void op_res_4_l(gbc_system *gbc) {
-    gbc->cpu->registers->L = reset_bit(gbc->cpu->registers->L, 4, &gbc->cpu->registers->F);
+    gbc->cpu->registers->L = reset_bit(gbc->cpu->registers->L, 4);
 }
 
 // 0xCBA6: RES 4, (HL) (- - - -)
 void op_res_4_hlp(gbc_system *gbc) {
     write_byte(gbc->ram,
                gbc->cpu->registers->HL,
-               reset_bit(read_byte(gbc->ram, gbc->cpu->registers->HL), 4, &gbc->cpu->registers->F));
+               reset_bit(read_byte(gbc->ram, gbc->cpu->registers->HL), 4));
 }
 
 // 0xCBA7: RES 4, A (- - - -)
 void op_res_4_a(gbc_system *gbc) {
-    gbc->cpu->registers->A = reset_bit(gbc->cpu->registers->A, 4, &gbc->cpu->registers->F);
+    gbc->cpu->registers->A = reset_bit(gbc->cpu->registers->A, 4);
 }
 
 // 0xCBA8: RES 5, B (- - - -)
 void op_res_5_b(gbc_system *gbc) {
-    gbc->cpu->registers->B = reset_bit(gbc->cpu->registers->B, 5, &gbc->cpu->registers->F);
+    gbc->cpu->registers->B = reset_bit(gbc->cpu->registers->B, 5);
 }
 
 // 0xCBA9: RES 5, C (- - - -)
 void op_res_5_c(gbc_system *gbc) {
-    gbc->cpu->registers->C = reset_bit(gbc->cpu->registers->C, 5, &gbc->cpu->registers->F);
+    gbc->cpu->registers->C = reset_bit(gbc->cpu->registers->C, 5);
 }
 
 // 0xCBAA: RES 5, D (- - - -)
 void op_res_5_d(gbc_system *gbc) {
-    gbc->cpu->registers->D = reset_bit(gbc->cpu->registers->D, 5, &gbc->cpu->registers->F);
+    gbc->cpu->registers->D = reset_bit(gbc->cpu->registers->D, 5);
 }
 
 // 0xCBAB: RES 5, E (- - - -)
 void op_res_5_e(gbc_system *gbc) {
-    gbc->cpu->registers->E = reset_bit(gbc->cpu->registers->E, 5, &gbc->cpu->registers->F);
+    gbc->cpu->registers->E = reset_bit(gbc->cpu->registers->E, 5);
 }
 
 // 0xCBAC: RES 5, H (- - - -)
 void op_res_5_h(gbc_system *gbc) {
-    gbc->cpu->registers->H = reset_bit(gbc->cpu->registers->H, 5, &gbc->cpu->registers->F);
+    gbc->cpu->registers->H = reset_bit(gbc->cpu->registers->H, 5);
 }
 
 // 0xCBAD: RES 5, L (- - - -)
 void op_res_5_l(gbc_system *gbc) {
-    gbc->cpu->registers->L = reset_bit(gbc->cpu->registers->L, 5, &gbc->cpu->registers->F);
+    gbc->cpu->registers->L = reset_bit(gbc->cpu->registers->L, 5);
 }
 
 // 0xCBAE: RES 5, (HL) (- - - -)
 void op_res_5_hlp(gbc_system *gbc) {
     write_byte(gbc->ram,
                gbc->cpu->registers->HL,
-               reset_bit(read_byte(gbc->ram, gbc->cpu->registers->HL), 5, &gbc->cpu->registers->F));
+               reset_bit(read_byte(gbc->ram, gbc->cpu->registers->HL), 5));
 }
 
 // 0xCBAF: RES 5, A (- - - -)
 void op_res_5_a(gbc_system *gbc) {
-    gbc->cpu->registers->A = reset_bit(gbc->cpu->registers->A, 5, &gbc->cpu->registers->F);
+    gbc->cpu->registers->A = reset_bit(gbc->cpu->registers->A, 5);
 }
 
 // 0xCBB0: RES 6, B (- - - -)
 void op_res_6_b(gbc_system *gbc) {
-    gbc->cpu->registers->B = reset_bit(gbc->cpu->registers->B, 6, &gbc->cpu->registers->F);
+    gbc->cpu->registers->B = reset_bit(gbc->cpu->registers->B, 6);
 }
 
 // 0xCBB1: RES 6, C (- - - -)
 void op_res_6_c(gbc_system *gbc) {
-    gbc->cpu->registers->C = reset_bit(gbc->cpu->registers->C, 6, &gbc->cpu->registers->F);
+    gbc->cpu->registers->C = reset_bit(gbc->cpu->registers->C, 6);
 }
 
 // 0xCBB2: RES 6, D (- - - -)
 void op_res_6_d(gbc_system *gbc) {
-    gbc->cpu->registers->D = reset_bit(gbc->cpu->registers->D, 6, &gbc->cpu->registers->F);
+    gbc->cpu->registers->D = reset_bit(gbc->cpu->registers->D, 6);
 }
 
 // 0xCBB3: RES 6, E (- - - -)
 void op_res_6_e(gbc_system *gbc) {
-    gbc->cpu->registers->E = reset_bit(gbc->cpu->registers->E, 6, &gbc->cpu->registers->F);
+    gbc->cpu->registers->E = reset_bit(gbc->cpu->registers->E, 6);
 }
 
 // 0xCBB4: RES 6, H (- - - -)
 void op_res_6_h(gbc_system *gbc) {
-    gbc->cpu->registers->H = reset_bit(gbc->cpu->registers->H, 6, &gbc->cpu->registers->F);
+    gbc->cpu->registers->H = reset_bit(gbc->cpu->registers->H, 6);
 }
 
 // 0xCBB5: RES 6, L (- - - -)
 void op_res_6_l(gbc_system *gbc) {
-    gbc->cpu->registers->L = reset_bit(gbc->cpu->registers->L, 6, &gbc->cpu->registers->F);
+    gbc->cpu->registers->L = reset_bit(gbc->cpu->registers->L, 6);
 }
 
 // 0xCBB6: RES 6, (HL) (- - - -)
 void op_res_6_hlp(gbc_system *gbc) {
     write_byte(gbc->ram,
                gbc->cpu->registers->HL,
-               reset_bit(read_byte(gbc->ram, gbc->cpu->registers->HL), 6, &gbc->cpu->registers->F));
+               reset_bit(read_byte(gbc->ram, gbc->cpu->registers->HL), 6));
 }
 
 // 0xCBB7: RES 6, A (- - - -)
 void op_res_6_a(gbc_system *gbc) {
-    gbc->cpu->registers->A = reset_bit(gbc->cpu->registers->A, 6, &gbc->cpu->registers->F);
+    gbc->cpu->registers->A = reset_bit(gbc->cpu->registers->A, 6);
 }
 
 // 0xCBB8: RES 7, B (- - - -)
 void op_res_7_b(gbc_system *gbc) {
-    gbc->cpu->registers->B = reset_bit(gbc->cpu->registers->B, 7, &gbc->cpu->registers->F);
+    gbc->cpu->registers->B = reset_bit(gbc->cpu->registers->B, 7);
 }
 
 // 0xCBB9: RES 7, C (- - - -)
 void op_res_7_c(gbc_system *gbc) {
-    gbc->cpu->registers->C = reset_bit(gbc->cpu->registers->C, 7, &gbc->cpu->registers->F);
+    gbc->cpu->registers->C = reset_bit(gbc->cpu->registers->C, 7);
 }
 
 // 0xCBBA: RES 7, D (- - - -)
 void op_res_7_d(gbc_system *gbc) {
-    gbc->cpu->registers->D = reset_bit(gbc->cpu->registers->D, 7, &gbc->cpu->registers->F);
+    gbc->cpu->registers->D = reset_bit(gbc->cpu->registers->D, 7);
 }
 
 // 0xCBBB: RES 7, E (- - - -)
 void op_res_7_e(gbc_system *gbc) {
-    gbc->cpu->registers->E = reset_bit(gbc->cpu->registers->E, 7, &gbc->cpu->registers->F);
+    gbc->cpu->registers->E = reset_bit(gbc->cpu->registers->E, 7);
 }
 
 // 0xCBBC: RES 7, H (- - - -)
 void op_res_7_h(gbc_system *gbc) {
-    gbc->cpu->registers->H = reset_bit(gbc->cpu->registers->H, 7, &gbc->cpu->registers->F);
+    gbc->cpu->registers->H = reset_bit(gbc->cpu->registers->H, 7);
 }
 
 // 0xCBBD: RES 7, L (- - - -)
 void op_res_7_l(gbc_system *gbc) {
-    gbc->cpu->registers->L = reset_bit(gbc->cpu->registers->L, 7, &gbc->cpu->registers->F);
+    gbc->cpu->registers->L = reset_bit(gbc->cpu->registers->L, 7);
 }
 
 // 0xCBBE: RES 7, (HL) (- - - -)
 void op_res_7_hlp(gbc_system *gbc) {
     write_byte(gbc->ram,
                gbc->cpu->registers->HL,
-               reset_bit(read_byte(gbc->ram, gbc->cpu->registers->HL), 7, &gbc->cpu->registers->F));
+               reset_bit(read_byte(gbc->ram, gbc->cpu->registers->HL), 7));
 }
 
 // 0xCBBF: RES 7, A (- - - -)
 void op_res_7_a(gbc_system *gbc) {
-    gbc->cpu->registers->A = reset_bit(gbc->cpu->registers->A, 7, &gbc->cpu->registers->F);
+    gbc->cpu->registers->A = reset_bit(gbc->cpu->registers->A, 7);
 }
 
 // 0xCBC0: SET 0, B (- - - -)
 void op_set_0_b(gbc_system *gbc) {
-   gbc->cpu->registers->A = set_bit(gbc->cpu->registers->B, 0, &gbc->cpu->registers->F);
+   gbc->cpu->registers->A = set_bit(gbc->cpu->registers->B, 0);
 }
 
 // 0xCBC1: SET 0, C (- - - -)
 void op_set_0_c(gbc_system *gbc) {
-   gbc->cpu->registers->A = set_bit(gbc->cpu->registers->C, 0, &gbc->cpu->registers->F);
+   gbc->cpu->registers->A = set_bit(gbc->cpu->registers->C, 0);
 }
 
 // 0xCBC2: SET 0, D (- - - -)
 void op_set_0_d(gbc_system *gbc) {
-   gbc->cpu->registers->A = set_bit(gbc->cpu->registers->D, 0, &gbc->cpu->registers->F);
+   gbc->cpu->registers->A = set_bit(gbc->cpu->registers->D, 0);
 }
 
 // 0xCBC3: SET 0, E (- - - -)
 void op_set_0_e(gbc_system *gbc) {
-   gbc->cpu->registers->A = set_bit(gbc->cpu->registers->E, 0, &gbc->cpu->registers->F);
+   gbc->cpu->registers->A = set_bit(gbc->cpu->registers->E, 0);
 }
 
 // 0xCBC4: SET 0, H (- - - -)
 void op_set_0_h(gbc_system *gbc) {
-   gbc->cpu->registers->A = set_bit(gbc->cpu->registers->H, 0, &gbc->cpu->registers->F);
+   gbc->cpu->registers->A = set_bit(gbc->cpu->registers->H, 0);
 }
 
 // 0xCBC5: SET 0, L (- - - -)
 void op_set_0_l(gbc_system *gbc) {
-   gbc->cpu->registers->A = set_bit(gbc->cpu->registers->L, 0, &gbc->cpu->registers->F);
+   gbc->cpu->registers->A = set_bit(gbc->cpu->registers->L, 0);
 }
 
 // 0xCBC6: SET 0, (HL) (- - - -)
 void op_set_0_hlp(gbc_system *gbc) {
     write_byte(gbc->ram,
                gbc->cpu->registers->HL,
-               set_bit(read_byte(gbc->ram, gbc->cpu->registers->HL), 0, &gbc->cpu->registers->F));
+               set_bit(read_byte(gbc->ram, gbc->cpu->registers->HL), 0));
 }
 
 // 0xCBC7: SET 0, A (- - - -)
 void op_set_0_a(gbc_system *gbc) {
-    gbc->cpu->registers->A = set_bit(gbc->cpu->registers->A, 0, &gbc->cpu->registers->F);
+    gbc->cpu->registers->A = set_bit(gbc->cpu->registers->A, 0);
 }
 
 // 0xCBC8: SET 1, B (- - - -)
 void op_set_1_b(gbc_system *gbc) {
-    gbc->cpu->registers->B = set_bit(gbc->cpu->registers->A, 1, &gbc->cpu->registers->F);
+    gbc->cpu->registers->B = set_bit(gbc->cpu->registers->A, 1);
 }
 
 // 0xCBC9: SET 1, C (- - - -)
 void op_set_1_c(gbc_system *gbc) {
-    gbc->cpu->registers->C = set_bit(gbc->cpu->registers->C, 1, &gbc->cpu->registers->F);
+    gbc->cpu->registers->C = set_bit(gbc->cpu->registers->C, 1);
 }
 
 // 0xCBCA: SET 1, D (- - - -)
 void op_set_1_d(gbc_system *gbc) {
-    gbc->cpu->registers->D = set_bit(gbc->cpu->registers->D, 1, &gbc->cpu->registers->F);
+    gbc->cpu->registers->D = set_bit(gbc->cpu->registers->D, 1);
 }
 
 // 0xCBCB: SET 1, E (- - - -)
 void op_set_1_e(gbc_system *gbc) {
-    gbc->cpu->registers->E = set_bit(gbc->cpu->registers->E, 1, &gbc->cpu->registers->F);
+    gbc->cpu->registers->E = set_bit(gbc->cpu->registers->E, 1);
 }
 
 // 0xCBCC: SET 1, H (- - - -)
 void op_set_1_h(gbc_system *gbc) {
-    gbc->cpu->registers->H = set_bit(gbc->cpu->registers->H, 1, &gbc->cpu->registers->F);
+    gbc->cpu->registers->H = set_bit(gbc->cpu->registers->H, 1);
 }
 
 // 0xCBCD: SET 1, L (- - - -)
 void op_set_1_l(gbc_system *gbc) {
-    gbc->cpu->registers->L = set_bit(gbc->cpu->registers->L, 1, &gbc->cpu->registers->F);
+    gbc->cpu->registers->L = set_bit(gbc->cpu->registers->L, 1);
 }
 
 // 0xCBCE: SET 1, (HL) (- - - -)
 void op_set_1_hlp(gbc_system *gbc) {
     write_byte(gbc->ram,
                gbc->cpu->registers->HL,
-               set_bit(gbc->cpu->registers->A, 1, &gbc->cpu->registers->F));
+               set_bit(gbc->cpu->registers->A, 1));
 }
 
 // 0xCBCF: SET 1, A (- - - -)
 void op_set_1_a(gbc_system *gbc) {
-    gbc->cpu->registers->A = set_bit(gbc->cpu->registers->A, 1, &gbc->cpu->registers->F);
+    gbc->cpu->registers->A = set_bit(gbc->cpu->registers->A, 1);
 }
 
 // 0xCBD0: SET 2, B (- - - -)
 void op_set_2_b(gbc_system *gbc) {
-    gbc->cpu->registers->B = set_bit(gbc->cpu->registers->B, 2, &gbc->cpu->registers->F);
+    gbc->cpu->registers->B = set_bit(gbc->cpu->registers->B, 2);
 }
 
 // 0xCBD1: SET 2, C (- - - -)
 void op_set_2_c(gbc_system *gbc) {
-    gbc->cpu->registers->C = set_bit(gbc->cpu->registers->C, 2, &gbc->cpu->registers->F);
+    gbc->cpu->registers->C = set_bit(gbc->cpu->registers->C, 2);
 }
 
 // 0xCBD2: SET 2, D (- - - -)
 void op_set_2_d(gbc_system *gbc) {
-    gbc->cpu->registers->D = set_bit(gbc->cpu->registers->D, 2, &gbc->cpu->registers->F);
+    gbc->cpu->registers->D = set_bit(gbc->cpu->registers->D, 2);
 }
 
 // 0xCBD3: SET 2, E (- - - -)
 void op_set_2_e(gbc_system *gbc) {
-    gbc->cpu->registers->E = set_bit(gbc->cpu->registers->E, 2, &gbc->cpu->registers->F);
+    gbc->cpu->registers->E = set_bit(gbc->cpu->registers->E, 2);
 }
 
 // 0xCBD4: SET 2, H (- - - -)
 void op_set_2_h(gbc_system *gbc) {
-    gbc->cpu->registers->H = set_bit(gbc->cpu->registers->H, 2, &gbc->cpu->registers->F);
+    gbc->cpu->registers->H = set_bit(gbc->cpu->registers->H, 2);
 }
 
 // 0xCBD5: SET 2, L (- - - -)
 void op_set_2_l(gbc_system *gbc) {
-    gbc->cpu->registers->L = set_bit(gbc->cpu->registers->L, 2, &gbc->cpu->registers->F);
+    gbc->cpu->registers->L = set_bit(gbc->cpu->registers->L, 2);
 }
 
 // 0xCBD6: SET 2, (HL) (- - - -)
 void op_set_2_hlp(gbc_system *gbc) {
     write_byte(gbc->ram,
                gbc->cpu->registers->HL,
-               set_bit(gbc->cpu->registers->L, 2, &gbc->cpu->registers->F));
+               set_bit(gbc->cpu->registers->L, 2));
 }
 
 // 0xCBD7: SET 2, A (- - - -)
 void op_set_2_a(gbc_system *gbc) {
-    gbc->cpu->registers->A = set_bit(gbc->cpu->registers->A, 2, &gbc->cpu->registers->F);
+    gbc->cpu->registers->A = set_bit(gbc->cpu->registers->A, 2);
 }
 
 // 0xCBD8: SET 3, B (- - - -)
 void op_set_3_b(gbc_system *gbc) {
-    gbc->cpu->registers->B = set_bit(gbc->cpu->registers->B, 3, &gbc->cpu->registers->F);
+    gbc->cpu->registers->B = set_bit(gbc->cpu->registers->B, 3);
 }
 
 // 0xCBD9: SET 3, C (- - - -)
 void op_set_3_c(gbc_system *gbc) {
-    gbc->cpu->registers->C = set_bit(gbc->cpu->registers->C, 3, &gbc->cpu->registers->F);
+    gbc->cpu->registers->C = set_bit(gbc->cpu->registers->C, 3);
 }
 
 // 0xCBDA: SET 3, D (- - - -)
 void op_set_3_d(gbc_system *gbc) {
-    gbc->cpu->registers->D = set_bit(gbc->cpu->registers->D, 3, &gbc->cpu->registers->F);
+    gbc->cpu->registers->D = set_bit(gbc->cpu->registers->D, 3);
 }
 
 // 0xCBDB: SET 3, E (- - - -)
 void op_set_3_e(gbc_system *gbc) {
-    gbc->cpu->registers->E = set_bit(gbc->cpu->registers->E, 3, &gbc->cpu->registers->F);
+    gbc->cpu->registers->E = set_bit(gbc->cpu->registers->E, 3);
 }
 
 // 0xCBDC: SET 3, H (- - - -)
 void op_set_3_h(gbc_system *gbc) {
-    gbc->cpu->registers->H = set_bit(gbc->cpu->registers->H, 3, &gbc->cpu->registers->F);
+    gbc->cpu->registers->H = set_bit(gbc->cpu->registers->H, 3);
 }
 
 // 0xCBDD: SET 3, L (- - - -)
 void op_set_3_l(gbc_system *gbc) {
-    gbc->cpu->registers->L = set_bit(gbc->cpu->registers->L, 3, &gbc->cpu->registers->F);
+    gbc->cpu->registers->L = set_bit(gbc->cpu->registers->L, 3);
 }
 
 // 0xCBDE: SET 3, (HL) (- - - -)
 void op_set_3_hlp(gbc_system *gbc) {
     write_byte(gbc->ram,
                gbc->cpu->registers->HL,
-               set_bit(gbc->cpu->registers->A, 3, &gbc->cpu->registers->F));
+               set_bit(gbc->cpu->registers->A, 3));
 }
 
 // 0xCBDF: SET 3, A (- - - -)
 void op_set_3_a(gbc_system *gbc) {
-    gbc->cpu->registers->A = set_bit(gbc->cpu->registers->A, 3, &gbc->cpu->registers->F);
+    gbc->cpu->registers->A = set_bit(gbc->cpu->registers->A, 3);
 }
 
 // 0xCBE0: SET 4, B (- - - -)
 void op_set_4_b(gbc_system *gbc) {
-    gbc->cpu->registers->B = set_bit(gbc->cpu->registers->B, 4, &gbc->cpu->registers->F);
+    gbc->cpu->registers->B = set_bit(gbc->cpu->registers->B, 4);
 }
 
 // 0xCBE1: SET 4, C (- - - -)
 void op_set_4_c(gbc_system *gbc) {
-    gbc->cpu->registers->C = set_bit(gbc->cpu->registers->C, 4, &gbc->cpu->registers->F);
+    gbc->cpu->registers->C = set_bit(gbc->cpu->registers->C, 4);
 }
 
 // 0xCBE2: SET 4, D (- - - -)
 void op_set_4_d(gbc_system *gbc) {
-    gbc->cpu->registers->D = set_bit(gbc->cpu->registers->D, 4, &gbc->cpu->registers->F);
+    gbc->cpu->registers->D = set_bit(gbc->cpu->registers->D, 4);
 }
 
 // 0xCBE3: SET 4, E (- - - -)
 void op_set_4_e(gbc_system *gbc) {
-    gbc->cpu->registers->E = set_bit(gbc->cpu->registers->E, 4, &gbc->cpu->registers->F);
+    gbc->cpu->registers->E = set_bit(gbc->cpu->registers->E, 4);
 }
 
 // 0xCBE4: SET 4, H (- - - -)
 void op_set_4_h(gbc_system *gbc) {
-    gbc->cpu->registers->H = set_bit(gbc->cpu->registers->H, 4, &gbc->cpu->registers->F);
+    gbc->cpu->registers->H = set_bit(gbc->cpu->registers->H, 4);
 }
 
 // 0xCBE5: SET 4, L (- - - -)
 void op_set_4_l(gbc_system *gbc) {
-    gbc->cpu->registers->L = set_bit(gbc->cpu->registers->L, 4, &gbc->cpu->registers->F);
+    gbc->cpu->registers->L = set_bit(gbc->cpu->registers->L, 4);
 }
 
 // 0xCBE6: SET 4, (HL) (- - - -)
 void op_set_4_hlp(gbc_system *gbc) {
     write_byte(gbc->ram,
                gbc->cpu->registers->HL,
-               set_bit(gbc->cpu->registers->L, 4, &gbc->cpu->registers->F));
+               set_bit(gbc->cpu->registers->L, 4));
 }
 
 // 0xCBE7: SET 4, A (- - - -)
 void op_set_4_a(gbc_system *gbc) {
-    gbc->cpu->registers->A = set_bit(gbc->cpu->registers->A, 4, &gbc->cpu->registers->F);
+    gbc->cpu->registers->A = set_bit(gbc->cpu->registers->A, 4);
 }
 
 // 0xCBE8: SET 5, B (- - - -)
 void op_set_5_b(gbc_system *gbc) {
-    gbc->cpu->registers->B = set_bit(gbc->cpu->registers->B, 5, &gbc->cpu->registers->F);
+    gbc->cpu->registers->B = set_bit(gbc->cpu->registers->B, 5);
 }
 
 // 0xCBE9: SET 5, C (- - - -)
 void op_set_5_c(gbc_system *gbc) {
-    gbc->cpu->registers->C = set_bit(gbc->cpu->registers->C, 5, &gbc->cpu->registers->F);
+    gbc->cpu->registers->C = set_bit(gbc->cpu->registers->C, 5);
 }
 
 // 0xCBEA: SET 5, D (- - - -)
 void op_set_5_d(gbc_system *gbc) {
-    gbc->cpu->registers->D = set_bit(gbc->cpu->registers->D, 5, &gbc->cpu->registers->F);
+    gbc->cpu->registers->D = set_bit(gbc->cpu->registers->D, 5);
 }
 
 // 0xCBEB: SET 5, E (- - - -)
 void op_set_5_e(gbc_system *gbc) {
-    gbc->cpu->registers->E = set_bit(gbc->cpu->registers->E, 5, &gbc->cpu->registers->F);
+    gbc->cpu->registers->E = set_bit(gbc->cpu->registers->E, 5);
 }
 
 // 0xCBEC: SET 5, H (- - - -)
 void op_set_5_h(gbc_system *gbc) {
-    gbc->cpu->registers->H = set_bit(gbc->cpu->registers->H, 5, &gbc->cpu->registers->F);
+    gbc->cpu->registers->H = set_bit(gbc->cpu->registers->H, 5);
 }
 
 // 0xCBED: SET 5, L (- - - -)
 void op_set_5_l(gbc_system *gbc) {
-    gbc->cpu->registers->L = set_bit(gbc->cpu->registers->L, 5, &gbc->cpu->registers->F);
+    gbc->cpu->registers->L = set_bit(gbc->cpu->registers->L, 5);
 }
 
 // 0xCBEE: SET 5, (HL) (- - - -)
 void op_set_5_hlp(gbc_system *gbc) {
     write_byte(gbc->ram,
                gbc->cpu->registers->HL,
-               set_bit(gbc->cpu->registers->L, 5, &gbc->cpu->registers->F));
+               set_bit(gbc->cpu->registers->L, 5));
 }
 
 // 0xCBEF: SET 5, A (- - - -)
 void op_set_5_a(gbc_system *gbc) {
-    gbc->cpu->registers->A = set_bit(gbc->cpu->registers->A, 5, &gbc->cpu->registers->F);
+    gbc->cpu->registers->A = set_bit(gbc->cpu->registers->A, 5);
 }
 
 // 0xCBF0: SET 6, B (- - - -)
 void op_set_6_b(gbc_system *gbc) {
-    gbc->cpu->registers->B = set_bit(gbc->cpu->registers->B, 6, &gbc->cpu->registers->F);
+    gbc->cpu->registers->B = set_bit(gbc->cpu->registers->B, 6);
 }
 
 // 0xCBF1: SET 6, C (- - - -)
 void op_set_6_c(gbc_system *gbc) {
-    gbc->cpu->registers->C = set_bit(gbc->cpu->registers->C, 6, &gbc->cpu->registers->F);
+    gbc->cpu->registers->C = set_bit(gbc->cpu->registers->C, 6);
 }
 
 // 0xCBF2: SET 6, D (- - - -)
 void op_set_6_d(gbc_system *gbc) {
-    gbc->cpu->registers->D = set_bit(gbc->cpu->registers->D, 6, &gbc->cpu->registers->F);
+    gbc->cpu->registers->D = set_bit(gbc->cpu->registers->D, 6);
 }
 
 // 0xCBF3: SET 6, E (- - - -)
 void op_set_6_e(gbc_system *gbc) {
-    gbc->cpu->registers->E = set_bit(gbc->cpu->registers->E, 6, &gbc->cpu->registers->F);
+    gbc->cpu->registers->E = set_bit(gbc->cpu->registers->E, 6);
 }
 
 // 0xCBF4: SET 6, H (- - - -)
 void op_set_6_h(gbc_system *gbc) {
-    gbc->cpu->registers->H = set_bit(gbc->cpu->registers->H, 6, &gbc->cpu->registers->F);
+    gbc->cpu->registers->H = set_bit(gbc->cpu->registers->H, 6);
 }
 
 // 0xCBF5: SET 6, L (- - - -)
 void op_set_6_l(gbc_system *gbc) {
-    gbc->cpu->registers->L = set_bit(gbc->cpu->registers->L, 6, &gbc->cpu->registers->F);
+    gbc->cpu->registers->L = set_bit(gbc->cpu->registers->L, 6);
 }
 
 // 0xCBF6: SET 6, (HL) (- - - -)
 void op_set_6_hlp(gbc_system *gbc) {
     write_byte(gbc->ram,
                gbc->cpu->registers->HL,
-               set_bit(gbc->cpu->registers->A, 6, &gbc->cpu->registers->F));
+               set_bit(gbc->cpu->registers->A, 6));
 }
 
 // 0xCBF7: SET 6, A (- - - -)
 void op_set_6_a(gbc_system *gbc) {
-    gbc->cpu->registers->A = set_bit(gbc->cpu->registers->A, 6, &gbc->cpu->registers->F);
+    gbc->cpu->registers->A = set_bit(gbc->cpu->registers->A, 6);
 }
 
 // 0xCBF8: SET 7, B (- - - -)
 void op_set_7_b(gbc_system *gbc) {
-    gbc->cpu->registers->B = set_bit(gbc->cpu->registers->B, 7, &gbc->cpu->registers->F);
+    gbc->cpu->registers->B = set_bit(gbc->cpu->registers->B, 7);
 }
 
 // 0xCBF9: SET 7, C (- - - -)
 void op_set_7_c(gbc_system *gbc) {
-    gbc->cpu->registers->C = set_bit(gbc->cpu->registers->C, 7, &gbc->cpu->registers->F);
+    gbc->cpu->registers->C = set_bit(gbc->cpu->registers->C, 7);
 }
 
 // 0xCBFA: SET 7, D (- - - -)
 void op_set_7_d(gbc_system *gbc) {
-    gbc->cpu->registers->D = set_bit(gbc->cpu->registers->D, 7, &gbc->cpu->registers->F);
+    gbc->cpu->registers->D = set_bit(gbc->cpu->registers->D, 7);
 }
 
 // 0xCBFB: SET 7, E (- - - -)
 void op_set_7_e(gbc_system *gbc) {
-    gbc->cpu->registers->E = set_bit(gbc->cpu->registers->E, 7, &gbc->cpu->registers->F);
+    gbc->cpu->registers->E = set_bit(gbc->cpu->registers->E, 7);
 }
 
 // 0xCBFC: SET 7, H (- - - -)
 void op_set_7_h(gbc_system *gbc) {
-    gbc->cpu->registers->H = set_bit(gbc->cpu->registers->H, 7, &gbc->cpu->registers->F);
+    gbc->cpu->registers->H = set_bit(gbc->cpu->registers->H, 7);
 }
 
 // 0xCBFD: SET 7, L (- - - -)
 void op_set_7_l(gbc_system *gbc) {
-    gbc->cpu->registers->L = set_bit(gbc->cpu->registers->L, 7, &gbc->cpu->registers->F);
+    gbc->cpu->registers->L = set_bit(gbc->cpu->registers->L, 7);
 }
 
 // 0xCBFE: SET 7, (HL) (- - - -)
 void op_set_7_hlp(gbc_system *gbc) {
     write_byte(gbc->ram, 
                gbc->cpu->registers->HL,
-               set_bit(gbc->cpu->registers->A, 7, &gbc->cpu->registers->F));
+               set_bit(gbc->cpu->registers->A, 7));
 }
 
 // 0xCBFF: SET 7, A (- - - -)
 void op_set_7_a(gbc_system *gbc) {
-    gbc->cpu->registers->A = set_bit(gbc->cpu->registers->A, 7, &gbc->cpu->registers->F);
+    gbc->cpu->registers->A = set_bit(gbc->cpu->registers->A, 7);
 }
