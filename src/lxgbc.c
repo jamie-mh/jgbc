@@ -85,7 +85,7 @@ int main(int argc, char **argv) {
             }
 
             if(gbc->cpu->is_halted == 0) {
-                gbc->cpu->run_for = 0;
+                gbc->cpu->run_for = gbc->cpu->clock;                
             }
         }
         // In normal mode, respect clock cycles
@@ -118,6 +118,8 @@ static char get_cl_arguments(int argc, char **argv, cmd_options *cmd) {
 
     int option;
     int f_flag, s_flag = 0;
+
+    cmd->debug = 0;
 
     while((option = getopt(argc, argv, "f:gs:")) != -1) {
         switch (option) {

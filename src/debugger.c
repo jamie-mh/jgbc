@@ -4,9 +4,9 @@
 #include "cpu.h"
 #include "ppu.h"
 
-static char add_breakpoint(const unsigned short, gbc_debugger *);
-static char remove_breakpoint(const unsigned short, gbc_debugger *);
-static gbc_breakpoint *find_breakpoint(const unsigned short, gbc_debugger *);
+static char add_breakpoint(const unsigned int, gbc_debugger *);
+static char remove_breakpoint(const unsigned int, gbc_debugger *);
+static gbc_breakpoint *find_breakpoint(const unsigned int, gbc_debugger *);
 static char dump_ram(gbc_ram *, const char *);
 static void print_debug(gbc_system *);
 
@@ -117,59 +117,59 @@ static debug_box *dbox_regis(gbc_system *gbc) {
 
     // TODO: Replace this at some point
     sprintf(line, "A : %02X", gbc->cpu->registers->A);
-    box->rows[0] = malloc(sizeof(char) * strlen(line));
+    box->rows[0] = malloc(sizeof(char) * (strlen(line) + 1));
     strcpy(box->rows[0], line);
 
     sprintf(line, "B : %02X", gbc->cpu->registers->B);
-    box->rows[1] = malloc(sizeof(char) * strlen(line));
+    box->rows[1] = malloc(sizeof(char) * (strlen(line) + 1));
     strcpy(box->rows[1], line);
 
     sprintf(line, "C : %02X", gbc->cpu->registers->C);
-    box->rows[2] = malloc(sizeof(char) * strlen(line));
+    box->rows[2] = malloc(sizeof(char) * (strlen(line) + 1));
     strcpy(box->rows[2], line);
 
     sprintf(line, "D : %02X", gbc->cpu->registers->D);
-    box->rows[3] = malloc(sizeof(char) * strlen(line));
+    box->rows[3] = malloc(sizeof(char) * (strlen(line) + 1));
     strcpy(box->rows[3], line);
 
     sprintf(line, "E : %02X", gbc->cpu->registers->E);
-    box->rows[4] = malloc(sizeof(char) * strlen(line));
+    box->rows[4] = malloc(sizeof(char) * (strlen(line) + 1));
     strcpy(box->rows[4], line);
 
     sprintf(line, "H : %02X", gbc->cpu->registers->H);
-    box->rows[5] = malloc(sizeof(char) * strlen(line));
+    box->rows[5] = malloc(sizeof(char) * (strlen(line) + 1));
     strcpy(box->rows[5], line);
 
     sprintf(line, "L : %02X", gbc->cpu->registers->L);
-    box->rows[6] = malloc(sizeof(char) * strlen(line));
+    box->rows[6] = malloc(sizeof(char) * (strlen(line) + 1));
     strcpy(box->rows[6], line);
 
     sprintf(line, "AF: %04X", gbc->cpu->registers->AF);
-    box->rows[7] = malloc(sizeof(char) * strlen(line));
+    box->rows[7] = malloc(sizeof(char) * (strlen(line) + 1));
     strcpy(box->rows[7], line);
 
     sprintf(line, "BC: %04X", gbc->cpu->registers->BC);
-    box->rows[8] = malloc(sizeof(char) * strlen(line));
+    box->rows[8] = malloc(sizeof(char) * (strlen(line) + 1));
     strcpy(box->rows[8], line);
 
     sprintf(line, "DE: %04X", gbc->cpu->registers->DE);
-    box->rows[9] = malloc(sizeof(char) * strlen(line));
+    box->rows[9] = malloc(sizeof(char) * (strlen(line) + 1));
     strcpy(box->rows[9], line);
 
     sprintf(line, "HL: %04X", gbc->cpu->registers->HL);
-    box->rows[10] = malloc(sizeof(char) * strlen(line));
+    box->rows[10] = malloc(sizeof(char) * (strlen(line) + 1));
     strcpy(box->rows[10], line);
 
     sprintf(line, "SP: %04X", gbc->cpu->registers->SP);
-    box->rows[11] = malloc(sizeof(char) * strlen(line));
+    box->rows[11] = malloc(sizeof(char) * (strlen(line) + 1));
     strcpy(box->rows[11], line);
     
     sprintf(line, "PC: %04X", gbc->cpu->registers->PC);
-    box->rows[12] = malloc(sizeof(char) * strlen(line));
+    box->rows[12] = malloc(sizeof(char) * (strlen(line) + 1));
     strcpy(box->rows[12], line);
 
     sprintf(line, "IME: %d", gbc->cpu->registers->IME);
-    box->rows[13] = malloc(sizeof(char) * strlen(line));
+    box->rows[13] = malloc(sizeof(char) * (strlen(line) + 1));
     strcpy(box->rows[13], line);
 
     // Free memory
@@ -192,7 +192,7 @@ static debug_box *dbox_flags(gbc_system *gbc) {
     // Allocate memory for 4 rows
     int i;
     for(i = 0; i < 4; i++) {
-        box->rows[i] = malloc(sizeof(char) * DBOX_FLAGS_WIDTH);
+        box->rows[i] = malloc(sizeof(char) * (DBOX_FLAGS_WIDTH + 1));
     } 
     
     // Create the rows
@@ -218,7 +218,7 @@ static debug_box *dbox_info(gbc_system *gbc) {
     // Allocate memory for the rows
     int i;
     for(i = 0; i < DBOX_INFO_ROWS; i++) {
-        box->rows[i] = malloc(sizeof(char) * DBOX_INFO_WIDTH);
+        box->rows[i] = malloc(sizeof(char) * (DBOX_INFO_WIDTH + 1));
     }
 
     // Write some information
@@ -307,12 +307,6 @@ void debug(gbc_system *gbc) {
         }
     }
 
-    // If we need to skip some instructions
-    if(gbc->debugger->skip_instr > 0) {
-        gbc->debugger->skip_instr--;
-        return;
-    }
-
     int command;
 
     // Get a command from the user
@@ -327,35 +321,38 @@ void debug(gbc_system *gbc) {
 
             // Help command
             case 'h':
-                printf("\nAvailable Commands:\n(1-9): Run X instructions\nb: Create a breakpoint\nd: Remove a breakpoint\nl: List all breakpoints\nr: Run\np: Print debug information\ns: Read byte in memory\nf: Dump RAM to a file\nq: Quit\n");
+                printf("\nAvailable Commands:\nn: Run current instruction\nb: Create a breakpoint\nd: Remove a breakpoint\nl: List all breakpoints\nr: Run\np: Print debug information\ns: Read byte in memory\nf: Dump RAM to a file\nq: Quit\n");
                 continue;
 
-            // Number input to run for X instructions before stopping
-            case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
-
-                // Subtract '0' to get the digit
-                gbc->debugger->skip_instr = command - '0' - 1;
+            // Run current instruction
+            case 'n':
                 gbc->debugger->print = 1;
                 return;
 
             // Add breakpoint command
             case 'b': {
-                unsigned short address;
+                unsigned int address = 0x101;
                 printf("\nNew breakpoint\nAddress (HEX) 0x");
                 scanf("%x", &address);
 
-                // Add the breakpoint 
-                if(add_breakpoint(address, gbc->debugger)) {
-                    printf(CGRN "Breakpoint added at 0x%04X\n" CNRM, address);
+                if(address < 0xFFFF) {
+                    
+                    // Add the breakpoint 
+                    if(add_breakpoint(address, gbc->debugger)) {
+                        printf(CGRN "Breakpoint added at 0x%04X\n" CNRM, address);
+                    } else {
+                        printf(CRED "Breakpoint already exists\n" CNRM);
+                    }
                 } else {
-                    printf(CRED "Breakpoint already exists\n" CNRM);
+                    printf(CRED "Out of range\n" CNRM);
                 }
+
                 continue;
             }
 
             // Remove breakpoint
             case 'd': {
-                unsigned short address;
+                unsigned int address;
                 printf("\nRemove breakpoint\nAddress (HEX) 0x");
                 scanf("%x", &address);
 
@@ -393,11 +390,16 @@ void debug(gbc_system *gbc) {
 
             // Read value at address in memory
             case 's': {
-                unsigned short address;
+                unsigned int address;
                 printf("\nRead byte\nAddress (HEX) 0x");
                 scanf("%x", &address);
 
-                printf("Result: 0x%02X\n\n", read_byte(gbc->ram, address));
+                if(address < 0xFFFF) {
+                    printf("Result: 0x%02X\n\n", read_byte(gbc->ram, address));
+                } else {
+                    printf(CRED "Out of range\n" CNRM);
+                }
+
                 continue;
             }
 
@@ -431,15 +433,15 @@ void init_debugger(gbc_debugger *debugger) {
     
     // Set the defaults
     debugger->breakpoint_head = NULL;
-    debugger->skip_instr = 0;
     debugger->running = 0;
+    debugger->print = 0;
 
     // Start the prompt
     printf("(dbg) ");
 }
 
 // Adds a breakpoint element to the breakpoint linked list
-static char add_breakpoint(const unsigned short address, gbc_debugger *debugger) {
+static char add_breakpoint(const unsigned int address, gbc_debugger *debugger) {
 
     // Check for duplicate breakpoints
     gbc_breakpoint *found = find_breakpoint(address, debugger);
@@ -447,7 +449,7 @@ static char add_breakpoint(const unsigned short address, gbc_debugger *debugger)
     if(found == NULL) {
         
         // Create a new breakpoint element
-        gbc_breakpoint *new = malloc(sizeof(*new));
+        gbc_breakpoint *new = malloc(sizeof(gbc_breakpoint));
         new->address = address;
 
         // If there are no breakpoints, set it as the head
@@ -467,7 +469,7 @@ static char add_breakpoint(const unsigned short address, gbc_debugger *debugger)
 }
 
 // Removes a breakpoint element from the breakpoint linked list
-static char remove_breakpoint(const unsigned short address, gbc_debugger *debugger) {
+static char remove_breakpoint(const unsigned int address, gbc_debugger *debugger) {
 
     // Remove the item from the linked list
     gbc_breakpoint *prev = NULL;
@@ -511,7 +513,7 @@ static char remove_breakpoint(const unsigned short address, gbc_debugger *debugg
 }
 
 // Returns a pointer to the breakpoint element with the specifed address in the breakpoint linked list provided it exists
-static gbc_breakpoint *find_breakpoint(const unsigned short address, gbc_debugger *debugger) {
+static gbc_breakpoint *find_breakpoint(const unsigned int address, gbc_debugger *debugger) {
 
     if(debugger->breakpoint_head != NULL) {
 

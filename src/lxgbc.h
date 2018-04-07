@@ -107,13 +107,12 @@ typedef struct gbc_rom {
 } gbc_rom;
 
 typedef struct gbc_breakpoint {
-    unsigned short address;
+    unsigned int address;
     struct gbc_breakpoint *next;
 } gbc_breakpoint;
 
 typedef struct gbc_debugger {
     gbc_breakpoint *breakpoint_head;
-    char skip_instr;
     char running;
     char print;
 } gbc_debugger;

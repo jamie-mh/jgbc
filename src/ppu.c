@@ -40,9 +40,9 @@ void init_ppu(gbc_ppu *ppu, const char scale) {
         SCREEN_WIDTH,
         SCREEN_HEIGHT
     );
-
-    // Allocate memory for the framebuffer (4 bytes per pixel)
-    ppu->framebuffer = calloc(SCREEN_WIDTH * SCREEN_HEIGHT * 4, sizeof(char));
+    
+    // Allocate memory for the framebuffer
+    ppu->framebuffer = calloc(SCREEN_WIDTH * SCREEN_HEIGHT * 8, sizeof(char));
 
     // Set the rendering scale
     SDL_RenderSetScale(ppu->renderer, scale, scale);

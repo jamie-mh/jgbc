@@ -104,7 +104,7 @@ You can type a command after the ```(dbg)``` prompt, just hit enter afterwards.
 
 ```
 Available Commands:
-(1-9): Run X instructions
+n: Run current instruction
 b: Create a breakpoint
 d: Remove a breakpoint
 l: List all breakpoints
