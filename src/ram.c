@@ -121,7 +121,7 @@ unsigned short read_short(gbc_ram *ram, const unsigned short address) {
 
 // Writes a byte in memory at the address
 void write_byte(gbc_ram *ram, const unsigned short address, const unsigned char value) {
-    
+
     // If the memory is unusable, do nothing 
     if(address >= 0xFEA0 && address <= 0xFEFF) {
         return; 

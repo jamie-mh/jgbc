@@ -3,7 +3,7 @@
 #define VRAM_SIZE 8192
 #define EXTRAM_BANK_SIZE 8192
 #define WRAM_BANK_SIZE 4096
-#define OAM_SIZE 159
+#define OAM_SIZE 160
 #define IO_SIZE 128
 #define HRAM_SIZE 128
 
