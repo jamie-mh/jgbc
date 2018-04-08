@@ -1,5 +1,7 @@
 #pragma once
 
+#define DEBUG_PROMPT "(dbg) "
+
 #define DBOX_COUNT 4
 
 #define DEBUG_WIDTH 64
@@ -18,12 +20,12 @@
 
 #define RAM_DUMP_FILENAME_SIZE 128
 
-#ifndef max
-    #define max(a, b) (((a) > (b)) ? (a) : (b))
+#ifndef MAX
+    #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 
-#ifndef min
-    #define min(a, b) (((a) < (b)) ? (a) : (b))
+#ifndef MIN
+    #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #endif
 
 typedef struct debug_box {

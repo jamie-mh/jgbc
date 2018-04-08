@@ -24,6 +24,7 @@ int main(int argc, char **argv) {
 
     init_system(gbc, cmd);
     gbc->is_running = 1;
+    free(cmd);
 
     SDL_Event event;
 
@@ -42,9 +43,17 @@ int main(int argc, char **argv) {
         if(gbc->debugger->is_debugging) {
 
             debug(gbc);
+            int clocks;
+
+            // Still run the ppu when the cpu is halted
+            if(gbc->cpu->is_halted) {
+                clocks = 1;
+            } else {
+                clocks = gbc->cpu->run_for;
+            }
 
             // Run as many ppu clocks as cpu clocks
-            for(int i = 0; i < gbc->cpu->run_for; i++) {
+            for(int i = 0; i < clocks; i++) {
                 if(lcd_on) {
                     ppu_do_clock(gbc);
                 }
@@ -68,6 +77,9 @@ int main(int argc, char **argv) {
         if(SDL_PollEvent(&event)) {
             handle_event(event, gbc);
         }
+
+        // Temp: Simulate no buttons pressed
+        write_byte(gbc->ram, 0xFF00, 0xEF);
     }
 
     SDL_Quit();
@@ -106,7 +118,7 @@ static void init_system(gbc_system *gbc, cmd_options *cmd) {
         printf(CGRN LOGO CNRM);
         print_rom_info(gbc->rom);
         printf("\nLXGBC DEBUGGER RUNNING\nType 'h' for information on the available commands.\n");
-        printf("(dbg) ");
+        printf(DEBUG_PROMPT);
 
         gbc->debugger->is_debugging = 1;
     }
@@ -124,7 +136,11 @@ static void handle_event(SDL_Event event, gbc_system *gbc) {
         case SDL_KEYUP:
             if(event.key.keysym.sym == SDLK_ESCAPE) {
                 gbc->debugger->is_running = 0;
-                gbc->debugger->is_debugging = 1;
+
+                if(gbc->debugger->is_debugging == 0) {
+                    gbc->debugger->is_debugging = 1;
+                    printf(DEBUG_PROMPT);
+                }
             }
 
             break;
@@ -138,7 +154,6 @@ static char get_cl_arguments(int argc, char **argv, cmd_options *cmd) {
     int f_flag, s_flag = 0;
 
     cmd->debug = 0;
-    cmd->rom_path = malloc(sizeof(char) * ROM_PATH_LENGTH);
 
     while((option = getopt(argc, argv, "f:gs:")) != -1) {
         switch (option) {

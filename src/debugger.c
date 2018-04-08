@@ -50,7 +50,7 @@ static debug_box *dbox_instr(gbc_system *gbc) {
         }
 
         // Check the we aren't outside the highest memory address
-        if(pointer >= 0xFFFF) {
+        if(pointer > 0xFFFF) {
             strcat(box->rows[i], "OUT OF RANGE");
             pointer++;
         }
@@ -62,15 +62,18 @@ static debug_box *dbox_instr(gbc_system *gbc) {
         // Process opcodes as usual if not
         else {
 
-            // Read byte at the pointer and find the instruction
-            gbc_instruction instr = find_instr(read_byte(gbc->ram, pointer), gbc);
+            unsigned char opcode = read_byte(gbc->ram, pointer);
+
+            // Find the instruction
+            gbc_instruction instr = find_instr(opcode, pointer, gbc);
+            unsigned char length = instr.length;
 
             // Read the operand and format the string
-            if(instr.length > 1) {
+            if(length > 1 && opcode != 0xCB) {
 
                 // Read the operand based on the length and increment the pointer
                 unsigned short operand = 0;
-                if(instr.length == 2) {
+                if(length == 2) {
                     operand = read_byte(gbc->ram, pointer + 1);
 
                     // If the operand is signed, get the two's complement
@@ -78,24 +81,23 @@ static debug_box *dbox_instr(gbc_system *gbc) {
                         operand = (~(operand - 1)) & 0x00FF;
                     }
 
-                    pointer += 2;
-                } else if(instr.length == 3) {
+                } else if(length == 3) {
                     operand = read_short(gbc->ram, pointer + 1);
-                    pointer += 3;
                 }
 
                 // Format an copy the string
                 char *row = malloc(sizeof(*row) * DBOX_INSTR_WIDTH);
                 sprintf(row, instr.disassembly, operand);
-
                 strcat(box->rows[i], row);  
             }
-            // If there is no operand
+            // If there is no operand (or CB opcode which has no operand)
             else {
+
                 // Copy the disassembly and increment the pointer
                 strcat(box->rows[i], instr.disassembly);
-                pointer++;
             }
+
+            pointer += instr.length;
         }
     }
 
@@ -225,9 +227,16 @@ static debug_box *dbox_info(gbc_system *gbc) {
         box->rows[i] = malloc(sizeof(char) * (DBOX_INFO_WIDTH + 1));
     }
 
+    unsigned short opcode = read_byte(gbc->ram, gbc->cpu->registers->PC);
+
+    // CB prefix
+    if(opcode == 0xCB) {
+        opcode = 0xCB00 | read_byte(gbc->ram, gbc->cpu->registers->PC + 1);
+    }
+
     // Write some information
     strcpy(box->rows[0], "OPCODE:");
-    sprintf(box->rows[1], "-> %02X", read_byte(gbc->ram, gbc->cpu->registers->PC));
+    sprintf(box->rows[1], "-> %04X", opcode);
     strcpy(box->rows[2], "LY:");
     sprintf(box->rows[3], "-> %02X", read_byte(gbc->ram, LY));
 
@@ -260,7 +269,7 @@ static void print_debug(gbc_system *gbc) {
         debug_box *box_two = boxes[i + 1];
 
         print_separator(box_one->width + box_two->width + 8);
-        int height = max(box_one->height, box_two->height);
+        int height = MAX(box_one->height, box_two->height);
 
         int j;
         for(j = 0; j < height; j++) {
@@ -339,7 +348,7 @@ void debug(gbc_system *gbc) {
                 printf("\nNew breakpoint\nAddress (HEX) 0x");
                 scanf("%x", &address);
 
-                if(address < 0xFFFF) {
+                if(address <= 0xFFFF) {
                     
                     // Add the breakpoint 
                     if(add_breakpoint(address, gbc->debugger)) {
@@ -398,7 +407,7 @@ void debug(gbc_system *gbc) {
                 printf("\nRead byte\nAddress (HEX) 0x");
                 scanf("%x", &address);
 
-                if(address < 0xFFFF) {
+                if(address <= 0xFFFF) {
                     printf("Result: 0x%02X\n\n", read_byte(gbc->ram, address));
                 } else {
                     printf(CRED "Out of range\n" CNRM);
@@ -428,7 +437,7 @@ void debug(gbc_system *gbc) {
                 exit(0);
         }
 
-        printf("(dbg) ");
+        printf(DEBUG_PROMPT);
     }
 }
 

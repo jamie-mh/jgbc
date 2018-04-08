@@ -34,11 +34,11 @@ void init_cpu(gbc_cpu *cpu) {
 }
 
 // Returns an instruction struct of the provided opcode
-gbc_instruction find_instr(const unsigned char opcode, gbc_system *gbc) {
+gbc_instruction find_instr(const unsigned char opcode, const unsigned short address, gbc_system *gbc) {
 
     // If the opcode has the CB prefix
     if(opcode == 0xCB) {
-        unsigned char next_opcode = read_byte(gbc->ram, gbc->cpu->registers->PC + 1);
+        unsigned char next_opcode = read_byte(gbc->ram, address + 1);
         return cb_instructions[next_opcode];
     } 
     // Standard instruction
@@ -112,7 +112,7 @@ static gbc_instruction get_curr_instr(gbc_system *gbc) {
     unsigned char opcode = read_byte(gbc->ram, gbc->cpu->registers->PC);
 
     // Get the instruction structure
-    return find_instr(opcode, gbc);
+    return find_instr(opcode, gbc->cpu->registers->PC, gbc);
 }
 
 // Returns the bit no of the specified flag in the F register

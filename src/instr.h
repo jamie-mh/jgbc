@@ -1,4 +1,5 @@
 #pragma once
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 void op_ld_a_d(gbc_system *);
 void op_nop(gbc_system *);

@@ -92,7 +92,9 @@ Don't try and run anything other than GB roms, it will crash (duh).
 
 ### Using the debugger
 
-When running LXGBC, adding the ``` -g ``` flag will start the debugger and allow you to step through the roms. You will be greeted with this:
+When running LXGBC, adding the ``` -g ``` flag will start the debugger and allow you to step through the roms. 
+You can also enter the debugger by pressing the escape key on your keyboard when a rom is running.
+You will be greeted with this:
 
 ``` 
     __   _  ____________  ______

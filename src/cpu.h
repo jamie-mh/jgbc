@@ -30,7 +30,7 @@ typedef struct gbc_instruction {
 } gbc_instruction;
 
 void init_cpu(gbc_cpu *);
-gbc_instruction find_instr(const unsigned char, gbc_system *);
+gbc_instruction find_instr(const unsigned char, const unsigned short, gbc_system *);
 void cpu_do_clock(gbc_system *);
 
 void set_flag(const char, const unsigned char, unsigned char *);
