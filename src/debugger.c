@@ -172,6 +172,10 @@ static debug_box *dbox_regis(gbc_system *gbc) {
     box->rows[13] = malloc(sizeof(char) * (strlen(line) + 1));
     strcpy(box->rows[13], line);
 
+    sprintf(line, "HALT: %d", gbc->cpu->is_halted);
+    box->rows[14] = malloc(sizeof(char) * (strlen(line) + 1));
+    strcpy(box->rows[14], line);
+
     // Free memory
     free(line);
 
@@ -293,13 +297,13 @@ static void print_debug(gbc_system *gbc) {
 void debug(gbc_system *gbc) {
 
     // If the emulator is running
-    if(gbc->debugger->running) {
+    if(gbc->debugger->is_running) {
 
         gbc_breakpoint *bp = find_breakpoint(gbc->cpu->registers->PC, gbc->debugger);
 
         // If there is a breakpoint at this instruction
         if(bp) {
-            gbc->debugger->running = 0;
+            gbc->debugger->is_running = 0;
             print_debug(gbc);
             printf(CYEL "Stopped at breakpoint 0x%04X\n" CNRM, bp->address);
         } else {
@@ -312,9 +316,9 @@ void debug(gbc_system *gbc) {
     // Get a command from the user
     while((command = getchar()) != EOF) {
         
-        if(gbc->debugger->print) {
+        if(gbc->debugger->should_print) {
             print_debug(gbc);
-            gbc->debugger->print = 0;
+            gbc->debugger->should_print = 0;
         }
     
         switch(command) {
@@ -326,7 +330,7 @@ void debug(gbc_system *gbc) {
 
             // Run current instruction
             case 'n':
-                gbc->debugger->print = 1;
+                gbc->debugger->should_print = 1;
                 return;
 
             // Add breakpoint command
@@ -380,7 +384,7 @@ void debug(gbc_system *gbc) {
 
             // Run command
             case 'r':
-                gbc->debugger->running = 1;
+                gbc->debugger->is_running = 1;
                 return;
             
             // Print debug information
@@ -433,11 +437,9 @@ void init_debugger(gbc_debugger *debugger) {
     
     // Set the defaults
     debugger->breakpoint_head = NULL;
-    debugger->running = 0;
-    debugger->print = 0;
-
-    // Start the prompt
-    printf("(dbg) ");
+    debugger->is_debugging = 0;
+    debugger->is_running = 0;
+    debugger->should_print = 0;
 }
 
 // Adds a breakpoint element to the breakpoint linked list

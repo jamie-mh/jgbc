@@ -1,5 +1,6 @@
 #pragma once
 
+#define TITLE_LENGTH 16
 #define ROM_BANK_SIZE 16384
 
 #define ROM_HEADER_START 0x100

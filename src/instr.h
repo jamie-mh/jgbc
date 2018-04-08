@@ -223,7 +223,7 @@ void op_sbc_a_d8(gbc_system *, unsigned char);
 void op_rst_18h(gbc_system *);
 void op_ldh_a8p_a(gbc_system *, unsigned char);
 void op_pop_hl(gbc_system *);
-void op_ld_cp_a(gbc_system *, unsigned char);
+void op_ld_cp_a(gbc_system *);
 void op_push_hl(gbc_system *);
 void op_and_d8(gbc_system *, unsigned char);
 void op_rst_20h(gbc_system *);

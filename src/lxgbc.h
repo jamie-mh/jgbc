@@ -113,8 +113,9 @@ typedef struct gbc_breakpoint {
 
 typedef struct gbc_debugger {
     gbc_breakpoint *breakpoint_head;
-    char running;
-    char print;
+    char is_debugging;
+    char is_running;
+    char should_print;
 } gbc_debugger;
 
 typedef struct gbc_system {

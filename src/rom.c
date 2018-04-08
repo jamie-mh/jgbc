@@ -74,17 +74,14 @@ static void get_rom_info(unsigned char *header, gbc_rom *rom) {
 
     // Read the title from the header    
     // The title is 16 characters maximum, uppercase ASCII
-    char *title = calloc(sizeof(char), 16);
+    rom->title = calloc(TITLE_LENGTH + 1, sizeof(char));
     int i;
 
-    for(i = 0; i < 16; i++) {
-        title[i] = header[0x134 - ROM_HEADER_START + i];
+    for(i = 0; i < TITLE_LENGTH; i++) {
+        rom->title[i] = header[0x134 - ROM_HEADER_START + i];
     }
 
-    title[strlen(title)] = '\0';
-    rom->title = malloc(sizeof(char) * strlen(title) + 1);
-    strcpy(rom->title, title);
-    free(title);
+    rom->title[strlen(rom->title)] = '\0';
 
     // Get the rest of the cartridge information 
     rom->cgb_flag = header[0x143 - ROM_HEADER_START]; 
