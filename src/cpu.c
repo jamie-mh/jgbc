@@ -359,14 +359,14 @@ unsigned char add_byte(const unsigned char a, const unsigned char b, unsigned ch
     set_flag(FLAG_SUBTRACT, 0, flag);
 
     // Check for a carry from bit 3 to 4
-    if((((a & 0xF) + (b & 0xF)) & 0x10) == 0x10) {
+    if(((a & 0xF) + (b & 0xF)) > 0xF) {
         set_flag(FLAG_HALFCARRY, 1, flag); 
     } else {
         set_flag(FLAG_HALFCARRY, 0, flag); 
     }
 
     // Check for carry
-    if((result & 0xF00) > 0) {
+    if(result > 0xFF) {
         set_flag(FLAG_CARRY, 1, flag);
     } else {
         set_flag(FLAG_CARRY, 0, flag); 
@@ -389,14 +389,14 @@ unsigned char sub_byte(const unsigned char a, const unsigned char b, unsigned ch
     set_flag(FLAG_SUBTRACT, 1, flag);
 
     // Borrow from bit 4 to 3
-    if((((a & 0xF) - (b & 0xF))) < 0) {
+    if(((a & 0xF) < (b & 0xF))) {
         set_flag(FLAG_HALFCARRY, 1, flag);
     } else {
         set_flag(FLAG_HALFCARRY, 0, flag);
     }
 
-    // If the result overflows a byte (carry)
-    if((result & 0xF00) > 0) {
+    // If the result underflows a byte
+    if(a < b) {
         set_flag(FLAG_CARRY, 1, flag);
     } else {
         set_flag(FLAG_CARRY, 0, flag); 
@@ -413,7 +413,7 @@ unsigned short add_short(const unsigned short a, const unsigned short b, unsigne
     set_flag(FLAG_SUBTRACT, 0, flag);
 
     // Carry from bit 11 to 12
-    if((((a & 0xFFF) + (b & 0xFFF)) & 0x800) == 0x800) {
+    if((a & 0xFFF) + (b & 0xFFF) > 0xFFF) {
         set_flag(FLAG_HALFCARRY, 1, flag); 
     } else {
         set_flag(FLAG_HALFCARRY, 0, flag); 

@@ -34,6 +34,9 @@
 #define IEF_SERIAL 3
 #define IEF_JOYPAD 4
 
+// Serial
+#define SB 0xFF01
+
 void init_ram(gbc_ram *);
 
 unsigned char read_byte(gbc_ram *, const unsigned short);
