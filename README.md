@@ -30,17 +30,17 @@ As it stands, the emulator is not complete enough to play games.
 
 | Name          | Status | Output |
 | ------------- |:------:|:------:|
-| 01-special | :x: | Stuck |
+| 01-special | :heavy_check_mark: | Passed |
 | 02-interrupts | :x: | No Timer |
-| 03-op sp,hl | :x: | Stuck |
-| 04-op r,imm | :x: | Stuck |
-| 05-op rp | :x: | Stuck |
-| 06-ld r,r | :heavy_check_mark: | Pass |
-| 07-jr,jp,call,ret,rst | :x: | Stuck |
-| 08-misc instrs | :x: | Stuck |
-| 09-op r,r | :x: | Stuck |
-| 10-bit ops | :x: | Stuck |
-| 11-op a,(hl) | :x: | Stuck |
+| 03-op sp,hl | :x: | Seg Fault |
+| 04-op r,imm | :heavy_check_mark: | Passed |
+| 05-op rp | :heavy_check_mark: | Passed |
+| 06-ld r,r | :heavy_check_mark: | Passed |
+| 07-jr,jp,call,ret,rst | :x: | Restart Loop |
+| 08-misc instrs | :x: | Restart Loop |
+| 09-op r,r | :heavy_check_mark: | Passed |
+| 10-bit ops | :heavy_check_mark: | Passed |
+| 11-op a,(hl) | :heavy_check_mark: | Passed |
 
 ### Prerequisites
 

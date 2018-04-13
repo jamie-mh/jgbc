@@ -269,7 +269,7 @@ static void print_debug(gbc_system *gbc) {
         debug_box *box_two = boxes[i + 1];
 
         print_separator(box_one->width + box_two->width + 8);
-        int height = MAX(box_one->height, box_two->height);
+        const int height = MAX(box_one->height, box_two->height);
 
         int j;
         for(j = 0; j < height; j++) {
@@ -455,7 +455,7 @@ void init_debugger(gbc_debugger *debugger) {
 static char add_breakpoint(const unsigned int address, gbc_debugger *debugger) {
 
     // Check for duplicate breakpoints
-    gbc_breakpoint *found = find_breakpoint(address, debugger);
+    const gbc_breakpoint *found = find_breakpoint(address, debugger);
    
     if(found == NULL) {
         

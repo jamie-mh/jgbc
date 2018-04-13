@@ -2,10 +2,11 @@
 BIN := ./bin
 SRC := ./src
 OBJ := ./obj
+INC := ./inc
 
 # Compiler
 CC := gcc
-CFLAGS := -I$(SRC)/ -lSDL2 -lm -Ofast -g -Wall -Wextra
+CFLAGS := -I$(INC)/ -lSDL2 -lm -Ofast -g -Wall -Wextra
 
 # Files
 OUTNAME := lxgbc

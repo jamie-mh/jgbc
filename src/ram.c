@@ -49,7 +49,7 @@ static unsigned char *get_memory_location(gbc_ram *ram, unsigned short *address)
     } 
     // 8KB External RAM (in cartridge)
     else if(*address >= 0xA000 && *address <= 0xBFFF) {
-        *address -= 0xC000;
+        *address -= 0xA000;
         return ram->extram;
     }
     // 4KB Work RAM Bank 00
@@ -112,8 +112,8 @@ unsigned char read_byte(gbc_ram *ram, const unsigned short address) {
 unsigned short read_short(gbc_ram *ram, const unsigned short address) {
 
     // Get the two consecutive bytes
-    unsigned char byte_a = read_byte(ram, address);
-    unsigned char byte_b = read_byte(ram, address + 1);
+    const unsigned char byte_a = read_byte(ram, address);
+    const unsigned char byte_b = read_byte(ram, address + 1);
 
     // Combine and return the result
     return byte_b << 8 | byte_a;
@@ -125,7 +125,6 @@ void write_byte(gbc_ram *ram, const unsigned short address, const unsigned char 
     // Serial bus
     if(address == SB) {
         printf("%c", value);
-        return;
     }
 
     // If the memory is unusable, do nothing 
@@ -168,6 +167,6 @@ void write_register(gbc_ram *ram, const unsigned short address, const unsigned c
 unsigned char read_register(gbc_ram *ram, const unsigned short address, const unsigned char bit) {
    
     // Return the nth bit of the register
-    unsigned char byte = read_byte(ram, address);
+    const unsigned char byte = read_byte(ram, address);
     return (byte >> bit) & 1;
 }

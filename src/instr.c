@@ -1,6 +1,7 @@
 #include "lxgbc.h"
 #include "ram.h"
 #include "cpu.h"
+#include "alu.h"
 #include "instr.h"
 
 // 0x00: NOP (- - - -)
@@ -50,7 +51,11 @@ void op_ld_b_d8(gbc_system *gbc, unsigned char operand) {
 
 // 0x07: RLCA (0 0 0 C)
 void op_rlca(gbc_system *gbc) {
-    printf("Unimplemented Instruction: RLCA\n");
+    gbc->cpu->registers->A = rotate_left_carry(
+        gbc->cpu->registers->A,
+        0,
+        &gbc->cpu->registers->F
+    );
 }
 
 // 0x08: LD (a16), SP (- - - -)
@@ -106,7 +111,11 @@ void op_ld_c_d8(gbc_system *gbc, unsigned char operand) {
 
 // 0x0F: RRCA (0 0 0 C)
 void op_rrca(gbc_system *gbc) {
-    printf("Unimplemented Instruction: RRCA\n");
+    gbc->cpu->registers->A = rotate_right_carry(
+        gbc->cpu->registers->A,
+        0,
+        &gbc->cpu->registers->F
+    );
 }
 
 // 0x10: STOP (- - - -)
@@ -156,7 +165,11 @@ void op_ld_d_d8(gbc_system *gbc, unsigned char operand) {
 
 // 0x17: RLA (0 0 0 C)
 void op_rla(gbc_system *gbc) {
-    printf("Unimplemented Instruction: RLA\n");
+    gbc->cpu->registers->A = rotate_left(
+        gbc->cpu->registers->A, 
+        0, 
+        &gbc->cpu->registers->F
+    );
 }
 
 // 0x18: JR r8 (- - - -)
@@ -266,45 +279,10 @@ void op_ld_h_d8(gbc_system *gbc, unsigned char operand) {
 
 // 0x27: DAA (Z - 0 C)
 void op_daa(gbc_system *gbc) {
-
-    unsigned short result = gbc->cpu->registers->A;
-
-    if(gbc->cpu->registers->A == 0) {
-        set_flag(FLAG_ZERO, 1, &gbc->cpu->registers->F); 
-    } else {
-        set_flag(FLAG_ZERO, 0, &gbc->cpu->registers->F); 
-    }
-
-    if(get_flag(FLAG_SUBTRACT, gbc->cpu->registers->F)) {
-
-        if(get_flag(FLAG_HALFCARRY, gbc->cpu->registers->F)) {
-            result = (result - 0x06) & 0xFF;
-        }
-
-        if(get_flag(FLAG_CARRY, gbc->cpu->registers->F)) {
-            result -= 0x60;
-        }
-    }
-    else {
-
-        if(get_flag(FLAG_HALFCARRY, gbc->cpu->registers->F) || (result & 0xF) > 9) {
-            result += 0x06;
-        }
-
-        if(get_flag(FLAG_CARRY, gbc->cpu->registers->F) || result > 0x9F) {
-            result += 0x60;
-        }
-    }
-
-    set_flag(FLAG_HALFCARRY, 0, &gbc->cpu->registers->F);
-
-    if(result > 0x100) {
-        set_flag(FLAG_CARRY, 1, &gbc->cpu->registers->F); 
-    } else {
-        set_flag(FLAG_CARRY, 0, &gbc->cpu->registers->F); 
-    }
-
-    gbc->cpu->registers->A = (unsigned char) result;    
+    gbc->cpu->registers->A = daa(
+        gbc->cpu->registers->A, 
+        &gbc->cpu->registers->F
+    );
 }
 
 // 0x28: JR Z, r8 (- - - -)
@@ -930,72 +908,72 @@ void op_add_a_a(gbc_system *gbc) {
 
 // 0x88: ADC A, B (Z 0 H C)
 void op_adc_a_b(gbc_system *gbc) {
-    gbc->cpu->registers->A = add_byte(
-        gbc->cpu->registers->A, 
-        gbc->cpu->registers->B + get_flag(FLAG_CARRY, gbc->cpu->registers->F),
+    gbc->cpu->registers->A = add_byte_carry(
+        gbc->cpu->registers->A,
+        gbc->cpu->registers->B,
         &gbc->cpu->registers->F
     );
 }
 
 // 0x89: ADC A, C (Z 0 H C)
 void op_adc_a_c(gbc_system *gbc) {
-    gbc->cpu->registers->A = add_byte(
+    gbc->cpu->registers->A = add_byte_carry(
         gbc->cpu->registers->A, 
-        gbc->cpu->registers->C + get_flag(FLAG_CARRY, gbc->cpu->registers->F),
+        gbc->cpu->registers->C,
         &gbc->cpu->registers->F
     );
 }
 
 // 0x8A: ADC A, D (Z 0 H C)
 void op_adc_a_d(gbc_system *gbc) {
-    gbc->cpu->registers->A = add_byte(
+    gbc->cpu->registers->A = add_byte_carry(
         gbc->cpu->registers->A, 
-        gbc->cpu->registers->D + get_flag(FLAG_CARRY, gbc->cpu->registers->F),
+        gbc->cpu->registers->D,
         &gbc->cpu->registers->F
     );
 }
 
 // 0x8B: ADC A, E (Z 0 H C)
 void op_adc_a_e(gbc_system *gbc) {
-    gbc->cpu->registers->A = add_byte(
+    gbc->cpu->registers->A = add_byte_carry(
         gbc->cpu->registers->A, 
-        gbc->cpu->registers->E + get_flag(FLAG_CARRY, gbc->cpu->registers->F),
+        gbc->cpu->registers->E,
         &gbc->cpu->registers->F
     );
 }
 
 // 0x8C: ADC A, H (Z 0 H C)
 void op_adc_a_h(gbc_system *gbc) {
-    gbc->cpu->registers->A = add_byte(
+    gbc->cpu->registers->A = add_byte_carry(
         gbc->cpu->registers->A, 
-        gbc->cpu->registers->H + get_flag(FLAG_CARRY, gbc->cpu->registers->F),
+        gbc->cpu->registers->H,
         &gbc->cpu->registers->F
     );
 }
 
 // 0x8D: ADC A, L (Z 0 H C)
 void op_adc_a_l(gbc_system *gbc) {
-    gbc->cpu->registers->A = add_byte(
+    gbc->cpu->registers->A = add_byte_carry(
         gbc->cpu->registers->A, 
-        gbc->cpu->registers->L + get_flag(FLAG_CARRY, gbc->cpu->registers->F),
+        gbc->cpu->registers->L,
         &gbc->cpu->registers->F
     );
 }
 
 // 0x8E: ADC A, (HL) (Z 0 H C)
 void op_adc_a_hlp(gbc_system *gbc) {
-    gbc->cpu->registers->A = add_byte(
+    gbc->cpu->registers->A = add_byte_carry(
         gbc->cpu->registers->A, 
-        read_byte(gbc->ram, gbc->cpu->registers->HL) + get_flag(FLAG_CARRY, gbc->cpu->registers->F),
+        read_byte(gbc->ram, gbc->cpu->registers->HL),
         &gbc->cpu->registers->F
     );
 }
 
 // 0x8F: ADC A, A (Z 0 H C)
 void op_adc_a_a(gbc_system *gbc) {
-    gbc->cpu->registers->A = add_byte(
+    gbc->cpu->registers->A = add_byte_carry(
         gbc->cpu->registers->A, 
-        gbc->cpu->registers->A + get_flag(FLAG_CARRY, gbc->cpu->registers->F),
+        gbc->cpu->registers->A,
         &gbc->cpu->registers->F
     );
 }
@@ -1074,72 +1052,72 @@ void op_sub_a(gbc_system *gbc) {
 
 // 0x98: SBC A, B (Z 1 H C)
 void op_sbc_a_b(gbc_system *gbc) {
-    gbc->cpu->registers->A = sub_byte(
+    gbc->cpu->registers->A = sub_byte_carry(
         gbc->cpu->registers->A, 
-        gbc->cpu->registers->B + get_flag(FLAG_CARRY, gbc->cpu->registers->F),
+        gbc->cpu->registers->B,
         &gbc->cpu->registers->F
     );
 }
 
 // 0x99: SBC A, C (Z 1 H C)
 void op_sbc_a_c(gbc_system *gbc) {
-    gbc->cpu->registers->A = sub_byte(
+    gbc->cpu->registers->A = sub_byte_carry(
         gbc->cpu->registers->A, 
-        gbc->cpu->registers->C + get_flag(FLAG_CARRY, gbc->cpu->registers->F),
+        gbc->cpu->registers->C,
         &gbc->cpu->registers->F
     );
 }
 
 // 0x9A: SBC A, D (Z 1 H C)
 void op_sbc_a_d(gbc_system *gbc) {
-    gbc->cpu->registers->A = sub_byte(
+    gbc->cpu->registers->A = sub_byte_carry(
         gbc->cpu->registers->A, 
-        gbc->cpu->registers->D + get_flag(FLAG_CARRY, gbc->cpu->registers->F),
+        gbc->cpu->registers->D,
         &gbc->cpu->registers->F
     );
 }
 
 // 0x9B: SBC A, E (Z 1 H C)
 void op_sbc_a_e(gbc_system *gbc) {
-    gbc->cpu->registers->A = sub_byte(
+    gbc->cpu->registers->A = sub_byte_carry(
         gbc->cpu->registers->A, 
-        gbc->cpu->registers->E + get_flag(FLAG_CARRY, gbc->cpu->registers->F),
+        gbc->cpu->registers->E,
         &gbc->cpu->registers->F
     );
 }
 
 // 0x9C: SBC A, H (Z 1 H C)
 void op_sbc_a_h(gbc_system *gbc) {
-    gbc->cpu->registers->A = sub_byte(
+    gbc->cpu->registers->A = sub_byte_carry(
         gbc->cpu->registers->A, 
-        gbc->cpu->registers->H + get_flag(FLAG_CARRY, gbc->cpu->registers->F),
+        gbc->cpu->registers->H,
         &gbc->cpu->registers->F
     );
 }
 
 // 0x9D: SBC A, L (Z 1 H C)
 void op_sbc_a_l(gbc_system *gbc) {
-    gbc->cpu->registers->A = sub_byte(
+    gbc->cpu->registers->A = sub_byte_carry(
         gbc->cpu->registers->A, 
-        gbc->cpu->registers->L + get_flag(FLAG_CARRY, gbc->cpu->registers->F),
+        gbc->cpu->registers->L,
         &gbc->cpu->registers->F
     );
 }
 
 // 0x9E: SBC A, (HL) (Z 1 H C)
 void op_sbc_a_hlp(gbc_system *gbc) {
-    gbc->cpu->registers->A = sub_byte(
+    gbc->cpu->registers->A = sub_byte_carry(
         gbc->cpu->registers->A, 
-        read_byte(gbc->ram, gbc->cpu->registers->HL) + get_flag(FLAG_CARRY, gbc->cpu->registers->F),
+        read_byte(gbc->ram, gbc->cpu->registers->HL),
         &gbc->cpu->registers->F
     );
 }
 
 // 0x9F: SBC A, A (Z 1 H C)
 void op_sbc_a_a(gbc_system *gbc) {
-    gbc->cpu->registers->A = sub_byte(
+    gbc->cpu->registers->A = sub_byte_carry(
         gbc->cpu->registers->A, 
-        gbc->cpu->registers->A + get_flag(FLAG_CARRY, gbc->cpu->registers->F),
+        gbc->cpu->registers->A,
         &gbc->cpu->registers->F
     );
 }
@@ -1434,7 +1412,7 @@ void op_cp_a(gbc_system *gbc) {
 
 // 0xC0: RET NZ (- - - -)
 void op_ret_nz(gbc_system *gbc) {
-    if(!get_flag(FLAG_ZERO, gbc->cpu->registers->F)) {
+    if(get_flag(FLAG_ZERO, gbc->cpu->registers->F) == 0) {
         op_ret(gbc); 
     } 
 }
@@ -1532,7 +1510,7 @@ void op_call_z_a16(gbc_system *gbc, unsigned short operand) {
 void op_call_a16(gbc_system *gbc, unsigned short operand) {
     stack_push_short(
         gbc->ram, 
-        &gbc->cpu->registers->SP, 
+        &gbc->cpu->registers->SP,
         gbc->cpu->registers->PC
     );
     gbc->cpu->registers->PC = operand;
@@ -1540,9 +1518,9 @@ void op_call_a16(gbc_system *gbc, unsigned short operand) {
 
 // 0xCE: ADC A, d8 (Z 0 H C)
 void op_adc_a_d8(gbc_system *gbc, unsigned char operand) {
-    gbc->cpu->registers->A = add_byte(
+    gbc->cpu->registers->A = add_byte_carry(
         gbc->cpu->registers->A,
-        operand + get_flag(FLAG_CARRY, gbc->cpu->registers->F),
+        operand,
         &gbc->cpu->registers->F
     );
 }
@@ -1643,9 +1621,9 @@ void op_call_c_a16(gbc_system *gbc, unsigned short operand) {
 
 // 0xDE: SBC A, d8 (Z 1 H C)
 void op_sbc_a_d8(gbc_system *gbc, unsigned char operand) {
-    gbc->cpu->registers->A = sub_byte(
+    gbc->cpu->registers->A = sub_byte_carry(
         gbc->cpu->registers->A,
-        operand + get_flag(FLAG_CARRY, gbc->cpu->registers->F),
+        operand,
         &gbc->cpu->registers->F
     );
 }
@@ -1881,7 +1859,8 @@ void op_rst_38h(gbc_system *gbc) {
 // 0xCB00: RLC B (Z 0 0 C)
 void op_rlc_b(gbc_system *gbc) {
     gbc->cpu->registers->B = rotate_left_carry(
-        gbc->cpu->registers->B, 
+        gbc->cpu->registers->B,
+        1,
         &gbc->cpu->registers->F
     );
 }
@@ -1889,7 +1868,8 @@ void op_rlc_b(gbc_system *gbc) {
 // 0xCB01: RLC C (Z 0 0 C)
 void op_rlc_c(gbc_system *gbc) {
     gbc->cpu->registers->C = rotate_left_carry(
-        gbc->cpu->registers->C, 
+        gbc->cpu->registers->C,
+        1,
         &gbc->cpu->registers->F
     );
 }
@@ -1898,6 +1878,7 @@ void op_rlc_c(gbc_system *gbc) {
 void op_rlc_d(gbc_system *gbc) {
     gbc->cpu->registers->D = rotate_left_carry(
         gbc->cpu->registers->D, 
+        1,
         &gbc->cpu->registers->F
     );
 }
@@ -1905,7 +1886,8 @@ void op_rlc_d(gbc_system *gbc) {
 // 0xCB03: RLC E (Z 0 0 C)
 void op_rlc_e(gbc_system *gbc) {
     gbc->cpu->registers->E = rotate_left_carry(
-        gbc->cpu->registers->E, 
+        gbc->cpu->registers->E,
+        1,
         &gbc->cpu->registers->F
     );
 }
@@ -1913,7 +1895,8 @@ void op_rlc_e(gbc_system *gbc) {
 // 0xCB04: RLC H (Z 0 0 C)
 void op_rlc_h(gbc_system *gbc) {
     gbc->cpu->registers->H = rotate_left_carry(
-        gbc->cpu->registers->H, 
+        gbc->cpu->registers->H,
+        1, 
         &gbc->cpu->registers->F
     );
 }
@@ -1921,7 +1904,8 @@ void op_rlc_h(gbc_system *gbc) {
 // 0xCB05: RLC L (Z 0 0 C)
 void op_rlc_l(gbc_system *gbc) {
     gbc->cpu->registers->L = rotate_left_carry(
-        gbc->cpu->registers->L, 
+        gbc->cpu->registers->L,
+        1,
         &gbc->cpu->registers->F
     );
 }
@@ -1932,7 +1916,8 @@ void op_rlc_hlp(gbc_system *gbc) {
         gbc->ram,
         gbc->cpu->registers->HL,
         rotate_left_carry(
-            read_byte(gbc->ram, gbc->cpu->registers->HL), 
+            read_byte(gbc->ram, gbc->cpu->registers->HL),
+            1,
             &gbc->cpu->registers->F
         )
     );
@@ -1942,6 +1927,7 @@ void op_rlc_hlp(gbc_system *gbc) {
 void op_rlc_a(gbc_system *gbc) {
     gbc->cpu->registers->A = rotate_left_carry(
         gbc->cpu->registers->A,
+        1,
         &gbc->cpu->registers->F
     );
 }
@@ -1949,7 +1935,8 @@ void op_rlc_a(gbc_system *gbc) {
 // 0xCB08: RRC B (Z 0 0 C)
 void op_rrc_b(gbc_system *gbc) {
     gbc->cpu->registers->B = rotate_right_carry(
-        gbc->cpu->registers->B, 
+        gbc->cpu->registers->B,
+        1,
         &gbc->cpu->registers->F
     );
 }
@@ -1958,6 +1945,7 @@ void op_rrc_b(gbc_system *gbc) {
 void op_rrc_c(gbc_system *gbc) {
     gbc->cpu->registers->C = rotate_right_carry(
         gbc->cpu->registers->C, 
+        1,
         &gbc->cpu->registers->F
     );
 }
@@ -1966,6 +1954,7 @@ void op_rrc_c(gbc_system *gbc) {
 void op_rrc_d(gbc_system *gbc) {
     gbc->cpu->registers->D = rotate_right_carry(
         gbc->cpu->registers->D, 
+        1,
         &gbc->cpu->registers->F
     );
 }
@@ -1973,7 +1962,8 @@ void op_rrc_d(gbc_system *gbc) {
 // 0xCB0B: RRC E (Z 0 0 C)
 void op_rrc_e(gbc_system *gbc) {
     gbc->cpu->registers->E = rotate_right_carry(
-        gbc->cpu->registers->E, 
+        gbc->cpu->registers->E,
+        1,
         &gbc->cpu->registers->F
     );
 }
@@ -1981,7 +1971,8 @@ void op_rrc_e(gbc_system *gbc) {
 // 0xCB0C: RRC H (Z 0 0 C)
 void op_rrc_h(gbc_system *gbc) {
     gbc->cpu->registers->H = rotate_right_carry(
-        gbc->cpu->registers->H, 
+        gbc->cpu->registers->H,
+        1,
         &gbc->cpu->registers->F
     );
 }
@@ -1989,7 +1980,8 @@ void op_rrc_h(gbc_system *gbc) {
 // 0xCB0D: RRC L (Z 0 0 C)
 void op_rrc_l(gbc_system *gbc) {
     gbc->cpu->registers->L = rotate_right_carry(
-        gbc->cpu->registers->L, 
+        gbc->cpu->registers->L,
+        1,
         &gbc->cpu->registers->F
     );
 }
@@ -2000,7 +1992,8 @@ void op_rrc_hlp(gbc_system *gbc) {
         gbc->ram,
         gbc->cpu->registers->HL,
         rotate_right_carry(
-            read_byte(gbc->ram, gbc->cpu->registers->HL), 
+            read_byte(gbc->ram, gbc->cpu->registers->HL),
+            1,
             &gbc->cpu->registers->F
         )
     );
@@ -2008,8 +2001,9 @@ void op_rrc_hlp(gbc_system *gbc) {
 
 // 0xCB0F: RRC A (Z 0 0 C)
 void op_rrc_a(gbc_system *gbc) {
-    gbc->cpu->registers->C = rotate_right_carry(
-        gbc->cpu->registers->C, 
+    gbc->cpu->registers->A = rotate_right_carry(
+        gbc->cpu->registers->A,
+        1,
         &gbc->cpu->registers->F
     );
 }
@@ -2017,7 +2011,8 @@ void op_rrc_a(gbc_system *gbc) {
 // 0xCB10: RL B (Z 0 0 C)
 void op_rl_b(gbc_system *gbc) {
     gbc->cpu->registers->B = rotate_left(
-        gbc->cpu->registers->B, 
+        gbc->cpu->registers->B,
+        1,
         &gbc->cpu->registers->F
     );
 }
@@ -2025,7 +2020,8 @@ void op_rl_b(gbc_system *gbc) {
 // 0xCB11: RL C (Z 0 0 C)
 void op_rl_c(gbc_system *gbc) {
     gbc->cpu->registers->C = rotate_left(
-        gbc->cpu->registers->C, 
+        gbc->cpu->registers->C,
+        1,
         &gbc->cpu->registers->F
     );
 }
@@ -2034,6 +2030,7 @@ void op_rl_c(gbc_system *gbc) {
 void op_rl_d(gbc_system *gbc) {
     gbc->cpu->registers->D = rotate_left(
         gbc->cpu->registers->D, 
+        1,
         &gbc->cpu->registers->F
     );
 }
@@ -2042,6 +2039,7 @@ void op_rl_d(gbc_system *gbc) {
 void op_rl_e(gbc_system *gbc) {
     gbc->cpu->registers->E = rotate_left(
         gbc->cpu->registers->E, 
+        1,
         &gbc->cpu->registers->F
     );
 }
@@ -2049,7 +2047,8 @@ void op_rl_e(gbc_system *gbc) {
 // 0xCB14: RL H (Z 0 0 C)
 void op_rl_h(gbc_system *gbc) {
     gbc->cpu->registers->H = rotate_left(
-        gbc->cpu->registers->H, 
+        gbc->cpu->registers->H,
+        1,
         &gbc->cpu->registers->F
     );
 }
@@ -2058,6 +2057,7 @@ void op_rl_h(gbc_system *gbc) {
 void op_rl_l(gbc_system *gbc) {
     gbc->cpu->registers->L = rotate_left(
         gbc->cpu->registers->L, 
+        1,
         &gbc->cpu->registers->F
     );
 }
@@ -2069,6 +2069,7 @@ void op_rl_hlp(gbc_system *gbc) {
         gbc->cpu->registers->HL,
         rotate_left(
             read_byte(gbc->ram, gbc->cpu->registers->HL), 
+            1,
             &gbc->cpu->registers->F
         )
     );
@@ -2077,7 +2078,8 @@ void op_rl_hlp(gbc_system *gbc) {
 // 0xCB17: RL A (Z 0 0 C)
 void op_rl_a(gbc_system *gbc) {
     gbc->cpu->registers->A = rotate_left(
-        gbc->cpu->registers->A, 
+        gbc->cpu->registers->A,
+        1,
         &gbc->cpu->registers->F
     );
 }
@@ -3152,32 +3154,32 @@ void op_res_7_a(gbc_system *gbc) {
 
 // 0xCBC0: SET 0, B (- - - -)
 void op_set_0_b(gbc_system *gbc) {
-   gbc->cpu->registers->A = set_bit(gbc->cpu->registers->B, 0);
+   gbc->cpu->registers->B = set_bit(gbc->cpu->registers->B, 0);
 }
 
 // 0xCBC1: SET 0, C (- - - -)
 void op_set_0_c(gbc_system *gbc) {
-   gbc->cpu->registers->A = set_bit(gbc->cpu->registers->C, 0);
+   gbc->cpu->registers->C = set_bit(gbc->cpu->registers->C, 0);
 }
 
 // 0xCBC2: SET 0, D (- - - -)
 void op_set_0_d(gbc_system *gbc) {
-   gbc->cpu->registers->A = set_bit(gbc->cpu->registers->D, 0);
+   gbc->cpu->registers->D = set_bit(gbc->cpu->registers->D, 0);
 }
 
 // 0xCBC3: SET 0, E (- - - -)
 void op_set_0_e(gbc_system *gbc) {
-   gbc->cpu->registers->A = set_bit(gbc->cpu->registers->E, 0);
+   gbc->cpu->registers->E = set_bit(gbc->cpu->registers->E, 0);
 }
 
 // 0xCBC4: SET 0, H (- - - -)
 void op_set_0_h(gbc_system *gbc) {
-   gbc->cpu->registers->A = set_bit(gbc->cpu->registers->H, 0);
+   gbc->cpu->registers->H = set_bit(gbc->cpu->registers->H, 0);
 }
 
 // 0xCBC5: SET 0, L (- - - -)
 void op_set_0_l(gbc_system *gbc) {
-   gbc->cpu->registers->A = set_bit(gbc->cpu->registers->L, 0);
+   gbc->cpu->registers->L = set_bit(gbc->cpu->registers->L, 0);
 }
 
 // 0xCBC6: SET 0, (HL) (- - - -)
@@ -3199,7 +3201,7 @@ void op_set_0_a(gbc_system *gbc) {
 
 // 0xCBC8: SET 1, B (- - - -)
 void op_set_1_b(gbc_system *gbc) {
-    gbc->cpu->registers->B = set_bit(gbc->cpu->registers->A, 1);
+    gbc->cpu->registers->B = set_bit(gbc->cpu->registers->B, 1);
 }
 
 // 0xCBC9: SET 1, C (- - - -)
@@ -3232,7 +3234,10 @@ void op_set_1_hlp(gbc_system *gbc) {
     write_byte(
         gbc->ram,
         gbc->cpu->registers->HL,
-        set_bit(gbc->cpu->registers->A, 1)
+        set_bit(
+            read_byte(gbc->ram, gbc->cpu->registers->HL),
+            1
+        )
     );
 }
 
@@ -3276,7 +3281,10 @@ void op_set_2_hlp(gbc_system *gbc) {
     write_byte(
         gbc->ram,
         gbc->cpu->registers->HL,
-        set_bit(gbc->cpu->registers->L, 2)
+        set_bit(
+            read_byte(gbc->ram, gbc->cpu->registers->HL),
+            2
+        )
     );
 }
 
@@ -3320,7 +3328,10 @@ void op_set_3_hlp(gbc_system *gbc) {
     write_byte(
         gbc->ram,
         gbc->cpu->registers->HL,
-        set_bit(gbc->cpu->registers->A, 3)
+        set_bit(
+            read_byte(gbc->ram, gbc->cpu->registers->HL),
+            3
+        )
     );
 }
 
@@ -3364,7 +3375,10 @@ void op_set_4_hlp(gbc_system *gbc) {
     write_byte(
         gbc->ram,
         gbc->cpu->registers->HL,
-        set_bit(gbc->cpu->registers->L, 4)
+        set_bit(
+            read_byte(gbc->ram, gbc->cpu->registers->HL),
+            4
+        )
     );
 }
 
@@ -3408,7 +3422,10 @@ void op_set_5_hlp(gbc_system *gbc) {
     write_byte(
         gbc->ram,
         gbc->cpu->registers->HL,
-        set_bit(gbc->cpu->registers->L, 5)
+        set_bit(
+            read_byte(gbc->ram, gbc->cpu->registers->HL),
+            5
+        )
     );
 }
 
@@ -3452,7 +3469,10 @@ void op_set_6_hlp(gbc_system *gbc) {
     write_byte(
         gbc->ram,
         gbc->cpu->registers->HL,
-        set_bit(gbc->cpu->registers->A, 6)
+        set_bit(
+            read_byte(gbc->ram, gbc->cpu->registers->HL),
+            6
+        )
     );
 }
 
@@ -3494,9 +3514,12 @@ void op_set_7_l(gbc_system *gbc) {
 // 0xCBFE: SET 7, (HL) (- - - -)
 void op_set_7_hlp(gbc_system *gbc) {
     write_byte(
-        gbc->ram, 
+        gbc->ram,
         gbc->cpu->registers->HL,
-        set_bit(gbc->cpu->registers->A, 7)
+        set_bit(
+            read_byte(gbc->ram, gbc->cpu->registers->HL),
+            7
+        )
     );
 }
 
