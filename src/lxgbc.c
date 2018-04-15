@@ -59,6 +59,7 @@ int main(int argc, char **argv) {
                 }
 
                 check_interrupt(gbc);
+                update_timer(gbc);
             }
 
             gbc->cpu->run_for = gbc->cpu->clock;                
@@ -71,6 +72,7 @@ int main(int argc, char **argv) {
             }
 
             check_interrupt(gbc);
+            update_timer(gbc);
         }
         
         // Handle SDL events
@@ -79,7 +81,7 @@ int main(int argc, char **argv) {
         }
 
         // Temp: Simulate no buttons pressed
-        write_byte(gbc->ram, 0xFF00, 0xEF);
+        write_byte(gbc->ram, 0xFF00, 0xEF, 0);
     }
 
     SDL_Quit();

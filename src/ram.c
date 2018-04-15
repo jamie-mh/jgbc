@@ -62,10 +62,15 @@ static unsigned char *get_memory_location(gbc_ram *ram, unsigned short *address)
         *address -= 0xD000;
         return ram->wramNN;
     } 
-    // Mirror of Work RAM
-    else if(*address >= 0xE000 && *address <= 0xFDFF) {
-        *address -= 0x2000;
+    // Mirror of Work RAM (wram 00)
+    else if(*address >= 0xE000 && *address <= 0xEFFF) {
+        *address -= 0xE000;
         return ram->wram00;
+    }
+    // Mirror of Work RAM (wram nn)
+    else if(*address >= 0xF000 && *address <= 0xFDFF) {
+        *address -= 0xF000;
+        return ram->wramNN;
     }
     // Sprite Attibute Table
     else if(*address >= 0xFE00 && *address <= 0xFE9F) {
@@ -91,12 +96,27 @@ static unsigned char *get_memory_location(gbc_ram *ram, unsigned short *address)
     return NULL;
 }
 
+// Checks if the ram address is valid and can be read / written
+char is_valid_ram(gbc_ram *ram, const unsigned short address) {
+
+    // If the memory is unusable
+    if(address >= 0xFEA0 && address <= 0xFEFF) {
+        return 0;
+    }
+
+    // If the memory is in extram and it is not available
+    if(address >= 0xA000 && address <= 0xBFFF && ram->extram == NULL) {
+        return 0;
+    }
+
+    return 1;    
+}
+
 // Reads a byte from the specified location in memory
 unsigned char read_byte(gbc_ram *ram, const unsigned short address) {
 
-    // If the memory is unusable, return 0
-    if(address >= 0xFEA0 && address <= 0xFEFF) {
-        return 0x0; 
+    if(!is_valid_ram(ram, address)) {
+        return 0x0;
     }
 
     // Get the memory location and the relative address inside this memory
@@ -120,16 +140,21 @@ unsigned short read_short(gbc_ram *ram, const unsigned short address) {
 }
 
 // Writes a byte in memory at the address
-void write_byte(gbc_ram *ram, const unsigned short address, const unsigned char value) {
+void write_byte(gbc_ram *ram, const unsigned short address, unsigned char value, const char is_program) {
 
-    // Serial bus
-    if(address == SB) {
-        printf("%c", value);
+    if(!is_valid_ram(ram, address)) {
+        return;
     }
 
-    // If the memory is unusable, do nothing 
-    if(address >= 0xFEA0 && address <= 0xFEFF) {
-        return; 
+    // Serial bus
+    // if(address == SB) {
+    //     printf("%c", value);
+    // }
+
+    // If the timer divider register is written to, it is reset
+    // Unless we are forcing the write
+    if(address == DIV && is_program) {
+        value = 0x0;
     }
 
     // Get the memory location with the relative address
@@ -150,8 +175,8 @@ void write_short(gbc_ram *ram, const unsigned short address, const unsigned shor
     unsigned char byte_b = (value & 0xFF00) >> 8;
 
     // Write the two bytes
-    write_byte(ram, address, byte_a);
-    write_byte(ram, address + 1, byte_b);
+    write_byte(ram, address, byte_a, 1);
+    write_byte(ram, address + 1, byte_b, 1);
 }
 
 // Writes to memory register at a certain location
@@ -160,7 +185,7 @@ void write_register(gbc_ram *ram, const unsigned short address, const unsigned c
     // Read and write the modified byte
     unsigned char byte = read_byte(ram, address);
     byte ^= (-value ^ byte) & (1 << bit);
-    write_byte(ram, address, byte);
+    write_byte(ram, address, byte, 0);
 }
 
 // Reads a memory register at a certain location

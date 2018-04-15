@@ -31,8 +31,8 @@ As it stands, the emulator is not complete enough to play games.
 | Name          | Status | Output |
 | ------------- |:------:|:------:|
 | 01-special | :heavy_check_mark: | Passed |
-| 02-interrupts | :x: | No Timer |
-| 03-op sp,hl | :x: | Seg Fault |
+| 02-interrupts | :heavy_check_mark: | Passed |
+| 03-op sp,hl | :x: | Stuck |
 | 04-op r,imm | :heavy_check_mark: | Passed |
 | 05-op rp | :heavy_check_mark: | Passed |
 | 06-ld r,r | :heavy_check_mark: | Passed |

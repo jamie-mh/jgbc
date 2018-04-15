@@ -19,7 +19,9 @@
 #define INT_LCD_STAT 0x48
 #define INT_TIMER 0x50
 #define INT_SERIAL 0x58
-#define INT_JOYPAD 0x60 
+#define INT_JOYPAD 0x60
+
+#define TAC_THRESHOLD {1024, 16, 64, 256}
 
 typedef struct gbc_instruction {
     char *disassembly;
@@ -42,3 +44,4 @@ unsigned char stack_pop_byte(gbc_ram *, unsigned short *);
 unsigned short stack_pop_short(gbc_ram *, unsigned short *);
 
 void check_interrupt(gbc_system *);
+void update_timer(gbc_system *);

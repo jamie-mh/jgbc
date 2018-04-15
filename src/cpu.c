@@ -32,6 +32,10 @@ void init_cpu(gbc_cpu *cpu) {
     // Reset the clock
     cpu->clock = 0;
     cpu->run_for = 0;
+
+    // Reset the timers
+    cpu->div_clock = 0;
+    cpu->cnt_clock = 0;
 }
 
 // Returns an instruction struct of the provided opcode
@@ -158,7 +162,7 @@ void stack_push_byte(gbc_ram *ram, unsigned short *sp, const unsigned char value
     *sp -= sizeof(char);
 
     // Write the value
-    write_byte(ram, *sp, value);
+    write_byte(ram, *sp, value, 1);
 }
 
 // Pushes a short to the stack after decrementing the stack pointer
@@ -240,4 +244,61 @@ static void service_interrupt(gbc_system *gbc, const unsigned char number) {
         // Jump to the interrupt subroutine
         gbc->cpu->registers->PC = interrupt[number];
     }  
+}
+
+// Updates the timer if they are enabled and requests interrupts
+void update_timer(gbc_system *gbc) {
+
+    gbc->cpu->div_clock++;
+
+    // The divider register updates at one 256th of the clock speed (aka 256 clocks)
+    // Reset the clock and update the register
+    if(gbc->cpu->div_clock == 256) {
+
+        // Increment the register (don't care if it overflows)
+        unsigned char curr_div = read_byte(gbc->ram, DIV);
+        write_byte(gbc->ram, DIV, curr_div + 1, 0);
+
+        gbc->cpu->div_clock = 0;
+    }
+
+    // The timer counter updates at the rate given in the control register
+    // Although unlike the divider, it must be enabled in the control register
+    // (0 == Stopped) (1 == Running)
+    if(read_register(gbc->ram, TAC, TAC_STOP) == 1) {
+
+        gbc->cpu->cnt_clock++;
+
+        // Get the speed to update the timer at
+        unsigned char speed_index = 
+            (read_register(gbc->ram, TAC, TAC_INPUT0)) | 
+            (read_register(gbc->ram, TAC, TAC_INPUT1) << 1);
+
+        // Get the array of possible tick to clock ratios
+        static const unsigned short timer_thresholds[0xF] = TAC_THRESHOLD;
+
+        // If the clock is at the current tick rate (or above, who knows)
+        if(gbc->cpu->cnt_clock >= timer_thresholds[speed_index]) {
+
+            unsigned char curr_cnt = read_byte(gbc->ram, TIMA);
+            unsigned char new_cnt;
+
+            // If the counter is about to overflow, reset it to the modulo
+            if(curr_cnt == 0xFF) {
+                new_cnt = read_byte(gbc->ram, TMA);
+
+                // Request a timer interrupt
+                write_register(gbc->ram, IE, IEF_TIMER, 1);
+                write_register(gbc->ram, IF, IEF_TIMER, 1);
+            }
+            // Otherwise increment as usual
+            else {
+                new_cnt = curr_cnt + 1;
+            }
+
+            // Write the new value and reset the clock
+            write_byte(gbc->ram, TIMA, new_cnt, 0);
+            gbc->cpu->cnt_clock = 0;
+        }
+    }
 }

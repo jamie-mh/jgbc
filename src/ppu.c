@@ -8,6 +8,8 @@ static void render_bg_scan(gbc_system *, unsigned char ly);
 static SDL_Colour get_shade(const unsigned char);
 static void fill_shade_table(gbc_system *, SDL_Colour *);
 
+static void render(gbc_ppu *);
+
 
 // Opens a SDL window, WIP
 void init_ppu(gbc_ppu *ppu, const char scale) {
@@ -46,6 +48,8 @@ void init_ppu(gbc_ppu *ppu, const char scale) {
 
     // Set the rendering scale
     SDL_RenderSetScale(ppu->renderer, scale, scale);
+
+    render(ppu);
 
     // Reset the clock
     ppu->clock = 0;
@@ -117,23 +121,13 @@ void ppu_do_clock(gbc_system *gbc) {
         if(ly_val == 153) {
             ly_val = 0;
 
-            // Flush the framebuffer to the texture
-            SDL_UpdateTexture(
-                gbc->ppu->texture,
-                NULL,
-                gbc->ppu->framebuffer,
-                SCREEN_WIDTH * 4
-            );
-
-            // Render the framebuffer
-            SDL_RenderCopy(gbc->ppu->renderer, gbc->ppu->texture, NULL, NULL);
-            SDL_RenderPresent(gbc->ppu->renderer);
+            render(gbc->ppu);
         } else {
             ly_val++;
         }
 
         // Write the vertical line register
-        write_byte(gbc->ram, LY, ly_val);
+        write_byte(gbc->ram, LY, ly_val, 0);
 
     } else {
         gbc->ppu->scan_clock++;
@@ -250,4 +244,19 @@ static void fill_shade_table(gbc_system *gbc, SDL_Colour *table) {
         // Add the shade
         table[i / 2] = get_shade(shade_num); 
     }
+}
+
+// Renders the current framebuffer to the display
+static void render(gbc_ppu *ppu) {
+
+    SDL_UpdateTexture(
+        ppu->texture,
+        NULL,
+        ppu->framebuffer,
+        SCREEN_WIDTH * 4
+    );
+
+    // Render the framebuffer
+    SDL_RenderCopy(ppu->renderer, ppu->texture, NULL, NULL);
+    SDL_RenderPresent(ppu->renderer);
 }

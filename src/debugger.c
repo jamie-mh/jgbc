@@ -334,7 +334,7 @@ void debug(gbc_system *gbc) {
 
             // Help command
             case 'h':
-                printf("\nAvailable Commands:\nn: Run current instruction\nb: Create a breakpoint\nd: Remove a breakpoint\nl: List all breakpoints\nr: Run\np: Print debug information\ns: Read byte in memory\nf: Dump RAM to a file\nq: Quit\n");
+                printf("\nAvailable Commands:\nn: Run current instruction\nb: Create a breakpoint\nd: Remove a breakpoint\nl: List all breakpoints\nr: Run\np: Print debug information\ns: Read byte in memory\nw: Write byte in memory\nf: Dump RAM to a file\nq: Quit\n");
                 continue;
 
             // Run current instruction
@@ -409,6 +409,30 @@ void debug(gbc_system *gbc) {
 
                 if(address <= 0xFFFF) {
                     printf("Result: 0x%02X\n\n", read_byte(gbc->ram, address));
+                } else {
+                    printf(CRED "Out of range\n" CNRM);
+                }
+
+                continue;
+            }
+
+            // Write value at address in memory
+            case 'w': {
+
+                unsigned int address;                    
+                unsigned int value;
+
+                printf("\nWrite byte\nAddress (HEX) 0x");
+                scanf("%x", &address);
+
+                if(address <= 0xFFFF) {
+
+                    printf("Value: 0x");
+                    scanf("%x", &value);
+
+                    write_byte(gbc->ram, address, value, 0);
+
+                    printf(CGRN "Written %02X at %04X\n\n" CNRM, value, address);
                 } else {
                     printf(CRED "Out of range\n" CNRM);
                 }
@@ -555,16 +579,9 @@ static char dump_ram(gbc_ram *ram, const char *filename) {
     // Dump the ram to a file
     unsigned short pointer = 0x0;
     for(; pointer < 0xFFFF; pointer++) {
-        
-        // TODO: Remove this
-        if((pointer >= 0xA000 && pointer <= 0xBFFF) ||
-           (pointer >= 0xFE00)) {
-            fputc(0, fp); 
-        } else {
-            fputc(read_byte(ram, pointer), fp);
-        }
+        fputc(read_byte(ram, pointer), fp);
     }
-    fclose(fp);
 
+    fclose(fp);
     return 1;
 }

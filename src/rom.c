@@ -66,6 +66,11 @@ char load_rom(gbc_system *gbc, const char *path) {
     gbc->ram->rom00 = gbc->rom->rom_banks[0];
     gbc->ram->romNN = gbc->rom->rom_banks[1];
 
+    // Point the extram to the first bank if applicable
+    if(gbc->rom->ram_size > 0) {
+        gbc->ram->extram = gbc->rom->ram_banks[0];
+    }
+
     return 1;
 }
 

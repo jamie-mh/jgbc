@@ -21,6 +21,10 @@
 #define TMA 0xFF06
 #define TAC 0xFF07
 
+#define TAC_INPUT0 0
+#define TAC_INPUT1 1
+#define TAC_STOP 2
+
 // GBC Only Registers
 #define KEY1 0xFF4D
 #define SVBK 0xFF70
@@ -39,10 +43,12 @@
 
 void init_ram(gbc_ram *);
 
+char is_valid_ram(gbc_ram *, const unsigned short);
+
 unsigned char read_byte(gbc_ram *, const unsigned short);
 unsigned short read_short(gbc_ram *, const unsigned short);
 
-void write_byte(gbc_ram *, const unsigned short, const unsigned char);
+void write_byte(gbc_ram *, const unsigned short, unsigned char, const char);
 void write_short(gbc_ram *, const unsigned short, const unsigned short);
 
 void set_register(gbc_ram *, const unsigned short, const unsigned char, const unsigned char);
