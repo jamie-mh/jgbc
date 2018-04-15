@@ -15,6 +15,8 @@
 #define LCDC_OBJ_DISPLAY 1 // OBJ (Sprite) Display Enable
 #define LCDC_BG_DISPLAY 0 // BG Display
 
+#define DEFAULT_LCDC 0x91
+
 // STAT: LCDC Status Register
 #define STAT 0xFF41
 #define STAT_LYC_LY_COINCID 6 // LYC=LY Coincidence Interrupt
@@ -72,6 +74,8 @@
 #define BLACK 0, 0, 0, 255
 #define DGREY 192, 192, 192, 255
 #define LGREY 96, 96, 96, 255
+
+#define FRAMERATE 60
 
 void init_ppu(gbc_ppu *, const char scale);
 void ppu_do_clock(gbc_system *);

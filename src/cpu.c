@@ -5,7 +5,6 @@
 #include "instr.h"
 
 static void service_interrupt(gbc_system *, const unsigned char);
-static void execute_instr(gbc_instruction, gbc_system *);
 static gbc_instruction get_curr_instr(gbc_system *);
 
 
@@ -28,10 +27,7 @@ void init_cpu(gbc_cpu *cpu) {
     // Enable interrupts
     cpu->registers->IME = 1;
     cpu->is_halted = 0;
-
-    // Reset the clock
-    cpu->clock = 0;
-    cpu->run_for = 0;
+    cpu->is_interrupted = 0;
 
     // Reset the timers
     cpu->div_clock = 0;
@@ -52,8 +48,10 @@ gbc_instruction find_instr(const unsigned char opcode, const unsigned short addr
     }
 }
 
-// Executes an instruction by calling the function associated with it 
-static void execute_instr(gbc_instruction instruction, gbc_system *gbc) {
+// Executes an instruction by calling the function associated with it and returns the cycles it took
+unsigned char execute_instr(gbc_system *gbc) {
+
+    gbc_instruction instruction = get_curr_instr(gbc);
 
     // Create a pointer to the function to execute
     void (*opcode_function)();
@@ -88,26 +86,8 @@ static void execute_instr(gbc_instruction instruction, gbc_system *gbc) {
             opcode_function(gbc, operand);
             break;
     }
-}
 
-// Execute a cpu instruction and respect its duration in clock cycles
-void cpu_do_clock(gbc_system *gbc) {
-
-    // Wait until the current instruction is finished
-    if(gbc->cpu->clock < gbc->cpu->run_for) {
-        gbc->cpu->clock++;
-    }
-    // We've moved to the next instruction
-    else {
-
-        // Execute the instruction
-        gbc_instruction instruction = get_curr_instr(gbc);
-        execute_instr(instruction, gbc);
-
-        // Set the clock accordingly
-        gbc->cpu->clock = 0;
-        gbc->cpu->run_for = instruction.clocks;
-    }
+    return instruction.clocks;
 }
 
 // Gets the current instruction at the program counter
@@ -199,23 +179,27 @@ unsigned short stack_pop_short(gbc_ram *ram, unsigned short *sp) {
 // Checks if the cpu has pending interrupts and services them 
 void check_interrupt(gbc_system *gbc) {
     
-    // Read the interrupt enable and request registers
-    unsigned char enabled = read_byte(gbc->ram, IE);
-    unsigned char flag = read_byte(gbc->ram, IF);
+    // Don't service any more interrupts until the current one is complete
+    if(gbc->cpu->is_interrupted == 0) { 
 
-    // Find the enabled and requested interrupts
-    for(int i = 0; i < 5; i++) {
-        
-        // If this interrupt is enabled and requested
-        // This just checks that the i'th bit is set in both bytes
-        if(((enabled >> i) & 1) && ((flag >> i) & 1)) {
+        // Read the interrupt enable and request registers
+        unsigned char enabled = read_byte(gbc->ram, IE);
+        unsigned char flag = read_byte(gbc->ram, IF);
 
-            // If interrupts are globally enabled
-            if(gbc->cpu->registers->IME) {
-                service_interrupt(gbc, i);
+        // Find the enabled and requested interrupts
+        for(int i = 0; i < 5; i++) {
+            
+            // If this interrupt is enabled and requested
+            // This just checks that the i'th bit is set in both bytes
+            if(((enabled >> i) & 1) && ((flag >> i) & 1)) {
+
+                // If interrupts are globally enabled
+                if(gbc->cpu->registers->IME) {
+                    service_interrupt(gbc, i);
+                }
+
+                gbc->cpu->is_halted = 0;
             }
-
-            gbc->cpu->is_halted = 0;
         }
     }
 }
@@ -243,6 +227,7 @@ static void service_interrupt(gbc_system *gbc, const unsigned char number) {
 
         // Jump to the interrupt subroutine
         gbc->cpu->registers->PC = interrupt[number];
+        gbc->cpu->is_interrupted = 1;
     }  
 }
 

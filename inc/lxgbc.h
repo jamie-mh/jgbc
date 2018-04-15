@@ -63,11 +63,10 @@ typedef struct gbc_registers {
 
 typedef struct gbc_cpu {
     gbc_registers *registers;
-    unsigned char clock;
     unsigned short div_clock; // Divider Timer Clock
     unsigned short cnt_clock; // Timer Counter Clock
-    unsigned char run_for;
-    unsigned char is_halted;
+    unsigned is_halted;
+    unsigned is_interrupted;
 } gbc_cpu;
 
 typedef struct gbc_ppu {

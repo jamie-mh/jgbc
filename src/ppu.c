@@ -60,7 +60,7 @@ void init_ppu(gbc_ppu *ppu, const char scale) {
 // Renders the picture on the screen scanline by scanline
 void ppu_do_clock(gbc_system *gbc) {
     
-    // Wait until the current instruction is finished
+    // Wait until the current scanline is finished
     if(gbc->ppu->clock < gbc->ppu->run_for) {
         gbc->ppu->clock++;
         return;
@@ -134,7 +134,7 @@ void ppu_do_clock(gbc_system *gbc) {
     }
 }
 
-// Renders a tile to the display at the specified coordinates
+// Renders a background scanline to the display at the specified coordinates
 // Gets tile data from ram at the pointer given
 static void render_bg_scan(gbc_system *gbc, unsigned char ly) {
 
@@ -147,6 +147,7 @@ static void render_bg_scan(gbc_system *gbc, unsigned char ly) {
     // The tile numbers are signed (-128 to 127)
     char signed_tile_num;
     unsigned short bg_tile_data_start;
+
     if(read_register(gbc->ram, LCDC, LCDC_BG_WINDOW_TILE_DATA)) {
         bg_tile_data_start = 0x8000;
         signed_tile_num = 0;
@@ -169,6 +170,7 @@ static void render_bg_scan(gbc_system *gbc, unsigned char ly) {
     // Render a scanline of background tiles 
     for(unsigned char x = 0; x < SCREEN_WIDTH; x++) {
 
+        // Get the current background position (wrap around if it overflows)
         const unsigned char bg_x = (scroll_x + x > 255) ? (scroll_x + x) - 255 : scroll_x + x; 
         const unsigned char bg_y = (scroll_y + ly > 255) ? (scroll_y + ly) - 255 : scroll_y + ly; 
 

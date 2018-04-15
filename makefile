@@ -6,7 +6,7 @@ INC := ./inc
 
 # Compiler
 CC := gcc
-CFLAGS := -I$(INC)/ -lSDL2 -lm -Ofast -g -Wall -Wextra
+CFLAGS := -I$(INC)/ -lSDL2 -lm -Ofast -fomit-frame-pointer -g -Wall -Wextra
 
 # Files
 OUTNAME := lxgbc

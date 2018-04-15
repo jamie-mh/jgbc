@@ -24,61 +24,54 @@ int main(int argc, char **argv) {
 
     init_system(gbc, cmd);
     gbc->is_running = 1;
-    free(cmd);
 
     SDL_Event event;
+    int last_time = 0;
 
     // Main endless loop 
     // One execution of this loop represents one cpu clock
     while(gbc->is_running) {
 
-        unsigned char lcd_on = read_register(gbc->ram, LCDC, LCDC_LCD_ENABLE);
+        static const int max_clocks = CLOCK_SPEED / FRAMERATE;
+        int frame_clocks = 0;
 
-        if(gbc->cpu->is_halted == 0) {
-            cpu_do_clock(gbc);
-        }
+        last_time = SDL_GetTicks();
 
-        // In debug mode, we need to run as many ppu clocks as cpu clocks
-        // and instantly run the instruction
-        if(gbc->debugger->is_debugging) {
+        // Run the clocks for this frame
+        while(frame_clocks < max_clocks) {
 
-            debug(gbc);
-            int clocks;
+            unsigned char clocks = 0;
 
-            // Still run the ppu when the cpu is halted
-            if(gbc->cpu->is_halted) {
-                clocks = 1;
-            } else {
-                clocks = gbc->cpu->run_for;
+            if(gbc->debugger->is_debugging) {
+                debug(gbc);
             }
 
-            // Run as many ppu clocks as cpu clocks
-            for(int i = 0; i < clocks; i++) {
-                if(lcd_on) {
-                    ppu_do_clock(gbc);
-                }
+            // Run the current cpu instruction
+            if(gbc->cpu->is_halted == 0) {
+                clocks = execute_instr(gbc);                
+            } else {
+                clocks = 1;
+            }
 
-                check_interrupt(gbc);
+            frame_clocks += clocks;
+
+            // Run the ppu and timer for the same amount of clocks
+            for(unsigned char i = 0; i < clocks; i++) {
+                ppu_do_clock(gbc);
                 update_timer(gbc);
             }
 
-            gbc->cpu->run_for = gbc->cpu->clock;                
-        }
-        // In normal mode, respect clock cycles
-        else {
-
-            if(lcd_on) {
-                ppu_do_clock(gbc);
-            }
-
             check_interrupt(gbc);
-            update_timer(gbc);
+
+            // Handle SDL events
+            if(SDL_PollEvent(&event)) {
+                handle_event(event, gbc);
+            }
         }
-        
-        // Handle SDL events
-        if(SDL_PollEvent(&event)) {
-            handle_event(event, gbc);
-        }
+
+        // Run at the framerate and remove the time it took to compute this frame
+        int execute_time = last_time - SDL_GetTicks();
+        SDL_Delay((1 / FRAMERATE) * 1000 - execute_time);
 
         // Temp: Simulate no buttons pressed
         write_byte(gbc->ram, 0xFF00, 0xEF, 0);

@@ -293,12 +293,12 @@ unsigned short add_short(const unsigned short a, const unsigned short b, unsigne
 }
 
 // Shift the carry flag onto the bottom and pop the top into the carry flag
-unsigned char rotate_left(const unsigned char operand, const char change_zero, unsigned char *flag) {
+unsigned char rotate_left(const unsigned char operand, const char affect_zero, unsigned char *flag) {
     
     // Shift the carry flag onto the result
     const unsigned char result = (operand << 1) | get_flag(FLAG_CARRY, *flag);
 
-    if((result == 0) && (change_zero == 1)) {
+    if((result == 0) && (affect_zero == 1)) {
         set_flag(FLAG_ZERO, 1, flag);
     } else {
         set_flag(FLAG_ZERO, 0, flag); 
@@ -335,12 +335,12 @@ unsigned char rotate_right(const unsigned char operand, unsigned char *flag) {
 }
 
 // Pop the top into the carry flag and shift it onto the bottom
-unsigned char rotate_left_carry(const unsigned char operand, const char change_zero, unsigned char *flag) {
+unsigned char rotate_left_carry(const unsigned char operand, const char affect_zero, unsigned char *flag) {
 
     // Shift bit 0 onto the top 
     const unsigned char result = ((operand << 1) | (operand >> 7));
 
-    if((result == 0) && (change_zero == 1)) {
+    if((result == 0) && (affect_zero == 1)) {
         set_flag(FLAG_ZERO, 1, flag);
     } else {
         set_flag(FLAG_ZERO, 0, flag); 
@@ -356,12 +356,12 @@ unsigned char rotate_left_carry(const unsigned char operand, const char change_z
 }
 
 // Pop the bottom into the carry and shift it on the top
-unsigned char rotate_right_carry(const unsigned char operand, const char change_zero, unsigned char *flag) {
+unsigned char rotate_right_carry(const unsigned char operand, const char affect_zero, unsigned char *flag) {
 
     // Shift bit 0 onto the top 
     const unsigned char result = ((operand >> 1) | (operand << 7));
 
-    if((result == 0) && (change_zero == 1)) {
+    if((result == 0) && (affect_zero == 1)) {
         set_flag(FLAG_ZERO, 1, flag);
     } else {
         set_flag(FLAG_ZERO, 0, flag); 

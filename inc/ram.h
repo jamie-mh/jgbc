@@ -15,28 +15,10 @@
 // Joypad Register
 #define JOYP 0xFF00
 
-// Timer and Divider Registers
-#define DIV 0xFF04
-#define TIMA 0xFF05
-#define TMA 0xFF06
-#define TAC 0xFF07
-
-#define TAC_INPUT0 0
-#define TAC_INPUT1 1
-#define TAC_STOP 2
 
 // GBC Only Registers
 #define KEY1 0xFF4D
 #define SVBK 0xFF70
-
-// Interrupt Registers
-#define IE 0xFFFF
-#define IF 0xFF0F
-#define IEF_VBLANK 0
-#define IEF_LCD_STAT 1
-#define IEF_TIMER 2
-#define IEF_SERIAL 3
-#define IEF_JOYPAD 4
 
 // Serial
 #define SB 0xFF01

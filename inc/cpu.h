@@ -21,7 +21,27 @@
 #define INT_SERIAL 0x58
 #define INT_JOYPAD 0x60
 
-#define TAC_THRESHOLD {1024, 16, 64, 256}
+// Timer and Divider Registers
+#define DIV 0xFF04
+#define TIMA 0xFF05
+#define TMA 0xFF06
+#define TAC 0xFF07
+
+#define TAC_INPUT0 0
+#define TAC_INPUT1 1
+#define TAC_STOP 2
+
+// Interrupt Registers
+#define IE 0xFFFF
+#define IF 0xFF0F
+#define IEF_VBLANK 0
+#define IEF_LCD_STAT 1
+#define IEF_TIMER 2
+#define IEF_SERIAL 3
+#define IEF_JOYPAD 4
+
+#define CLOCK_SPEED 4194304
+#define TAC_THRESHOLD {CLOCK_SPEED / 4096, CLOCK_SPEED / 262144, CLOCK_SPEED / 65536, CLOCK_SPEED / 16384}
 
 typedef struct gbc_instruction {
     char *disassembly;
@@ -33,7 +53,7 @@ typedef struct gbc_instruction {
 
 void init_cpu(gbc_cpu *);
 gbc_instruction find_instr(const unsigned char, const unsigned short, gbc_system *);
-void cpu_do_clock(gbc_system *);
+unsigned char execute_instr(gbc_system *);
 
 void set_flag(const char, const unsigned char, unsigned char *);
 char get_flag(const char, const unsigned char);

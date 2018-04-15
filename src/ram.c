@@ -1,4 +1,6 @@
 #include "lxgbc.h"
+#include "ppu.h"
+#include "cpu.h"
 #include "ram.h"
 
 static unsigned char *get_memory_location(gbc_ram *, unsigned short *);
@@ -27,6 +29,9 @@ void init_ram(gbc_ram *ram) {
     ram->io = calloc(IO_SIZE, sizeof(char));
     ram->hram = calloc(HRAM_SIZE, sizeof(char));
     ram->ier = calloc(1, sizeof(char));
+
+    // Set the default registers
+    write_byte(ram, LCDC, DEFAULT_LCDC, 0);
 }
 
 // Returns a pointer to the memory location of the specified address
