@@ -8,8 +8,6 @@ static void render_bg_scan(gbc_system *, unsigned char ly);
 static SDL_Colour get_shade(const unsigned char);
 static void fill_shade_table(gbc_system *, SDL_Colour *);
 
-static void render(gbc_ppu *);
-
 
 // Opens a SDL window, WIP
 void init_ppu(gbc_ppu *ppu, const char scale) {
@@ -120,8 +118,6 @@ void ppu_do_clock(gbc_system *gbc) {
         // End of frame rendering
         if(ly_val == 153) {
             ly_val = 0;
-
-            render(gbc->ppu);
         } else {
             ly_val++;
         }
@@ -249,7 +245,7 @@ static void fill_shade_table(gbc_system *gbc, SDL_Colour *table) {
 }
 
 // Renders the current framebuffer to the display
-static void render(gbc_ppu *ppu) {
+void render(gbc_ppu *ppu) {
 
     SDL_UpdateTexture(
         ppu->texture,

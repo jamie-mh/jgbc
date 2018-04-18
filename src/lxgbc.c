@@ -69,6 +69,8 @@ int main(int argc, char **argv) {
             }
         }
 
+        render(gbc->ppu);
+
         // Run at the framerate and remove the time it took to compute this frame
         int execute_time = last_time - SDL_GetTicks();
         SDL_Delay((1 / FRAMERATE) * 1000 - execute_time);
