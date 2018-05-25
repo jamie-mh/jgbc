@@ -9,7 +9,7 @@
 
 static void init_system(gbc_system *, cmd_options *);
 static void handle_event(SDL_Event, gbc_system *);
-static char get_cl_arguments(int, char **, cmd_options *);
+static bool get_cl_arguments(int, char **, cmd_options *);
 
 
 int main(int argc, char **argv) {
@@ -17,13 +17,12 @@ int main(int argc, char **argv) {
     gbc_system *gbc = malloc(sizeof(gbc_system));
     cmd_options *cmd = malloc(sizeof(cmd_options));
 
-    // Check that the command line arguments are valid
     if(!get_cl_arguments(argc, argv, cmd)) {
-        return -1;
+        return EXIT_FAILURE; 
     }
 
     init_system(gbc, cmd);
-    gbc->is_running = 1;
+    free(cmd);
 
     SDL_Event event;
     int last_time = 0;
@@ -46,8 +45,7 @@ int main(int argc, char **argv) {
                 debug(gbc);
             }
 
-            // Run the current cpu instruction
-            if(gbc->cpu->is_halted == 0) {
+            if(gbc->cpu->is_halted == false) {
                 clocks = execute_instr(gbc);                
             } else {
                 clocks = 1;
@@ -63,7 +61,6 @@ int main(int argc, char **argv) {
 
             check_interrupt(gbc);
 
-            // Handle SDL events
             if(SDL_PollEvent(&event)) {
                 handle_event(event, gbc);
             }
@@ -80,13 +77,12 @@ int main(int argc, char **argv) {
     }
 
     SDL_Quit();
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 // Initialises the system
 static void init_system(gbc_system *gbc, cmd_options *cmd) {
 
-    // Allocate memory    
     gbc->cpu = malloc(sizeof(gbc_cpu));
     gbc->ppu = malloc(sizeof(gbc_ppu));
     gbc->ram = malloc(sizeof(gbc_ram));
@@ -98,27 +94,28 @@ static void init_system(gbc_system *gbc, cmd_options *cmd) {
     init_ppu(gbc->ppu, cmd->scale);
     init_debugger(gbc->debugger);
 
-    // Load the rom into memory
     if(!load_rom(gbc, cmd->rom_path)) {
         fprintf(stderr, "ERROR: Could not load rom file!\n");
-        exit(-1);
+        exit(EXIT_FAILURE);
     }
 
     // Append the game title to the window title
     char title[TITLE_LENGTH + strlen(MAIN_WINDOW_TITLE " - ") + 1];
-    sprintf(title, "%s - %s", MAIN_WINDOW_TITLE, gbc->rom->title);
+    snprintf(title, TITLE_LENGTH + 1, "%s - %s", MAIN_WINDOW_TITLE, gbc->rom->title);
+    title[strlen(title)] = '\0';
 
     SDL_SetWindowTitle(gbc->ppu->window, title);
 
-    // Show a message and initialise the debugger 
     if(cmd->debug) {
         printf(CGRN LOGO CNRM);
         print_rom_info(gbc->rom);
         printf("\nLXGBC DEBUGGER RUNNING\nType 'h' for information on the available commands.\n");
         printf(DEBUG_PROMPT);
 
-        gbc->debugger->is_debugging = 1;
+        gbc->debugger->is_debugging = true;
     }
+
+    gbc->is_running = true;
 }
 
 // Handles events from SDL
@@ -134,8 +131,8 @@ static void handle_event(SDL_Event event, gbc_system *gbc) {
             if(event.key.keysym.sym == SDLK_ESCAPE) {
                 gbc->debugger->is_running = 0;
 
-                if(gbc->debugger->is_debugging == 0) {
-                    gbc->debugger->is_debugging = 1;
+                if(gbc->debugger->is_debugging == false) {
+                    gbc->debugger->is_debugging = true;
                     printf(DEBUG_PROMPT);
                 }
             }
@@ -145,12 +142,12 @@ static void handle_event(SDL_Event event, gbc_system *gbc) {
 }
 
 // Populates the cmd_options struct with the selected options from the command line
-static char get_cl_arguments(int argc, char **argv, cmd_options *cmd) {
+static bool get_cl_arguments(int argc, char **argv, cmd_options *cmd) {
 
     int option;
     int f_flag, s_flag = 0;
 
-    cmd->debug = 0;
+    cmd->debug = false;
 
     while((option = getopt(argc, argv, "f:gs:")) != -1) {
         switch (option) {
@@ -160,7 +157,7 @@ static char get_cl_arguments(int argc, char **argv, cmd_options *cmd) {
                 break;
             
             case 'g':
-                cmd->debug = 1;
+                cmd->debug = true;
                 break;
 
             case 's':
@@ -176,12 +173,12 @@ static char get_cl_arguments(int argc, char **argv, cmd_options *cmd) {
 
     if(!f_flag) {
         printf("%s: missing -f option\n", argv[0]);
-        return 0;
+        return false;
     }
 
     if(!s_flag) {
         cmd->scale = 1;
     }
 
-    return 1;
+    return true;
 }

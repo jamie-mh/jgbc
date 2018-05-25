@@ -16,7 +16,6 @@ void init_ram(gbc_ram *ram) {
     ram->vram = calloc(VRAM_SIZE, sizeof(char));
     ram->wram_banks = malloc(sizeof(char *) * WRAM_BANK_COUNT); 
 
-    // Allocate memory for all the WRAM banks
     for(int i = 0; i < WRAM_BANK_COUNT; i++) {
         ram->wram_banks[i] = calloc(WRAM_BANK_SIZE, sizeof(char));
     }
@@ -30,7 +29,6 @@ void init_ram(gbc_ram *ram) {
     ram->hram = calloc(HRAM_SIZE, sizeof(char));
     ram->ier = calloc(1, sizeof(char));
 
-    // Set the default registers
     write_byte(ram, LCDC, DEFAULT_LCDC, 0);
 }
 
@@ -102,19 +100,19 @@ static unsigned char *get_memory_location(gbc_ram *ram, unsigned short *address)
 }
 
 // Checks if the ram address is valid and can be read / written
-char is_valid_ram(gbc_ram *ram, const unsigned short address) {
+bool is_valid_ram(gbc_ram *ram, const unsigned short address) {
 
     // If the memory is unusable
     if(address >= 0xFEA0 && address <= 0xFEFF) {
-        return 0;
+        return false;
     }
 
     // If the memory is in extram and it is not available
     if(address >= 0xA000 && address <= 0xBFFF && ram->extram == NULL) {
-        return 0;
+        return false;
     }
 
-    return 1;    
+    return true;
 }
 
 // Reads a byte from the specified location in memory
@@ -136,11 +134,9 @@ unsigned char read_byte(gbc_ram *ram, const unsigned short address) {
 // Returns the LS byte first
 unsigned short read_short(gbc_ram *ram, const unsigned short address) {
 
-    // Get the two consecutive bytes
     const unsigned char byte_a = read_byte(ram, address);
     const unsigned char byte_b = read_byte(ram, address + 1);
 
-    // Combine and return the result
     return byte_b << 8 | byte_a;
 }
 
@@ -179,7 +175,6 @@ void write_short(gbc_ram *ram, const unsigned short address, const unsigned shor
     unsigned char byte_a = (value & 0x00FF);
     unsigned char byte_b = (value & 0xFF00) >> 8;
 
-    // Write the two bytes
     write_byte(ram, address, byte_a, 1);
     write_byte(ram, address + 1, byte_b, 1);
 }
@@ -187,7 +182,6 @@ void write_short(gbc_ram *ram, const unsigned short address, const unsigned shor
 // Writes to memory register at a certain location
 void write_register(gbc_ram *ram, const unsigned short address, const unsigned char bit, const unsigned char value) {
     
-    // Read and write the modified byte
     unsigned char byte = read_byte(ram, address);
     byte ^= (-value ^ byte) & (1 << bit);
     write_byte(ram, address, byte, 0);

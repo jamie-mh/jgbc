@@ -6,12 +6,14 @@ static void get_rom_info(unsigned char *, gbc_rom *);
 
 
 // Load a ROM file into the RAM memory location
-char load_rom(gbc_system *gbc, const char *path) {
+bool load_rom(gbc_system *gbc, const char *path) {
 
-    // Open the file at the specified path
     FILE *file;
     file = fopen(path, "r");
-    if(!file) return 0;
+
+    if(!file) {
+        return false;
+    }
 
     // Allocate temp memory and copy just the header 
     unsigned char *header = malloc(sizeof(char) * (ROM_HEADER_END - ROM_HEADER_START)); 
@@ -22,10 +24,9 @@ char load_rom(gbc_system *gbc, const char *path) {
 
         // If we cannot read this location, then the file is invalid
         if((character = fgetc(file)) == EOF) {
-            return 0;
+            return false;
         }
         
-        // Add the byte to the header memory
         header[i - ROM_HEADER_START] = (unsigned char) character;
     }
 
@@ -33,13 +34,11 @@ char load_rom(gbc_system *gbc, const char *path) {
     get_rom_info(header, gbc->rom);
     free(header);
 
-    // Allocate memory for all the rom banks
     gbc->rom->rom_banks = malloc(sizeof(char *) * gbc->rom->rom_size); 
     for(int i = 0; i < gbc->rom->rom_size; i++) {
         gbc->rom->rom_banks[i] = calloc(ROM_BANK_SIZE, sizeof(char)); 
     }
     
-    // Allocate memory for all the ext ram banks
     gbc->rom->ram_banks = malloc(sizeof(char *) * gbc->rom->ram_size);
     for(int i = 0; i < gbc->rom->ram_size; i++) {
         gbc->rom->ram_banks[i] = calloc(EXTRAM_BANK_SIZE, sizeof(char));
@@ -54,7 +53,6 @@ char load_rom(gbc_system *gbc, const char *path) {
         
         unsigned char bank = floor(position / ROM_BANK_SIZE);
         
-        // Write the character to ram
         gbc->rom->rom_banks[bank][position - (ROM_BANK_SIZE * bank)] = character;
         position++; 
     }
@@ -71,7 +69,7 @@ char load_rom(gbc_system *gbc, const char *path) {
         gbc->ram->extram = gbc->rom->ram_banks[0];
     }
 
-    return 1;
+    return true;
 }
 
 // Parse the ROM header and get its information
@@ -80,15 +78,13 @@ static void get_rom_info(unsigned char *header, gbc_rom *rom) {
     // Read the title from the header    
     // The title is 16 characters maximum, uppercase ASCII
     rom->title = calloc(TITLE_LENGTH + 1, sizeof(char));
-    int i;
 
-    for(i = 0; i < TITLE_LENGTH; i++) {
+    for(int i = 0; i < TITLE_LENGTH; i++) {
         rom->title[i] = header[0x134 - ROM_HEADER_START + i];
     }
 
     rom->title[strlen(rom->title)] = '\0';
 
-    // Get the rest of the cartridge information 
     rom->cgb_flag = header[0x143 - ROM_HEADER_START]; 
     rom->cart_type = header[0x147 - ROM_HEADER_START];
     rom->rom_size = (2*ROM_BANK_SIZE << header[0x148 - ROM_HEADER_START]) / ROM_BANK_SIZE;
@@ -106,7 +102,6 @@ static void get_rom_info(unsigned char *header, gbc_rom *rom) {
 // Display the ROM information in the console
 void print_rom_info(gbc_rom *rom) {
     
-    // Print the rom information
     printf(CMAG "Title: " CNRM "%s\n", rom->title);
     printf(CMAG "CGB Flag: " CNRM "%02X\n", rom->cgb_flag);
     printf(CMAG "Cartridge Type: " CNRM "%02X\n", rom->cart_type);

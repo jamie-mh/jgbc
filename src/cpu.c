@@ -11,21 +11,18 @@ static gbc_instruction get_curr_instr(gbc_system *);
 // Initialises the CPU registers
 void init_cpu(gbc_cpu *cpu) {
 
-    // Initialize the registers
     cpu->registers = malloc(sizeof(gbc_registers));
 
-    // Default register values
     cpu->registers->AF = DEFAULT_AF;
     cpu->registers->BC = DEFAULT_BC;
     cpu->registers->DE = DEFAULT_DE;
     cpu->registers->HL = DEFAULT_HL;
 
-    // Set the pointers to their default value
     cpu->registers->PC = DEFAULT_PC;
     cpu->registers->SP = DEFAULT_SP;
 
     // Enable interrupts
-    cpu->registers->IME = 1;
+    cpu->registers->IME = true;
     cpu->is_halted = 0;
     cpu->is_interrupted = 0;
 
@@ -53,20 +50,17 @@ unsigned char execute_instr(gbc_system *gbc) {
 
     gbc_instruction instruction = get_curr_instr(gbc);
 
-    // Create a pointer to the function to execute
     void (*opcode_function)();
     opcode_function = instruction.execute;
 
-    // Execute the instruction based on the length of the operand
     char operand_len = instruction.length - 1;
     unsigned short operand;
 
-    // If it is a CB instruction, it's shorter
+    // If it is a CB instruction, it's shorter because we don't count the prefix
     if(instruction.execute == &op_prefix_cb) {
         operand_len--; 
     }
 
-    // Increment the program counter
     unsigned short instr_start = gbc->cpu->registers->PC;
     gbc->cpu->registers->PC += instruction.length;
 
@@ -93,17 +87,13 @@ unsigned char execute_instr(gbc_system *gbc) {
 // Gets the current instruction at the program counter
 static gbc_instruction get_curr_instr(gbc_system *gbc) {
     
-    // Get the opcode at the program counter
     unsigned char opcode = read_byte(gbc->ram, gbc->cpu->registers->PC);
-
-    // Get the instruction structure
     return find_instr(opcode, gbc->cpu->registers->PC, gbc);
 }
 
 // Returns the bit no of the specified flag in the F register
 char get_flag_offset(const char flag) {
-    
-    // Find the offset of the bit
+
     switch(flag) {
         case FLAG_ZERO: return 7;
         case FLAG_SUBTRACT: return 6;
@@ -137,11 +127,8 @@ char get_flag(const char flag, const unsigned char regis) {
 
 // Pushes a byte to the stack after decrementing the stack pointer
 void stack_push_byte(gbc_ram *ram, unsigned short *sp, const unsigned char value) {
-   
-    // Decrement the stack pointer
-    *sp -= sizeof(char);
 
-    // Write the value
+    *sp -= sizeof(char);
     write_byte(ram, *sp, value, 1);
 }
 
@@ -156,10 +143,7 @@ void stack_push_short(gbc_ram *ram, unsigned short *sp, const unsigned short val
 // Pops a byte from the stack and increments the stack pointer
 unsigned char stack_pop_byte(gbc_ram *ram, unsigned short *sp) {
     
-    // Read the value
     unsigned char value = read_byte(ram, *sp);
-    
-    // Increment the stack pointer
     *sp += sizeof(char);
 
     return value;
@@ -168,11 +152,9 @@ unsigned char stack_pop_byte(gbc_ram *ram, unsigned short *sp) {
 // Pops a short from the stack and increments the stack pointer
 unsigned short stack_pop_short(gbc_ram *ram, unsigned short *sp) {
     
-    // Get two bytes from the stack 
     unsigned char byte_a = stack_pop_byte(ram, sp); 
     unsigned char byte_b = stack_pop_byte(ram, sp); 
 
-    // Combine them
     return byte_a | (byte_b << 8);
 }
 
@@ -180,13 +162,11 @@ unsigned short stack_pop_short(gbc_ram *ram, unsigned short *sp) {
 void check_interrupt(gbc_system *gbc) {
     
     // Don't service any more interrupts until the current one is complete
-    if(gbc->cpu->is_interrupted == 0) { 
+    if(gbc->cpu->is_interrupted == false) { 
 
-        // Read the interrupt enable and request registers
         unsigned char enabled = read_byte(gbc->ram, IE);
         unsigned char flag = read_byte(gbc->ram, IF);
 
-        // Find the enabled and requested interrupts
         for(int i = 0; i < 5; i++) {
             
             // If this interrupt is enabled and requested
@@ -223,7 +203,7 @@ static void service_interrupt(gbc_system *gbc, const unsigned char number) {
         // Disable the interrupt request
         write_register(gbc->ram, IE, number, 0);
         write_register(gbc->ram, IF, number, 0);
-        gbc->cpu->registers->IME = 0;
+        gbc->cpu->registers->IME = false;
 
         // Jump to the interrupt subroutine
         gbc->cpu->registers->PC = interrupt[number];

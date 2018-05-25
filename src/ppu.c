@@ -12,10 +12,8 @@ static void fill_shade_table(gbc_system *, SDL_Colour *);
 // Opens a SDL window, WIP
 void init_ppu(gbc_ppu *ppu, const char scale) {
 
-    // Init video subsystem
     SDL_Init(SDL_INIT_VIDEO);
 
-    // Create window
     ppu->window = SDL_CreateWindow(
         MAIN_WINDOW_TITLE,
         SDL_WINDOWPOS_UNDEFINED,
@@ -25,14 +23,12 @@ void init_ppu(gbc_ppu *ppu, const char scale) {
         SDL_WINDOW_SHOWN
     );
 
-    // Create renderer
     ppu->renderer = SDL_CreateRenderer(
         ppu->window,
         -1,
         SDL_RENDERER_ACCELERATED
     );
 
-    // Create a texture that will be copied to the renderer
     ppu->texture = SDL_CreateTexture(
         ppu->renderer,
         SDL_PIXELFORMAT_ARGB8888,
@@ -41,15 +37,12 @@ void init_ppu(gbc_ppu *ppu, const char scale) {
         SCREEN_HEIGHT
     );
     
-    // Allocate memory for the framebuffer
     ppu->framebuffer = calloc(SCREEN_WIDTH * SCREEN_HEIGHT * 8, sizeof(char));
 
-    // Set the rendering scale
     SDL_RenderSetScale(ppu->renderer, scale, scale);
 
     render(ppu);
 
-    // Reset the clock
     ppu->clock = 0;
     ppu->scan_clock = 0;
     ppu->run_for = 0;
@@ -64,7 +57,6 @@ void ppu_do_clock(gbc_system *gbc) {
         return;
     }
 
-    // Set the mode according to the clock
     unsigned char ly_val = read_byte(gbc->ram, LY);
     unsigned char mode = 0;
 
@@ -103,7 +95,6 @@ void ppu_do_clock(gbc_system *gbc) {
     // It's not super accurate but it's good enough and shouldn't be too noticable
     if(gbc->ppu->scan_clock == 20) {
 
-        // Render the background scanline
         render_bg_scan(gbc, ly_val);
 
         // Run for 43 clocks
@@ -141,15 +132,15 @@ static void render_bg_scan(gbc_system *gbc, unsigned char ly) {
     // The tile numbers are unsigned (0 to 255)
     // When this bit is disabled, the tile data is stored starting at 0x8800 (pattern 0 at 0x9000)
     // The tile numbers are signed (-128 to 127)
-    char signed_tile_num;
+    bool signed_tile_num;
     unsigned short bg_tile_data_start;
 
     if(read_register(gbc->ram, LCDC, LCDC_BG_WINDOW_TILE_DATA)) {
         bg_tile_data_start = 0x8000;
-        signed_tile_num = 0;
+        signed_tile_num = false;
     } else {
         bg_tile_data_start = 0x8800;
-        signed_tile_num = 1;
+        signed_tile_num = true;
     }
 
     // Get the current background scroll position
@@ -254,7 +245,6 @@ void render(gbc_ppu *ppu) {
         SCREEN_WIDTH * 4
     );
 
-    // Render the framebuffer
     SDL_RenderCopy(ppu->renderer, ppu->texture, NULL, NULL);
     SDL_RenderPresent(ppu->renderer);
 }

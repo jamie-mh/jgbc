@@ -1853,7 +1853,7 @@ void op_ld_a_a16p(gbc_system *gbc, unsigned short operand) {
 
 // 0xFB: EI (- - - -)
 void op_ei(gbc_system *gbc) {
-    gbc->cpu->registers->IME = 1;
+    gbc->cpu->registers->IME = true;
 }
 
 // 0xFE: CP d8 (Z 1 H C)

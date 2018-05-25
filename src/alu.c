@@ -3,44 +3,44 @@
 #include "alu.h"
 #include "instr.h"
 
-static char did_byte_half_carry(unsigned char, unsigned char);
-static char did_byte_full_carry(unsigned char, unsigned char);
-static char did_byte_half_borrow(unsigned char, unsigned char);
-static char did_byte_full_borrow(unsigned char, unsigned char);
-static char did_short_half_carry(unsigned short, unsigned short);
-static char did_short_full_carry(unsigned short a, unsigned short b);
+static bool did_byte_half_carry(unsigned char, unsigned char);
+static bool did_byte_full_carry(unsigned char, unsigned char);
+static bool did_byte_half_borrow(unsigned char, unsigned char);
+static bool did_byte_full_borrow(unsigned char, unsigned char);
+static bool did_short_half_carry(unsigned short, unsigned short);
+static bool did_short_full_carry(unsigned short a, unsigned short b);
 
 /*
 *   Helper Functions
 */
 
 // Checks if a byte operation resulted in a half-carry
-static char did_byte_half_carry(unsigned char a, unsigned char b) {
+static bool did_byte_half_carry(unsigned char a, unsigned char b) {
     return ((a & 0xF) + (b & 0xF)) > 0xF;
 }
 
 // Checks if a byte operation resulted in a half-borrow
-static char did_byte_half_borrow(unsigned char a, unsigned char b) {
+static bool did_byte_half_borrow(unsigned char a, unsigned char b) {
     return ((a & 0xF) < (b & 0xF));
 }
 
 // Checks if a byte operation resulted in a full carry
-static char did_byte_full_carry(unsigned char a, unsigned char b) {
+static bool did_byte_full_carry(unsigned char a, unsigned char b) {
     return (a + b) > 0xFF;
 }
 
 // Checks if a byte operation resulted in a full borrow
-static char did_byte_full_borrow(unsigned char a, unsigned char b) {
+static bool did_byte_full_borrow(unsigned char a, unsigned char b) {
     return (a < b);
 }
 
 // Checks if a short operation resulted in a half-carry
-static char did_short_half_carry(unsigned short a, unsigned short b) {
+static bool did_short_half_carry(unsigned short a, unsigned short b) {
     return (a & 0xFFF) + (b & 0xFFF) > 0xFFF;
 }
 
 // Checks if a short operation resulted in a full carry
-static char did_short_full_carry(unsigned short a, unsigned short b) {
+static bool did_short_full_carry(unsigned short a, unsigned short b) {
     return ((a + b) & 0xF0000) > 0;
 }
 

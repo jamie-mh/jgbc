@@ -23,9 +23,10 @@
 // Serial
 #define SB 0xFF01
 
+
 void init_ram(gbc_ram *);
 
-char is_valid_ram(gbc_ram *, const unsigned short);
+bool is_valid_ram(gbc_ram *, const unsigned short);
 
 unsigned char read_byte(gbc_ram *, const unsigned short);
 unsigned short read_short(gbc_ram *, const unsigned short);

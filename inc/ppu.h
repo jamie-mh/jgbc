@@ -77,6 +77,7 @@
 
 #define FRAMERATE 60
 
+
 void init_ppu(gbc_ppu *, const char);
 void ppu_do_clock(gbc_system *);
 void render(gbc_ppu *);

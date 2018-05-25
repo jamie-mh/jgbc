@@ -6,6 +6,7 @@
 #include<time.h>
 #include<string.h>
 #include<unistd.h>
+#include<stdbool.h>
 #include<SDL2/SDL.h>
 
 #define ROM_PATH_LENGTH 256
@@ -19,6 +20,7 @@
 #define CMAG "\x1B[35m"
 #define CCYN "\x1B[36m"
 #define CWHT "\x1B[37m"
+
 
 typedef struct gbc_registers {
 
@@ -58,15 +60,15 @@ typedef struct gbc_registers {
 
     unsigned short PC; // Program Counter
     unsigned short SP; // Stack Pointer
-    unsigned char IME; // Interrupt Master Enable
+    bool IME; // Interrupt Master Enable
 } gbc_registers;
 
 typedef struct gbc_cpu {
     gbc_registers *registers;
     unsigned short div_clock; // Divider Timer Clock
     unsigned short cnt_clock; // Timer Counter Clock
-    unsigned is_halted;
-    unsigned is_interrupted;
+    bool is_halted;
+    bool is_interrupted;
 } gbc_cpu;
 
 typedef struct gbc_ppu {
@@ -114,13 +116,13 @@ typedef struct gbc_breakpoint {
 
 typedef struct gbc_debugger {
     gbc_breakpoint *breakpoint_head;
-    char is_debugging;
-    char is_running;
-    char should_print;
+    bool is_debugging;
+    bool is_running;
+    bool should_print;
 } gbc_debugger;
 
 typedef struct gbc_system {
-    char is_running;
+    bool is_running;
     gbc_cpu *cpu;
     gbc_ppu *ppu;
     gbc_ram *ram;
@@ -130,6 +132,6 @@ typedef struct gbc_system {
 
 typedef struct cmd_options {
     char *rom_path;
-    char debug;
+    bool debug;
     char scale;
 } cmd_options;

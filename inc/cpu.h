@@ -1,5 +1,6 @@
 #pragma once
 
+// Default Register Values (Original GameBoy)
 #define DEFAULT_PC 0x100
 #define DEFAULT_SP 0xFFFE
 #define DEFAULT_AF 0x1B0
@@ -7,14 +8,13 @@
 #define DEFAULT_DE 0xD8
 #define DEFAULT_HL 0x14D
 
-#define INSTRUCTION_COUNT 256
-#define CB_INSTRUCTION_COUNT 256
-
+// F Register Flags
 #define FLAG_ZERO 'Z'
 #define FLAG_SUBTRACT 'N'
 #define FLAG_HALFCARRY 'H'
 #define FLAG_CARRY 'C'
 
+// Interupt Addresses
 #define INT_VBLANK 0x40
 #define INT_LCD_STAT 0x48
 #define INT_TIMER 0x50
@@ -31,6 +31,10 @@
 #define TAC_INPUT1 1
 #define TAC_STOP 2
 
+// CPU Timer
+#define CLOCK_SPEED 4194304
+#define TAC_THRESHOLD {CLOCK_SPEED / 4096, CLOCK_SPEED / 262144, CLOCK_SPEED / 65536, CLOCK_SPEED / 16384}
+
 // Interrupt Registers
 #define IE 0xFFFF
 #define IF 0xFF0F
@@ -40,14 +44,16 @@
 #define IEF_SERIAL 3
 #define IEF_JOYPAD 4
 
-#define CLOCK_SPEED 4194304
-#define TAC_THRESHOLD {CLOCK_SPEED / 4096, CLOCK_SPEED / 262144, CLOCK_SPEED / 65536, CLOCK_SPEED / 16384}
+// Instruction Set
+#define INSTRUCTION_COUNT 256
+#define CB_INSTRUCTION_COUNT 256
+
 
 typedef struct gbc_instruction {
     char *disassembly;
     char length;
     char clocks;
-    char signed_operand;
+    bool signed_operand;
     void *execute;
 } gbc_instruction;
 
