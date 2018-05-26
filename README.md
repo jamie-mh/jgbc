@@ -4,7 +4,7 @@
 
 A GameBoy and GameBoy Color emulator for Linux. Written in C with SDL2.
 
-- Compiled and tested on Fedora 27 with gcc 7.3.1.
+- Compiled and tested on Fedora 27 with gcc 8.1.1.
 - Compiled and tested on Ubuntu 16.04 LTS with gcc 5.4.0.
 
 ### Project Status
@@ -14,10 +14,11 @@ As it stands, the emulator is not complete enough to play games.
 #### Working
 
 - Loading roms (parsing header, etc...)
-- Most CPU instructions implemented
+- All CPU instructions implemented correctly
 - Disassembly and debugger
 - Background graphics
 - Interrupts
+- Timers
 
 #### Not Working
 
@@ -32,12 +33,12 @@ As it stands, the emulator is not complete enough to play games.
 | ------------- |:------:|:------:|
 | 01-special | :heavy_check_mark: | Passed |
 | 02-interrupts | :heavy_check_mark: | Passed |
-| 03-op sp,hl | :x: | Stuck |
+| 03-op sp,hl | :heavy_check_mark: | Passed |
 | 04-op r,imm | :heavy_check_mark: | Passed |
 | 05-op rp | :heavy_check_mark: | Passed |
 | 06-ld r,r | :heavy_check_mark: | Passed |
-| 07-jr,jp,call,ret,rst | :x: | Restart Loop |
-| 08-misc instrs | :x: | Restart Loop |
+| 07-jr,jp,call,ret,rst | :heavy_check_mark: | Passed |
+| 08-misc instrs | :heavy_check_mark: | Passed |
 | 09-op r,r | :heavy_check_mark: | Passed |
 | 10-bit ops | :heavy_check_mark: | Passed |
 | 11-op a,(hl) | :heavy_check_mark: | Passed |
@@ -65,7 +66,7 @@ sudo dnf install SDL2-devel
 Compile the program with these commands.
 
 ```
-git clone --recurse-submodules https://github.com/jamie-mh/lxgbc
+git clone https://github.com/jamie-mh/lxgbc
 cd lxgbc
 make
 ```
@@ -73,7 +74,7 @@ make
 To run it, just specify some arguments.
 
 ```
-./bin/lxgbc -f (path to rom) [-g debugger] [-s scale]
+./bin/lxgbc -f (path to rom) [-g debugger] [-s scale] [-n no speed limit]
 ```
 
 Roms are not included in the repository, steal them if you want, not like I advocate that or anything (pls nintendo no sue).

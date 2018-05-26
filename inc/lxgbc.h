@@ -134,4 +134,5 @@ typedef struct cmd_options {
     char *rom_path;
     bool debug;
     char scale;
+    bool no_limit;
 } cmd_options;

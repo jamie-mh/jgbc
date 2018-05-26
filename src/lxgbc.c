@@ -22,7 +22,7 @@ int main(int argc, char **argv) {
     }
 
     init_system(gbc, cmd);
-    free(cmd);
+    /*free(cmd);*/
 
     SDL_Event event;
     int last_time = 0;
@@ -68,9 +68,12 @@ int main(int argc, char **argv) {
 
         render(gbc->ppu);
 
-        // Run at the framerate and remove the time it took to compute this frame
-        int execute_time = last_time - SDL_GetTicks();
-        SDL_Delay((1 / FRAMERATE) * 1000 - execute_time);
+        if(!cmd->no_limit) {
+
+            // Run at the framerate and remove the time it took to compute this frame
+            int execute_time = last_time - SDL_GetTicks();
+            SDL_Delay((1 / FRAMERATE) * 1000 - execute_time);
+        }
 
         // Temp: Simulate no buttons pressed
         write_byte(gbc->ram, 0xFF00, 0xEF, 0);
@@ -148,8 +151,9 @@ static bool get_cl_arguments(int argc, char **argv, cmd_options *cmd) {
     int f_flag, s_flag = 0;
 
     cmd->debug = false;
+    cmd->no_limit = false;
 
-    while((option = getopt(argc, argv, "f:gs:")) != -1) {
+    while((option = getopt(argc, argv, "f:gs:n")) != -1) {
         switch (option) {
             case 'f':
                 cmd->rom_path = optarg;
@@ -165,8 +169,12 @@ static bool get_cl_arguments(int argc, char **argv, cmd_options *cmd) {
                 s_flag = 1;
                 break;
 
+            case 'n':
+                cmd->no_limit = true;
+                break;
+
             default: 
-                printf("Usage: -f rom [-g debug mode] [-s screen scale]\n"); 
+                printf("Usage: -f rom [-g debug mode] [-s screen scale] [-n no speed limit]\n"); 
                 return 0;
         }
     }

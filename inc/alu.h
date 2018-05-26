@@ -10,14 +10,15 @@ unsigned char dec(const unsigned char, unsigned char *);
 unsigned char add_byte(const unsigned char, const unsigned char, unsigned char *);
 unsigned char add_byte_carry(const unsigned char, const unsigned char, unsigned char *);
 unsigned short add_short(const unsigned short, const unsigned short, unsigned char *);
+unsigned short add_sp_signed_byte(const unsigned short, const signed char, unsigned char *);
 
 unsigned char sub_byte(const unsigned char, const unsigned char, unsigned char *);
 unsigned char sub_byte_carry(const unsigned char, const unsigned char, unsigned char *);
 
-unsigned char rotate_left(const unsigned char, const char, unsigned char *);
+unsigned char rotate_left(const unsigned char, const bool, unsigned char *);
 unsigned char rotate_right(const unsigned char, unsigned char *);
-unsigned char rotate_left_carry(const unsigned char, const char, unsigned char *);
-unsigned char rotate_right_carry(const unsigned char, const char, unsigned char *);
+unsigned char rotate_left_carry(const unsigned char, const bool, unsigned char *);
+unsigned char rotate_right_carry(const unsigned char, const bool, unsigned char *);
 unsigned char shift_left_arith(const unsigned char, unsigned char *);
 unsigned char shift_right_arith(const unsigned char, unsigned char *);
 unsigned char shift_right_logic(const unsigned char, unsigned char *);

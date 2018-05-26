@@ -141,7 +141,7 @@ unsigned short read_short(gbc_ram *ram, const unsigned short address) {
 }
 
 // Writes a byte in memory at the address
-void write_byte(gbc_ram *ram, const unsigned short address, unsigned char value, const char is_program) {
+void write_byte(gbc_ram *ram, const unsigned short address, unsigned char value, const bool is_program) {
 
     if(!is_valid_ram(ram, address)) {
         return;
@@ -175,8 +175,8 @@ void write_short(gbc_ram *ram, const unsigned short address, const unsigned shor
     unsigned char byte_a = (value & 0x00FF);
     unsigned char byte_b = (value & 0xFF00) >> 8;
 
-    write_byte(ram, address, byte_a, 1);
-    write_byte(ram, address + 1, byte_b, 1);
+    write_byte(ram, address, byte_a, true);
+    write_byte(ram, address + 1, byte_b, true);
 }
 
 // Writes to memory register at a certain location

@@ -292,13 +292,34 @@ unsigned short add_short(const unsigned short a, const unsigned short b, unsigne
     return result;
 }
 
+// Designed to add a signed value to the SP register (only used in 2 instructions)
+unsigned short add_sp_signed_byte(const unsigned short sp, const signed char operand, unsigned char *flag) {
+
+    set_flag(FLAG_ZERO, 0, flag);
+    set_flag(FLAG_SUBTRACT, 0, flag);
+
+    if(did_byte_half_carry(sp & 0xFF, (unsigned char) operand)) {
+        set_flag(FLAG_HALFCARRY, 1, flag); 
+    } else {
+        set_flag(FLAG_HALFCARRY, 0, flag); 
+    }
+
+    if(did_byte_full_carry(sp & 0xFF, (unsigned char) operand)) {
+        set_flag(FLAG_CARRY, 1, flag); 
+    } else {
+        set_flag(FLAG_CARRY, 0, flag); 
+    }
+
+    return sp + operand;
+}
+
 // Shift the carry flag onto the bottom and pop the top into the carry flag
-unsigned char rotate_left(const unsigned char operand, const char affect_zero, unsigned char *flag) {
+unsigned char rotate_left(const unsigned char operand, const bool affect_zero, unsigned char *flag) {
     
     // Shift the carry flag onto the result
     const unsigned char result = (operand << 1) | get_flag(FLAG_CARRY, *flag);
 
-    if((result == 0) && (affect_zero == 1)) {
+    if((result == 0) && affect_zero) {
         set_flag(FLAG_ZERO, 1, flag);
     } else {
         set_flag(FLAG_ZERO, 0, flag); 
@@ -335,12 +356,12 @@ unsigned char rotate_right(const unsigned char operand, unsigned char *flag) {
 }
 
 // Pop the top into the carry flag and shift it onto the bottom
-unsigned char rotate_left_carry(const unsigned char operand, const char affect_zero, unsigned char *flag) {
+unsigned char rotate_left_carry(const unsigned char operand, const bool affect_zero, unsigned char *flag) {
 
     // Shift bit 0 onto the top 
     const unsigned char result = ((operand << 1) | (operand >> 7));
 
-    if((result == 0) && (affect_zero == 1)) {
+    if((result == 0) && affect_zero) {
         set_flag(FLAG_ZERO, 1, flag);
     } else {
         set_flag(FLAG_ZERO, 0, flag); 
@@ -356,12 +377,12 @@ unsigned char rotate_left_carry(const unsigned char operand, const char affect_z
 }
 
 // Pop the bottom into the carry and shift it on the top
-unsigned char rotate_right_carry(const unsigned char operand, const char affect_zero, unsigned char *flag) {
+unsigned char rotate_right_carry(const unsigned char operand, const bool affect_zero, unsigned char *flag) {
 
     // Shift bit 0 onto the top 
     const unsigned char result = ((operand >> 1) | (operand << 7));
 
-    if((result == 0) && (affect_zero == 1)) {
+    if((result == 0) && affect_zero) {
         set_flag(FLAG_ZERO, 1, flag);
     } else {
         set_flag(FLAG_ZERO, 0, flag); 

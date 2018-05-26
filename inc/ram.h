@@ -31,7 +31,7 @@ bool is_valid_ram(gbc_ram *, const unsigned short);
 unsigned char read_byte(gbc_ram *, const unsigned short);
 unsigned short read_short(gbc_ram *, const unsigned short);
 
-void write_byte(gbc_ram *, const unsigned short, unsigned char, const char);
+void write_byte(gbc_ram *, const unsigned short, unsigned char, const bool);
 void write_short(gbc_ram *, const unsigned short, const unsigned short);
 
 void set_register(gbc_ram *, const unsigned short, const unsigned char, const unsigned char);

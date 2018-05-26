@@ -59,7 +59,7 @@ static debug_box *dbox_instr(gbc_system *gbc) {
             strcat(box->rows[i], "OUT OF RANGE");
             pointer++;
         }
-        else if(pointer >= ROM_HEADER_START && pointer <= ROM_HEADER_END) {
+        else if(pointer > ROM_HEADER_START + 1 && pointer < ROM_HEADER_END) {
             strcat(box->rows[i], "CARTRIDGE HEADER");
             pointer++;
         }
@@ -219,10 +219,10 @@ static debug_box *dbox_info(gbc_system *gbc) {
         opcode = 0xCB00 | read_byte(gbc->ram, gbc->cpu->registers->PC + 1);
     }
 
-    strcpy(box->rows[0], "OPCODE:");
-    snprintf(box->rows[1], DBOX_INFO_WIDTH + 1, "-> %04X", opcode);
-    strcpy(box->rows[2], "LY:");
-    snprintf(box->rows[3], DBOX_INFO_WIDTH + 1, "-> %02X", read_byte(gbc->ram, LY));
+    snprintf(box->rows[0], DBOX_INFO_WIDTH + 1, "OP: %04X", opcode);
+    snprintf(box->rows[1], DBOX_INFO_WIDTH + 1, "LY: %02X", read_byte(gbc->ram, LY));
+    snprintf(box->rows[2], DBOX_INFO_WIDTH + 1, "IE: %02X", read_byte(gbc->ram, IE));
+    snprintf(box->rows[3], DBOX_INFO_WIDTH + 1, "IF: %02X", read_byte(gbc->ram, IF));
 
     return box;
 }
