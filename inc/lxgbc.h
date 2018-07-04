@@ -73,6 +73,13 @@ typedef struct gbc_cpu {
     bool is_interrupted;
 } gbc_cpu;
 
+typedef struct gbc_sprite {
+    unsigned char y;
+    unsigned char x;
+    unsigned char tile;
+    unsigned char attributes;
+} gbc_sprite;
+
 typedef struct gbc_ppu {
     SDL_Window *window;
     SDL_Renderer *renderer;
@@ -80,6 +87,7 @@ typedef struct gbc_ppu {
     unsigned char *framebuffer;
     unsigned short scan_clock;
     unsigned short frame_clock;
+    gbc_sprite *sprite_buffer; // Only fetch the sprites once per frame    
 } gbc_ppu;
 
 typedef struct gbc_ram {

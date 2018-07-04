@@ -5,13 +5,14 @@
 
 static void update_render_mode(gbc_system *, unsigned char);
 static void render_bg_scan(gbc_system *, unsigned char);
-static void render_sprite_scan(gbc_system *, const struct Sprite *, unsigned char);
+static void render_sprite_scan(gbc_system *, unsigned char);
 
-static void render_tile_pixel(gbc_system *, const unsigned char, const unsigned char, const unsigned short, SDL_Colour *);
-static struct Sprite *get_sprites(gbc_system *);
+static void render_tile_pixel(gbc_system *, const unsigned char, const unsigned char, const unsigned short, SDL_Colour *, bool);
+static gbc_sprite *get_sprites(gbc_system *);
 
 static SDL_Colour get_shade(const unsigned char);
-static void fill_shade_table(gbc_system *, SDL_Colour *);
+static void fill_bg_shade_table(gbc_system *, SDL_Colour *);
+static void fill_sprite_shade_table(gbc_system *, unsigned char, SDL_Colour *);
 
 
 // Opens a SDL window
@@ -43,6 +44,8 @@ void init_ppu(gbc_ppu *ppu, const char scale) {
     );
     
     ppu->framebuffer = calloc(SCREEN_WIDTH * SCREEN_HEIGHT * 8, sizeof(char));
+    ppu->sprite_buffer = NULL;
+
     SDL_RenderSetScale(ppu->renderer, scale, scale);
     render(ppu);
 
@@ -87,6 +90,10 @@ void update_ppu(gbc_system *gbc, int clocks) {
     unsigned char ly_val = read_byte(gbc->ram, LY);
     update_render_mode(gbc, ly_val);
 
+    if(gbc->ppu->sprite_buffer == NULL) {
+        gbc->ppu->sprite_buffer = get_sprites(gbc); 
+    }
+
     gbc->ppu->scan_clock += clocks;
 
     if(gbc->ppu->scan_clock >= CLOCKS_PER_SCANLINE) { 
@@ -104,14 +111,14 @@ void update_ppu(gbc_system *gbc, int clocks) {
         // Render all 144 lines on the screen 
         if(ly_val < 144) {
             render_bg_scan(gbc, ly_val);
-
-            /*struct Sprite *sprites = get_sprites(gbc);*/
-            /*render_sprite_scan(gbc, sprites, ly_val);*/
-            /*free(sprites);*/
+            render_sprite_scan(gbc, ly_val);
         }
         // End of frame, request vblank
         else if(ly_val == 144) {
             write_register(gbc, IF, IEF_VBLANK, 1); 
+
+            free(gbc->ppu->sprite_buffer);
+            gbc->ppu->sprite_buffer = get_sprites(gbc);
         }
 
         // Update the coincidence flag (0: LYC != LY, 1: LYC == LY)
@@ -153,7 +160,7 @@ static void render_bg_scan(gbc_system *gbc, unsigned char ly) {
 
     // Get the palette data
     SDL_Colour shades[4];
-    fill_shade_table(gbc, shades);
+    fill_bg_shade_table(gbc, shades);
 
     short tile_number;
     unsigned short tile_start;
@@ -181,50 +188,47 @@ static void render_bg_scan(gbc_system *gbc, unsigned char ly) {
         const unsigned short pixel_row = read_short(gbc->ram, tile_start + (bg_y % 8) * 2);
 
         for(unsigned char px = 0; px < 8; px++) {
-            render_tile_pixel(gbc, x + px, ly, pixel_row, shades);
+            render_tile_pixel(gbc, x + px, ly, pixel_row, shades, false);
         }
     }
 }
 
 // Renders a sprite scanline to the display at the specified coordinates
-static void render_sprite_scan(gbc_system *gbc, const struct Sprite *sprites, const unsigned char ly) {
+static void render_sprite_scan(gbc_system *gbc, const unsigned char ly) {
 
-    // Are the tiles 8x8 or 8*16?
+    // Are the tiles 8x8 or 8x16?
     bool tall_sprites = read_register(gbc->ram, LCDC, LCDC_OBJ_SIZE);
     const unsigned char height = (tall_sprites) ? 16 : 8;
 
-    // Get the palette data
-    SDL_Colour shades[4];
-    fill_shade_table(gbc, shades);
-
     for(int i = 0; i < 40; i++) {
         
-        struct Sprite sprite = sprites[i];
+        gbc_sprite sprite = gbc->ppu->sprite_buffer[i];
         const unsigned char x = sprite.x - 8;
         const unsigned char y = sprite.y - 16;
 
-        // If the sprite is on the screen
-        if(sprite.x > 0 && sprite.x < 168 && y >= ly && y + height <= ly) {
-            /*printf("yeah boi\n");*/
+        // If the sprite is on the screen and is on the ly line
+        if(x > 0 && x < SCREEN_WIDTH + 8 && y <= ly && y + height > ly) {
+
+            SDL_Colour shades[4];
+            fill_sprite_shade_table(gbc, sprite.attributes, shades);
 
             // A tall sprite has the first bit removed 
             const unsigned char tile = (tall_sprites) ? sprite.tile & 0x7F : sprite.tile;
-            const unsigned char line_number = ly - y;
-            printf("%d\n", line_number);
+            const unsigned char row_index = ly - y;
 
             // Get the byte of data that matches this sprite line
-            const unsigned short line_offset = (tile * 8 * height * 2) + line_number;
-            const unsigned short line_data = read_short(gbc->ram, 0x8000 + line_offset);
+            const unsigned short row_offset = (tile * 16) + row_index * 2;
+            const unsigned short row_data = read_short(gbc->ram, 0x8000 + row_offset);
 
             for(unsigned char px = 0; px < 8; px++) {
-                render_tile_pixel(gbc, x + px, y, line_data, shades);
+                render_tile_pixel(gbc, x + px, ly, row_data, shades, true);
             } 
         }
     } 
 }
 
 // Renders a tile pixel to the framebuffer 
-static void render_tile_pixel(gbc_system *gbc, const unsigned char x, const unsigned char y, const unsigned short line, SDL_Colour *shades) {
+static void render_tile_pixel(gbc_system *gbc, const unsigned char x, const unsigned char y, const unsigned short line, SDL_Colour *shades, bool sprite) {
 
     const unsigned char ls_byte = (line & 0xFF00) >> 8;
     const unsigned char ms_byte = (line & 0x00FF);
@@ -232,28 +236,32 @@ static void render_tile_pixel(gbc_system *gbc, const unsigned char x, const unsi
     // Get the colour from the most the most and least significant bits
     const unsigned char bit = 7 - (x % 8);
     const unsigned char shade_num = ((ms_byte >> bit) & 1) | (((ls_byte >> bit) & 1) << 1);
-    SDL_Colour shade = shades[shade_num];
 
-    const unsigned int buf_offset = (x * 4) + (y * SCREEN_WIDTH * 4);
+    // If the color is white for sprites, ignore it, it should be transparent
+    if(!sprite || (sprite && shade_num > 0)) {
+        SDL_Colour shade = shades[shade_num];
 
-    gbc->ppu->framebuffer[buf_offset + 0] = shade.r; // R
-    gbc->ppu->framebuffer[buf_offset + 1] = shade.g; // G
-    gbc->ppu->framebuffer[buf_offset + 2] = shade.b; // B
-    gbc->ppu->framebuffer[buf_offset + 3] = shade.a; // A
+        const unsigned int buf_offset = (x * 4) + (y * SCREEN_WIDTH * 4);
+
+        gbc->ppu->framebuffer[buf_offset + 0] = shade.r; // R
+        gbc->ppu->framebuffer[buf_offset + 1] = shade.g; // G
+        gbc->ppu->framebuffer[buf_offset + 2] = shade.b; // B
+        gbc->ppu->framebuffer[buf_offset + 3] = shade.a; // A
+    }
 }
 
 // Returns an array of sprites in the OAM 
-static struct Sprite *get_sprites(gbc_system *gbc) {
+static gbc_sprite *get_sprites(gbc_system *gbc) {
 
-    struct Sprite *sprites = malloc(40 * sizeof(struct Sprite));
+    gbc_sprite *sprites = malloc(40 * sizeof(gbc_sprite));
 
     for(int i = 0; i < 40; i++) {
     
-        struct Sprite *sprite = &sprites[i];
+        gbc_sprite *sprite = &sprites[i];
         unsigned short address = 0xFE00 + (i * 4);
 
-        sprite->x = read_byte(gbc->ram, address + 0); 
-        sprite->y = read_byte(gbc->ram, address + 1); 
+        sprite->y = read_byte(gbc->ram, address + 0); 
+        sprite->x = read_byte(gbc->ram, address + 1); 
         sprite->tile = read_byte(gbc->ram, address + 2); 
         sprite->attributes = read_byte(gbc->ram, address + 3);
     }
@@ -261,7 +269,7 @@ static struct Sprite *get_sprites(gbc_system *gbc) {
     return sprites;
 }
 
-// Returns the colour associated with a shade number
+// Returns the colour associated with a shade number tiles
 // Monochrome GameBoy only
 static SDL_Colour get_shade(const unsigned char num) {
 
@@ -283,12 +291,31 @@ static SDL_Colour get_shade(const unsigned char num) {
     } 
 }
 
-// Modifies a table to add the color shades according to the palette register
+// Modifies a table to add the color shades for bg tiles according to the palette register
 // Monochrome GameBoy only
-static void fill_shade_table(gbc_system *gbc, SDL_Colour *table) {
+static void fill_bg_shade_table(gbc_system *gbc, SDL_Colour *table) {
     
     // Read the background palette register
-    unsigned char palette = read_byte(gbc->ram, BGP);
+    const unsigned char palette = read_byte(gbc->ram, BGP);
+    
+    // Fill the table
+    for(unsigned char i = 0; i < 8; i += 2) {
+
+        // Get the number from two bits at a time
+        unsigned char shade_num = (((palette >> i) & 1) << 1) | ((palette >> (i + 1)) & 1);
+
+        // Add the shade
+        table[i / 2] = get_shade(shade_num); 
+    }
+}
+
+// Modifies a table to add the color shades for sprite tiles according to the palette registers
+// Monochrome GameBoy only
+static void fill_sprite_shade_table(gbc_system *gbc, unsigned char sprite_attr, SDL_Colour *table) {
+
+    // Read the sprite palette register
+    const unsigned char palette_addr = (GET_BIT(sprite_attr, 4)) ? 0xFF49 : 0xFF48;
+    const unsigned char palette = read_byte(gbc->ram, palette_addr);
     
     // Fill the table
     for(unsigned char i = 0; i < 8; i += 2) {

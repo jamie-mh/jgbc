@@ -67,15 +67,8 @@
 #define DGREY 192, 192, 192, 255
 #define LGREY 96, 96, 96, 255
 
-#define FRAMERATE 60
+#define FRAMERATE 60.0
 #define CLOCKS_PER_SCANLINE 456 
-
-struct Sprite {
-    unsigned char x;
-    unsigned char y;
-    unsigned char tile;
-    unsigned char attributes;
-};
 
 void init_ppu(gbc_ppu *, const char);
 void update_ppu(gbc_system *, int);

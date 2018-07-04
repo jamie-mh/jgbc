@@ -30,9 +30,10 @@ int main(int argc, char **argv) {
     // One execution of this loop represents one cpu clock
     while(gbc->is_running) {
 
-        static const int max_clocks = CLOCK_SPEED / FRAMERATE;
-        int frame_clocks = 0;
+        static const unsigned int max_clocks = CLOCK_SPEED / FRAMERATE;
+        static const unsigned char millis_per_frame = (1 / FRAMERATE) * 1000.0;
 
+        unsigned int frame_clocks = 0;
         last_time = SDL_GetTicks();
 
         // Run the clocks for this frame
@@ -67,8 +68,11 @@ int main(int argc, char **argv) {
         if(!cmd->no_limit) {
 
             // Run at the framerate and remove the time it took to compute this frame
-            int execute_time = last_time - SDL_GetTicks();
-            SDL_Delay((1 / FRAMERATE) * 1000 - execute_time);
+            int execute_time = SDL_GetTicks() - last_time;
+
+            if(execute_time < millis_per_frame) {
+                SDL_Delay(millis_per_frame - execute_time);
+            }
         }
 
         // Temp: Simulate no buttons pressed
@@ -120,8 +124,7 @@ static void init_system(gbc_system *gbc, cmd_options *cmd) {
 // Handles events from SDL
 static void handle_event(SDL_Event event, gbc_system *gbc) {
 
-    switch(event.type)
-    {
+    switch(event.type) {
         case SDL_QUIT:
             gbc->is_running = 0;
             break;
