@@ -91,6 +91,7 @@ typedef struct gbc_ppu {
 } gbc_ppu;
 
 typedef struct gbc_ram {
+    unsigned char *bootrom;
     unsigned char *rom00; // 16KB ROM Bank
     unsigned char *romNN; // 16KB Switchable ROM Bank
     unsigned char *vram; // 8KB Video RAM
@@ -148,4 +149,5 @@ typedef struct cmd_options {
     bool debug;
     char scale;
     bool no_limit;
+    bool skip_boot;
 } cmd_options;

@@ -74,7 +74,7 @@ make
 To run it, just specify some arguments.
 
 ```
-./bin/lxgbc -f (path to rom) [-g debugger] [-s scale] [-n no speed limit]
+./bin/lxgbc -f (path to rom) [-g debugger] [-s scale] [-n no speed limit] [-b skip nintendo logo]
 ```
 
 Roms are not included in the repository, steal them if you want, not like I advocate that or anything (pls nintendo no sue).

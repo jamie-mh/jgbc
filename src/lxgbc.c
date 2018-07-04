@@ -75,9 +75,6 @@ int main(int argc, char **argv) {
                 SDL_Delay(millis_per_frame - execute_time);
             }
         }
-
-        // Temp: Simulate no buttons pressed
-        /*write_byte(gbc, 0xFF00, 0xEF, 0);*/
     }
 
     SDL_Quit();
@@ -101,6 +98,11 @@ static void init_system(gbc_system *gbc, cmd_options *cmd) {
     if(!load_rom(gbc, cmd->rom_path)) {
         fprintf(stderr, "ERROR: Could not load rom file!\n");
         exit(EXIT_FAILURE);
+    }
+
+    if(cmd->skip_boot) {
+        gbc->cpu->registers->PC = 0x100;
+        write_byte(gbc, BOOTROM_DISABLE, 1, false);
     }
 
     // Append the game title to the window title
@@ -154,8 +156,9 @@ static bool get_cl_arguments(int argc, char **argv, cmd_options *cmd) {
 
     cmd->debug = false;
     cmd->no_limit = false;
+    cmd->skip_boot = false;
 
-    while((option = getopt(argc, argv, "f:gs:n")) != -1) {
+    while((option = getopt(argc, argv, "f:gs:nb")) != -1) {
         switch(option) {
             case 'f':
                 cmd->rom_path = optarg;
@@ -174,9 +177,13 @@ static bool get_cl_arguments(int argc, char **argv, cmd_options *cmd) {
             case 'n':
                 cmd->no_limit = true;
                 break;
+            
+            case 'b':
+                cmd->skip_boot = true;
+                break;
 
             default: 
-                printf("Usage: -f rom [-g debug mode] [-s screen scale] [-n no speed limit]\n"); 
+                printf("Usage: -f rom [-g debug mode] [-s screen scale] [-n no speed limit] [-b skip nintendo screen]\n"); 
                 return 0;
         }
     }

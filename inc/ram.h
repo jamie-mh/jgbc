@@ -19,6 +19,7 @@
 
 // Serial
 #define SB 0xFF01
+#define BOOTROM_DISABLE 0xFF50
 
 
 void init_ram(gbc_system *);

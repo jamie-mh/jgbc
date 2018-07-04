@@ -40,7 +40,11 @@ static unsigned char *get_memory_location(gbc_ram *ram, unsigned short *address)
 
     // 16KB ROM Bank 00 
     if(*address <= 0x3FFF) {
-        return ram->rom00;
+        if(*address <= 0x100 && !read_byte(ram, BOOTROM_DISABLE)) {
+            return ram->bootrom;
+        } else {
+            return ram->rom00;
+        }
     } 
     // 16KB ROM Bank NN
     else if(*address >= 0x4000 && *address <= 0x7FFF) {
