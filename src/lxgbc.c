@@ -22,10 +22,9 @@ int main(int argc, char **argv) {
     }
 
     init_system(gbc, cmd);
-    /*free(cmd);*/
 
     SDL_Event event;
-    int last_time = 0;
+    unsigned int last_time = 0;
 
     // Main endless loop 
     // One execution of this loop represents one cpu clock
@@ -48,18 +47,15 @@ int main(int argc, char **argv) {
             if(gbc->cpu->is_halted == false) {
                 clocks = execute_instr(gbc);                
             } else {
-                clocks = 1;
+                clocks = 4;
             }
+
+            check_interrupts(gbc);
+
+            update_ppu(gbc, clocks);
+            update_timer(gbc, clocks);
 
             frame_clocks += clocks;
-
-            // Run the ppu and timer for the same amount of clocks
-            for(unsigned char i = 0; i < clocks; i++) {
-                ppu_do_clock(gbc);
-                update_timer(gbc);
-            }
-
-            check_interrupt(gbc);
 
             if(SDL_PollEvent(&event)) {
                 handle_event(event, gbc);
@@ -76,7 +72,7 @@ int main(int argc, char **argv) {
         }
 
         // Temp: Simulate no buttons pressed
-        write_byte(gbc->ram, 0xFF00, 0xEF, 0);
+        /*write_byte(gbc, 0xFF00, 0xEF, 0);*/
     }
 
     SDL_Quit();
@@ -93,7 +89,7 @@ static void init_system(gbc_system *gbc, cmd_options *cmd) {
     gbc->debugger = malloc(sizeof(gbc_debugger));
 
     init_cpu(gbc->cpu);
-    init_ram(gbc->ram);
+    init_ram(gbc);
     init_ppu(gbc->ppu, cmd->scale);
     init_debugger(gbc->debugger);
 

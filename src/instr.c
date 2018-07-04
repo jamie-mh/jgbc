@@ -17,7 +17,7 @@ void op_ld_bc_d16(gbc_system *gbc, unsigned short operand) {
 // 0x02: LD (BC), A (- - - -)
 void op_ld_bcp_a(gbc_system *gbc) {
     write_byte(
-        gbc->ram, 
+        gbc, 
         gbc->cpu->registers->BC, 
         gbc->cpu->registers->A,
         true 
@@ -62,7 +62,7 @@ void op_rlca(gbc_system *gbc) {
 // 0x08: LD (a16), SP (- - - -)
 void op_ld_a16p_sp(gbc_system *gbc, unsigned short operand) {
     write_short(
-        gbc->ram, 
+        gbc, 
         operand, 
         gbc->cpu->registers->SP
     );
@@ -133,7 +133,7 @@ void op_ld_de_d16(gbc_system *gbc, unsigned short operand) {
 // 0x12: LD (DE), A (- - - -)
 void op_ld_dep_a(gbc_system *gbc) {
     write_byte(
-        gbc->ram, 
+        gbc, 
         gbc->cpu->registers->DE, 
         gbc->cpu->registers->A,
         true 
@@ -247,7 +247,7 @@ void op_ld_hl_d16(gbc_system *gbc, unsigned short operand) {
 // 0x22: LD (HL+), A (- - - -)
 void op_ld_hlpp_a(gbc_system *gbc) {
     write_byte(
-        gbc->ram, 
+        gbc, 
         gbc->cpu->registers->HL, 
         gbc->cpu->registers->A,
         true 
@@ -362,7 +362,7 @@ void op_ld_sp_d16(gbc_system *gbc, unsigned short operand) {
 // 0x32: LD (HL-), A (- - - -)
 void op_ld_hlmp_a(gbc_system *gbc) {
     write_byte(
-        gbc->ram, 
+        gbc, 
         gbc->cpu->registers->HL, 
         gbc->cpu->registers->A,
         true 
@@ -378,7 +378,7 @@ void op_inc_sp(gbc_system *gbc) {
 // 0x34: INC (HL) (Z 0 H -)
 void op_inc_hlp(gbc_system *gbc) {
     write_byte(
-        gbc->ram,
+        gbc,
         gbc->cpu->registers->HL, 
         inc(
             read_byte(gbc->ram, gbc->cpu->registers->HL), 
@@ -391,7 +391,7 @@ void op_inc_hlp(gbc_system *gbc) {
 // 0x35: DEC (HL) (Z 1 H -)
 void op_dec_hlp(gbc_system *gbc) {
     write_byte(
-        gbc->ram,
+        gbc,
         gbc->cpu->registers->HL,
         dec(
             read_byte(gbc->ram, gbc->cpu->registers->HL), 
@@ -404,7 +404,7 @@ void op_dec_hlp(gbc_system *gbc) {
 // 0x36: LD (HL), d8 (- - - -)
 void op_ld_hlp_d8(gbc_system *gbc, unsigned char operand) {
     write_byte(
-        gbc->ram, 
+        gbc, 
         gbc->cpu->registers->HL, 
         operand,
         true 
@@ -734,7 +734,7 @@ void op_ld_l_a(gbc_system *gbc) {
 // 0x70: LD (HL), B (- - - -)
 void op_ld_hlp_b(gbc_system *gbc) {
     write_byte(
-        gbc->ram, 
+        gbc, 
         gbc->cpu->registers->HL, 
         gbc->cpu->registers->B,
         true 
@@ -744,7 +744,7 @@ void op_ld_hlp_b(gbc_system *gbc) {
 // 0x71: LD (HL), C (- - - -)
 void op_ld_hlp_c(gbc_system *gbc) {
     write_byte(
-        gbc->ram, 
+        gbc, 
         gbc->cpu->registers->HL, 
         gbc->cpu->registers->C,
         true 
@@ -754,7 +754,7 @@ void op_ld_hlp_c(gbc_system *gbc) {
 // 0x72: LD (HL), D (- - - -)
 void op_ld_hlp_d(gbc_system *gbc) {
     write_byte(
-        gbc->ram, 
+        gbc, 
         gbc->cpu->registers->HL, 
         gbc->cpu->registers->D,
         true 
@@ -764,7 +764,7 @@ void op_ld_hlp_d(gbc_system *gbc) {
 // 0x73: LD (HL), E (- - - -)
 void op_ld_hlp_e(gbc_system *gbc) {
     write_byte(
-        gbc->ram, 
+        gbc, 
         gbc->cpu->registers->HL, 
         gbc->cpu->registers->E,
         true 
@@ -774,7 +774,7 @@ void op_ld_hlp_e(gbc_system *gbc) {
 // 0x74: LD (HL), H (- - - -)
 void op_ld_hlp_h(gbc_system *gbc) {
     write_byte(
-        gbc->ram, 
+        gbc, 
         gbc->cpu->registers->HL, 
         gbc->cpu->registers->H,
         true 
@@ -784,7 +784,7 @@ void op_ld_hlp_h(gbc_system *gbc) {
 // 0x75: LD (HL), L (- - - -)
 void op_ld_hlp_l(gbc_system *gbc) {
     write_byte(
-        gbc->ram, 
+        gbc, 
         gbc->cpu->registers->HL, 
         gbc->cpu->registers->L,
         true 
@@ -799,7 +799,7 @@ void op_halt(gbc_system *gbc) {
 // 0x77: LD (HL), A (- - - -)
 void op_ld_hlp_a(gbc_system *gbc) {
     write_byte(
-        gbc->ram, 
+        gbc, 
         gbc->cpu->registers->HL, 
         gbc->cpu->registers->A,
         true 
@@ -1462,7 +1462,7 @@ void op_call_nz_a16(gbc_system *gbc, unsigned short operand) {
 // 0xC5: PUSH BC (- - - -)
 void op_push_bc(gbc_system *gbc) {
     stack_push_short(
-        gbc->ram, 
+        gbc, 
         &gbc->cpu->registers->SP, 
         gbc->cpu->registers->BC
     );
@@ -1480,7 +1480,7 @@ void op_add_a_d8(gbc_system *gbc, unsigned char operand) {
 // 0xC7: RST 00H (- - - -)
 void op_rst_00h(gbc_system *gbc) {
     stack_push_short(
-        gbc->ram, 
+        gbc, 
         &gbc->cpu->registers->SP, 
         gbc->cpu->registers->PC
     );
@@ -1525,7 +1525,7 @@ void op_call_z_a16(gbc_system *gbc, unsigned short operand) {
 // 0xCD: CALL a16 (- - - -)
 void op_call_a16(gbc_system *gbc, unsigned short operand) {
     stack_push_short(
-        gbc->ram, 
+        gbc, 
         &gbc->cpu->registers->SP,
         gbc->cpu->registers->PC
     );
@@ -1544,7 +1544,7 @@ void op_adc_a_d8(gbc_system *gbc, unsigned char operand) {
 // 0xCF: RST 08H (- - - -)
 void op_rst_08h(gbc_system *gbc) {
     stack_push_short(
-        gbc->ram, 
+        gbc, 
         &gbc->cpu->registers->SP, 
         gbc->cpu->registers->PC
     );
@@ -1583,7 +1583,7 @@ void op_call_nc_a16(gbc_system *gbc, unsigned short operand) {
 // 0xD5: PUSH DE (- - - -)
 void op_push_de(gbc_system *gbc) {
     stack_push_short(
-        gbc->ram, 
+        gbc, 
         &gbc->cpu->registers->SP, 
         gbc->cpu->registers->DE
     );
@@ -1601,7 +1601,7 @@ void op_sub_d8(gbc_system *gbc, unsigned char operand) {
 // 0xD7: RST 10H (- - - -)
 void op_rst_10h(gbc_system *gbc) {
     stack_push_short(
-        gbc->ram, 
+        gbc, 
         &gbc->cpu->registers->SP, 
         gbc->cpu->registers->PC
     );
@@ -1647,7 +1647,7 @@ void op_sbc_a_d8(gbc_system *gbc, unsigned char operand) {
 // 0xDF: RST 18H (- - - -)
 void op_rst_18h(gbc_system *gbc) {
     stack_push_short(
-        gbc->ram, 
+        gbc, 
         &gbc->cpu->registers->SP, 
         gbc->cpu->registers->PC
     );
@@ -1657,7 +1657,7 @@ void op_rst_18h(gbc_system *gbc) {
 // 0xE0: LDH (a8), A (- - - -)
 void op_ldh_a8p_a(gbc_system *gbc, unsigned char operand) {
     write_byte(
-        gbc->ram, 
+        gbc, 
         0xFF00 + operand, 
         gbc->cpu->registers->A,
         true 
@@ -1675,7 +1675,7 @@ void op_pop_hl(gbc_system *gbc) {
 // 0xE2: LD (C), A (- - - -)
 void op_ld_cp_a(gbc_system *gbc) {
     write_byte(
-        gbc->ram, 
+        gbc, 
         0xFF00 + gbc->cpu->registers->C, 
         gbc->cpu->registers->A,
         true 
@@ -1685,7 +1685,7 @@ void op_ld_cp_a(gbc_system *gbc) {
 // 0xE5: PUSH HL (- - - -)
 void op_push_hl(gbc_system *gbc) {
     stack_push_short(
-        gbc->ram, 
+        gbc, 
         &gbc->cpu->registers->SP, 
         gbc->cpu->registers->HL
     );
@@ -1703,7 +1703,7 @@ void op_and_d8(gbc_system *gbc, unsigned char operand) {
 // 0xE7: RST 20H (- - - -)
 void op_rst_20h(gbc_system *gbc) {
     stack_push_short(
-        gbc->ram, 
+        gbc, 
         &gbc->cpu->registers->SP, 
         gbc->cpu->registers->PC
     );
@@ -1727,7 +1727,7 @@ void op_jp_hlp(gbc_system *gbc) {
 // 0xEA: LD (a16), A (- - - -)
 void op_ld_a16p_a(gbc_system *gbc, unsigned short operand) {
     write_byte(
-        gbc->ram, 
+        gbc, 
         operand, 
         gbc->cpu->registers->A,
         true 
@@ -1746,7 +1746,7 @@ void op_xor_d8(gbc_system *gbc, unsigned char operand) {
 // 0xEF: RST 28H (- - - -)
 void op_rst_28h(gbc_system *gbc) {
     stack_push_short(
-        gbc->ram, 
+        gbc, 
         &gbc->cpu->registers->SP, 
         gbc->cpu->registers->PC
     );
@@ -1788,7 +1788,7 @@ void op_di(gbc_system *gbc) {
 // 0xF5: PUSH AF (- - - -)
 void op_push_af(gbc_system *gbc) {
     stack_push_short(
-        gbc->ram, 
+        gbc, 
         &gbc->cpu->registers->SP, 
         gbc->cpu->registers->AF
     );
@@ -1805,7 +1805,8 @@ void op_or_d8(gbc_system *gbc, unsigned char operand) {
 
 // 0xF7: RST 30H (- - - -)
 void op_rst_30h(gbc_system *gbc) {
-    stack_push_short(gbc->ram, 
+    stack_push_short(
+        gbc, 
         &gbc->cpu->registers->SP, 
         gbc->cpu->registers->PC
     );
@@ -1851,7 +1852,7 @@ void op_cp_d8(gbc_system *gbc, unsigned char operand) {
 // 0xFF: RST 38H (- - - -)
 void op_rst_38h(gbc_system *gbc) {
     stack_push_short(
-        gbc->ram, 
+        gbc, 
         &gbc->cpu->registers->SP, 
         gbc->cpu->registers->PC
     );
@@ -1915,7 +1916,7 @@ void op_rlc_l(gbc_system *gbc) {
 // 0xCB06: RLC (HL) (Z 0 0 C)
 void op_rlc_hlp(gbc_system *gbc) {
     write_byte(
-        gbc->ram,
+        gbc,
         gbc->cpu->registers->HL,
         rotate_left_carry(
             read_byte(gbc->ram, gbc->cpu->registers->HL),
@@ -1992,7 +1993,7 @@ void op_rrc_l(gbc_system *gbc) {
 // 0xCB0E: RRC (HL) (Z 0 0 C)
 void op_rrc_hlp(gbc_system *gbc) {
     write_byte(
-        gbc->ram,
+        gbc,
         gbc->cpu->registers->HL,
         rotate_right_carry(
             read_byte(gbc->ram, gbc->cpu->registers->HL),
@@ -2069,7 +2070,7 @@ void op_rl_l(gbc_system *gbc) {
 // 0xCB16: RL (HL) (Z 0 0 C)
 void op_rl_hlp(gbc_system *gbc) {
     write_byte(
-        gbc->ram,
+        gbc,
         gbc->cpu->registers->HL,
         rotate_left(
             read_byte(gbc->ram, gbc->cpu->registers->HL), 
@@ -2140,7 +2141,7 @@ void op_rr_l(gbc_system *gbc) {
 // 0xCB1E: RR (HL) (Z 0 0 C)
 void op_rr_hlp(gbc_system *gbc) {
     write_byte(
-        gbc->ram,
+        gbc,
         gbc->cpu->registers->HL,
         rotate_right(
             read_byte(gbc->ram, gbc->cpu->registers->HL), 
@@ -2209,7 +2210,7 @@ void op_sla_l(gbc_system *gbc) {
 // 0xCB26: SLA (HL) (Z 0 0 C)
 void op_sla_hlp(gbc_system *gbc) {
     write_byte(
-        gbc->ram,
+        gbc,
         gbc->cpu->registers->HL,
         shift_left_arith(
             read_byte(gbc->ram, gbc->cpu->registers->HL), 
@@ -2278,7 +2279,7 @@ void op_sra_l(gbc_system *gbc) {
 // 0xCB2E: SRA (HL) (Z 0 0 0)
 void op_sra_hlp(gbc_system *gbc) {
     write_byte(
-        gbc->ram,
+        gbc,
         gbc->cpu->registers->HL,
         shift_right_arith(
             read_byte(gbc->ram, gbc->cpu->registers->HL), 
@@ -2347,7 +2348,7 @@ void op_swap_l(gbc_system *gbc) {
 // 0xCB36: SWAP (HL) (Z 0 0 0)
 void op_swap_hlp(gbc_system *gbc) {
     write_byte(
-        gbc->ram,
+        gbc,
         gbc->cpu->registers->HL,
         swap(
             read_byte(gbc->ram, gbc->cpu->registers->HL), 
@@ -2416,7 +2417,7 @@ void op_srl_l(gbc_system *gbc) {
 // 0xCB3E: SRL (HL) (Z 0 0 C)
 void op_srl_hlp(gbc_system *gbc) {
     write_byte(
-        gbc->ram,
+        gbc,
         gbc->cpu->registers->HL,
         shift_right_logic(
             read_byte(gbc->ram, gbc->cpu->registers->HL), 
@@ -2819,7 +2820,7 @@ void op_res_0_l(gbc_system *gbc) {
 // 0xCB86: RES 0, (HL) (- - - -)
 void op_res_0_hlp(gbc_system *gbc) {
     write_byte(
-        gbc->ram,
+        gbc,
         gbc->cpu->registers->HL,
         reset_bit(
             read_byte(gbc->ram, gbc->cpu->registers->HL), 
@@ -2867,7 +2868,7 @@ void op_res_1_l(gbc_system *gbc) {
 // 0xCB8E: RES 1, (HL) (- - - -)
 void op_res_1_hlp(gbc_system *gbc) {
     write_byte(
-        gbc->ram,
+        gbc,
         gbc->cpu->registers->HL,
         reset_bit(
             read_byte(gbc->ram, gbc->cpu->registers->HL), 
@@ -2915,7 +2916,7 @@ void op_res_2_l(gbc_system *gbc) {
 // 0xCB96: RES 2, (HL) (- - - -)
 void op_res_2_hlp(gbc_system *gbc) {
     write_byte(
-        gbc->ram,
+        gbc,
         gbc->cpu->registers->HL,
         reset_bit(
             read_byte(gbc->ram, gbc->cpu->registers->HL), 
@@ -2963,7 +2964,7 @@ void op_res_3_l(gbc_system *gbc) {
 // 0xCB9E: RES 3, (HL) (- - - -)
 void op_res_3_hlp(gbc_system *gbc) {
     write_byte(
-        gbc->ram,
+        gbc,
         gbc->cpu->registers->HL,
         reset_bit(
             read_byte(gbc->ram, gbc->cpu->registers->HL), 
@@ -3011,7 +3012,7 @@ void op_res_4_l(gbc_system *gbc) {
 // 0xCBA6: RES 4, (HL) (- - - -)
 void op_res_4_hlp(gbc_system *gbc) {
     write_byte(
-        gbc->ram,
+        gbc,
         gbc->cpu->registers->HL,
         reset_bit(
             read_byte(gbc->ram, gbc->cpu->registers->HL), 
@@ -3059,7 +3060,7 @@ void op_res_5_l(gbc_system *gbc) {
 // 0xCBAE: RES 5, (HL) (- - - -)
 void op_res_5_hlp(gbc_system *gbc) {
     write_byte(
-        gbc->ram,
+        gbc,
         gbc->cpu->registers->HL,
         reset_bit(
             read_byte(gbc->ram, gbc->cpu->registers->HL), 
@@ -3107,7 +3108,7 @@ void op_res_6_l(gbc_system *gbc) {
 // 0xCBB6: RES 6, (HL) (- - - -)
 void op_res_6_hlp(gbc_system *gbc) {
     write_byte(
-        gbc->ram,
+        gbc,
         gbc->cpu->registers->HL,
         reset_bit(
             read_byte(gbc->ram, gbc->cpu->registers->HL), 
@@ -3155,7 +3156,7 @@ void op_res_7_l(gbc_system *gbc) {
 // 0xCBBE: RES 7, (HL) (- - - -)
 void op_res_7_hlp(gbc_system *gbc) {
     write_byte(
-        gbc->ram,
+        gbc,
         gbc->cpu->registers->HL,
         reset_bit(
             read_byte(gbc->ram, gbc->cpu->registers->HL), 
@@ -3203,7 +3204,7 @@ void op_set_0_l(gbc_system *gbc) {
 // 0xCBC6: SET 0, (HL) (- - - -)
 void op_set_0_hlp(gbc_system *gbc) {
     write_byte(
-        gbc->ram,
+        gbc,
         gbc->cpu->registers->HL,
         set_bit(
             read_byte(gbc->ram, gbc->cpu->registers->HL), 
@@ -3251,7 +3252,7 @@ void op_set_1_l(gbc_system *gbc) {
 // 0xCBCE: SET 1, (HL) (- - - -)
 void op_set_1_hlp(gbc_system *gbc) {
     write_byte(
-        gbc->ram,
+        gbc,
         gbc->cpu->registers->HL,
         set_bit(
             read_byte(gbc->ram, gbc->cpu->registers->HL),
@@ -3299,7 +3300,7 @@ void op_set_2_l(gbc_system *gbc) {
 // 0xCBD6: SET 2, (HL) (- - - -)
 void op_set_2_hlp(gbc_system *gbc) {
     write_byte(
-        gbc->ram,
+        gbc,
         gbc->cpu->registers->HL,
         set_bit(
             read_byte(gbc->ram, gbc->cpu->registers->HL),
@@ -3347,7 +3348,7 @@ void op_set_3_l(gbc_system *gbc) {
 // 0xCBDE: SET 3, (HL) (- - - -)
 void op_set_3_hlp(gbc_system *gbc) {
     write_byte(
-        gbc->ram,
+        gbc,
         gbc->cpu->registers->HL,
         set_bit(
             read_byte(gbc->ram, gbc->cpu->registers->HL),
@@ -3395,7 +3396,7 @@ void op_set_4_l(gbc_system *gbc) {
 // 0xCBE6: SET 4, (HL) (- - - -)
 void op_set_4_hlp(gbc_system *gbc) {
     write_byte(
-        gbc->ram,
+        gbc,
         gbc->cpu->registers->HL,
         set_bit(
             read_byte(gbc->ram, gbc->cpu->registers->HL),
@@ -3443,7 +3444,7 @@ void op_set_5_l(gbc_system *gbc) {
 // 0xCBEE: SET 5, (HL) (- - - -)
 void op_set_5_hlp(gbc_system *gbc) {
     write_byte(
-        gbc->ram,
+        gbc,
         gbc->cpu->registers->HL,
         set_bit(
             read_byte(gbc->ram, gbc->cpu->registers->HL),
@@ -3491,7 +3492,7 @@ void op_set_6_l(gbc_system *gbc) {
 // 0xCBF6: SET 6, (HL) (- - - -)
 void op_set_6_hlp(gbc_system *gbc) {
     write_byte(
-        gbc->ram,
+        gbc,
         gbc->cpu->registers->HL,
         set_bit(
             read_byte(gbc->ram, gbc->cpu->registers->HL),
@@ -3539,7 +3540,7 @@ void op_set_7_l(gbc_system *gbc) {
 // 0xCBFE: SET 7, (HL) (- - - -)
 void op_set_7_hlp(gbc_system *gbc) {
     write_byte(
-        gbc->ram,
+        gbc,
         gbc->cpu->registers->HL,
         set_bit(
             read_byte(gbc->ram, gbc->cpu->registers->HL),

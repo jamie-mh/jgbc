@@ -61,6 +61,9 @@ bool load_rom(gbc_system *gbc, const char *path) {
     // Point the cartridge ram locations to the first rom banks
     // With ROM0 being fixed at the first rom bank
     // And romNN starting with the second one
+    gbc->rom->curr_rom_bank = 1;
+    gbc->rom->curr_ram_bank = 0;
+
     gbc->ram->rom00 = gbc->rom->rom_banks[0];
     gbc->ram->romNN = gbc->rom->rom_banks[1];
 
@@ -87,6 +90,19 @@ static void get_rom_info(unsigned char *header, gbc_rom *rom) {
 
     rom->cgb_flag = header[0x143 - ROM_HEADER_START]; 
     rom->cart_type = header[0x147 - ROM_HEADER_START];
+
+    switch(rom->cart_type) {
+        case 1:
+        case 2:
+        case 3:
+            rom->mbc_type = 1;
+            break;
+        case 5:
+        case 6:
+            rom->mbc_type = 2;
+            break;
+    }
+
     rom->rom_size = (2*ROM_BANK_SIZE << header[0x148 - ROM_HEADER_START]) / ROM_BANK_SIZE;
     
     switch(header[0x149 - ROM_HEADER_START]) {
@@ -107,6 +123,7 @@ void print_rom_info(gbc_rom *rom) {
     printf(CMAG "Cartridge Type: " CNRM "%02X\n", rom->cart_type);
     printf(CMAG "ROM Size: " CNRM "%d x %d KB\n", rom->rom_size, ROM_BANK_SIZE);
     printf(CMAG "RAM Size: " CNRM "%d x %d KB\n", rom->ram_size, EXTRAM_BANK_SIZE);
+    printf(CMAG "MBC Type: " CNRM "MBC %d\n", rom->mbc_type);
     printf(CMAG "Destination Code: " CNRM "%02X\n", rom->dest_code);
     printf(CMAG "Version Number: " CNRM "%02X\n", rom->ver_no);
 }

@@ -64,10 +64,10 @@ unsigned char execute_instr(gbc_system *);
 void set_flag(const char, const unsigned char, unsigned char *);
 char get_flag(const char, const unsigned char);
 
-void stack_push_byte(gbc_ram *, unsigned short *, const unsigned char);
-void stack_push_short(gbc_ram *, unsigned short *, const unsigned short);
+void stack_push_byte(gbc_system *, unsigned short *, const unsigned char);
+void stack_push_short(gbc_system *, unsigned short *, const unsigned short);
 unsigned char stack_pop_byte(gbc_ram *, unsigned short *);
 unsigned short stack_pop_short(gbc_ram *, unsigned short *);
 
-void check_interrupt(gbc_system *);
-void update_timer(gbc_system *);
+void check_interrupts(gbc_system *);
+void update_timer(gbc_system *, int);

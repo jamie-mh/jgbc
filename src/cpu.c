@@ -126,18 +126,18 @@ char get_flag(const char flag, const unsigned char regis) {
 }
 
 // Pushes a byte to the stack after decrementing the stack pointer
-void stack_push_byte(gbc_ram *ram, unsigned short *sp, const unsigned char value) {
+void stack_push_byte(gbc_system *gbc, unsigned short *sp, const unsigned char value) {
 
     *sp -= sizeof(char);
-    write_byte(ram, *sp, value, 1);
+    write_byte(gbc, *sp, value, 1);
 }
 
 // Pushes a short to the stack after decrementing the stack pointer
-void stack_push_short(gbc_ram *ram, unsigned short *sp, const unsigned short value) {
+void stack_push_short(gbc_system *gbc, unsigned short *sp, const unsigned short value) {
     
     // Push the short to the stack as two bytes
-    stack_push_byte(ram, sp, (value & 0xFF00) >> 8);
-    stack_push_byte(ram, sp, value & 0x00FF);
+    stack_push_byte(gbc, sp, (value & 0xFF00) >> 8);
+    stack_push_byte(gbc, sp, value & 0x00FF);
 }
 
 // Pops a byte from the stack and increments the stack pointer
@@ -159,7 +159,7 @@ unsigned short stack_pop_short(gbc_ram *ram, unsigned short *sp) {
 }
 
 // Checks if the cpu has pending interrupts and services them 
-void check_interrupt(gbc_system *gbc) {
+void check_interrupts(gbc_system *gbc) {
     
     // Don't service any more interrupts until the current one is complete
     if(gbc->cpu->is_interrupted == false) { 
@@ -198,11 +198,11 @@ static void service_interrupt(gbc_system *gbc, const unsigned char number) {
     if(number <= 5) {
 
         // Push the current program counter to the stack
-        stack_push_short(gbc->ram, &gbc->cpu->registers->SP, gbc->cpu->registers->PC);
+        stack_push_short(gbc, &gbc->cpu->registers->SP, gbc->cpu->registers->PC);
         
         // Disable the interrupt request
-        write_register(gbc->ram, IE, number, 0);
-        write_register(gbc->ram, IF, number, 0);
+        write_register(gbc, IE, number, 0);
+        write_register(gbc, IF, number, 0);
         gbc->cpu->registers->IME = false;
 
         // Jump to the interrupt subroutine
@@ -212,17 +212,17 @@ static void service_interrupt(gbc_system *gbc, const unsigned char number) {
 }
 
 // Updates the timer if they are enabled and requests interrupts
-void update_timer(gbc_system *gbc) {
+void update_timer(gbc_system *gbc, int clocks) {
 
-    gbc->cpu->div_clock++;
+    gbc->cpu->div_clock += clocks;
 
     // The divider register updates at one 256th of the clock speed (aka 256 clocks)
     // Reset the clock and update the register
-    if(gbc->cpu->div_clock == 256) {
+    if(gbc->cpu->div_clock >= 256) {
 
         // Increment the register (don't care if it overflows)
         unsigned char curr_div = read_byte(gbc->ram, DIV);
-        write_byte(gbc->ram, DIV, curr_div + 1, 0);
+        write_byte(gbc, DIV, curr_div + 1, 0);
 
         gbc->cpu->div_clock = 0;
     }
@@ -232,7 +232,7 @@ void update_timer(gbc_system *gbc) {
     // (0 == Stopped) (1 == Running)
     if(read_register(gbc->ram, TAC, TAC_STOP) == 1) {
 
-        gbc->cpu->cnt_clock++;
+        gbc->cpu->cnt_clock += clocks;
 
         // Get the speed to update the timer at
         unsigned char speed_index = 
@@ -253,8 +253,8 @@ void update_timer(gbc_system *gbc) {
                 new_cnt = read_byte(gbc->ram, TMA);
 
                 // Request a timer interrupt
-                write_register(gbc->ram, IE, IEF_TIMER, 1);
-                write_register(gbc->ram, IF, IEF_TIMER, 1);
+                write_register(gbc, IE, IEF_TIMER, 1);
+                write_register(gbc, IF, IEF_TIMER, 1);
             }
             // Otherwise increment as usual
             else {
@@ -262,7 +262,7 @@ void update_timer(gbc_system *gbc) {
             }
 
             // Write the new value and reset the clock
-            write_byte(gbc->ram, TIMA, new_cnt, 0);
+            write_byte(gbc, TIMA, new_cnt, 0);
             gbc->cpu->cnt_clock = 0;
         }
     }

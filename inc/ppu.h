@@ -19,7 +19,7 @@
 
 // STAT: LCDC Status Register
 #define STAT 0xFF41
-#define STAT_LYC_LY_COINCID 6 // LYC=LY Coincidence Interrupt
+#define STAT_COINCID_INT 6 // LYC=LY Coincidence Interrupt
 #define STAT_OAM 5 // Mode 2 OAM Interrupt
 #define STAT_VBLANK 4 // Mode 1 V-Blank Interrupt
 #define STAT_HBLANK 3 // Mode 0 H-Blank Interrupt
@@ -38,14 +38,7 @@
 
 // LYC: LY Compare
 #define LYC 0xFF45
-
-// WY: Window Position Y
-#define WY 0xFF4A
-
-// WX: Window Position X minus 7
-#define WX 0xFF4B
-
-// BGP: BG Palette Data (NON CGB)
+// WY: Window Position Y #define WY 0xFF4A WX: Window Position X minus 7 #define WX 0xFF4B BGP: BG Palette Data (NON CGB)
 #define BGP 0xFF47
 
 // 0BP0: Object Palette 0 Data (NON CGB)
@@ -54,9 +47,8 @@
 // 0BP1: Object Palette 1 Data (NON CGB)
 #define OBP1 0xFF49
 
-// 
+// Direct Memory Access 
 #define DMA 0xFF46
-
 
 #define REG_BCPS 0xFF68
 #define REG_BCPD 0xFF69
@@ -76,8 +68,15 @@
 #define LGREY 96, 96, 96, 255
 
 #define FRAMERATE 60
+#define CLOCKS_PER_SCANLINE 456 
 
+struct Sprite {
+    unsigned char x;
+    unsigned char y;
+    unsigned char tile;
+    unsigned char attributes;
+};
 
 void init_ppu(gbc_ppu *, const char);
-void ppu_do_clock(gbc_system *);
+void update_ppu(gbc_system *, int);
 void render(gbc_ppu *);

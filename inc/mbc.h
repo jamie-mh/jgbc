@@ -1,3 +1,3 @@
 #pragma once
 
-void check_bank(gbc_system *);
+void mbc_check(gbc_system *, const unsigned short, const unsigned char);

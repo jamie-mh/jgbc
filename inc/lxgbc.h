@@ -1,13 +1,13 @@
 #pragma once
 
-#include<stdio.h>
-#include<stdlib.h>
-#include<math.h>
-#include<time.h>
-#include<string.h>
-#include<unistd.h>
-#include<stdbool.h>
-#include<SDL2/SDL.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <time.h>
+#include <string.h>
+#include <unistd.h>
+#include <stdbool.h>
+#include <SDL2/SDL.h>
 
 #define ROM_PATH_LENGTH 256
 #define LOGO "    __   _  ____________  ______\n   / /  | |/ / ____/ __ )/ ____/\n  / /   |   / / __/ __  / /    \n / /___/   / /_/ / /_/ / /___  \n/_____/_/|_\\____/_____/\\____/   \n                                \n"
@@ -20,6 +20,8 @@
 #define CMAG "\x1B[35m"
 #define CCYN "\x1B[36m"
 #define CWHT "\x1B[37m"
+
+#define GET_BIT(val, i) (((val) >> (i)) & 1)
 
 
 typedef struct gbc_registers {
@@ -76,9 +78,8 @@ typedef struct gbc_ppu {
     SDL_Renderer *renderer;
     SDL_Texture *texture;
     unsigned char *framebuffer;
-    unsigned char clock;
-    unsigned char scan_clock;
-    unsigned char run_for;
+    unsigned short scan_clock;
+    unsigned short frame_clock;
 } gbc_ppu;
 
 typedef struct gbc_ram {
@@ -100,10 +101,14 @@ typedef struct gbc_rom {
     char *title; // Uppercase ASCII Game Name
     char cgb_flag; // Color Support Flag
     unsigned char cart_type; // Cartridge Type Code
+    unsigned char mbc_type; // MBC Type (1, 2, 3)
     unsigned char rom_size; // Number of ROM banks
     unsigned char ram_size; // Number of EXT RAM banks
     unsigned char dest_code; // Destination Code (0: Japan, 1: World)
     unsigned char ver_no; // ROM Version Number
+
+    unsigned char curr_rom_bank;
+    unsigned char curr_ram_bank;
 
     unsigned char **rom_banks;
     unsigned char **ram_banks;

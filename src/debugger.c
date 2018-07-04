@@ -414,7 +414,7 @@ void debug(gbc_system *gbc) {
                     printf("Value: 0x");
                     scanf("%x", &value);
 
-                    write_byte(gbc->ram, address, value, 0);
+                    write_byte(gbc, address, value, 0);
 
                     printf(CGRN "Written %02X at %04X\n\n" CNRM, value, address);
                 } else {

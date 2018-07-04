@@ -3,13 +3,18 @@
 #include "cpu.h"
 #include "ppu.h"
 
-static void render_bg_scan(gbc_system *, unsigned char ly);
+static void update_render_mode(gbc_system *, unsigned char);
+static void render_bg_scan(gbc_system *, unsigned char);
+static void render_sprite_scan(gbc_system *, const struct Sprite *, unsigned char);
+
+static void render_tile_pixel(gbc_system *, const unsigned char, const unsigned char, const unsigned short, SDL_Colour *);
+static struct Sprite *get_sprites(gbc_system *);
 
 static SDL_Colour get_shade(const unsigned char);
 static void fill_shade_table(gbc_system *, SDL_Colour *);
 
 
-// Opens a SDL window, WIP
+// Opens a SDL window
 void init_ppu(gbc_ppu *ppu, const char scale) {
 
     SDL_Init(SDL_INIT_VIDEO);
@@ -38,36 +43,21 @@ void init_ppu(gbc_ppu *ppu, const char scale) {
     );
     
     ppu->framebuffer = calloc(SCREEN_WIDTH * SCREEN_HEIGHT * 8, sizeof(char));
-
     SDL_RenderSetScale(ppu->renderer, scale, scale);
-
     render(ppu);
 
-    ppu->clock = 0;
     ppu->scan_clock = 0;
-    ppu->run_for = 0;
+    ppu->frame_clock = 0;
 }
 
-// Renders the picture on the screen scanline by scanline
-void ppu_do_clock(gbc_system *gbc) {
-    
-    // Wait until the current scanline is finished
-    if(gbc->ppu->clock < gbc->ppu->run_for) {
-        gbc->ppu->clock++;
-        return;
-    }
+// Updates the mode in the STAT register based on the ly and scan clock 
+static void update_render_mode(gbc_system *gbc, unsigned char ly_val) {
 
-    unsigned char ly_val = read_byte(gbc->ram, LY);
     unsigned char mode = 0;
 
     // V-Blank (10 lines)
     if(ly_val >= 144 && ly_val <= 154) {
         mode = 1;
-    
-        // Check for v-blank interrupt
-        if(ly_val == 144 && read_register(gbc->ram, IE, IEF_VBLANK)) {
-            write_register(gbc->ram, IF, IEF_VBLANK, 1); 
-        }
     }
     // Screen rendering (144 lines aka height of screen in px)
     else {
@@ -87,37 +77,51 @@ void ppu_do_clock(gbc_system *gbc) {
     }
 
     // Write the mode to the two bits of the register
-    write_register(gbc->ram, STAT, STAT_MODE0, (mode >> 1) & 1);
-    write_register(gbc->ram, STAT, STAT_MODE1, (mode >> 0) & 1);
-    
-    // Render pixels to the screen in screen rendering mode
-    // The rendering lasts for 43 clocks, we are going to draw the line and wait
-    // It's not super accurate but it's good enough and shouldn't be too noticable
-    if(gbc->ppu->scan_clock == 20) {
+    write_register(gbc, STAT, STAT_MODE0, (mode >> 1) & 1);
+    write_register(gbc, STAT, STAT_MODE1, (mode >> 0) & 1);
+}
 
-        render_bg_scan(gbc, ly_val);
+// Renders the picture on the screen scanline by scanline
+void update_ppu(gbc_system *gbc, int clocks) {
 
-        // Run for 43 clocks
-        gbc->ppu->run_for = 43;
-        gbc->ppu->clock = 0;
-    }
+    unsigned char ly_val = read_byte(gbc->ram, LY);
+    update_render_mode(gbc, ly_val);
 
-    // End of scanline
-    if(gbc->ppu->scan_clock == 114) {
+    gbc->ppu->scan_clock += clocks;
+
+    if(gbc->ppu->scan_clock >= CLOCKS_PER_SCANLINE) { 
+
         gbc->ppu->scan_clock = 0;
 
-        // End of frame rendering
         if(ly_val == 153) {
             ly_val = 0;
         } else {
             ly_val++;
         }
+         
+        write_byte(gbc, LY, ly_val, false);
 
-        // Write the vertical line register
-        write_byte(gbc->ram, LY, ly_val, 0);
+        // Render all 144 lines on the screen 
+        if(ly_val < 144) {
+            render_bg_scan(gbc, ly_val);
 
-    } else {
-        gbc->ppu->scan_clock++;
+            /*struct Sprite *sprites = get_sprites(gbc);*/
+            /*render_sprite_scan(gbc, sprites, ly_val);*/
+            /*free(sprites);*/
+        }
+        // End of frame, request vblank
+        else if(ly_val == 144) {
+            write_register(gbc, IF, IEF_VBLANK, 1); 
+        }
+
+        // Update the coincidence flag (0: LYC != LY, 1: LYC == LY)
+        const bool coincidence = (read_byte(gbc->ram, LYC) == ly_val);
+        write_register(gbc, STAT, STAT_COINCID_FLAG, coincidence);
+
+        // If the LYC == LY interrupt is enabled, request it
+        if(coincidence && read_register(gbc->ram, STAT, STAT_COINCID_INT)) {
+            write_register(gbc, IF, IEF_LCD_STAT, 1); 
+        }
     }
 }
 
@@ -155,7 +159,7 @@ static void render_bg_scan(gbc_system *gbc, unsigned char ly) {
     unsigned short tile_start;
     
     // Render a scanline of background tiles 
-    for(unsigned char x = 0; x < SCREEN_WIDTH; x++) {
+    for(unsigned char x = 0; x < SCREEN_WIDTH; x += 8) {
 
         // Get the current background position (wrap around if it overflows)
         const unsigned char bg_x = (scroll_x + x > 255) ? (scroll_x + x) - 255 : scroll_x + x; 
@@ -175,24 +179,86 @@ static void render_bg_scan(gbc_system *gbc, unsigned char ly) {
         
         // Read two bytes from memory at the pixel row location
         const unsigned short pixel_row = read_short(gbc->ram, tile_start + (bg_y % 8) * 2);
- 
-        // Split the most and least significant bytes
-        const unsigned char ls_byte = (pixel_row & 0xFF00) >> 8;
-        const unsigned char ms_byte = (pixel_row & 0x00FF);
-    
-        // Get the colour from the most the most and least significant bits
-        const unsigned char bit = 7 - (x % 8);
-        const unsigned char shade_num = ((ms_byte >> bit) & 1) | (((ls_byte >> bit) & 1) << 1);
-        SDL_Colour shade = shades[shade_num];
-    
-        // Draw the pixel in the framebuffer
-        const unsigned int buf_offset = (x * 4) + (ly * SCREEN_WIDTH * 4);
 
-        gbc->ppu->framebuffer[buf_offset + 0] = shade.r; // R
-        gbc->ppu->framebuffer[buf_offset + 1] = shade.g; // G
-        gbc->ppu->framebuffer[buf_offset + 2] = shade.b; // B
-        gbc->ppu->framebuffer[buf_offset + 3] = shade.a; // A
+        for(unsigned char px = 0; px < 8; px++) {
+            render_tile_pixel(gbc, x + px, ly, pixel_row, shades);
+        }
     }
+}
+
+// Renders a sprite scanline to the display at the specified coordinates
+static void render_sprite_scan(gbc_system *gbc, const struct Sprite *sprites, const unsigned char ly) {
+
+    // Are the tiles 8x8 or 8*16?
+    bool tall_sprites = read_register(gbc->ram, LCDC, LCDC_OBJ_SIZE);
+    const unsigned char height = (tall_sprites) ? 16 : 8;
+
+    // Get the palette data
+    SDL_Colour shades[4];
+    fill_shade_table(gbc, shades);
+
+    for(int i = 0; i < 40; i++) {
+        
+        struct Sprite sprite = sprites[i];
+        const unsigned char x = sprite.x - 8;
+        const unsigned char y = sprite.y - 16;
+
+        // If the sprite is on the screen
+        if(sprite.x > 0 && sprite.x < 168 && y >= ly && y + height <= ly) {
+            /*printf("yeah boi\n");*/
+
+            // A tall sprite has the first bit removed 
+            const unsigned char tile = (tall_sprites) ? sprite.tile & 0x7F : sprite.tile;
+            const unsigned char line_number = ly - y;
+            printf("%d\n", line_number);
+
+            // Get the byte of data that matches this sprite line
+            const unsigned short line_offset = (tile * 8 * height * 2) + line_number;
+            const unsigned short line_data = read_short(gbc->ram, 0x8000 + line_offset);
+
+            for(unsigned char px = 0; px < 8; px++) {
+                render_tile_pixel(gbc, x + px, y, line_data, shades);
+            } 
+        }
+    } 
+}
+
+// Renders a tile pixel to the framebuffer 
+static void render_tile_pixel(gbc_system *gbc, const unsigned char x, const unsigned char y, const unsigned short line, SDL_Colour *shades) {
+
+    const unsigned char ls_byte = (line & 0xFF00) >> 8;
+    const unsigned char ms_byte = (line & 0x00FF);
+
+    // Get the colour from the most the most and least significant bits
+    const unsigned char bit = 7 - (x % 8);
+    const unsigned char shade_num = ((ms_byte >> bit) & 1) | (((ls_byte >> bit) & 1) << 1);
+    SDL_Colour shade = shades[shade_num];
+
+    const unsigned int buf_offset = (x * 4) + (y * SCREEN_WIDTH * 4);
+
+    gbc->ppu->framebuffer[buf_offset + 0] = shade.r; // R
+    gbc->ppu->framebuffer[buf_offset + 1] = shade.g; // G
+    gbc->ppu->framebuffer[buf_offset + 2] = shade.b; // B
+    gbc->ppu->framebuffer[buf_offset + 3] = shade.a; // A
+}
+
+// Returns an array of sprites in the OAM 
+static struct Sprite *get_sprites(gbc_system *gbc) {
+
+    struct Sprite *sprites = malloc(40 * sizeof(struct Sprite));
+
+    for(int i = 0; i < 40; i++) {
+    
+        struct Sprite *sprite = &sprites[i];
+        unsigned short address = 0xFE00 + (i * 4);
+
+        sprite->x = read_byte(gbc->ram, address + 0); 
+        sprite->y = read_byte(gbc->ram, address + 1); 
+        sprite->tile = read_byte(gbc->ram, address + 2); 
+        sprite->attributes = read_byte(gbc->ram, address + 3);
+    }
+
+    return sprites;
 }
 
 // Returns the colour associated with a shade number
@@ -242,7 +308,7 @@ void render(gbc_ppu *ppu) {
         ppu->texture,
         NULL,
         ppu->framebuffer,
-        SCREEN_WIDTH * 4
+        SCREEN_WIDTH * 4 
     );
 
     SDL_RenderCopy(ppu->renderer, ppu->texture, NULL, NULL);

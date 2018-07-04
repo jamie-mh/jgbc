@@ -2,34 +2,36 @@
 #include "ppu.h"
 #include "cpu.h"
 #include "ram.h"
+#include "mbc.h"
 
 static unsigned char *get_memory_location(gbc_ram *, unsigned short *);
+static void DMA_transfer(gbc_system *, unsigned char);
 
 
 // Allocates memory
-void init_ram(gbc_ram *ram) {
+void init_ram(gbc_system *gbc) {
 
-    ram->rom00 = NULL;
-    ram->romNN = NULL;
-    ram->extram = NULL;
+    gbc->ram->rom00 = NULL;
+    gbc->ram->romNN = NULL;
+    gbc->ram->extram = NULL;
 
-    ram->vram = calloc(VRAM_SIZE, sizeof(char));
-    ram->wram_banks = malloc(sizeof(char *) * WRAM_BANK_COUNT); 
+    gbc->ram->vram = calloc(VRAM_SIZE, sizeof(char));
+    gbc->ram->wram_banks = malloc(sizeof(char *) * WRAM_BANK_COUNT); 
 
     for(int i = 0; i < WRAM_BANK_COUNT; i++) {
-        ram->wram_banks[i] = calloc(WRAM_BANK_SIZE, sizeof(char));
+        gbc->ram->wram_banks[i] = calloc(WRAM_BANK_SIZE, sizeof(char));
     }
 
     // Point the WRAM to the default banks
-    ram->wram00 = ram->wram_banks[0];
-    ram->wramNN = ram->wram_banks[1];
+    gbc->ram->wram00 = gbc->ram->wram_banks[0];
+    gbc->ram->wramNN = gbc->ram->wram_banks[1];
     
-    ram->oam = calloc(OAM_SIZE, sizeof(char));
-    ram->io = calloc(IO_SIZE, sizeof(char));
-    ram->hram = calloc(HRAM_SIZE, sizeof(char));
-    ram->ier = calloc(1, sizeof(char));
+    gbc->ram->oam = calloc(OAM_SIZE, sizeof(char));
+    gbc->ram->io = calloc(IO_SIZE, sizeof(char));
+    gbc->ram->hram = calloc(HRAM_SIZE, sizeof(char));
+    gbc->ram->ier = calloc(1, sizeof(char));
 
-    write_byte(ram, LCDC, DEFAULT_LCDC, 0);
+    write_byte(gbc, LCDC, DEFAULT_LCDC, 0);
 }
 
 // Returns a pointer to the memory location of the specified address
@@ -141,9 +143,10 @@ unsigned short read_short(gbc_ram *ram, const unsigned short address) {
 }
 
 // Writes a byte in memory at the address
-void write_byte(gbc_ram *ram, const unsigned short address, unsigned char value, const bool is_program) {
+void write_byte(gbc_system *gbc, const unsigned short address, unsigned char value, const bool is_program) {
+    mbc_check(gbc, address, value);
 
-    if(!is_valid_ram(ram, address)) {
+    if(!is_valid_ram(gbc->ram, address)) {
         return;
     }
 
@@ -151,6 +154,10 @@ void write_byte(gbc_ram *ram, const unsigned short address, unsigned char value,
     // if(address == SB) {
     //     printf("%c", value);
     // }
+
+    if(address == DMA) {
+        DMA_transfer(gbc, value); 
+    }
 
     // If the timer divider register is written to, it is reset
     // Unless we are forcing the write
@@ -160,7 +167,7 @@ void write_byte(gbc_ram *ram, const unsigned short address, unsigned char value,
 
     // Get the memory location with the relative address
     unsigned short rel_address = address;
-    unsigned char *mem = get_memory_location(ram, &rel_address);
+    unsigned char *mem = get_memory_location(gbc->ram, &rel_address);
 
     // TODO: Implement bank switching
     
@@ -169,22 +176,22 @@ void write_byte(gbc_ram *ram, const unsigned short address, unsigned char value,
 }
 
 // Writes two bytes in memory starting at the address
-void write_short(gbc_ram *ram, const unsigned short address, const unsigned short value) {
+void write_short(gbc_system *gbc, const unsigned short address, const unsigned short value) {
 
     // Split the short into two bytes
-    unsigned char byte_a = (value & 0x00FF);
-    unsigned char byte_b = (value & 0xFF00) >> 8;
+    const unsigned char byte_a = (value & 0x00FF);
+    const unsigned char byte_b = (value & 0xFF00) >> 8;
 
-    write_byte(ram, address, byte_a, true);
-    write_byte(ram, address + 1, byte_b, true);
+    write_byte(gbc, address, byte_a, true);
+    write_byte(gbc, address + 1, byte_b, true);
 }
 
 // Writes to memory register at a certain location
-void write_register(gbc_ram *ram, const unsigned short address, const unsigned char bit, const unsigned char value) {
+void write_register(gbc_system *gbc, const unsigned short address, const unsigned char bit, const unsigned char value) {
     
-    unsigned char byte = read_byte(ram, address);
+    unsigned char byte = read_byte(gbc->ram, address);
     byte ^= (-value ^ byte) & (1 << bit);
-    write_byte(ram, address, byte, 0);
+    write_byte(gbc, address, byte, 0);
 }
 
 // Reads a memory register at a certain location
@@ -193,4 +200,14 @@ unsigned char read_register(gbc_ram *ram, const unsigned short address, const un
     // Return the nth bit of the register
     const unsigned char byte = read_byte(ram, address);
     return (byte >> bit) & 1;
+}
+
+// Launches a DMA transfer from ROM or RAM to OAM memory (sprite data)
+static void DMA_transfer(gbc_system *gbc, unsigned char value) {
+
+    const unsigned short address = value * 0x100;
+
+    for(int i = 0; i <= 0x9F; i++) {
+        write_byte(gbc, 0xFE00 + i, read_byte(gbc->ram, address + i), false); 
+    }
 }
