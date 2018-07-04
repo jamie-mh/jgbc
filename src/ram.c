@@ -165,13 +165,15 @@ void write_byte(gbc_system *gbc, const unsigned short address, unsigned char val
         value = 0x0;
     }
 
+    // If the vertical line register is written to, it is reset
+    if(address == LY && is_program) {
+        value = 0x0;
+    }
+
     // Get the memory location with the relative address
     unsigned short rel_address = address;
     unsigned char *mem = get_memory_location(gbc->ram, &rel_address);
-
-    // TODO: Implement bank switching
     
-    // Write the byte to memory
     mem[rel_address] = value;
 }
 

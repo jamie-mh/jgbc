@@ -4,17 +4,17 @@ OBJ := ./obj
 INC := ./inc
 
 CC := gcc
-CFLAGS := -I$(INC)/ -lSDL2 -lm -Ofast -fomit-frame-pointer -g -Wall -Wextra
+CFLAGS := -I$(INC)/ -lSDL2 -lm -g -Wall -Wextra
 
 OUTNAME := lxgbc
 SOURCES := $(wildcard $(SRC)/*.c)
 OBJECTS := $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(SOURCES))
 
 all: $(OBJECTS)
-	$(CC) $^ -o $(BIN)/$(OUTNAME) $(CFLAGS)
+	$(CC) $(CFLAGS) $^ -o $(BIN)/$(OUTNAME)
 
 $(OBJ)/%.o: $(SRC)/%.c
-	$(CC) -c $< -o $@ $(CFLAGS)
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
 	rm -rf $(OBJ)/* $(BIN)/$(OUTNAME)

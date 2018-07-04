@@ -90,6 +90,7 @@ Don't try and run anything other than GB roms, it will crash (duh).
 ### Screenshots
 
 ![Dr Mario](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/drmario.png)
+![Super Mario Land 2](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/mario2.png)
 
 ### Using the debugger
 

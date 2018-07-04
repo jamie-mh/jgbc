@@ -6,6 +6,7 @@
 #include "debugger.h"
 #include "ppu.h"
 #include "sound.h"
+#include "input.h"
 
 static void init_system(gbc_system *, cmd_options *);
 static void handle_event(SDL_Event, gbc_system *);
@@ -53,12 +54,12 @@ int main(int argc, char **argv) {
 
             check_interrupts(gbc);
 
-            update_ppu(gbc, clocks);
             update_timer(gbc, clocks);
+            update_ppu(gbc, clocks);
 
             frame_clocks += clocks;
 
-            if(SDL_PollEvent(&event)) {
+            while(SDL_PollEvent(&event)) {
                 handle_event(event, gbc);
             }
         }
@@ -137,6 +138,8 @@ static void handle_event(SDL_Event event, gbc_system *gbc) {
                     gbc->debugger->is_debugging = true;
                     printf(DEBUG_PROMPT);
                 }
+            } else {
+                handle_input(gbc, event.key); 
             }
 
             break;
@@ -153,7 +156,7 @@ static bool get_cl_arguments(int argc, char **argv, cmd_options *cmd) {
     cmd->no_limit = false;
 
     while((option = getopt(argc, argv, "f:gs:n")) != -1) {
-        switch (option) {
+        switch(option) {
             case 'f':
                 cmd->rom_path = optarg;
                 f_flag = 1;

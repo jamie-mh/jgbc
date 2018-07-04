@@ -12,9 +12,6 @@
 // Sound Registers
 // TODO: Implement
 
-// Joypad Register
-#define JOYP 0xFF00
-
 
 // GBC Only Registers
 #define KEY1 0xFF4D

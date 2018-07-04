@@ -20,12 +20,12 @@
 // STAT: LCDC Status Register
 #define STAT 0xFF41
 #define STAT_COINCID_INT 6 // LYC=LY Coincidence Interrupt
-#define STAT_OAM 5 // Mode 2 OAM Interrupt
-#define STAT_VBLANK 4 // Mode 1 V-Blank Interrupt
-#define STAT_HBLANK 3 // Mode 0 H-Blank Interrupt
+#define STAT_OAM_INT 5 // Mode 2 OAM Interrupt
+#define STAT_VBLANK_INT 4 // Mode 1 V-Blank Interrupt
+#define STAT_HBLANK_INT 3 // Mode 0 H-Blank Interrupt
 #define STAT_COINCID_FLAG 2 // Coincidence Flag
-#define STAT_MODE0 1 // Mode Flag 1/2 
-#define STAT_MODE1 0 // Mode Flag 2/2
+#define STAT_MODE1 1 // Mode Flag 1/2 
+#define STAT_MODE0 0 // Mode Flag 2/2
 
 // SCY: Scroll Y
 #define SCY 0xFF42
@@ -71,5 +71,5 @@
 #define CLOCKS_PER_SCANLINE 456 
 
 void init_ppu(gbc_ppu *, const char);
-void update_ppu(gbc_system *, int);
+void update_ppu(gbc_system *, const int);
 void render(gbc_ppu *);

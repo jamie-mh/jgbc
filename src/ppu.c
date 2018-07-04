@@ -3,16 +3,16 @@
 #include "cpu.h"
 #include "ppu.h"
 
-static void update_render_mode(gbc_system *, unsigned char);
-static void render_bg_scan(gbc_system *, unsigned char);
-static void render_sprite_scan(gbc_system *, unsigned char);
+static void update_render_mode(gbc_system *, const unsigned char, const bool);
+static void render_bg_scan(gbc_system *, const unsigned char);
+static void render_sprite_scan(gbc_system *, const unsigned char);
 
-static void render_tile_pixel(gbc_system *, const unsigned char, const unsigned char, const unsigned short, SDL_Colour *, bool);
+static void render_tile_pixel(gbc_system *, const unsigned char, const unsigned char, const unsigned short, const SDL_Colour *, const bool);
 static gbc_sprite *get_sprites(gbc_system *);
 
 static SDL_Colour get_shade(const unsigned char);
 static void fill_bg_shade_table(gbc_system *, SDL_Colour *);
-static void fill_sprite_shade_table(gbc_system *, unsigned char, SDL_Colour *);
+static void fill_sprite_shade_table(gbc_system *, const unsigned char, SDL_Colour *);
 
 
 // Opens a SDL window
@@ -54,41 +54,64 @@ void init_ppu(gbc_ppu *ppu, const char scale) {
 }
 
 // Updates the mode in the STAT register based on the ly and scan clock 
-static void update_render_mode(gbc_system *gbc, unsigned char ly_val) {
+static void update_render_mode(gbc_system *gbc, const unsigned char ly_val, const bool lcd_on) {
+    
+    const unsigned char curr_mode = read_byte(gbc->ram, STAT) & 0x3;
+    unsigned char new_mode = 0;
+    bool request_int = false;
 
-    unsigned char mode = 0;
-
-    // V-Blank (10 lines)
-    if(ly_val >= 144 && ly_val <= 154) {
-        mode = 1;
+    // V-Blank (10 lines) or when the screen is off
+    if(ly_val >= 144 || !lcd_on) {
+        new_mode = 1;
+        request_int = read_register(gbc->ram, STAT, STAT_VBLANK_INT);
     }
     // Screen rendering (144 lines aka height of screen in px)
     else {
     
-        // OAM Transfer (20 clocks)
-        if(gbc->ppu->scan_clock < 20) {
-            mode = 2;
+        // OAM Transfer
+        if(gbc->ppu->scan_clock < 80) {
+            new_mode = 2;
+            request_int = read_register(gbc->ram, STAT, STAT_OAM_INT);
         }
-        // Pixel Transfer (43 clocks)
-        else if(gbc->ppu->scan_clock >= 20 && gbc->ppu->scan_clock < 63) {
-            mode = 3;  
+        // Pixel Transfer
+        else if(gbc->ppu->scan_clock >= 80 && gbc->ppu->scan_clock < 172) {
+            new_mode = 3;
         } 
-        // H-Blank (51 clocks) 
-        else if(gbc->ppu->scan_clock >= 63 && gbc->ppu->scan_clock <= 114) {
-            mode = 0; 
+        // H-Blank
+        else if(gbc->ppu->scan_clock >= 172) {
+            new_mode = 0; 
+            request_int = read_register(gbc->ram, STAT, STAT_HBLANK_INT);
         }
     }
 
-    // Write the mode to the two bits of the register
-    write_register(gbc, STAT, STAT_MODE0, (mode >> 1) & 1);
-    write_register(gbc, STAT, STAT_MODE1, (mode >> 0) & 1);
+    if(new_mode != curr_mode) {
+
+        // We've changed mode and the interrupt for this mode is active
+        // So request a LCD STAT interrupt
+        if(request_int) {
+            write_register(gbc, IF, IEF_LCD_STAT, 1);
+        }
+
+        // Write the mode to the two bits of the register
+        write_register(gbc, STAT, STAT_MODE1, (new_mode >> 1) & 1);
+        write_register(gbc, STAT, STAT_MODE0, (new_mode >> 0) & 1);
+    }
 }
 
 // Renders the picture on the screen scanline by scanline
-void update_ppu(gbc_system *gbc, int clocks) {
+void update_ppu(gbc_system *gbc, const int clocks) {
 
+    const bool lcd_on = read_register(gbc->ram, LCDC, LCDC_LCD_ENABLE);
     unsigned char ly_val = read_byte(gbc->ram, LY);
-    update_render_mode(gbc, ly_val);
+
+    update_render_mode(gbc, ly_val, lcd_on);
+
+    // When the LCD is off, ly and the scanline clock are reset
+    if(!lcd_on) {
+        write_byte(gbc, LY, 0, false);
+        gbc->ppu->scan_clock = 0;
+        return;
+    }
 
     if(gbc->ppu->sprite_buffer == NULL) {
         gbc->ppu->sprite_buffer = get_sprites(gbc); 
@@ -113,7 +136,7 @@ void update_ppu(gbc_system *gbc, int clocks) {
             render_bg_scan(gbc, ly_val);
             render_sprite_scan(gbc, ly_val);
         }
-        // End of frame, request vblank
+        // End of frame, request vblank interrupt
         else if(ly_val == 144) {
             write_register(gbc, IF, IEF_VBLANK, 1); 
 
@@ -121,20 +144,27 @@ void update_ppu(gbc_system *gbc, int clocks) {
             gbc->ppu->sprite_buffer = get_sprites(gbc);
         }
 
-        // Update the coincidence flag (0: LYC != LY, 1: LYC == LY)
-        const bool coincidence = (read_byte(gbc->ram, LYC) == ly_val);
-        write_register(gbc, STAT, STAT_COINCID_FLAG, coincidence);
+        // Check if LY == LYC
+        if(read_byte(gbc->ram, LYC) == ly_val) {
+            write_register(gbc, STAT, STAT_COINCID_FLAG, 1);
 
-        // If the LYC == LY interrupt is enabled, request it
-        if(coincidence && read_register(gbc->ram, STAT, STAT_COINCID_INT)) {
-            write_register(gbc, IF, IEF_LCD_STAT, 1); 
+            // If the LY == LYC interrupt is enabled, request it
+            if(read_register(gbc->ram, STAT, STAT_COINCID_INT)) {
+                write_register(gbc, IF, IEF_LCD_STAT, 1);
+            }
+        } else {
+            write_register(gbc, STAT, STAT_COINCID_FLAG, 0);
         }
     }
 }
 
 // Renders a background scanline to the display at the specified coordinates
 // Gets tile data from ram at the pointer given
-static void render_bg_scan(gbc_system *gbc, unsigned char ly) {
+static void render_bg_scan(gbc_system *gbc, const unsigned char ly) {
+
+    if(!read_register(gbc->ram, LCDC, LCDC_BG_DISPLAY)) {
+        return;
+    }
 
     // Get the start of the tile map data 
     unsigned short bg_tile_map_start = (read_register(gbc->ram, LCDC, LCDC_BG_TILE_MAP) ? 0x9C00 : 0x9800);
@@ -196,6 +226,10 @@ static void render_bg_scan(gbc_system *gbc, unsigned char ly) {
 // Renders a sprite scanline to the display at the specified coordinates
 static void render_sprite_scan(gbc_system *gbc, const unsigned char ly) {
 
+    if(!read_register(gbc->ram, LCDC, LCDC_OBJ_DISPLAY)) {
+        return;
+    }
+
     // Are the tiles 8x8 or 8x16?
     bool tall_sprites = read_register(gbc->ram, LCDC, LCDC_OBJ_SIZE);
     const unsigned char height = (tall_sprites) ? 16 : 8;
@@ -220,6 +254,8 @@ static void render_sprite_scan(gbc_system *gbc, const unsigned char ly) {
             const unsigned short row_offset = (tile * 16) + row_index * 2;
             const unsigned short row_data = read_short(gbc->ram, 0x8000 + row_offset);
 
+            // TODO: Implement sprite flipping
+
             for(unsigned char px = 0; px < 8; px++) {
                 render_tile_pixel(gbc, x + px, ly, row_data, shades, true);
             } 
@@ -228,7 +264,7 @@ static void render_sprite_scan(gbc_system *gbc, const unsigned char ly) {
 }
 
 // Renders a tile pixel to the framebuffer 
-static void render_tile_pixel(gbc_system *gbc, const unsigned char x, const unsigned char y, const unsigned short line, SDL_Colour *shades, bool sprite) {
+static void render_tile_pixel(gbc_system *gbc, const unsigned char x, const unsigned char y, const unsigned short line, const SDL_Colour *shades, const bool sprite) {
 
     const unsigned char ls_byte = (line & 0xFF00) >> 8;
     const unsigned char ms_byte = (line & 0x00FF);
@@ -311,7 +347,7 @@ static void fill_bg_shade_table(gbc_system *gbc, SDL_Colour *table) {
 
 // Modifies a table to add the color shades for sprite tiles according to the palette registers
 // Monochrome GameBoy only
-static void fill_sprite_shade_table(gbc_system *gbc, unsigned char sprite_attr, SDL_Colour *table) {
+static void fill_sprite_shade_table(gbc_system *gbc, const unsigned char sprite_attr, SDL_Colour *table) {
 
     // Read the sprite palette register
     const unsigned char palette_addr = (GET_BIT(sprite_attr, 4)) ? 0xFF49 : 0xFF48;

@@ -201,7 +201,6 @@ static void service_interrupt(gbc_system *gbc, const unsigned char number) {
         stack_push_short(gbc, &gbc->cpu->registers->SP, gbc->cpu->registers->PC);
         
         // Disable the interrupt request
-        write_register(gbc, IE, number, 0);
         write_register(gbc, IF, number, 0);
         gbc->cpu->registers->IME = false;
 
