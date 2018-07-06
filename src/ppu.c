@@ -15,8 +15,18 @@ static void fill_bg_shade_table(gbc_system *, SDL_Colour *);
 static void fill_sprite_shade_table(gbc_system *, const unsigned char, SDL_Colour *);
 
 
-// Opens a SDL window
-void init_ppu(gbc_ppu *ppu, const char scale) {
+// Creates an empty framebuffer
+void init_ppu(gbc_ppu *ppu) {
+
+    ppu->framebuffer = calloc(SCREEN_WIDTH * SCREEN_HEIGHT * 8, sizeof(char));
+    ppu->sprite_buffer = NULL;
+
+    ppu->scan_clock = 0;
+    ppu->frame_clock = 0;
+}
+
+// Creates a SDL window for use without the debugger
+void init_window(gbc_ppu *ppu) {
 
     SDL_Init(SDL_INIT_VIDEO);
 
@@ -24,15 +34,15 @@ void init_ppu(gbc_ppu *ppu, const char scale) {
         MAIN_WINDOW_TITLE,
         SDL_WINDOWPOS_UNDEFINED,
         SDL_WINDOWPOS_UNDEFINED,
-        SCREEN_WIDTH * scale,
-        SCREEN_HEIGHT * scale,
+        SCREEN_WIDTH * SCREEN_SCALE,
+        SCREEN_HEIGHT * SCREEN_SCALE,
         SDL_WINDOW_SHOWN
     );
 
     ppu->renderer = SDL_CreateRenderer(
         ppu->window,
         -1,
-        SDL_RENDERER_ACCELERATED
+        SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
     );
 
     ppu->texture = SDL_CreateTexture(
@@ -42,15 +52,9 @@ void init_ppu(gbc_ppu *ppu, const char scale) {
         SCREEN_WIDTH,
         SCREEN_HEIGHT
     );
-    
-    ppu->framebuffer = calloc(SCREEN_WIDTH * SCREEN_HEIGHT * 8, sizeof(char));
-    ppu->sprite_buffer = NULL;
 
-    SDL_RenderSetScale(ppu->renderer, scale, scale);
-    render(ppu);
-
-    ppu->scan_clock = 0;
-    ppu->frame_clock = 0;
+    SDL_RenderSetScale(ppu->renderer, SCREEN_SCALE, SCREEN_SCALE);
+    render_to_window(ppu);
 }
 
 // Updates the mode in the STAT register based on the ly and scan clock 
@@ -365,7 +369,7 @@ static void fill_sprite_shade_table(gbc_system *gbc, const unsigned char sprite_
 }
 
 // Renders the current framebuffer to the display
-void render(gbc_ppu *ppu) {
+void render_to_window(gbc_ppu *ppu) {
 
     SDL_UpdateTexture(
         ppu->texture,

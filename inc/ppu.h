@@ -2,6 +2,7 @@
 
 #define SCREEN_WIDTH 160
 #define SCREEN_HEIGHT 144
+#define SCREEN_SCALE 3
 #define MAIN_WINDOW_TITLE "LXGBC"
 
 // LCDC: LCD Control Register 
@@ -70,6 +71,6 @@
 #define FRAMERATE 60.0
 #define CLOCKS_PER_SCANLINE 456 
 
-void init_ppu(gbc_ppu *, const char);
+void init_ppu(gbc_ppu *);
 void update_ppu(gbc_system *, const int);
-void render(gbc_ppu *);
+void render_to_window(gbc_ppu *);

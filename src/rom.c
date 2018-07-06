@@ -119,19 +119,6 @@ static void get_rom_info(unsigned char *header, gbc_rom *rom) {
     rom->ver_no = header[0x14C - ROM_HEADER_START];
 }
 
-// Display the ROM information in the console
-void print_rom_info(gbc_rom *rom) {
-    
-    printf(CMAG "Title: " CNRM "%s\n", rom->title);
-    printf(CMAG "CGB Flag: " CNRM "%02X\n", rom->cgb_flag);
-    printf(CMAG "Cartridge Type: " CNRM "%02X\n", rom->cart_type);
-    printf(CMAG "ROM Size: " CNRM "%d x %d KB\n", rom->rom_size, ROM_BANK_SIZE);
-    printf(CMAG "RAM Size: " CNRM "%d x %d KB\n", rom->ram_size, EXTRAM_BANK_SIZE);
-    printf(CMAG "MBC Type: " CNRM "MBC %d\n", rom->mbc_type);
-    printf(CMAG "Destination Code: " CNRM "%02X\n", rom->dest_code);
-    printf(CMAG "Version Number: " CNRM "%02X\n", rom->ver_no);
-}
-
 void load_bootrom(gbc_ram *ram) {
 
     // Modified DMG bootrom with the cartridge check removed

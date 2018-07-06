@@ -38,71 +38,74 @@ void init_ram(gbc_system *gbc) {
 // and changes the input address to the relative location inside this section.
 static unsigned char *get_memory_location(gbc_ram *ram, unsigned short *address) {
 
-    // 16KB ROM Bank 00 
-    if(*address <= 0x3FFF) {
-        if(*address <= 0x100 && !read_byte(ram, BOOTROM_DISABLE)) {
-            return ram->bootrom;
-        } else {
-            return ram->rom00;
-        }
-    } 
-    // 16KB ROM Bank NN
-    else if(*address >= 0x4000 && *address <= 0x7FFF) {
-        *address -= 0x4000;
-        return ram->romNN;
-    } 
-    // 8KB Video RAM
-    else if(*address >= 0x8000 && *address <= 0x9FFF) {
-        *address -= 0x8000;
-        return ram->vram;
-    } 
-    // 8KB External RAM (in cartridge)
-    else if(*address >= 0xA000 && *address <= 0xBFFF) {
-        *address -= 0xA000;
-        return ram->extram;
-    }
-    // 4KB Work RAM Bank 00
-    else if(*address >= 0xC000 && *address <= 0xCFFF) {
-        *address -= 0xC000;
-        return ram->wram00;
-    } 
-    // 4KB Work RAM Bank NN
-    else if(*address >= 0xD000 && *address <= 0xDFFF) {
-        *address -= 0xD000;
-        return ram->wramNN;
-    } 
-    // Mirror of Work RAM (wram 00)
-    else if(*address >= 0xE000 && *address <= 0xEFFF) {
-        *address -= 0xE000;
-        return ram->wram00;
-    }
-    // Mirror of Work RAM (wram nn)
-    else if(*address >= 0xF000 && *address <= 0xFDFF) {
-        *address -= 0xF000;
-        return ram->wramNN;
-    }
-    // Sprite Attibute Table
-    else if(*address >= 0xFE00 && *address <= 0xFE9F) {
-        *address -= 0xFE00;
-        return ram->oam;
-    }
-    // IO Registers
-    else if(*address >= 0xFF00 && *address <= 0xFF7F) {
-        *address -= 0xFF00;
-        return ram->io;
-    }
-    // High RAM
-    else if(*address >= 0xFF80 && *address <= 0xFFFE) {
-        *address -= 0xFF80;
-        return ram->hram;
-    }
-    // Interrupt Enable Register
-    else if(*address == 0xFFFF) {
-        *address = 0;
-        return ram->ier;
-    }
+    switch(*address) {
 
-    return NULL;
+        // 16KB ROM Bank 00 
+        case 0x0 ... 0x3FFF:
+            if(*address <= 0x100 && !read_byte(ram, BOOTROM_DISABLE)) {
+                return ram->bootrom;
+            } else {
+                return ram->rom00;
+            }
+
+        // 16KB ROM Bank NN
+        case 0x4000 ... 0x7FFF:
+            *address -= 0x4000;
+            return ram->romNN;
+
+        // 8KB Video RAM
+        case 0x8000 ... 0x9FFF:
+            *address -= 0x8000;
+            return ram->vram;
+
+        // 8KB External RAM (in cartridge)
+        case 0xA000 ... 0xBFFF:
+            *address -= 0xA000;
+            return ram->extram;
+
+        // 4KB Work RAM Bank 00
+        case 0xC000 ... 0xCFFF:
+            *address -= 0xC000;
+            return ram->wram00;
+
+        // 4KB Work RAM Bank NN
+        case 0xD000 ... 0xDFFF:
+            *address -= 0xD000;
+            return ram->wramNN;
+
+        // Mirror of Work RAM (wram 00)
+        case 0xE000 ... 0xEFFF:
+            *address -= 0xE000;
+            return ram->wram00;
+
+        // Mirror of Work RAM (wram nn)
+        case 0xF000 ... 0xFDFF:
+            *address -= 0xF000;
+            return ram->wramNN;
+
+        // Sprite Attibute Table
+        case 0xFE00 ... 0xFE9F:
+            *address -= 0xFE00;
+            return ram->oam;
+
+        // IO Registers
+        case 0xFF00 ... 0xFF7F:
+            *address -= 0xFF00;
+            return ram->io;
+
+        // High RAM
+        case 0xFF80 ... 0xFFFE:
+            *address -= 0xFF80;
+            return ram->hram;
+        
+        // Interrupt Enable Register
+        case 0xFFFF:
+            *address = 0;
+            return ram->ier;
+
+        default:
+            return NULL;
+    }
 }
 
 // Checks if the ram address is valid and can be read / written

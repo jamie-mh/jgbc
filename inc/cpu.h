@@ -2,6 +2,7 @@
 
 // Default Register Values (Original GameBoy)
 #define DEFAULT_PC 0x0
+#define PROGRAM_START 0x100
 #define DEFAULT_SP 0xFFFE
 #define DEFAULT_AF 0x1B0
 #define DEFAULT_BC 0x13

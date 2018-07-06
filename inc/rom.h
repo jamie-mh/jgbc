@@ -9,4 +9,3 @@
 
 void load_bootstrap(gbc_ram *);
 bool load_rom(gbc_system *, const char *);
-void print_rom_info(gbc_rom *);
