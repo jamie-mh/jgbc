@@ -41,65 +41,65 @@ static unsigned char *get_memory_location(gbc_ram *ram, unsigned short *address)
     switch(*address) {
 
         // 16KB ROM Bank 00 
-        case 0x0 ... 0x3FFF:
-            if(*address <= 0x100 && !read_byte(ram, BOOTROM_DISABLE)) {
+        case ROM00_START ... ROM00_END:
+            if(*address <= PROGRAM_START && !read_byte(ram, BOOTROM_DISABLE)) {
                 return ram->bootrom;
             } else {
                 return ram->rom00;
             }
 
         // 16KB ROM Bank NN
-        case 0x4000 ... 0x7FFF:
-            *address -= 0x4000;
+        case ROMNN_START ... ROMNN_END:
+            *address -= ROMNN_START;
             return ram->romNN;
 
         // 8KB Video RAM
-        case 0x8000 ... 0x9FFF:
-            *address -= 0x8000;
+        case VRAM_START ... VRAM_END:
+            *address -= VRAM_START;
             return ram->vram;
 
         // 8KB External RAM (in cartridge)
-        case 0xA000 ... 0xBFFF:
-            *address -= 0xA000;
+        case EXTRAM_START ... EXTRAM_END:
+            *address -= EXTRAM_START;
             return ram->extram;
 
         // 4KB Work RAM Bank 00
-        case 0xC000 ... 0xCFFF:
-            *address -= 0xC000;
+        case WRAM00_START ... WRAM00_END:
+            *address -= WRAM00_START;
             return ram->wram00;
 
         // 4KB Work RAM Bank NN
-        case 0xD000 ... 0xDFFF:
-            *address -= 0xD000;
+        case WRAMNN_START ... WRAMNN_END:
+            *address -= WRAMNN_START;
             return ram->wramNN;
 
         // Mirror of Work RAM (wram 00)
-        case 0xE000 ... 0xEFFF:
-            *address -= 0xE000;
+        case WRAM00_MIRROR_START ... WRAM00_MIRROR_END:
+            *address -= WRAM00_MIRROR_START;
             return ram->wram00;
 
         // Mirror of Work RAM (wram nn)
-        case 0xF000 ... 0xFDFF:
-            *address -= 0xF000;
+        case WRAMNN_MIRROR_START ... WRAMNN_MIRROR_END:
+            *address -= WRAMNN_MIRROR_START;
             return ram->wramNN;
 
         // Sprite Attibute Table
-        case 0xFE00 ... 0xFE9F:
-            *address -= 0xFE00;
+        case OAM_START ... OAM_END:
+            *address -= OAM_START;
             return ram->oam;
 
         // IO Registers
-        case 0xFF00 ... 0xFF7F:
-            *address -= 0xFF00;
+        case IO_START ... IO_END:
+            *address -= IO_START;
             return ram->io;
 
         // High RAM
-        case 0xFF80 ... 0xFFFE:
-            *address -= 0xFF80;
+        case HRAM_START ... HRAM_END:
+            *address -= HRAM_START;
             return ram->hram;
         
         // Interrupt Enable Register
-        case 0xFFFF:
+        case IME_START_END:
             *address = 0;
             return ram->ier;
 
@@ -112,12 +112,12 @@ static unsigned char *get_memory_location(gbc_ram *ram, unsigned short *address)
 bool is_valid_ram(gbc_ram *ram, const unsigned short address) {
 
     // If the memory is unusable
-    if(address >= 0xFEA0 && address <= 0xFEFF) {
+    if(address >= UNUSABLE_START && address <= UNUSABLE_END) {
         return false;
     }
 
     // If the memory is in extram and it is not available
-    if(address >= 0xA000 && address <= 0xBFFF && ram->extram == NULL) {
+    if(address >= EXTRAM_START && address <= EXTRAM_END && ram->extram == NULL) {
         return false;
     }
 

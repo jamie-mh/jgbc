@@ -22,7 +22,7 @@ int main(int argc, char **argv) {
     init_system(gbc, argv[1]);
     init_window(gbc->ppu);
 
-    set_window_title(gbc->ppu->window, gbc->rom->title);
+    set_window_title(gbc->ppu->window, gbc->rom->title, false);
 
     SDL_Event event;
     unsigned int last_time = 0;

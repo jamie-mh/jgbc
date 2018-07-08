@@ -28,10 +28,23 @@ void init_system(gbc_system *gbc, const char *rom_path) {
 }
 
 // Sets the window title to the game title
-void set_window_title(SDL_Window *window, const char *game_title) {
-    char title[TITLE_LENGTH + strlen(MAIN_WINDOW_TITLE " - ") + 1];
-    snprintf(title, TITLE_LENGTH + 1, "%s - %s", MAIN_WINDOW_TITLE, game_title);
-    title[strlen(title)] = '\0';
+void set_window_title(SDL_Window *window, const char *game_title, const bool debugger) {
 
+    char *title;
+
+    if(debugger) {
+        const unsigned char len = TITLE_LENGTH + strlen(MAIN_WINDOW_TITLE " -  (DEBUGGER)") + 1;
+        title = malloc(sizeof(char) * len);
+
+        snprintf(title, len, "(DEBUGGER) %s - %s", MAIN_WINDOW_TITLE, game_title);
+    } else {
+        const unsigned char len = TITLE_LENGTH + strlen(MAIN_WINDOW_TITLE " - ") + 1;
+        title = malloc(sizeof(char) * len);
+
+        snprintf(title, len, "%s - %s", MAIN_WINDOW_TITLE, game_title);
+    }
+
+    title[strlen(title)] = '\0';
     SDL_SetWindowTitle(window, title);
+    free(title);
 }
