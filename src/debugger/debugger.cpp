@@ -106,6 +106,8 @@ int main(int argc, char **argv) {
                 debugger->is_paused = true;
                 debugger->next_addr = 0;
             }
+
+            write_byte(gbc, JOYP, 0x1F, false); // Temp simulate no buttons
         }
 
         render(gbc, debugger, io);
@@ -148,7 +150,7 @@ static void init_debugger(gbc_debugger *debugger) {
         SDL_WINDOWPOS_CENTERED, 
         DEBUGGER_WIDTH, 
         DEBUGGER_HEIGHT, 
-        SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED
+        SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE
     );
 
     debugger->gl_context = SDL_GL_CreateContext(debugger->window);
@@ -260,6 +262,10 @@ static void handle_event(SDL_Event event, gbc_system *gbc) {
             if(event.window.event == SDL_WINDOWEVENT_CLOSE) {
                 gbc->is_running = 0;
             }
+            break;
+
+        case SDL_KEYUP:
+            handle_input(gbc, event.key); 
             break;
     }
 }

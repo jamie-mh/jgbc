@@ -53,6 +53,8 @@ int main(int argc, char **argv) {
             update_ppu(gbc, clocks);
 
             frame_clocks += clocks;
+
+            write_byte(gbc, JOYP, 0x1F, false); // Temp simulate no buttons
         }
 
         render_to_window(gbc->ppu);

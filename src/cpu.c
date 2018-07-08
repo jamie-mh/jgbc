@@ -22,9 +22,8 @@ void init_cpu(gbc_cpu *cpu) {
     cpu->registers->SP = DEFAULT_SP;
 
     // Enable interrupts
-    cpu->registers->IME = true;
-    cpu->is_halted = 0;
-    cpu->is_interrupted = 0;
+    cpu->registers->IME = false;
+    cpu->is_halted = false;
 
     // Reset the timers
     cpu->div_clock = 0;
@@ -152,34 +151,29 @@ unsigned char stack_pop_byte(gbc_ram *ram, unsigned short *sp) {
 // Pops a short from the stack and increments the stack pointer
 unsigned short stack_pop_short(gbc_ram *ram, unsigned short *sp) {
     
-    unsigned char byte_a = stack_pop_byte(ram, sp); 
-    unsigned char byte_b = stack_pop_byte(ram, sp); 
+    const unsigned char byte_a = stack_pop_byte(ram, sp); 
+    const unsigned char byte_b = stack_pop_byte(ram, sp); 
 
     return byte_a | (byte_b << 8);
 }
 
 // Checks if the cpu has pending interrupts and services them 
 void check_interrupts(gbc_system *gbc) {
-    
-    // Don't service any more interrupts until the current one is complete
-    if(gbc->cpu->is_interrupted == false) { 
 
-        unsigned char enabled = read_byte(gbc->ram, IE);
-        unsigned char flag = read_byte(gbc->ram, IF);
+    const unsigned char enabled = read_byte(gbc->ram, IE);
+    const unsigned char flag = read_byte(gbc->ram, IF);
 
-        for(int i = 0; i < 5; i++) {
-            
-            // If this interrupt is enabled and requested
-            // This just checks that the i'th bit is set in both bytes
-            if(((enabled >> i) & 1) && ((flag >> i) & 1)) {
+    for(int i = 0; i < 5; i++) {
+        
+        // If this interrupt is enabled and requested
+        // This just checks that the i'th bit is set in both bytes
+        if(GET_BIT(enabled, i) && GET_BIT(flag, i)) {
 
-                // If interrupts are globally enabled
-                if(gbc->cpu->registers->IME) {
-                    service_interrupt(gbc, i);
-                }
-
-                gbc->cpu->is_halted = 0;
+            if(gbc->cpu->registers->IME) {
+                service_interrupt(gbc, i);
             }
+    
+            gbc->cpu->is_halted = false;
         }
     }
 }
@@ -195,23 +189,19 @@ static void service_interrupt(gbc_system *gbc, const unsigned char number) {
         INT_JOYPAD
     };
 
-    if(number <= 5) {
+    assert(number < 5);
 
-        // Push the current program counter to the stack
-        stack_push_short(gbc, &gbc->cpu->registers->SP, gbc->cpu->registers->PC);
-        
-        // Disable the interrupt request
-        write_register(gbc, IF, number, 0);
-        gbc->cpu->registers->IME = false;
-
-        // Jump to the interrupt subroutine
-        gbc->cpu->registers->PC = interrupt[number];
-        gbc->cpu->is_interrupted = 1;
-    }  
+    // Push the current program counter to the stack
+    stack_push_short(gbc, &gbc->cpu->registers->SP, gbc->cpu->registers->PC);
+    
+    // Disable the interrupt request
+    write_register(gbc, IF, number, 0);
+    gbc->cpu->registers->IME = false;
+    gbc->cpu->registers->PC = interrupt[number];
 }
 
 // Updates the timer if they are enabled and requests interrupts
-void update_timer(gbc_system *gbc, int clocks) {
+void update_timer(gbc_system *gbc, const int clocks) {
 
     gbc->cpu->div_clock += clocks;
 
@@ -220,8 +210,8 @@ void update_timer(gbc_system *gbc, int clocks) {
     if(gbc->cpu->div_clock >= 256) {
 
         // Increment the register (don't care if it overflows)
-        unsigned char curr_div = read_byte(gbc->ram, DIV);
-        write_byte(gbc, DIV, curr_div + 1, 0);
+        const unsigned char curr_div = read_byte(gbc->ram, DIV);
+        write_byte(gbc, DIV, curr_div + 1, false);
 
         gbc->cpu->div_clock = 0;
     }
@@ -234,25 +224,25 @@ void update_timer(gbc_system *gbc, int clocks) {
         gbc->cpu->cnt_clock += clocks;
 
         // Get the speed to update the timer at
-        unsigned char speed_index = 
-            (read_register(gbc->ram, TAC, TAC_INPUT0)) | 
-            (read_register(gbc->ram, TAC, TAC_INPUT1) << 1);
+        const unsigned char speed_index = read_byte(gbc->ram, TAC) & 0x3;
 
         // Get the array of possible tick to clock ratios
-        static const unsigned short timer_thresholds[0xF] = TAC_THRESHOLD;
+        static const unsigned short timer_thresholds[4] = {
+            CLOCK_SPEED / 4096,
+            CLOCK_SPEED / 262144,
+            CLOCK_SPEED / 65536,
+            CLOCK_SPEED / 16384
+        };
 
         // If the clock is at the current tick rate (or above, who knows)
         if(gbc->cpu->cnt_clock >= timer_thresholds[speed_index]) {
 
-            unsigned char curr_cnt = read_byte(gbc->ram, TIMA);
+            const unsigned char curr_cnt = read_byte(gbc->ram, TIMA);
             unsigned char new_cnt;
 
             // If the counter is about to overflow, reset it to the modulo
             if(curr_cnt == 0xFF) {
                 new_cnt = read_byte(gbc->ram, TMA);
-
-                // Request a timer interrupt
-                write_register(gbc, IE, IEF_TIMER, 1);
                 write_register(gbc, IF, IEF_TIMER, 1);
             }
             // Otherwise increment as usual
@@ -261,7 +251,7 @@ void update_timer(gbc_system *gbc, int clocks) {
             }
 
             // Write the new value and reset the clock
-            write_byte(gbc, TIMA, new_cnt, 0);
+            write_byte(gbc, TIMA, new_cnt, false);
             gbc->cpu->cnt_clock = 0;
         }
     }

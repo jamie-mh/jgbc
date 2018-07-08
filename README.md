@@ -7,6 +7,8 @@ A GameBoy and GameBoy Color emulator. Written in C/C++ with SDL2.
 - Compiled and tested on Fedora 28 with gcc 8.1.1.
 - Compiled and tested on Ubuntu 16.04 LTS with gcc 5.4.0.
 
+![Debugger](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/debugger.png)
+
 ### Project Status
 
 As it stands, the emulator is not complete enough to play games.
@@ -22,7 +24,7 @@ As it stands, the emulator is not complete enough to play games.
 
 #### Not Working
 
-- Sprites / Window
+- Sprites (flip) / Window
 - Sound
 - Joypad
 - GameBoy Color specific features
@@ -90,8 +92,13 @@ Don't try and run anything other than GB roms, it will crash (duh).
 ```
 ### Screenshots
 
+![Tetris](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/tetris.png)
 ![Dr Mario](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/drmario.png)
+![Super Mario Land 1](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/mario1.png)
 ![Super Mario Land 2](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/mario2.png)
+![Wario Land](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/wario.png)
+![CPU test](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/cpuinstr.png)
+![Tetris DX](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/tetrisdx.png)
 
 ### Using the debugger
 

@@ -4,6 +4,7 @@
 
 #define DEBUGGER_WIDTH 1280
 #define DEBUGGER_HEIGHT 720
+#define DEBUGGER_SCALE 2
 
 
 typedef struct gbc_breakpoint {

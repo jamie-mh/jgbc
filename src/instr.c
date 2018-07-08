@@ -1500,7 +1500,6 @@ void op_ret(gbc_system *gbc) {
         gbc->ram, 
         &gbc->cpu->registers->SP
     );
-    gbc->cpu->is_interrupted = 0;
 }
 
 // 0xCA: JP Z, a16 (- - - -)

@@ -38,7 +38,7 @@
 #define IO_END 0xFF7F
 #define HRAM_START 0xFF80
 #define HRAM_END 0xFFFE
-#define IME_START_END 0xFFFF
+#define IE_START_END 0xFFFF
 
 // Sound Registers
 // TODO: Implement

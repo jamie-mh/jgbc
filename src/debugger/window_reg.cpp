@@ -23,7 +23,6 @@ void window_reg_show(gbc_system *gbc) {
         ImGui::Separator();
 
         ImGui::Text("HALT: %02X", gbc->cpu->is_halted);
-        ImGui::Text("INT: %02X", gbc->cpu->is_interrupted);
     }
 
     ImGui::EndDock();

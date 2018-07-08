@@ -34,7 +34,6 @@
 
 // CPU Timer
 #define CLOCK_SPEED 4194304
-#define TAC_THRESHOLD {CLOCK_SPEED / 4096, CLOCK_SPEED / 262144, CLOCK_SPEED / 65536, CLOCK_SPEED / 16384}
 
 // Interrupt Registers
 #define IE 0xFFFF
@@ -44,6 +43,8 @@
 #define IEF_TIMER 2
 #define IEF_SERIAL 3
 #define IEF_JOYPAD 4
+
+#define DEFAULT_IF 0xE0
 
 // Instruction Set
 #define INSTRUCTION_COUNT 256
@@ -71,4 +72,4 @@ unsigned char stack_pop_byte(gbc_ram *, unsigned short *);
 unsigned short stack_pop_short(gbc_ram *, unsigned short *);
 
 void check_interrupts(gbc_system *);
-void update_timer(gbc_system *, int);
+void update_timer(gbc_system *, const int);

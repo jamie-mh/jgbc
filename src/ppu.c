@@ -78,11 +78,11 @@ static void update_render_mode(gbc_system *gbc, const unsigned char ly_val, cons
             request_int = read_register(gbc->ram, STAT, STAT_OAM_INT);
         }
         // Pixel Transfer
-        else if(gbc->ppu->scan_clock >= 80 && gbc->ppu->scan_clock < 172) {
+        else if(gbc->ppu->scan_clock >= 80 && gbc->ppu->scan_clock <= 252) {
             new_mode = 3;
         } 
         // H-Blank
-        else if(gbc->ppu->scan_clock >= 172) {
+        else if(gbc->ppu->scan_clock > 252) {
             new_mode = 0; 
             request_int = read_register(gbc->ram, STAT, STAT_HBLANK_INT);
         }

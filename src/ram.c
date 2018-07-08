@@ -31,7 +31,8 @@ void init_ram(gbc_system *gbc) {
     gbc->ram->hram = calloc(HRAM_SIZE, sizeof(char));
     gbc->ram->ier = calloc(1, sizeof(char));
 
-    write_byte(gbc, LCDC, DEFAULT_LCDC, 0);
+    write_byte(gbc, LCDC, DEFAULT_LCDC, false);
+    write_byte(gbc, IF, DEFAULT_IF, false);
 }
 
 // Returns a pointer to the memory location of the specified address
@@ -99,7 +100,7 @@ static unsigned char *get_memory_location(gbc_ram *ram, unsigned short *address)
             return ram->hram;
         
         // Interrupt Enable Register
-        case IME_START_END:
+        case IE_START_END:
             *address = 0;
             return ram->ier;
 
@@ -110,6 +111,8 @@ static unsigned char *get_memory_location(gbc_ram *ram, unsigned short *address)
 
 // Checks if the ram address is valid and can be read / written
 bool is_valid_ram(gbc_ram *ram, const unsigned short address) {
+
+    /*if(address == 0xff80) return false;*/
 
     // If the memory is unusable
     if(address >= UNUSABLE_START && address <= UNUSABLE_END) {

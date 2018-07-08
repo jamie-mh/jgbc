@@ -4,6 +4,7 @@ extern "C" {
 }
 
 #include "imgui/imgui.h"
+#include "debugger/debugger.h"
 #include "debugger/window_emu.h"
 #include "imgui_dock/imgui_dock.h"
 
@@ -24,8 +25,8 @@ void window_emu_show(gbc_system *gbc) {
                 buf_offset = (x * 4) + (y * SCREEN_WIDTH * 4);
                 
                 draw_list->AddRectFilled(
-                    ImVec2(pos.x + x * SCREEN_SCALE, pos.y + y * SCREEN_SCALE), 
-                    ImVec2(pos.x + x * SCREEN_SCALE + SCREEN_SCALE, pos.y + y * SCREEN_SCALE + SCREEN_SCALE),
+                    ImVec2(pos.x + x * DEBUGGER_SCALE, pos.y + y * DEBUGGER_SCALE), 
+                    ImVec2(pos.x + x * DEBUGGER_SCALE + DEBUGGER_SCALE, pos.y + y * DEBUGGER_SCALE + DEBUGGER_SCALE),
                     IM_COL32(
                         gbc->ppu->framebuffer[buf_offset + 0],
                         gbc->ppu->framebuffer[buf_offset + 1],

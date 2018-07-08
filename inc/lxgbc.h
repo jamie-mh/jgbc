@@ -60,7 +60,6 @@ typedef struct gbc_cpu {
     unsigned short div_clock; // Divider Timer Clock
     unsigned short cnt_clock; // Timer Counter Clock
     bool is_halted;
-    bool is_interrupted;
 } gbc_cpu;
 
 typedef struct gbc_sprite {
