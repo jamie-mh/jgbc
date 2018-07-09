@@ -35,10 +35,11 @@ void window_stack_show(gbc_system *gbc) {
                 ImGui::SameLine();
                 ImGui::TextColored(addr_colour, "0x%04X: ", addr);
                 ImGui::SameLine();
-                ImGui::Text("%02X", read_byte(gbc->ram, addr));
+                ImGui::Text("%02X", read_byte(gbc, addr, false));
             }
         }
 
+        clipper.End();
         ImGui::EndChild();
     }
 

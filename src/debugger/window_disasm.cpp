@@ -39,7 +39,7 @@ void window_disasm_show(gbc_system *gbc, gbc_debugger *debugger) {
                 draw_break_selector(debugger, pointer);
                 ImGui::SameLine();
 
-                unsigned char opcode = read_byte(gbc->ram, pointer);
+                unsigned char opcode = read_byte(gbc, pointer, false);
 
                 gbc_instruction instr = find_instr(opcode, pointer, gbc);
                 unsigned char length = instr.length;
@@ -55,7 +55,7 @@ void window_disasm_show(gbc_system *gbc, gbc_debugger *debugger) {
                     // Read the operand based on the length and increment the pointer
                     unsigned short operand = 0;
                     if(length == 2) {
-                        operand = read_byte(gbc->ram, pointer + 1);
+                        operand = read_byte(gbc, pointer + 1, false);
 
                         // If the operand is signed, get the two's complement
                         if(instr.signed_operand) {
@@ -66,7 +66,7 @@ void window_disasm_show(gbc_system *gbc, gbc_debugger *debugger) {
                         ImGui::SameLine();
 
                     } else if(length == 3) {
-                        operand = read_short(gbc->ram, pointer + 1);
+                        operand = read_short(gbc, pointer + 1, false);
                         ImGui::TextColored(data_colour, "%02X %02X ", (operand & 0xFF00) >> 8, operand & 0xFF);
                         ImGui::SameLine();
                     }
@@ -121,7 +121,7 @@ static unsigned short get_nth_instr_addr(gbc_system *gbc, const unsigned short n
             continue;
         }
 
-        const unsigned char opcode = read_byte(gbc->ram, pointer);
+        const unsigned char opcode = read_byte(gbc, pointer, false);
         const gbc_instruction instr = find_instr(opcode, pointer, gbc);
 
         if(i >= n) {
@@ -147,7 +147,7 @@ static unsigned short get_instr_count(gbc_system *gbc, const unsigned short limi
             continue;
         }
 
-        const unsigned char opcode = read_byte(gbc->ram, pointer);
+        const unsigned char opcode = read_byte(gbc, pointer, false);
         const gbc_instruction instr = find_instr(opcode, pointer, gbc);
         count++;
 

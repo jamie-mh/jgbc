@@ -3,8 +3,9 @@
 #include "cpu.h"
 #include "ram.h"
 #include "mbc.h"
+#include "input.h"
 
-static unsigned char *get_memory_location(gbc_ram *, unsigned short *);
+static unsigned char *get_memory_location(gbc_system *, unsigned short *);
 static void DMA_transfer(gbc_system *, unsigned char);
 
 
@@ -37,72 +38,72 @@ void init_ram(gbc_system *gbc) {
 
 // Returns a pointer to the memory location of the specified address
 // and changes the input address to the relative location inside this section.
-static unsigned char *get_memory_location(gbc_ram *ram, unsigned short *address) {
+static unsigned char *get_memory_location(gbc_system *gbc, unsigned short *address) {
 
     switch(*address) {
 
         // 16KB ROM Bank 00 
         case ROM00_START ... ROM00_END:
-            if(*address <= PROGRAM_START && !read_byte(ram, BOOTROM_DISABLE)) {
-                return ram->bootrom;
+            if(*address <= PROGRAM_START && !read_byte(gbc, BOOTROM_DISABLE, false)) {
+                return gbc->ram->bootrom;
             } else {
-                return ram->rom00;
+                return gbc->ram->rom00;
             }
 
         // 16KB ROM Bank NN
         case ROMNN_START ... ROMNN_END:
             *address -= ROMNN_START;
-            return ram->romNN;
+            return gbc->ram->romNN;
 
         // 8KB Video RAM
         case VRAM_START ... VRAM_END:
             *address -= VRAM_START;
-            return ram->vram;
+            return gbc->ram->vram;
 
         // 8KB External RAM (in cartridge)
         case EXTRAM_START ... EXTRAM_END:
             *address -= EXTRAM_START;
-            return ram->extram;
+            return gbc->ram->extram;
 
         // 4KB Work RAM Bank 00
         case WRAM00_START ... WRAM00_END:
             *address -= WRAM00_START;
-            return ram->wram00;
+            return gbc->ram->wram00;
 
         // 4KB Work RAM Bank NN
         case WRAMNN_START ... WRAMNN_END:
             *address -= WRAMNN_START;
-            return ram->wramNN;
+            return gbc->ram->wramNN;
 
         // Mirror of Work RAM (wram 00)
         case WRAM00_MIRROR_START ... WRAM00_MIRROR_END:
             *address -= WRAM00_MIRROR_START;
-            return ram->wram00;
+            return gbc->ram->wram00;
 
         // Mirror of Work RAM (wram nn)
         case WRAMNN_MIRROR_START ... WRAMNN_MIRROR_END:
             *address -= WRAMNN_MIRROR_START;
-            return ram->wramNN;
+            return gbc->ram->wramNN;
 
         // Sprite Attibute Table
         case OAM_START ... OAM_END:
             *address -= OAM_START;
-            return ram->oam;
+            return gbc->ram->oam;
 
         // IO Registers
         case IO_START ... IO_END:
             *address -= IO_START;
-            return ram->io;
+            return gbc->ram->io;
 
         // High RAM
         case HRAM_START ... HRAM_END:
             *address -= HRAM_START;
-            return ram->hram;
+            return gbc->ram->hram;
         
         // Interrupt Enable Register
         case IE_START_END:
             *address = 0;
-            return ram->ier;
+            return gbc->ram->ier;
 
         default:
             return NULL;
@@ -111,8 +112,6 @@ static unsigned char *get_memory_location(gbc_ram *ram, unsigned short *address)
 
 // Checks if the ram address is valid and can be read / written
 bool is_valid_ram(gbc_ram *ram, const unsigned short address) {
-
-    /*if(address == 0xff80) return false;*/
 
     // If the memory is unusable
     if(address >= UNUSABLE_START && address <= UNUSABLE_END) {
@@ -128,15 +127,19 @@ bool is_valid_ram(gbc_ram *ram, const unsigned short address) {
 }
 
 // Reads a byte from the specified location in memory
-unsigned char read_byte(gbc_ram *ram, const unsigned short address) {
+unsigned char read_byte(gbc_system *gbc, const unsigned short address, const bool is_program) {
 
-    if(!is_valid_ram(ram, address)) {
+    if(is_program && address == JOYP) {
+        return joypad_state(gbc);  
+    }
+
+    if(!is_valid_ram(gbc->ram, address)) {
         return 0x0;
     }
 
     // Get the memory location and the relative address inside this memory
     unsigned short rel_address = address;
-    unsigned char *mem = get_memory_location(ram, &rel_address);
+    unsigned char *mem = get_memory_location(gbc, &rel_address);
 
     // Return the byte from memory
     return mem[rel_address];
@@ -144,10 +147,10 @@ unsigned char read_byte(gbc_ram *ram, const unsigned short address) {
 
 // Reads a short (2 bytes) from the specified location in memory
 // Returns the LS byte first
-unsigned short read_short(gbc_ram *ram, const unsigned short address) {
+unsigned short read_short(gbc_system *gbc, const unsigned short address, const bool is_program) {
 
-    const unsigned char byte_a = read_byte(ram, address);
-    const unsigned char byte_b = read_byte(ram, address + 1);
+    const unsigned char byte_a = read_byte(gbc, address, is_program);
+    const unsigned char byte_b = read_byte(gbc, address + 1, is_program);
 
     return byte_b << 8 | byte_a;
 }
@@ -171,46 +174,46 @@ void write_byte(gbc_system *gbc, const unsigned short address, unsigned char val
 
     // If the timer divider register is written to, it is reset
     // Unless we are forcing the write
-    if(address == DIV && is_program) {
+    if(is_program && address == DIV) {
         value = 0x0;
     }
 
     // If the vertical line register is written to, it is reset
-    if(address == LY && is_program) {
+    if(is_program && address == LY) {
         value = 0x0;
     }
 
     // Get the memory location with the relative address
     unsigned short rel_address = address;
-    unsigned char *mem = get_memory_location(gbc->ram, &rel_address);
+    unsigned char *mem = get_memory_location(gbc, &rel_address);
     
     mem[rel_address] = value;
 }
 
 // Writes two bytes in memory starting at the address
-void write_short(gbc_system *gbc, const unsigned short address, const unsigned short value) {
+void write_short(gbc_system *gbc, const unsigned short address, const unsigned short value, const bool is_program) {
 
     // Split the short into two bytes
     const unsigned char byte_a = (value & 0x00FF);
     const unsigned char byte_b = (value & 0xFF00) >> 8;
 
-    write_byte(gbc, address, byte_a, true);
-    write_byte(gbc, address + 1, byte_b, true);
+    write_byte(gbc, address, byte_a, is_program);
+    write_byte(gbc, address + 1, byte_b, is_program);
 }
 
 // Writes to memory register at a certain location
 void write_register(gbc_system *gbc, const unsigned short address, const unsigned char bit, const unsigned char value) {
     
-    unsigned char byte = read_byte(gbc->ram, address);
+    unsigned char byte = read_byte(gbc, address, false);
     byte ^= (-value ^ byte) & (1 << bit);
-    write_byte(gbc, address, byte, 0);
+    write_byte(gbc, address, byte, false);
 }
 
 // Reads a memory register at a certain location
-unsigned char read_register(gbc_ram *ram, const unsigned short address, const unsigned char bit) {
+unsigned char read_register(gbc_system *gbc, const unsigned short address, const unsigned char bit) {
    
     // Return the nth bit of the register
-    const unsigned char byte = read_byte(ram, address);
+    const unsigned char byte = read_byte(gbc, address, false);
     return (byte >> bit) & 1;
 }
 
@@ -220,6 +223,6 @@ static void DMA_transfer(gbc_system *gbc, unsigned char value) {
     const unsigned short address = value * 0x100;
 
     for(int i = 0; i <= 0x9F; i++) {
-        write_byte(gbc, 0xFE00 + i, read_byte(gbc->ram, address + i), false); 
+        write_byte(gbc, 0xFE00 + i, read_byte(gbc, address + i, false), false); 
     }
 }

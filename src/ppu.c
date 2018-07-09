@@ -60,14 +60,14 @@ void init_window(gbc_ppu *ppu) {
 // Updates the mode in the STAT register based on the ly and scan clock 
 static void update_render_mode(gbc_system *gbc, const unsigned char ly_val, const bool lcd_on) {
     
-    const unsigned char curr_mode = read_byte(gbc->ram, STAT) & 0x3;
+    const unsigned char curr_mode = read_byte(gbc, STAT, false) & 0x3;
     unsigned char new_mode = 0;
     bool request_int = false;
 
     // V-Blank (10 lines) or when the screen is off
     if(ly_val >= 144 || !lcd_on) {
         new_mode = 1;
-        request_int = read_register(gbc->ram, STAT, STAT_VBLANK_INT);
+        request_int = read_register(gbc, STAT, STAT_VBLANK_INT);
     }
     // Screen rendering (144 lines aka height of screen in px)
     else {
@@ -75,7 +75,7 @@ static void update_render_mode(gbc_system *gbc, const unsigned char ly_val, cons
         // OAM Transfer
         if(gbc->ppu->scan_clock < 80) {
             new_mode = 2;
-            request_int = read_register(gbc->ram, STAT, STAT_OAM_INT);
+            request_int = read_register(gbc, STAT, STAT_OAM_INT);
         }
         // Pixel Transfer
         else if(gbc->ppu->scan_clock >= 80 && gbc->ppu->scan_clock <= 252) {
@@ -84,7 +84,7 @@ static void update_render_mode(gbc_system *gbc, const unsigned char ly_val, cons
         // H-Blank
         else if(gbc->ppu->scan_clock > 252) {
             new_mode = 0; 
-            request_int = read_register(gbc->ram, STAT, STAT_HBLANK_INT);
+            request_int = read_register(gbc, STAT, STAT_HBLANK_INT);
         }
     }
 
@@ -105,8 +105,8 @@ static void update_render_mode(gbc_system *gbc, const unsigned char ly_val, cons
 // Renders the picture on the screen scanline by scanline
 void update_ppu(gbc_system *gbc, const int clocks) {
 
-    const bool lcd_on = read_register(gbc->ram, LCDC, LCDC_LCD_ENABLE);
-    unsigned char ly_val = read_byte(gbc->ram, LY);
+    const bool lcd_on = read_register(gbc, LCDC, LCDC_LCD_ENABLE);
+    unsigned char ly_val = read_byte(gbc, LY, false);
 
     update_render_mode(gbc, ly_val, lcd_on);
 
@@ -149,11 +149,11 @@ void update_ppu(gbc_system *gbc, const int clocks) {
         }
 
         // Check if LY == LYC
-        if(read_byte(gbc->ram, LYC) == ly_val) {
+        if(read_byte(gbc, LYC, false) == ly_val) {
             write_register(gbc, STAT, STAT_COINCID_FLAG, 1);
 
             // If the LY == LYC interrupt is enabled, request it
-            if(read_register(gbc->ram, STAT, STAT_COINCID_INT)) {
+            if(read_register(gbc, STAT, STAT_COINCID_INT)) {
                 write_register(gbc, IF, IEF_LCD_STAT, 1);
             }
         } else {
@@ -166,12 +166,12 @@ void update_ppu(gbc_system *gbc, const int clocks) {
 // Gets tile data from ram at the pointer given
 static void render_bg_scan(gbc_system *gbc, const unsigned char ly) {
 
-    if(!read_register(gbc->ram, LCDC, LCDC_BG_DISPLAY)) {
+    if(!read_register(gbc, LCDC, LCDC_BG_DISPLAY)) {
         return;
     }
 
     // Get the start of the tile map data 
-    unsigned short bg_tile_map_start = (read_register(gbc->ram, LCDC, LCDC_BG_TILE_MAP) ? 0x9C00 : 0x9800);
+    unsigned short bg_tile_map_start = (read_register(gbc, LCDC, LCDC_BG_TILE_MAP) ? 0x9C00 : 0x9800);
 
     // When this bit is enabled, the tile data is stored starting at 0x8000
     // The tile numbers are unsigned (0 to 255)
@@ -180,7 +180,7 @@ static void render_bg_scan(gbc_system *gbc, const unsigned char ly) {
     bool signed_tile_num;
     unsigned short bg_tile_data_start;
 
-    if(read_register(gbc->ram, LCDC, LCDC_BG_WINDOW_TILE_DATA)) {
+    if(read_register(gbc, LCDC, LCDC_BG_WINDOW_TILE_DATA)) {
         bg_tile_data_start = 0x8000;
         signed_tile_num = false;
     } else {
@@ -189,8 +189,8 @@ static void render_bg_scan(gbc_system *gbc, const unsigned char ly) {
     }
 
     // Get the current background scroll position
-    const unsigned char scroll_x = read_byte(gbc->ram, SCX);
-    const unsigned char scroll_y = read_byte(gbc->ram, SCY);
+    const unsigned char scroll_x = read_byte(gbc, SCX, false);
+    const unsigned char scroll_y = read_byte(gbc, SCY, false);
 
     // Get the palette data
     SDL_Colour shades[4];
@@ -211,15 +211,15 @@ static void render_bg_scan(gbc_system *gbc, const unsigned char ly) {
 
         // Read the tile number at the offset position, however it may be signed
         if(signed_tile_num) {
-            tile_number = (signed char) read_byte(gbc->ram, bg_tile_map_start + map_offset);
+            tile_number = (signed char) read_byte(gbc, bg_tile_map_start + map_offset, false);
             tile_start = bg_tile_data_start + ((tile_number + 128) * 16);
         } else {
-            tile_number = read_byte(gbc->ram, bg_tile_map_start + map_offset); 
+            tile_number = read_byte(gbc, bg_tile_map_start + map_offset, false); 
             tile_start = bg_tile_data_start + (tile_number * 16);
         }
         
         // Read two bytes from memory at the pixel row location
-        const unsigned short pixel_row = read_short(gbc->ram, tile_start + (bg_y % 8) * 2);
+        const unsigned short pixel_row = read_short(gbc, tile_start + (bg_y % 8) * 2, false);
 
         for(unsigned char px = 0; px < 8; px++) {
             render_tile_pixel(gbc, x + px, ly, pixel_row, shades, false);
@@ -230,12 +230,12 @@ static void render_bg_scan(gbc_system *gbc, const unsigned char ly) {
 // Renders a sprite scanline to the display at the specified coordinates
 static void render_sprite_scan(gbc_system *gbc, const unsigned char ly) {
 
-    if(!read_register(gbc->ram, LCDC, LCDC_OBJ_DISPLAY)) {
+    if(!read_register(gbc, LCDC, LCDC_OBJ_DISPLAY)) {
         return;
     }
 
     // Are the tiles 8x8 or 8x16?
-    bool tall_sprites = read_register(gbc->ram, LCDC, LCDC_OBJ_SIZE);
+    bool tall_sprites = read_register(gbc, LCDC, LCDC_OBJ_SIZE);
     const unsigned char height = (tall_sprites) ? 16 : 8;
 
     for(int i = 0; i < 40; i++) {
@@ -256,7 +256,7 @@ static void render_sprite_scan(gbc_system *gbc, const unsigned char ly) {
 
             // Get the byte of data that matches this sprite line
             const unsigned short row_offset = (tile * 16) + row_index * 2;
-            const unsigned short row_data = read_short(gbc->ram, 0x8000 + row_offset);
+            const unsigned short row_data = read_short(gbc, 0x8000 + row_offset, false);
 
             // TODO: Implement sprite flipping
 
@@ -300,10 +300,10 @@ static gbc_sprite *get_sprites(gbc_system *gbc) {
         gbc_sprite *sprite = &sprites[i];
         unsigned short address = 0xFE00 + (i * 4);
 
-        sprite->y = read_byte(gbc->ram, address + 0); 
-        sprite->x = read_byte(gbc->ram, address + 1); 
-        sprite->tile = read_byte(gbc->ram, address + 2); 
-        sprite->attributes = read_byte(gbc->ram, address + 3);
+        sprite->y = read_byte(gbc, address + 0, false); 
+        sprite->x = read_byte(gbc, address + 1, false); 
+        sprite->tile = read_byte(gbc, address + 2, false); 
+        sprite->attributes = read_byte(gbc, address + 3, false);
     }
 
     return sprites;
@@ -336,7 +336,7 @@ static SDL_Colour get_shade(const unsigned char num) {
 static void fill_bg_shade_table(gbc_system *gbc, SDL_Colour *table) {
     
     // Read the background palette register
-    const unsigned char palette = read_byte(gbc->ram, BGP);
+    const unsigned char palette = read_byte(gbc, BGP, false);
     
     // Fill the table
     for(unsigned char i = 0; i < 8; i += 2) {
@@ -355,7 +355,7 @@ static void fill_sprite_shade_table(gbc_system *gbc, const unsigned char sprite_
 
     // Read the sprite palette register
     const unsigned char palette_addr = (GET_BIT(sprite_attr, 4)) ? 0xFF49 : 0xFF48;
-    const unsigned char palette = read_byte(gbc->ram, palette_addr);
+    const unsigned char palette = read_byte(gbc, palette_addr, false);
     
     // Fill the table
     for(unsigned char i = 0; i < 8; i += 2) {

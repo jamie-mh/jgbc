@@ -112,10 +112,22 @@ typedef struct gbc_rom {
     unsigned char **ram_banks;
 } gbc_rom;
 
+typedef struct gbc_input {
+    bool up;
+    bool right;
+    bool down;
+    bool left;
+    bool start;
+    bool select;
+    bool a;
+    bool b;
+} gbc_input;
+
 typedef struct gbc_system {
     bool is_running;
     gbc_cpu *cpu;
     gbc_ppu *ppu;
     gbc_ram *ram;
     gbc_rom *rom;
+    gbc_input *input;
 } gbc_system;

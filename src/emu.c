@@ -6,6 +6,8 @@
 #include "alu.h"
 #include "instr.h"
 #include "emu.h"
+#include "input.h"
+
 
 // Initialises the system
 void init_system(gbc_system *gbc, const char *rom_path) {
@@ -14,10 +16,12 @@ void init_system(gbc_system *gbc, const char *rom_path) {
     gbc->ppu = malloc(sizeof(gbc_ppu));
     gbc->ram = malloc(sizeof(gbc_ram));
     gbc->rom = malloc(sizeof(gbc_rom));
+    gbc->input = malloc(sizeof(gbc_input));
 
     init_cpu(gbc->cpu);
     init_ram(gbc);
     init_ppu(gbc->ppu);
+    init_input(gbc->input);
 
     if(!load_rom(gbc, rom_path)) {
         fprintf(stderr, "ERROR: Could not load rom file!\n");

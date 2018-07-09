@@ -21,12 +21,12 @@ As it stands, the emulator is not complete enough to play games.
 - Background graphics
 - Interrupts
 - Timers
+- Joypad
 
 #### Not Working
 
 - Sprites (flip) / Window
 - Sound
-- Joypad
 - GameBoy Color specific features
 
 #### Blargg's CPU Tests

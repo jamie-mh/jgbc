@@ -53,8 +53,6 @@ int main(int argc, char **argv) {
             update_ppu(gbc, clocks);
 
             frame_clocks += clocks;
-
-            write_byte(gbc, JOYP, 0x1F, false); // Temp simulate no buttons
         }
 
         render_to_window(gbc->ppu);
@@ -83,8 +81,9 @@ static void handle_event(SDL_Event event, gbc_system *gbc) {
             gbc->is_running = 0;
             break;
 
+        case SDL_KEYDOWN:
         case SDL_KEYUP:
-            handle_input(gbc, event.key); 
+            handle_input(gbc->input, event.key); 
             break;
     }
 }

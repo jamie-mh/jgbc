@@ -68,8 +68,8 @@ char get_flag(const char, const unsigned char);
 
 void stack_push_byte(gbc_system *, unsigned short *, const unsigned char);
 void stack_push_short(gbc_system *, unsigned short *, const unsigned short);
-unsigned char stack_pop_byte(gbc_ram *, unsigned short *);
-unsigned short stack_pop_short(gbc_ram *, unsigned short *);
+unsigned char stack_pop_byte(gbc_system *, unsigned short *);
+unsigned short stack_pop_short(gbc_system *, unsigned short *);
 
 void check_interrupts(gbc_system *);
 void update_timer(gbc_system *, const int);

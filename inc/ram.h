@@ -57,11 +57,11 @@ void init_ram(gbc_system *);
 
 bool is_valid_ram(gbc_ram *, const unsigned short);
 
-unsigned char read_byte(gbc_ram *, const unsigned short);
-unsigned short read_short(gbc_ram *, const unsigned short);
+unsigned char read_byte(gbc_system *, const unsigned short, const bool);
+unsigned short read_short(gbc_system *, const unsigned short, const bool);
 
 void write_byte(gbc_system *, const unsigned short, unsigned char, const bool);
-void write_short(gbc_system *, const unsigned short, const unsigned short);
+void write_short(gbc_system *, const unsigned short, const unsigned short, const bool);
 
 void write_register(gbc_system *, const unsigned short, const unsigned char, const unsigned char);
-unsigned char read_register(gbc_ram *, const unsigned short, const unsigned char);
+unsigned char read_register(gbc_system *, const unsigned short, const unsigned char);

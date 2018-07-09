@@ -57,17 +57,17 @@ void window_ctrl_show(gbc_system *gbc, gbc_debugger *debugger) {
 }
 
 static void step_into(gbc_system *gbc, gbc_debugger *debugger) {
-    unsigned char opcode = read_byte(gbc->ram, gbc->cpu->registers->PC);
+    unsigned char opcode = read_byte(gbc, gbc->cpu->registers->PC, false);
 
     if(is_jump_call(opcode) || is_subroutine_call(opcode)) {
-        debugger->next_addr = read_short(gbc->ram, gbc->cpu->registers->PC + 1);
+        debugger->next_addr = read_short(gbc, gbc->cpu->registers->PC + 1, false);
     } else if(is_jump_signed(opcode)) {
 
         // Address just before the jump destination (done like this because the PC hasn't been incremented yet)
-        const unsigned short before_addr = gbc->cpu->registers->PC + (signed char) read_byte(gbc->ram, gbc->cpu->registers->PC + 1);
+        const unsigned short before_addr = gbc->cpu->registers->PC + (signed char) read_byte(gbc, gbc->cpu->registers->PC + 1, false);
 
         gbc_instruction before_instr = find_instr(
-            read_byte(gbc->ram, before_addr),
+            read_byte(gbc, before_addr, false),
             before_addr,
             gbc
         );
@@ -81,10 +81,10 @@ static void step_into(gbc_system *gbc, gbc_debugger *debugger) {
 }
 
 static void step_over(gbc_system *gbc, gbc_debugger *debugger) {
-    const unsigned char opcode = read_byte(gbc->ram, gbc->cpu->registers->PC);
+    const unsigned char opcode = read_byte(gbc, gbc->cpu->registers->PC, false);
 
     if(is_jump_call(opcode)) {
-        debugger->next_addr = read_short(gbc->ram, gbc->cpu->registers->PC + 1);
+        debugger->next_addr = read_short(gbc, gbc->cpu->registers->PC + 1, false);
     } else {
         run_to_next(gbc, debugger);
     }
@@ -129,7 +129,7 @@ static bool is_jump_signed(const unsigned char op) {
 
 static void run_to_next(gbc_system *gbc, gbc_debugger *debugger) {
     gbc_instruction instr = find_instr(
-        read_byte(gbc->ram, gbc->cpu->registers->PC),
+        read_byte(gbc, gbc->cpu->registers->PC, false),
         gbc->cpu->registers->PC,
         gbc
     );

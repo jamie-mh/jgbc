@@ -35,7 +35,7 @@ gbc_instruction find_instr(const unsigned char opcode, const unsigned short addr
 
     // If the opcode has the CB prefix
     if(opcode == 0xCB) {
-        unsigned char next_opcode = read_byte(gbc->ram, address + 1);
+        unsigned char next_opcode = read_byte(gbc, address + 1, false);
         return cb_instructions[next_opcode];
     } 
     // Standard instruction
@@ -70,12 +70,12 @@ unsigned char execute_instr(gbc_system *gbc) {
             break;
 
         case 1:
-            operand = read_byte(gbc->ram, instr_start + 1);
+            operand = read_byte(gbc, instr_start + 1, false);
             opcode_function(gbc, (unsigned char) operand);
             break;
 
         case 2:
-            operand = read_short(gbc->ram, instr_start + 1);
+            operand = read_short(gbc, instr_start + 1, false);
             opcode_function(gbc, operand);
             break;
     }
@@ -86,7 +86,7 @@ unsigned char execute_instr(gbc_system *gbc) {
 // Gets the current instruction at the program counter
 static gbc_instruction get_curr_instr(gbc_system *gbc) {
     
-    unsigned char opcode = read_byte(gbc->ram, gbc->cpu->registers->PC);
+    unsigned char opcode = read_byte(gbc, gbc->cpu->registers->PC, false);
     return find_instr(opcode, gbc->cpu->registers->PC, gbc);
 }
 
@@ -140,19 +140,19 @@ void stack_push_short(gbc_system *gbc, unsigned short *sp, const unsigned short 
 }
 
 // Pops a byte from the stack and increments the stack pointer
-unsigned char stack_pop_byte(gbc_ram *ram, unsigned short *sp) {
+unsigned char stack_pop_byte(gbc_system *gbc, unsigned short *sp) {
     
-    unsigned char value = read_byte(ram, *sp);
+    unsigned char value = read_byte(gbc, *sp, false);
     *sp += sizeof(char);
 
     return value;
 }
 
 // Pops a short from the stack and increments the stack pointer
-unsigned short stack_pop_short(gbc_ram *ram, unsigned short *sp) {
+unsigned short stack_pop_short(gbc_system *gbc, unsigned short *sp) {
     
-    const unsigned char byte_a = stack_pop_byte(ram, sp); 
-    const unsigned char byte_b = stack_pop_byte(ram, sp); 
+    const unsigned char byte_a = stack_pop_byte(gbc, sp); 
+    const unsigned char byte_b = stack_pop_byte(gbc, sp); 
 
     return byte_a | (byte_b << 8);
 }
@@ -160,8 +160,8 @@ unsigned short stack_pop_short(gbc_ram *ram, unsigned short *sp) {
 // Checks if the cpu has pending interrupts and services them 
 void check_interrupts(gbc_system *gbc) {
 
-    const unsigned char enabled = read_byte(gbc->ram, IE);
-    const unsigned char flag = read_byte(gbc->ram, IF);
+    const unsigned char enabled = read_byte(gbc, IE, false);
+    const unsigned char flag = read_byte(gbc, IF, false);
 
     for(int i = 0; i < 5; i++) {
         
@@ -210,7 +210,7 @@ void update_timer(gbc_system *gbc, const int clocks) {
     if(gbc->cpu->div_clock >= 256) {
 
         // Increment the register (don't care if it overflows)
-        const unsigned char curr_div = read_byte(gbc->ram, DIV);
+        const unsigned char curr_div = read_byte(gbc, DIV, false);
         write_byte(gbc, DIV, curr_div + 1, false);
 
         gbc->cpu->div_clock = 0;
@@ -219,12 +219,12 @@ void update_timer(gbc_system *gbc, const int clocks) {
     // The timer counter updates at the rate given in the control register
     // Although unlike the divider, it must be enabled in the control register
     // (0 == Stopped) (1 == Running)
-    if(read_register(gbc->ram, TAC, TAC_STOP) == 1) {
+    if(read_register(gbc, TAC, TAC_STOP) == 1) {
 
         gbc->cpu->cnt_clock += clocks;
 
         // Get the speed to update the timer at
-        const unsigned char speed_index = read_byte(gbc->ram, TAC) & 0x3;
+        const unsigned char speed_index = read_byte(gbc, TAC, false) & 0x3;
 
         // Get the array of possible tick to clock ratios
         static const unsigned short timer_thresholds[4] = {
@@ -237,12 +237,12 @@ void update_timer(gbc_system *gbc, const int clocks) {
         // If the clock is at the current tick rate (or above, who knows)
         if(gbc->cpu->cnt_clock >= timer_thresholds[speed_index]) {
 
-            const unsigned char curr_cnt = read_byte(gbc->ram, TIMA);
+            const unsigned char curr_cnt = read_byte(gbc, TIMA, false);
             unsigned char new_cnt;
 
             // If the counter is about to overflow, reset it to the modulo
             if(curr_cnt == 0xFF) {
-                new_cnt = read_byte(gbc->ram, TMA);
+                new_cnt = read_byte(gbc, TMA, false);
                 write_register(gbc, IF, IEF_TIMER, 1);
             }
             // Otherwise increment as usual

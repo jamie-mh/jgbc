@@ -40,7 +40,7 @@ void window_break_show(gbc_system *gbc, gbc_debugger *debugger) {
                 ImGui::SameLine();
                 ImGui::TextColored(addr_colour, "0x%04X", item->address);
                 ImGui::SameLine();
-                ImGui::Text(find_instr(read_byte(gbc->ram, item->address), item->address, gbc).disassembly, 0x0, 0x0);
+                ImGui::Text(find_instr(read_byte(gbc, item->address, false), item->address, gbc).disassembly, 0x0, 0x0);
 
                 item = item->next;
                 i++;

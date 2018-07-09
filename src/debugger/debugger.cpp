@@ -106,8 +106,6 @@ int main(int argc, char **argv) {
                 debugger->is_paused = true;
                 debugger->next_addr = 0;
             }
-
-            write_byte(gbc, JOYP, 0x1F, false); // Temp simulate no buttons
         }
 
         render(gbc, debugger, io);
@@ -264,8 +262,9 @@ static void handle_event(SDL_Event event, gbc_system *gbc) {
             }
             break;
 
+        case SDL_KEYDOWN:
         case SDL_KEYUP:
-            handle_input(gbc, event.key); 
+            handle_input(gbc->input, event.key); 
             break;
     }
 }
