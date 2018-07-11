@@ -137,7 +137,7 @@ static unsigned short get_nth_instr_addr(gbc_system *gbc, const unsigned short n
 // Gets the number of instructions from the start of memory to the limit
 static unsigned short get_instr_count(gbc_system *gbc, const unsigned short limit_addr) {
 
-    unsigned short count;
+    unsigned short count = 0;
 
     // Don't interpret the header as instructions
     for(unsigned int pointer = 0; pointer <= limit_addr;) {
