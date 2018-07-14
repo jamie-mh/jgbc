@@ -11,8 +11,6 @@ A GameBoy and GameBoy Color emulator. Written in C/C++ with SDL2.
 
 ### Project Status
 
-As it stands, the emulator is not complete enough to play games.
-
 #### Working
 
 - Loading roms (parsing header, etc...)

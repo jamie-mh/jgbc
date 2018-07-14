@@ -2,7 +2,7 @@
 
 #define SCREEN_WIDTH 160
 #define SCREEN_HEIGHT 144
-#define SCREEN_SCALE 4
+#define SCREEN_SCALE 5
 #define MAIN_WINDOW_TITLE "LXGBC"
 
 // LCDC: LCD Control Register 

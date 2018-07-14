@@ -20,7 +20,7 @@ void window_emu_show(gbc_system *gbc) {
         for(int x = 0; x < SCREEN_WIDTH; x++) {
             for(int y = 0; y < SCREEN_HEIGHT; y++) {
 
-                buf_offset = (x * 4) + (y * SCREEN_WIDTH * 4);
+                buf_offset = (x * 3) + (y * SCREEN_WIDTH * 3);
                 
                 draw_list->AddRectFilled(
                     ImVec2(pos.x + x * DEBUGGER_SCALE, pos.y + y * DEBUGGER_SCALE), 
@@ -29,7 +29,7 @@ void window_emu_show(gbc_system *gbc) {
                         gbc->ppu->framebuffer[buf_offset + 0],
                         gbc->ppu->framebuffer[buf_offset + 1],
                         gbc->ppu->framebuffer[buf_offset + 2],
-                        gbc->ppu->framebuffer[buf_offset + 3]
+                        0xFF
                     )
                 );
             }

@@ -16,8 +16,11 @@ static void fill_shade_table(const unsigned char, SDL_Colour *);
 
 // Creates an empty framebuffer
 void init_ppu(gbc_ppu *ppu) {
+    ppu->window = NULL;
+    ppu->renderer = NULL;
+    ppu->texture = NULL;
 
-    ppu->framebuffer = calloc(SCREEN_WIDTH * SCREEN_HEIGHT * 8, sizeof(char));
+    ppu->framebuffer = calloc(SCREEN_WIDTH * SCREEN_HEIGHT * 3, sizeof(char));
     ppu->sprite_buffer = NULL;
 
     ppu->scan_clock = 0;
@@ -38,6 +41,10 @@ void init_window(gbc_ppu *ppu) {
         SDL_WINDOW_SHOWN
     );
 
+    SDL_DisplayMode mode;
+    mode.refresh_rate = FRAMERATE;
+    SDL_SetWindowDisplayMode(ppu->window, &mode);
+
     ppu->renderer = SDL_CreateRenderer(
         ppu->window,
         -1,
@@ -46,7 +53,7 @@ void init_window(gbc_ppu *ppu) {
 
     ppu->texture = SDL_CreateTexture(
         ppu->renderer,
-        SDL_PIXELFORMAT_ARGB8888,
+        SDL_PIXELFORMAT_RGB24,
         SDL_TEXTUREACCESS_STREAMING,
         SCREEN_WIDTH,
         SCREEN_HEIGHT
@@ -95,6 +102,10 @@ void update_ppu(gbc_system *gbc, const int clocks) {
 
             free(gbc->ppu->sprite_buffer);
             gbc->ppu->sprite_buffer = get_sprites(gbc);
+
+            if(gbc->ppu->window != NULL) {
+                render_to_window(gbc->ppu);
+            }
         }
 
         // Check if LY == LYC
@@ -244,12 +255,11 @@ static void render_bg_scan(gbc_system *gbc, const unsigned char ly) {
         const unsigned char shade_num = GET_BIT(data_byte_1, bit) | (GET_BIT(data_byte_2, bit) << 1);
         const SDL_Colour shade = shades[shade_num];
 
-        const unsigned int buf_offset = (x * 4) + (ly * SCREEN_WIDTH * 4);
+        const unsigned int buf_offset = (x * 3) + (ly * SCREEN_WIDTH * 3);
 
         gbc->ppu->framebuffer[buf_offset + 0] = shade.r; // R
         gbc->ppu->framebuffer[buf_offset + 1] = shade.g; // G
         gbc->ppu->framebuffer[buf_offset + 2] = shade.b; // B
-        gbc->ppu->framebuffer[buf_offset + 3] = shade.a; // A
     }
 }
 
@@ -267,11 +277,11 @@ static void render_sprite_scan(gbc_system *gbc, const unsigned char ly) {
     for(int i = 0; i < 40; i++) {
         
         const gbc_sprite sprite = gbc->ppu->sprite_buffer[i];
-        const unsigned char x = sprite.x - 8;
-        const unsigned char y = sprite.y - 16;
+        const short x = sprite.x - 8;
+        const short y = sprite.y - 16;
 
         // If the sprite is on the screen and is on the ly line
-        if(x > 0 && x < SCREEN_WIDTH + 8 && y <= ly && y + height > ly) {
+        if(x >= 0 && x < SCREEN_WIDTH + 8 && y <= ly && y + height > ly) {
 
             const unsigned short palette_addr = (GET_BIT(sprite.attributes, SPRITE_ATTR_PALETTE)) ? OBP1 : OBP0;
             const unsigned char palette = read_byte(gbc, palette_addr, false);
@@ -312,17 +322,16 @@ static void render_sprite_scan(gbc_system *gbc, const unsigned char ly) {
                 }
                 
                 const SDL_Colour shade = shades[shade_num];
-                const unsigned int buf_offset = ((x + px) * 4) + (ly * SCREEN_WIDTH * 4);
+                const unsigned int buf_offset = ((x + px) * 3) + (ly * SCREEN_WIDTH * 3);
 
                 // If the sprite is behind the background, it is only visible above white
-                if(is_behind_bg && gbc->ppu->framebuffer[buf_offset] > 0x0) {
+                if(is_behind_bg && gbc->ppu->framebuffer[buf_offset] < 0xFF) {
                     continue; 
                 }
 
                 gbc->ppu->framebuffer[buf_offset + 0] = shade.r; // R
                 gbc->ppu->framebuffer[buf_offset + 1] = shade.g; // G
                 gbc->ppu->framebuffer[buf_offset + 2] = shade.b; // B
-                gbc->ppu->framebuffer[buf_offset + 3] = shade.a; // A
             } 
         }
     } 
@@ -390,7 +399,7 @@ void render_to_window(gbc_ppu *ppu) {
         ppu->texture,
         NULL,
         ppu->framebuffer,
-        SCREEN_WIDTH * 4 
+        SCREEN_WIDTH * 3 
     );
 
     SDL_RenderCopy(ppu->renderer, ppu->texture, NULL, NULL);

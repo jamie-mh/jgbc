@@ -59,17 +59,8 @@ int main(int argc, char **argv) {
             frame_clocks += clocks;
         }
 
-        render_to_window(gbc->ppu);
-
         while(SDL_PollEvent(&event)) {
             handle_event(event, gbc);
-        }
-
-        // Run at the framerate and remove the time it took to compute this frame
-        int execute_time = SDL_GetTicks() - last_time;
-
-        if(execute_time < millis_per_frame) {
-            SDL_Delay(millis_per_frame - execute_time);
         }
     }
 
