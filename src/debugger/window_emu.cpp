@@ -8,8 +8,6 @@ extern "C" {
 #include "debugger/window_emu.h"
 #include "imgui_dock/imgui_dock.h"
 
-static void window_emu_start();
-
 
 void window_emu_show(gbc_system *gbc) {
 

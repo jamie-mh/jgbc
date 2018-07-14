@@ -2,7 +2,7 @@
 
 #define SCREEN_WIDTH 160
 #define SCREEN_HEIGHT 144
-#define SCREEN_SCALE 3
+#define SCREEN_SCALE 4
 #define MAIN_WINDOW_TITLE "LXGBC"
 
 // LCDC: LCD Control Register 
@@ -28,6 +28,12 @@
 #define STAT_MODE1 1 // Mode Flag 1/2 
 #define STAT_MODE0 0 // Mode Flag 2/2
 
+// Sprite Attributes
+#define SPRITE_ATTR_PRIORITY 7
+#define SPRITE_ATTR_FLIP_Y 6
+#define SPRITE_ATTR_FLIP_X 5
+#define SPRITE_ATTR_PALETTE 4
+
 // SCY: Scroll Y
 #define SCY 0xFF42
 
@@ -39,7 +45,12 @@
 
 // LYC: LY Compare
 #define LYC 0xFF45
-// WY: Window Position Y #define WY 0xFF4A WX: Window Position X minus 7 #define WX 0xFF4B BGP: BG Palette Data (NON CGB)
+
+// Window Position
+#define WX 0xFF4B
+#define WY 0xFF4A
+
+// BGP: BG Palette Data (NON CGB)
 #define BGP 0xFF47
 
 // 0BP0: Object Palette 0 Data (NON CGB)
@@ -65,8 +76,8 @@
 // GameBoy Monochrome Palette
 #define WHITE 255, 255, 255, 255
 #define BLACK 0, 0, 0, 255
-#define DGREY 192, 192, 192, 255
-#define LGREY 96, 96, 96, 255
+#define LGREY 192, 192, 192, 255
+#define DGREY 96, 96, 96, 255
 
 #define FRAMERATE 60.0
 #define CLOCKS_PER_SCANLINE 456 

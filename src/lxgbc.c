@@ -24,6 +24,10 @@ int main(int argc, char **argv) {
 
     set_window_title(gbc->ppu->window, gbc->rom->title, false);
 
+    // TEMP: skip logo
+    gbc->cpu->registers->PC = 0x100;
+    write_byte(gbc, 0xff50, 1, false);
+
     SDL_Event event;
     unsigned int last_time = 0;
 

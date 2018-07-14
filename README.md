@@ -18,16 +18,18 @@ As it stands, the emulator is not complete enough to play games.
 - Loading roms (parsing header, etc...)
 - All CPU instructions implemented correctly
 - Disassembly and debugger
-- Background graphics
+- Background / Window graphics
+- Sprites
 - Interrupts
 - Timers
 - Joypad
+- MBC 1
 
 #### Not Working
 
-- Sprites (flip) / Window
 - Sound
 - GameBoy Color specific features
+- Other MBCs
 
 #### Blargg's CPU Tests
 
