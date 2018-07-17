@@ -3,78 +3,87 @@
 #include "rom.h"
 #include "ram.h"
 
-static void switch_rom_bank(gbc_system *, const unsigned short, const unsigned char);
-static void switch_extram_mode(gbc_system *, const unsigned short, const unsigned char);
+static void mbc1(gbc_system *, const unsigned short, const unsigned char);
+static void mbc3(gbc_system *, const unsigned short, const unsigned char);
+
 
 // Checks if the memory being written to is attempting to switch banks
 void mbc_check(gbc_system *gbc, const unsigned short address, const unsigned char value) {
 
-    // Cartridge extram on / off 
-    if(address <= 0x1FFF) {
-        /*switch_extram_mode(gbc, address, value);*/
-    }
-    // Writing to rom, this indicates a rom bank NN switch
-    else if(address <= 0x3FFF || (address >= 0x4000 && address <= 0x7FFF)) {
-        switch_rom_bank(gbc, address, value); 
+    switch(gbc->rom->mbc_type) {
+        case 1:
+            mbc1(gbc, address, value);
+            break;
+
+        case 2:
+            break;
+
+        case 3:
+            mbc3(gbc, address, value);
     }
 }
 
-static void switch_rom_bank(gbc_system *gbc, const unsigned short address, const unsigned char value) {
+static void mbc1(gbc_system *gbc, const unsigned short address, const unsigned char value) {
 
-    const char mbc_type = gbc->rom->mbc_type;
+    static bool rom_mode = true;
+    static bool ram_enabled = false;
 
-    if(mbc_type == 1) {
+    unsigned char rom_bank = gbc->rom->curr_rom_bank;
+    unsigned char ram_bank = gbc->rom->curr_ram_bank;
 
-        // Writing to rom 00 changes the lower 5 bits of the bank number
-        if(address <= 0x3FFF) {
-        
-            const unsigned char lower_5_bits = value & 0x1F;
+    switch(address) {
+    
+        case 0 ... 0x1FFF:
+            ram_enabled = (value == 0xA) ? true : false;
+            break;
+   
+        // Select the lower 5 bits of the rom bank
+        case 0x2000 ... 0x3FFF:
+            rom_bank &= 0xE0;
+            rom_bank |= (value & 0x1F); 
 
-            // Replace the lower 5 bits in the current rom bank
-            // with the lower 5 bits of the written value
-            gbc->rom->curr_rom_bank &= 0xE0;
-            gbc->rom->curr_rom_bank |= lower_5_bits;
-        } 
-        // Writing to rom NN changes bits 5 and 6 of the bank number
-        else if(address >= 0x4000 && address <= 0x7FFF) {
-       
-            const unsigned char upper_3_bits = value & 0xE0;
+            if(rom_bank == 0) {
+                rom_bank = 1; 
+            }
+            break;
 
-            // Replace the bits 5 and 6 with those in the written value
-            gbc->rom->curr_rom_bank &= 0x1F;
-            gbc->rom->curr_rom_bank |= upper_3_bits;
-        }
+        // Select the upper 2 bits of the rom or ram bank (5 and 6) (not bit 7) 
+        case 0x4000 ... 0x5FFF:
 
-    } else if(mbc_type == 2) {
-        gbc->rom->curr_rom_bank = value & 0xF;
+            if(rom_mode) {
+                rom_bank &= 0x9F;
+                rom_bank |= (value & 0x60);
+
+                // Banks 20h, 40h, and 60h are unselectable
+                switch(rom_bank) {
+                    case 0x20:
+                    case 0x40:
+                    case 0x60:
+                        rom_bank++;
+                }
+            } else {
+                ram_bank = value; 
+            }
+            break;
+
+        case 0x6000 ... 0x7FFF:
+            rom_mode = (value == 0x1) ? false : true;
+            break;
     }
 
-    // Never point rom NN to rom 00
-    if(gbc->rom->curr_rom_bank == 0) {
-        gbc->rom->curr_rom_bank = 1;
+    gbc->rom->curr_rom_bank = rom_bank % gbc->rom->rom_size;
+    gbc->ram->romNN = gbc->rom->rom_banks[rom_bank];
+
+    if(ram_enabled && gbc->rom->ram_size > 0) {
+        gbc->rom->curr_ram_bank = ram_bank % gbc->rom->ram_size;
+        gbc->ram->extram = gbc->rom->ram_banks[ram_bank];
+    } else {
+        gbc->ram->extram = NULL; 
     }
-
-    // Wrap around if bank doesn't exist
-    gbc->rom->curr_rom_bank %= gbc->rom->rom_size;
-
-    gbc->ram->romNN = gbc->rom->rom_banks[gbc->rom->curr_rom_bank];
 }
 
-static void switch_extram_mode(gbc_system *gbc, const unsigned short address, const unsigned char value) {
+static void mbc3(gbc_system *gbc, const unsigned short address, const unsigned char value) {
 
-    // In MBC 2, bit 4 of the address must be 0 to turn RAM on / off
-    if(gbc->rom->mbc_type == 2 && ((address >> 4) & 1)) {
-        return; 
-    }
-
-    const unsigned char lower_nibble = value & 0xF;
-
-    // RAM Enabled
-    if(lower_nibble == 0xA) {
-        gbc->ram->extram = gbc->rom->ram_banks[gbc->rom->curr_ram_bank];
-    }
-    // RAM Disabled
-    else if(lower_nibble == 0x0) {
-        gbc->ram->extram = NULL;
-    }
+    // TODO: Implement RTC
+    mbc1(gbc, address, value);
 }

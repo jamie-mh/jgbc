@@ -178,7 +178,7 @@ static void render_bg_scan(gbc_system *gbc, const unsigned char ly) {
     } 
 
     // Get the start of the tile map data 
-    unsigned short bg_tile_map_start = (read_register(gbc, LCDC, LCDC_BG_TILE_MAP) ? 0x9C00 : 0x9800);
+    const unsigned short bg_tile_map_start = (read_register(gbc, LCDC, LCDC_BG_TILE_MAP) ? 0x9C00 : 0x9800);
 
     // When this bit is enabled, the tile data is stored starting at 0x8000
     // The tile numbers are unsigned (0 to 255)

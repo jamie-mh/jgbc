@@ -67,17 +67,12 @@ int main(int argc, char **argv) {
     ImGuiIO &io = ImGui::GetIO(); 
     (void) io;
 
-    // Main endless loop 
     SDL_Event event;
-    unsigned int last_time = 0;
 
     while(gbc->is_running) {
 
         static const unsigned int max_clocks = CLOCK_SPEED / FRAMERATE;
-        static const unsigned char millis_per_frame = (1 / FRAMERATE) * 1000.0;
-
         unsigned int frame_clocks = 0;
-        last_time = SDL_GetTicks();
 
         // Run the clocks for this frame
         while(!debugger->is_paused && frame_clocks < max_clocks) {
@@ -109,13 +104,6 @@ int main(int argc, char **argv) {
         }
 
         render(gbc, debugger, io);
-
-        // Run at the framerate and remove the time it took to compute this frame
-        int execute_time = SDL_GetTicks() - last_time;
-
-        if(execute_time < millis_per_frame) {
-            SDL_Delay(millis_per_frame - execute_time);
-        }
 
         while(SDL_PollEvent(&event)) {
             handle_event(event, gbc);

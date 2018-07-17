@@ -9,6 +9,8 @@
 #include "emu.h"
 
 static void handle_event(SDL_Event, gbc_system *);
+static void print_rom_info(gbc_rom *);
+
 
 int main(int argc, char **argv) {
 
@@ -23,22 +25,19 @@ int main(int argc, char **argv) {
     init_window(gbc->ppu);
 
     set_window_title(gbc->ppu->window, gbc->rom->title, false);
+    print_rom_info(gbc->rom);
 
     // TEMP: skip logo
     gbc->cpu->registers->PC = 0x100;
     write_byte(gbc, 0xff50, 1, false);
 
     SDL_Event event;
-    unsigned int last_time = 0;
 
     // Main endless loop 
     while(gbc->is_running) {
 
         static const unsigned int max_clocks = CLOCK_SPEED / FRAMERATE;
-        static const unsigned char millis_per_frame = (1 / FRAMERATE) * 1000.0;
-
         unsigned int frame_clocks = 0;
-        last_time = SDL_GetTicks();
 
         // Run the clocks for this frame
         while(frame_clocks < max_clocks) {
@@ -81,4 +80,15 @@ static void handle_event(SDL_Event event, gbc_system *gbc) {
             handle_input(gbc->input, event.key); 
             break;
     }
+}
+
+// Prints the rom info to the terminal
+static void print_rom_info(gbc_rom *rom) {
+    printf("Title: %s\n", rom->title);
+    printf("CGB Flag: %02X\n", rom->cgb_flag);
+    printf("Cartridge Type: %02X\n", rom->cart_type);
+    printf("ROM Size: %d x %d KB\n", rom->rom_size, ROM_BANK_SIZE);
+    printf("RAM Size: %d x %d KB\n", rom->ram_size, EXTRAM_BANK_SIZE);
+    printf("Destination Code: %02X\n", rom->dest_code);
+    printf("Version Number: %02X\n\n", rom->ver_no);
 }

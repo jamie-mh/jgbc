@@ -168,6 +168,11 @@ void write_byte(gbc_system *gbc, const unsigned short address, unsigned char val
     //     printf("%c", value);
     // }
 
+    // If the memory is ROM
+    if(is_program && address <= ROMNN_END) {
+        return; 
+    }
+
     if(address == DMA) {
         DMA_transfer(gbc, value); 
     }

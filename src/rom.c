@@ -96,14 +96,28 @@ static void get_rom_info(unsigned char *header, gbc_rom *rom) {
     rom->cart_type = header[0x147 - ROM_HEADER_START];
 
     switch(rom->cart_type) {
-        case 1:
-        case 2:
-        case 3:
+        case 0x0:
+            rom->mbc_type = 0;
+            break;
+
+        default:
+        case 0x1:
+        case 0x2:
+        case 0x3:
             rom->mbc_type = 1;
             break;
-        case 5:
-        case 6:
+
+        case 0x5:
+        case 0x6:
             rom->mbc_type = 2;
+            break;
+
+        case 0xF:
+        case 0x10:
+        case 0x11:
+        case 0x12:
+        case 0x13:
+            rom->mbc_type = 3;
             break;
     }
 
