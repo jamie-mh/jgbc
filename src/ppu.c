@@ -64,7 +64,7 @@ void init_window(gbc_ppu *ppu) {
 }
 
 // Renders the picture on the screen scanline by scanline
-void update_ppu(gbc_system *gbc, const int clocks) {
+void update_ppu(gbc_system *gbc) {
 
     const bool lcd_on = read_register(gbc, LCDC, LCDC_LCD_ENABLE);
     unsigned char ly_val = read_byte(gbc, LY, false);
@@ -82,7 +82,7 @@ void update_ppu(gbc_system *gbc, const int clocks) {
         gbc->ppu->sprite_buffer = get_sprites(gbc); 
     }
 
-    gbc->ppu->scan_clock += clocks;
+    gbc->ppu->scan_clock += gbc->clocks;
 
     if(gbc->ppu->scan_clock >= CLOCKS_PER_SCANLINE) { 
 
@@ -281,7 +281,7 @@ static void render_sprite_scan(gbc_system *gbc, const unsigned char ly) {
         const short y = sprite.y - 16;
 
         // If the sprite is on the screen and is on the ly line
-        if(x >= 0 && x < SCREEN_WIDTH + 8 && y <= ly && y + height > ly) {
+        if(y <= ly && y + height > ly) {
 
             const unsigned short palette_addr = (GET_BIT(sprite.attributes, SPRITE_ATTR_PALETTE)) ? OBP1 : OBP0;
             const unsigned char palette = read_byte(gbc, palette_addr, false);
@@ -305,7 +305,9 @@ static void render_sprite_scan(gbc_system *gbc, const unsigned char ly) {
             const bool is_flipped_x = GET_BIT(sprite.attributes, SPRITE_ATTR_FLIP_X);
             const bool is_behind_bg = GET_BIT(sprite.attributes, SPRITE_ATTR_PRIORITY);
 
-            for(unsigned char px = 0; px < 8; px++) {
+            // Draw the pixels of the sprite, however if the sprite is offscreen
+            // then only draw the visible pixels
+            for(unsigned char px = ((x < 0) ? -x : 0); px < 8; px++) {
 
                 if(x + px > SCREEN_WIDTH) {
                     break; 
@@ -325,7 +327,7 @@ static void render_sprite_scan(gbc_system *gbc, const unsigned char ly) {
                 const unsigned int buf_offset = ((x + px) * 3) + (ly * SCREEN_WIDTH * 3);
 
                 // If the sprite is behind the background, it is only visible above white
-                if(is_behind_bg && gbc->ppu->framebuffer[buf_offset] < 0xFF) {
+                if(is_behind_bg && gbc->ppu->framebuffer[buf_offset] != 0xE0) {
                     continue; 
                 }
 

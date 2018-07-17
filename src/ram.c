@@ -31,9 +31,6 @@ void init_ram(gbc_system *gbc) {
     gbc->ram->io = calloc(IO_SIZE, sizeof(char));
     gbc->ram->hram = calloc(HRAM_SIZE, sizeof(char));
     gbc->ram->ier = calloc(1, sizeof(char));
-
-    write_byte(gbc, LCDC, DEFAULT_LCDC, false);
-    write_byte(gbc, IF, DEFAULT_IF, false);
 }
 
 // Returns a pointer to the memory location of the specified address

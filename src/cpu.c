@@ -45,7 +45,12 @@ gbc_instruction find_instr(const unsigned char opcode, const unsigned short addr
 }
 
 // Executes an instruction by calling the function associated with it and returns the cycles it took
-unsigned char execute_instr(gbc_system *gbc) {
+void execute_instr(gbc_system *gbc) {
+
+    if(gbc->cpu->is_halted) {
+        gbc->clocks += 4;
+        return;
+    }
 
     gbc_instruction instruction = get_curr_instr(gbc);
 
@@ -80,7 +85,7 @@ unsigned char execute_instr(gbc_system *gbc) {
             break;
     }
 
-    return instruction.clocks;
+    gbc->clocks += instruction.clocks;
 }
 
 // Gets the current instruction at the program counter
@@ -201,19 +206,19 @@ static void service_interrupt(gbc_system *gbc, const unsigned char number) {
 }
 
 // Updates the timer if they are enabled and requests interrupts
-void update_timer(gbc_system *gbc, const int clocks) {
+void update_timer(gbc_system *gbc) {
 
-    gbc->cpu->div_clock += clocks;
+    gbc->cpu->div_clock += gbc->clocks;
 
     // The divider register updates at one 256th of the clock speed (aka 256 clocks)
     // Reset the clock and update the register
-    if(gbc->cpu->div_clock >= 256) {
+    while(gbc->cpu->div_clock >= 256) {
 
         // Increment the register (don't care if it overflows)
         const unsigned char curr_div = read_byte(gbc, DIV, false);
         write_byte(gbc, DIV, curr_div + 1, false);
 
-        gbc->cpu->div_clock = 0;
+        gbc->cpu->div_clock -= 256;
     }
 
     // The timer counter updates at the rate given in the control register
@@ -221,7 +226,7 @@ void update_timer(gbc_system *gbc, const int clocks) {
     // (0 == Stopped) (1 == Running)
     if(read_register(gbc, TAC, TAC_STOP) == 1) {
 
-        gbc->cpu->cnt_clock += clocks;
+        gbc->cpu->cnt_clock += gbc->clocks;
 
         // Get the speed to update the timer at
         const unsigned char speed_index = read_byte(gbc, TAC, false) & 0x3;
@@ -234,25 +239,25 @@ void update_timer(gbc_system *gbc, const int clocks) {
             CLOCK_SPEED / 16384
         };
 
-        // If the clock is at the current tick rate (or above, who knows)
-        if(gbc->cpu->cnt_clock >= timer_thresholds[speed_index]) {
+        const unsigned short threshold = timer_thresholds[speed_index];
+
+        // If the clock is at the current tick rate
+        if(gbc->cpu->cnt_clock >= threshold) {
 
             const unsigned char curr_cnt = read_byte(gbc, TIMA, false);
             unsigned char new_cnt;
 
             // If the counter is about to overflow, reset it to the modulo
-            if(curr_cnt == 0xFF) {
+            if(curr_cnt + 1 == 256) {
                 new_cnt = read_byte(gbc, TMA, false);
                 write_register(gbc, IF, IEF_TIMER, 1);
-            }
-            // Otherwise increment as usual
-            else {
+            } else {
                 new_cnt = curr_cnt + 1;
             }
 
             // Write the new value and reset the clock
             write_byte(gbc, TIMA, new_cnt, false);
-            gbc->cpu->cnt_clock = 0;
+            gbc->cpu->cnt_clock -= threshold;
         }
     }
 }

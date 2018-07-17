@@ -1,8 +1,8 @@
 #include "lxgbc.h"
 #include "ram.h"
-#include "rom.h"
+#include "cart.h"
 
-static void get_rom_info(unsigned char *, gbc_rom *);
+static void get_cart_info(unsigned char *, gbc_cart *);
 void load_bootrom(gbc_ram *);
 
 
@@ -32,17 +32,17 @@ bool load_rom(gbc_system *gbc, const char *path) {
     }
 
     // Read the header and see how many ROM banks are required
-    get_rom_info(header, gbc->rom);
+    get_cart_info(header, gbc->cart);
     free(header);
 
-    gbc->rom->rom_banks = malloc(sizeof(char *) * gbc->rom->rom_size); 
-    for(int i = 0; i < gbc->rom->rom_size; i++) {
-        gbc->rom->rom_banks[i] = calloc(ROM_BANK_SIZE, sizeof(char)); 
+    gbc->cart->rom_banks = malloc(sizeof(char *) * gbc->cart->rom_size); 
+    for(int i = 0; i < gbc->cart->rom_size; i++) {
+        gbc->cart->rom_banks[i] = calloc(ROM_BANK_SIZE, sizeof(char)); 
     }
     
-    gbc->rom->ram_banks = malloc(sizeof(char *) * gbc->rom->ram_size);
-    for(int i = 0; i < gbc->rom->ram_size; i++) {
-        gbc->rom->ram_banks[i] = calloc(EXTRAM_BANK_SIZE, sizeof(char));
+    gbc->cart->ram_banks = malloc(sizeof(char *) * gbc->cart->ram_size);
+    for(int i = 0; i < gbc->cart->ram_size; i++) {
+        gbc->cart->ram_banks[i] = calloc(EXTRAM_BANK_SIZE, sizeof(char));
     }
     
     // Return to the start of the file
@@ -54,7 +54,7 @@ bool load_rom(gbc_system *gbc, const char *path) {
         
         unsigned char bank = floor(position / ROM_BANK_SIZE);
         
-        gbc->rom->rom_banks[bank][position - (ROM_BANK_SIZE * bank)] = character;
+        gbc->cart->rom_banks[bank][position - (ROM_BANK_SIZE * bank)] = character;
         position++; 
     }
     fclose(file);
@@ -62,15 +62,15 @@ bool load_rom(gbc_system *gbc, const char *path) {
     // Point the cartridge ram locations to the first rom banks
     // With ROM0 being fixed at the first rom bank
     // And romNN starting with the second one
-    gbc->rom->curr_rom_bank = 1;
-    gbc->rom->curr_ram_bank = 0;
+    gbc->cart->curr_rom_bank = 1;
+    gbc->cart->curr_ram_bank = 0;
 
-    gbc->ram->rom00 = gbc->rom->rom_banks[0];
-    gbc->ram->romNN = gbc->rom->rom_banks[1];
+    gbc->ram->rom00 = gbc->cart->rom_banks[0];
+    gbc->ram->romNN = gbc->cart->rom_banks[1];
 
     // Point the extram to the first bank if applicable
-    if(gbc->rom->ram_size > 0) {
-        gbc->ram->extram = gbc->rom->ram_banks[0];
+    if(gbc->cart->ram_size > 0) {
+        gbc->ram->extram = gbc->cart->ram_banks[0];
     }
 
     gbc->ram->bootrom = malloc(sizeof(char) * 0x100);
@@ -80,36 +80,36 @@ bool load_rom(gbc_system *gbc, const char *path) {
 }
 
 // Parse the ROM header and get its information
-static void get_rom_info(unsigned char *header, gbc_rom *rom) {
+static void get_cart_info(unsigned char *header, gbc_cart *cart) {
 
     // Read the title from the header    
     // The title is 16 characters maximum, uppercase ASCII
-    rom->title = calloc(TITLE_LENGTH + 1, sizeof(char));
+    cart->title = calloc(TITLE_LENGTH + 1, sizeof(char));
 
     for(int i = 0; i < TITLE_LENGTH; i++) {
-        rom->title[i] = header[0x134 - ROM_HEADER_START + i];
+        cart->title[i] = header[0x134 - ROM_HEADER_START + i];
     }
 
-    rom->title[strlen(rom->title)] = '\0';
+    cart->title[strlen(cart->title)] = '\0';
 
-    rom->cgb_flag = header[0x143 - ROM_HEADER_START]; 
-    rom->cart_type = header[0x147 - ROM_HEADER_START];
+    cart->cgb_flag = header[0x143 - ROM_HEADER_START]; 
+    cart->type = header[0x147 - ROM_HEADER_START];
 
-    switch(rom->cart_type) {
+    switch(cart->type) {
         case 0x0:
-            rom->mbc_type = 0;
+            cart->mbc_type = 0;
             break;
 
         default:
         case 0x1:
         case 0x2:
         case 0x3:
-            rom->mbc_type = 1;
+            cart->mbc_type = 1;
             break;
 
         case 0x5:
         case 0x6:
-            rom->mbc_type = 2;
+            cart->mbc_type = 2;
             break;
 
         case 0xF:
@@ -117,20 +117,20 @@ static void get_rom_info(unsigned char *header, gbc_rom *rom) {
         case 0x11:
         case 0x12:
         case 0x13:
-            rom->mbc_type = 3;
+            cart->mbc_type = 3;
             break;
     }
 
-    rom->rom_size = (2*ROM_BANK_SIZE << header[0x148 - ROM_HEADER_START]) / ROM_BANK_SIZE;
+    cart->rom_size = (2*ROM_BANK_SIZE << header[0x148 - ROM_HEADER_START]) / ROM_BANK_SIZE;
     
     switch(header[0x149 - ROM_HEADER_START]) {
-        case 0x0: rom->ram_size = 0; break;
-        case 0x1: case 0x2: rom->ram_size = 1; break;
-        case 0x3: rom->ram_size = 4; break;
+        case 0x0: cart->ram_size = 0; break;
+        case 0x1: case 0x2: cart->ram_size = 1; break;
+        case 0x3: cart->ram_size = 4; break;
     }
     
-    rom->dest_code = header[0x14A - ROM_HEADER_START];
-    rom->ver_no = header[0x14C - ROM_HEADER_START];
+    cart->dest_code = header[0x14A - ROM_HEADER_START];
+    cart->ver_no = header[0x14C - ROM_HEADER_START];
 }
 
 void load_bootrom(gbc_ram *ram) {

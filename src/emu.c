@@ -1,7 +1,7 @@
 #include "lxgbc.h"
 #include "ram.h"
 #include "ppu.h"
-#include "rom.h"
+#include "cart.h"
 #include "cpu.h"
 #include "alu.h"
 #include "instr.h"
@@ -15,7 +15,7 @@ void init_system(gbc_system *gbc, const char *rom_path) {
     gbc->cpu = malloc(sizeof(gbc_cpu));
     gbc->ppu = malloc(sizeof(gbc_ppu));
     gbc->ram = malloc(sizeof(gbc_ram));
-    gbc->rom = malloc(sizeof(gbc_rom));
+    gbc->cart = malloc(sizeof(gbc_cart));
     gbc->input = malloc(sizeof(gbc_input));
 
     init_cpu(gbc->cpu);
@@ -28,7 +28,11 @@ void init_system(gbc_system *gbc, const char *rom_path) {
         exit(EXIT_FAILURE);
     }
 
+    write_byte(gbc, LCDC, DEFAULT_LCDC, false);
+    write_byte(gbc, IF, DEFAULT_IF, false);
+
     gbc->is_running = true;
+    gbc->clocks = 0;
 }
 
 // Sets the window title to the game title

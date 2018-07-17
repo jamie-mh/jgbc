@@ -1,21 +1,23 @@
 #include "lxgbc.h"
 #include "mbc.h"
-#include "rom.h"
+#include "cart.h"
 #include "ram.h"
 
 static void mbc1(gbc_system *, const unsigned short, const unsigned char);
+static void mbc2(gbc_system *, const unsigned short, const unsigned char);
 static void mbc3(gbc_system *, const unsigned short, const unsigned char);
 
 
 // Checks if the memory being written to is attempting to switch banks
 void mbc_check(gbc_system *gbc, const unsigned short address, const unsigned char value) {
 
-    switch(gbc->rom->mbc_type) {
+    switch(gbc->cart->mbc_type) {
         case 1:
             mbc1(gbc, address, value);
             break;
 
         case 2:
+            mbc2(gbc, address, value);
             break;
 
         case 3:
@@ -28,8 +30,8 @@ static void mbc1(gbc_system *gbc, const unsigned short address, const unsigned c
     static bool rom_mode = true;
     static bool ram_enabled = false;
 
-    unsigned char rom_bank = gbc->rom->curr_rom_bank;
-    unsigned char ram_bank = gbc->rom->curr_ram_bank;
+    unsigned char rom_bank = gbc->cart->curr_rom_bank;
+    unsigned char ram_bank = gbc->cart->curr_ram_bank;
 
     switch(address) {
     
@@ -71,19 +73,23 @@ static void mbc1(gbc_system *gbc, const unsigned short address, const unsigned c
             break;
     }
 
-    gbc->rom->curr_rom_bank = rom_bank % gbc->rom->rom_size;
-    gbc->ram->romNN = gbc->rom->rom_banks[rom_bank];
+    gbc->cart->curr_rom_bank = rom_bank % gbc->cart->rom_size;
+    gbc->ram->romNN = gbc->cart->rom_banks[rom_bank];
 
-    if(ram_enabled && gbc->rom->ram_size > 0) {
-        gbc->rom->curr_ram_bank = ram_bank % gbc->rom->ram_size;
-        gbc->ram->extram = gbc->rom->ram_banks[ram_bank];
+    if(ram_enabled && gbc->cart->ram_size > 0) {
+        gbc->cart->curr_ram_bank = ram_bank % gbc->cart->ram_size;
+        gbc->ram->extram = gbc->cart->ram_banks[ram_bank];
     } else {
         gbc->ram->extram = NULL; 
     }
 }
 
-static void mbc3(gbc_system *gbc, const unsigned short address, const unsigned char value) {
+static void mbc2(gbc_system *gbc, const unsigned short address, const unsigned char value) {
+    // TODO: Implement
+    mbc1(gbc, address, value);
+}
 
+static void mbc3(gbc_system *gbc, const unsigned short address, const unsigned char value) {
     // TODO: Implement RTC
     mbc1(gbc, address, value);
 }

@@ -2,7 +2,7 @@
 
 #define SCREEN_WIDTH 160
 #define SCREEN_HEIGHT 144
-#define SCREEN_SCALE 5
+#define SCREEN_SCALE 2
 #define MAIN_WINDOW_TITLE "LXGBC"
 
 // LCDC: LCD Control Register 
@@ -74,10 +74,10 @@
 #define HDMA5 0xFF55
 
 // GameBoy Monochrome Palette
-#define WHITE 255, 255, 255, 255
-#define BLACK 0, 0, 0, 255
-#define LGREY 192, 192, 192, 255
-#define DGREY 96, 96, 96, 255
+#define WHITE 0xE0, 0xF8, 0xD0, 0xFF 
+#define BLACK 0x08, 0x18, 0x20, 0xFF 
+#define LGREY 0x88, 0xC0, 0x70, 0xFF 
+#define DGREY 0x34, 0x68, 0x56, 0xFF 
 
 #define FRAMERATE 60.0
 #define CLOCKS_PER_SCANLINE 456 
@@ -85,5 +85,5 @@
 void init_ppu(gbc_ppu *);
 void init_window(gbc_ppu *);
 
-void update_ppu(gbc_system *, const int);
+void update_ppu(gbc_system *);
 void render_to_window(gbc_ppu *);

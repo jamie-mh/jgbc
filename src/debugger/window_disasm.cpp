@@ -2,7 +2,7 @@ extern "C" {
     #include "lxgbc.h"
     #include "ram.h"
     #include "cpu.h"
-    #include "rom.h"
+    #include "cart.h"
 }
 
 #include "debugger/debugger.h"

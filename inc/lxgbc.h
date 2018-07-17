@@ -95,10 +95,10 @@ typedef struct gbc_ram {
     unsigned char **wram_banks; // 8x4KB WRAM Banks (CGB Only)
 } gbc_ram;
 
-typedef struct gbc_rom {
+typedef struct gbc_cart {
     char *title; // Uppercase ASCII Game Name
     char cgb_flag; // Color Support Flag
-    unsigned char cart_type; // Cartridge Type Code
+    unsigned char type; // Cartridge Type Code
     unsigned char mbc_type; // MBC Type (1, 2, 3)
     unsigned char rom_size; // Number of ROM banks
     unsigned char ram_size; // Number of EXT RAM banks
@@ -110,7 +110,7 @@ typedef struct gbc_rom {
 
     unsigned char **rom_banks;
     unsigned char **ram_banks;
-} gbc_rom;
+} gbc_cart;
 
 typedef struct gbc_input {
     bool up;
@@ -125,9 +125,11 @@ typedef struct gbc_input {
 
 typedef struct gbc_system {
     bool is_running;
+    unsigned char clocks;
+
     gbc_cpu *cpu;
     gbc_ppu *ppu;
     gbc_ram *ram;
-    gbc_rom *rom;
+    gbc_cart *cart;
     gbc_input *input;
 } gbc_system;

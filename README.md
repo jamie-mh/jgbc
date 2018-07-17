@@ -9,6 +9,21 @@ A GameBoy and GameBoy Color emulator. Written in C/C++ with SDL2.
 
 ![Debugger](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/debugger.png)
 
+### Screenshots
+
+![Zelda](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/zelda.png)
+![Tetris](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/tetris.png)
+![Tetris DX](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/tetrisdx.png)
+![Dr Mario](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/drmario.png)
+![Super Mario Land 1](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/mario1.png)
+![Super Mario Land 2](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/mario2.png)
+![Super Mario Land 3](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/mario3.png)
+![Kirby's Dream Land](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/kirby.png)
+![Metroid II](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/metroid.png)
+![Donkey Kong Land](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/donkeykong.png)
+![Tennis](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/tennis.png)
+![CPU test](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/cpuinstr.png)
+
 ### Project Status
 
 #### Working
@@ -90,20 +105,6 @@ Don't try and run anything other than GB roms, it will crash (duh).
 ```
 ./bin/lxgbc roms/Tetris.gb
 ```
-### Screenshots
-
-![Zelda](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/zelda.png)
-![Tetris](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/tetris.png)
-![Tetris DX](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/tetrisdx.png)
-![Dr Mario](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/drmario.png)
-![Super Mario Land 1](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/mario1.png)
-![Super Mario Land 2](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/mario2.png)
-![Super Mario Land 3](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/mario3.png)
-![Kirby's Dream Land](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/kirby.png)
-![Metroid II](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/metroid.png)
-![Donkey Kong Land](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/donkeykong.png)
-![Tennis](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/tennis.png)
-![CPU test](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/cpuinstr.png)
 
 ### Using the debugger
 

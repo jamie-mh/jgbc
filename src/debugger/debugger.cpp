@@ -3,7 +3,7 @@ extern "C" {
     #include "ram.h"
     #include "cpu.h"
     #include "mbc.h"
-    #include "rom.h"
+    #include "cart.h"
     #include "ppu.h"
     #include "sound.h"
     #include "input.h"
@@ -61,37 +61,32 @@ int main(int argc, char **argv) {
     write_byte(gbc, BOOTROM_DISABLE, 1, false);
     gbc->cpu->registers->PC = PROGRAM_START;
 
-    set_window_title(debugger->window, gbc->rom->title, true);
+    set_window_title(debugger->window, gbc->cart->title, true);
     init_imgui(debugger);
 
     ImGuiIO &io = ImGui::GetIO(); 
     (void) io;
 
     SDL_Event event;
+    static const unsigned int max_clocks = CLOCK_SPEED / FRAMERATE;
 
     while(gbc->is_running) {
 
-        static const unsigned int max_clocks = CLOCK_SPEED / FRAMERATE;
         unsigned int frame_clocks = 0;
 
         // Run the clocks for this frame
         while(!debugger->is_paused && frame_clocks < max_clocks) {
 
-            unsigned char clocks = 0;
+            gbc->clocks = 0;
 
-            if(gbc->cpu->is_halted == false) {
-                clocks = execute_instr(gbc);                
-            } else {
-                clocks = 4;
-            }
-
+            execute_instr(gbc);                
             check_interrupts(gbc);
 
-            update_timer(gbc, clocks);
-            update_ppu(gbc, clocks);
+            update_timer(gbc);
+            update_ppu(gbc);
 
-            frame_clocks += clocks;
-            debugger->clocks += clocks;
+            frame_clocks += gbc->clocks;
+            debugger->clocks += gbc->clocks;
 
             if(find_breakpoint(gbc->cpu->registers->PC, debugger) != nullptr) {
                 debugger->is_paused = true;

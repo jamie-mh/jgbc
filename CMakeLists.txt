@@ -25,7 +25,7 @@ add_executable(
     ${PROJECT_SOURCE_DIR}/mbc.c
     ${PROJECT_SOURCE_DIR}/ppu.c
     ${PROJECT_SOURCE_DIR}/ram.c
-    ${PROJECT_SOURCE_DIR}/rom.c
+    ${PROJECT_SOURCE_DIR}/cart.c
     ${PROJECT_SOURCE_DIR}/sound.c
 )
 
@@ -43,7 +43,7 @@ add_executable(
     ${PROJECT_SOURCE_DIR}/mbc.c
     ${PROJECT_SOURCE_DIR}/ppu.c
     ${PROJECT_SOURCE_DIR}/ram.c
-    ${PROJECT_SOURCE_DIR}/rom.c
+    ${PROJECT_SOURCE_DIR}/cart.c
     ${PROJECT_SOURCE_DIR}/sound.c
     
     ${PROJECT_SOURCE_DIR}/debugger/debugger.cpp
