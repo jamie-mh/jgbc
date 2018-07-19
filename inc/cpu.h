@@ -53,23 +53,23 @@
 
 typedef struct gbc_instruction {
     char *disassembly;
-    char length;
-    char clocks;
+    uint8_t length;
+    uint8_t clocks;
     bool signed_operand;
     void *execute;
 } gbc_instruction;
 
 void init_cpu(gbc_cpu *);
-gbc_instruction find_instr(const unsigned char, const unsigned short, gbc_system *);
+gbc_instruction find_instr(const uint8_t, const uint16_t, gbc_system *);
 void execute_instr(gbc_system *);
 
-void set_flag(const char, const unsigned char, unsigned char *);
-char get_flag(const char, const unsigned char);
+void set_flag(const char, const uint8_t, uint8_t *);
+char get_flag(const char, const uint8_t);
 
-void stack_push_byte(gbc_system *, unsigned short *, const unsigned char);
-void stack_push_short(gbc_system *, unsigned short *, const unsigned short);
-unsigned char stack_pop_byte(gbc_system *, unsigned short *);
-unsigned short stack_pop_short(gbc_system *, unsigned short *);
+void stack_push_byte(gbc_system *, uint16_t *, const uint8_t);
+void stack_push_short(gbc_system *, uint16_t *, const uint16_t);
+uint8_t stack_pop_byte(gbc_system *, uint16_t *);
+uint16_t stack_pop_short(gbc_system *, uint16_t *);
 
 void check_interrupts(gbc_system *);
 void update_timer(gbc_system *);

@@ -1,11 +1,11 @@
 extern "C" {
-    #include "lxgbc.h"
+    #include "jgbc.h"
     #include "ram.h"
     #include "cpu.h"
     #include "mbc.h"
     #include "cart.h"
     #include "ppu.h"
-    #include "sound.h"
+    #include "apu.h"
     #include "input.h"
     #include "emu.h"
 }
@@ -28,6 +28,7 @@ extern "C" {
 #include "debugger/window_mem.h"
 #include "debugger/window_break.h"
 #include "debugger/window_stack.h"
+#include "debugger/liberation_mono.h"
 
 
 static void init_debugger(gbc_debugger *);
@@ -72,7 +73,7 @@ int main(int argc, char **argv) {
 
     while(gbc->is_running) {
 
-        unsigned int frame_clocks = 0;
+        uint32_t frame_clocks = 0;
 
         // Run the clocks for this frame
         while(!debugger->is_paused && frame_clocks < max_clocks) {
@@ -170,7 +171,7 @@ static void init_imgui(gbc_debugger *debugger) {
     ImGui_ImplOpenGL3_Init();
 
     ImGui::StyleColorsDark();
-    ImGui::GetIO().Fonts->AddFontFromFileTTF("LiberationMono-Regular.ttf", 18.0f);
+	ImGui::GetIO().Fonts->AddFontFromMemoryCompressedTTF(LiberationMono_compressed_data, LiberationMono_compressed_size, 18.0f);
 }
 
 static void render(gbc_system *gbc, gbc_debugger *debugger, ImGuiIO &io) {
@@ -257,7 +258,7 @@ static void handle_event(SDL_Event event, gbc_system *gbc) {
 */
 
 // Adds a breakpoint element to the breakpoint linked list
-bool add_breakpoint(const unsigned int address, gbc_debugger *debugger) {
+bool add_breakpoint(const uint16_t address, gbc_debugger *debugger) {
 
     const gbc_breakpoint *found = find_breakpoint(address, debugger);
 
@@ -281,7 +282,7 @@ bool add_breakpoint(const unsigned int address, gbc_debugger *debugger) {
 }
 
 // Returns a pointer to the breakpoint element with the specifed address in the breakpoint linked list provided it exists
-gbc_breakpoint *find_breakpoint(const unsigned int address, gbc_debugger *debugger) {
+gbc_breakpoint *find_breakpoint(const uint16_t address, gbc_debugger *debugger) {
 
     if(debugger->breakpoint_head != nullptr) {
 
@@ -300,7 +301,7 @@ gbc_breakpoint *find_breakpoint(const unsigned int address, gbc_debugger *debugg
     return nullptr; 
 }
 
-bool remove_breakpoint(const unsigned int address, gbc_debugger *debugger) {
+bool remove_breakpoint(const uint16_t address, gbc_debugger *debugger) {
 
     gbc_breakpoint *prev = nullptr;
     gbc_breakpoint *curr= nullptr;

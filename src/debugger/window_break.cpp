@@ -1,5 +1,5 @@
 extern "C" {
-    #include "lxgbc.h"
+    #include "jgbc.h"
     #include "ram.h"
     #include "cpu.h"
 }
@@ -21,7 +21,7 @@ void window_break_show(gbc_system *gbc, gbc_debugger *debugger) {
         
         ImGui::Text("Address Breakpoints");
         const ImS32 s32_one = 1, s32_fifty = 50;
-        static int addr = 0;
+        static int32_t addr = 0;
 
         ImGui::InputScalar("ADDR", ImGuiDataType_S32, &addr, &s32_one, &s32_fifty, "%04X", ImGuiInputTextFlags_CharsHexadecimal);
         if(ImGui::Button("Add")) {

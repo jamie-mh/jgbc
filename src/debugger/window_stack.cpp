@@ -1,5 +1,5 @@
 extern "C" {
-    #include "lxgbc.h"
+    #include "jgbc.h"
     #include "ram.h"
 }
 
@@ -16,10 +16,10 @@ void window_stack_show(gbc_system *gbc) {
         ImGui::BeginChild("Scrolling");
 
         static const ImVec4 addr_colour = ImVec4(0.38f, 0.49f, 0.55f, 1.0f);
-        const unsigned short sp = gbc->cpu->registers->SP;
+        const uint16_t sp = gbc->cpu->registers->SP;
 
         ImGuiListClipper clipper(0xFFFF - sp);
-        unsigned short addr;
+        uint16_t addr;
 
         while(clipper.Step()) {
             for(int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {

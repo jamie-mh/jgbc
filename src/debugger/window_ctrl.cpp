@@ -1,5 +1,5 @@
 extern "C" {
-    #include "lxgbc.h"
+    #include "jgbc.h"
     #include "cpu.h"
     #include "ram.h"
 }
@@ -57,14 +57,14 @@ void window_ctrl_show(gbc_system *gbc, gbc_debugger *debugger) {
 }
 
 static void step_into(gbc_system *gbc, gbc_debugger *debugger) {
-    unsigned char opcode = read_byte(gbc, gbc->cpu->registers->PC, false);
+    uint8_t opcode = read_byte(gbc, gbc->cpu->registers->PC, false);
 
     if(is_jump_call(opcode) || is_subroutine_call(opcode)) {
         debugger->next_addr = read_short(gbc, gbc->cpu->registers->PC + 1, false);
     } else if(is_jump_signed(opcode)) {
 
         // Address just before the jump destination (done like this because the PC hasn't been incremented yet)
-        const unsigned short before_addr = gbc->cpu->registers->PC + (signed char) read_byte(gbc, gbc->cpu->registers->PC + 1, false);
+        const uint16_t before_addr = gbc->cpu->registers->PC + (signed char) read_byte(gbc, gbc->cpu->registers->PC + 1, false);
 
         gbc_instruction before_instr = find_instr(
             read_byte(gbc, before_addr, false),
@@ -81,7 +81,7 @@ static void step_into(gbc_system *gbc, gbc_debugger *debugger) {
 }
 
 static void step_over(gbc_system *gbc, gbc_debugger *debugger) {
-    const unsigned char opcode = read_byte(gbc, gbc->cpu->registers->PC, false);
+    const uint8_t opcode = read_byte(gbc, gbc->cpu->registers->PC, false);
 
     if(is_jump_call(opcode)) {
         debugger->next_addr = read_short(gbc, gbc->cpu->registers->PC + 1, false);

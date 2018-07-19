@@ -1,10 +1,10 @@
-#include "lxgbc.h"
+#include "jgbc.h"
 #include "ram.h"
 #include "cpu.h"
 #include "alu.h"
 #include "instr.h"
 
-static void service_interrupt(gbc_system *, const unsigned char);
+static void service_interrupt(gbc_system *, const uint8_t);
 static gbc_instruction get_curr_instr(gbc_system *);
 
 
@@ -31,11 +31,11 @@ void init_cpu(gbc_cpu *cpu) {
 }
 
 // Returns an instruction struct of the provided opcode
-gbc_instruction find_instr(const unsigned char opcode, const unsigned short address, gbc_system *gbc) {
+gbc_instruction find_instr(const uint8_t opcode, const uint16_t address, gbc_system *gbc) {
 
     // If the opcode has the CB prefix
     if(opcode == 0xCB) {
-        unsigned char next_opcode = read_byte(gbc, address + 1, false);
+        uint8_t next_opcode = read_byte(gbc, address + 1, false);
         return cb_instructions[next_opcode];
     } 
     // Standard instruction
@@ -58,14 +58,14 @@ void execute_instr(gbc_system *gbc) {
     opcode_function = instruction.execute;
 
     char operand_len = instruction.length - 1;
-    unsigned short operand;
+    uint16_t operand;
 
     // If it is a CB instruction, it's shorter because we don't count the prefix
     if(instruction.execute == &op_prefix_cb) {
         operand_len--; 
     }
 
-    unsigned short instr_start = gbc->cpu->registers->PC;
+    uint16_t instr_start = gbc->cpu->registers->PC;
     gbc->cpu->registers->PC += instruction.length;
 
     switch(operand_len) {
@@ -76,7 +76,7 @@ void execute_instr(gbc_system *gbc) {
 
         case 1:
             operand = read_byte(gbc, instr_start + 1, false);
-            opcode_function(gbc, (unsigned char) operand);
+            opcode_function(gbc, (uint8_t) operand);
             break;
 
         case 2:
@@ -91,7 +91,7 @@ void execute_instr(gbc_system *gbc) {
 // Gets the current instruction at the program counter
 static gbc_instruction get_curr_instr(gbc_system *gbc) {
     
-    unsigned char opcode = read_byte(gbc, gbc->cpu->registers->PC, false);
+    uint8_t opcode = read_byte(gbc, gbc->cpu->registers->PC, false);
     return find_instr(opcode, gbc->cpu->registers->PC, gbc);
 }
 
@@ -108,7 +108,7 @@ char get_flag_offset(const char flag) {
 }
 
 // Sets a flag in the F register
-void set_flag(const char flag, const unsigned char value, unsigned char *regis) {
+void set_flag(const char flag, const uint8_t value, uint8_t *regis) {
 
     char offset = get_flag_offset(flag);
 
@@ -121,7 +121,7 @@ void set_flag(const char flag, const unsigned char value, unsigned char *regis) 
 }
 
 // Returns the value of a flag in the F register
-char get_flag(const char flag, const unsigned char regis) {
+char get_flag(const char flag, const uint8_t regis) {
 
     char offset = get_flag_offset(flag);
 
@@ -130,14 +130,14 @@ char get_flag(const char flag, const unsigned char regis) {
 }
 
 // Pushes a byte to the stack after decrementing the stack pointer
-void stack_push_byte(gbc_system *gbc, unsigned short *sp, const unsigned char value) {
+void stack_push_byte(gbc_system *gbc, uint16_t *sp, const uint8_t value) {
 
-    *sp -= sizeof(char);
+    *sp -= sizeof(uint8_t);
     write_byte(gbc, *sp, value, 1);
 }
 
 // Pushes a short to the stack after decrementing the stack pointer
-void stack_push_short(gbc_system *gbc, unsigned short *sp, const unsigned short value) {
+void stack_push_short(gbc_system *gbc, uint16_t *sp, const uint16_t value) {
     
     // Push the short to the stack as two bytes
     stack_push_byte(gbc, sp, (value & 0xFF00) >> 8);
@@ -145,19 +145,19 @@ void stack_push_short(gbc_system *gbc, unsigned short *sp, const unsigned short 
 }
 
 // Pops a byte from the stack and increments the stack pointer
-unsigned char stack_pop_byte(gbc_system *gbc, unsigned short *sp) {
+uint8_t stack_pop_byte(gbc_system *gbc, uint16_t *sp) {
     
-    unsigned char value = read_byte(gbc, *sp, false);
-    *sp += sizeof(char);
+    uint8_t value = read_byte(gbc, *sp, false);
+    *sp += sizeof(uint8_t);
 
     return value;
 }
 
 // Pops a short from the stack and increments the stack pointer
-unsigned short stack_pop_short(gbc_system *gbc, unsigned short *sp) {
+uint16_t stack_pop_short(gbc_system *gbc, uint16_t *sp) {
     
-    const unsigned char byte_a = stack_pop_byte(gbc, sp); 
-    const unsigned char byte_b = stack_pop_byte(gbc, sp); 
+    const uint8_t byte_a = stack_pop_byte(gbc, sp); 
+    const uint8_t byte_b = stack_pop_byte(gbc, sp); 
 
     return byte_a | (byte_b << 8);
 }
@@ -165,8 +165,8 @@ unsigned short stack_pop_short(gbc_system *gbc, unsigned short *sp) {
 // Checks if the cpu has pending interrupts and services them 
 void check_interrupts(gbc_system *gbc) {
 
-    const unsigned char enabled = read_byte(gbc, IE, false);
-    const unsigned char flag = read_byte(gbc, IF, false);
+    const uint8_t enabled = read_byte(gbc, IE, false);
+    const uint8_t flag = read_byte(gbc, IF, false);
 
     for(int i = 0; i < 5; i++) {
         
@@ -184,9 +184,9 @@ void check_interrupts(gbc_system *gbc) {
 }
 
 // Calls the interrupt subroutine after storing the program counter on the stack
-static void service_interrupt(gbc_system *gbc, const unsigned char number) {
+static void service_interrupt(gbc_system *gbc, const uint8_t number) {
     
-    static const unsigned short interrupt[5] = {
+    static const uint16_t interrupt[5] = {
         INT_VBLANK,
         INT_LCD_STAT,
         INT_TIMER,
@@ -215,7 +215,7 @@ void update_timer(gbc_system *gbc) {
     while(gbc->cpu->div_clock >= 256) {
 
         // Increment the register (don't care if it overflows)
-        const unsigned char curr_div = read_byte(gbc, DIV, false);
+        const uint8_t curr_div = read_byte(gbc, DIV, false);
         write_byte(gbc, DIV, curr_div + 1, false);
 
         gbc->cpu->div_clock -= 256;
@@ -229,23 +229,23 @@ void update_timer(gbc_system *gbc) {
         gbc->cpu->cnt_clock += gbc->clocks;
 
         // Get the speed to update the timer at
-        const unsigned char speed_index = read_byte(gbc, TAC, false) & 0x3;
+        const uint8_t speed_index = read_byte(gbc, TAC, false) & 0x3;
 
         // Get the array of possible tick to clock ratios
-        static const unsigned short timer_thresholds[4] = {
+        static const uint16_t timer_thresholds[4] = {
             CLOCK_SPEED / 4096,
             CLOCK_SPEED / 262144,
             CLOCK_SPEED / 65536,
             CLOCK_SPEED / 16384
         };
 
-        const unsigned short threshold = timer_thresholds[speed_index];
+        const uint16_t threshold = timer_thresholds[speed_index];
 
         // If the clock is at the current tick rate
         if(gbc->cpu->cnt_clock >= threshold) {
 
-            const unsigned char curr_cnt = read_byte(gbc, TIMA, false);
-            unsigned char new_cnt;
+            const uint8_t curr_cnt = read_byte(gbc, TIMA, false);
+            uint8_t new_cnt;
 
             // If the counter is about to overflow, reset it to the modulo
             if(curr_cnt + 1 == 256) {

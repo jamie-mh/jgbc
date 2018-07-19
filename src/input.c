@@ -1,4 +1,4 @@
-#include "lxgbc.h"
+#include "jgbc.h"
 #include "input.h"
 #include "ram.h"
 #include "cpu.h"
@@ -58,8 +58,8 @@ void handle_input(gbc_input *input, SDL_KeyboardEvent key) {
 
 // Intercepts the joypad register reads and returns the current values
 // Everything is inversed, this is how the games read it
-unsigned char joypad_state(gbc_system *gbc) {
-    unsigned char joypad = read_byte(gbc, JOYP, false);
+uint8_t joypad_state(gbc_system *gbc) {
+    uint8_t joypad = read_byte(gbc, JOYP, false);
 
     if((joypad & JOYP_DIR) == 0) {
         SET_KEY(KEY_UP_SELECT, gbc->input->up, joypad);

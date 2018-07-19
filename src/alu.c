@@ -1,46 +1,46 @@
-#include "lxgbc.h"
+#include "jgbc.h"
 #include "cpu.h"
 #include "alu.h"
 #include "instr.h"
 
-static bool did_byte_half_carry(unsigned char, unsigned char);
-static bool did_byte_full_carry(unsigned char, unsigned char);
-static bool did_byte_half_borrow(unsigned char, unsigned char);
-static bool did_byte_full_borrow(unsigned char, unsigned char);
-static bool did_short_half_carry(unsigned short, unsigned short);
-static bool did_short_full_carry(unsigned short a, unsigned short b);
+static bool did_byte_half_carry(uint8_t, uint8_t);
+static bool did_byte_full_carry(uint8_t, uint8_t);
+static bool did_byte_half_borrow(uint8_t, uint8_t);
+static bool did_byte_full_borrow(uint8_t, uint8_t);
+static bool did_short_half_carry(uint16_t, uint16_t);
+static bool did_short_full_carry(uint16_t a, uint16_t b);
 
 /*
 *   Helper Functions
 */
 
 // Checks if a byte operation resulted in a half-carry
-static bool did_byte_half_carry(unsigned char a, unsigned char b) {
+static bool did_byte_half_carry(uint8_t a, uint8_t b) {
     return ((a & 0xF) + (b & 0xF)) > 0xF;
 }
 
 // Checks if a byte operation resulted in a half-borrow
-static bool did_byte_half_borrow(unsigned char a, unsigned char b) {
+static bool did_byte_half_borrow(uint8_t a, uint8_t b) {
     return ((a & 0xF) < (b & 0xF));
 }
 
 // Checks if a byte operation resulted in a full carry
-static bool did_byte_full_carry(unsigned char a, unsigned char b) {
+static bool did_byte_full_carry(uint8_t a, uint8_t b) {
     return (a + b) > 0xFF;
 }
 
 // Checks if a byte operation resulted in a full borrow
-static bool did_byte_full_borrow(unsigned char a, unsigned char b) {
+static bool did_byte_full_borrow(uint8_t a, uint8_t b) {
     return (a < b);
 }
 
 // Checks if a short operation resulted in a half-carry
-static bool did_short_half_carry(unsigned short a, unsigned short b) {
+static bool did_short_half_carry(uint16_t a, uint16_t b) {
     return (a & 0xFFF) + (b & 0xFFF) > 0xFFF;
 }
 
 // Checks if a short operation resulted in a full carry
-static bool did_short_full_carry(unsigned short a, unsigned short b) {
+static bool did_short_full_carry(uint16_t a, uint16_t b) {
     return ((a + b) & 0xF0000) > 0;
 }
 
@@ -49,9 +49,9 @@ static bool did_short_full_carry(unsigned short a, unsigned short b) {
 */
 
 // Bitwise AND of a and b
-unsigned char and(const unsigned char a, const unsigned char b, unsigned char *flag) {
+uint8_t and(const uint8_t a, const uint8_t b, uint8_t *flag) {
     
-    const unsigned char result = a & b;
+    const uint8_t result = a & b;
 
     if(result == 0) {
         set_flag(FLAG_ZERO, 1, flag);
@@ -67,9 +67,9 @@ unsigned char and(const unsigned char a, const unsigned char b, unsigned char *f
 }
 
 // Bitwise OR of a and b
-unsigned char or(const unsigned char a, const unsigned char b, unsigned char *flag) {
+uint8_t or(const uint8_t a, const uint8_t b, uint8_t *flag) {
 
-    const unsigned char result = a | b;
+    const uint8_t result = a | b;
 
     if(result == 0) {
         set_flag(FLAG_ZERO, 1, flag);
@@ -85,9 +85,9 @@ unsigned char or(const unsigned char a, const unsigned char b, unsigned char *fl
 }
 
 // Bitwise XOR of a and b
-unsigned char xor(const unsigned char a, const unsigned char b, unsigned char *flag) {
+uint8_t xor(const uint8_t a, const uint8_t b, uint8_t *flag) {
     
-    const unsigned char result = a ^ b;
+    const uint8_t result = a ^ b;
 
     if(result == 0) {
         set_flag(FLAG_ZERO, 1, flag);
@@ -103,9 +103,9 @@ unsigned char xor(const unsigned char a, const unsigned char b, unsigned char *f
 }
 
 // Increment byte
-unsigned char inc(const unsigned char operand, unsigned char *flag) {
+uint8_t inc(const uint8_t operand, uint8_t *flag) {
 
-    const unsigned char result = operand + 1;
+    const uint8_t result = operand + 1;
 
     if(result == 0) {
         set_flag(FLAG_ZERO, 1, flag); 
@@ -126,9 +126,9 @@ unsigned char inc(const unsigned char operand, unsigned char *flag) {
 }
 
 // Decrement byte
-unsigned char dec(const unsigned char operand, unsigned char *flag) {
+uint8_t dec(const uint8_t operand, uint8_t *flag) {
 
-    const unsigned char result = operand - 1;
+    const uint8_t result = operand - 1;
 
     if(result == 0) {
         set_flag(FLAG_ZERO, 1, flag);
@@ -149,9 +149,9 @@ unsigned char dec(const unsigned char operand, unsigned char *flag) {
 }
 
 // Add two bytes and return a byte
-unsigned char add_byte(const unsigned char a, const unsigned char b, unsigned char *flag) {
+uint8_t add_byte(const uint8_t a, const uint8_t b, uint8_t *flag) {
     
-    const unsigned char result = a + b;
+    const uint8_t result = a + b;
 
     if(result == 0) {
         set_flag(FLAG_ZERO, 1, flag);
@@ -179,10 +179,10 @@ unsigned char add_byte(const unsigned char a, const unsigned char b, unsigned ch
 }
 
 // Add two bytes with the carry flag and return a byte
-unsigned char add_byte_carry(const unsigned char a, const unsigned char b, unsigned char *flag) {
+uint8_t add_byte_carry(const uint8_t a, const uint8_t b, uint8_t *flag) {
 
-    const unsigned char carry = get_flag(FLAG_CARRY, *flag);
-    const unsigned char result = a + b + carry;
+    const uint8_t carry = get_flag(FLAG_CARRY, *flag);
+    const uint8_t result = a + b + carry;
 
     if(result == 0) {
         set_flag(FLAG_ZERO, 1, flag);
@@ -208,9 +208,9 @@ unsigned char add_byte_carry(const unsigned char a, const unsigned char b, unsig
 }
 
 // Subtract two bytes and return a byte
-unsigned char sub_byte(const unsigned char a, const unsigned char b, unsigned char *flag) {
+uint8_t sub_byte(const uint8_t a, const uint8_t b, uint8_t *flag) {
 
-    const unsigned char result = a - b;
+    const uint8_t result = a - b;
 
     if(result == 0) {
         set_flag(FLAG_ZERO, 1, flag); 
@@ -238,10 +238,10 @@ unsigned char sub_byte(const unsigned char a, const unsigned char b, unsigned ch
 }
 
 // Subtract two bytes, the carry flag and return a byte
-unsigned char sub_byte_carry(const unsigned char a, const unsigned char b, unsigned char *flag) {
+uint8_t sub_byte_carry(const uint8_t a, const uint8_t b, uint8_t *flag) {
 
-    const unsigned char carry = get_flag(FLAG_CARRY, *flag);
-    const unsigned char result = a - b - carry;
+    const uint8_t carry = get_flag(FLAG_CARRY, *flag);
+    const uint8_t result = a - b - carry;
 
     if(result == 0) {
         set_flag(FLAG_ZERO, 1, flag); 
@@ -269,9 +269,9 @@ unsigned char sub_byte_carry(const unsigned char a, const unsigned char b, unsig
 }
 
 // Add two 16 bit numbers
-unsigned short add_short(const unsigned short a, const unsigned short b, unsigned char *flag) {
+uint16_t add_short(const uint16_t a, const uint16_t b, uint8_t *flag) {
     
-    const unsigned short result = a + b;
+    const uint16_t result = a + b;
 
     set_flag(FLAG_SUBTRACT, 0, flag);
 
@@ -293,18 +293,18 @@ unsigned short add_short(const unsigned short a, const unsigned short b, unsigne
 }
 
 // Designed to add a signed value to the SP register (only used in 2 instructions)
-unsigned short add_sp_signed_byte(const unsigned short sp, const signed char operand, unsigned char *flag) {
+uint16_t add_sp_signed_byte(const uint16_t sp, const int8_t operand, uint8_t *flag) {
 
     set_flag(FLAG_ZERO, 0, flag);
     set_flag(FLAG_SUBTRACT, 0, flag);
 
-    if(did_byte_half_carry(sp & 0xFF, (unsigned char) operand)) {
+    if(did_byte_half_carry(sp & 0xFF, (uint8_t) operand)) {
         set_flag(FLAG_HALFCARRY, 1, flag); 
     } else {
         set_flag(FLAG_HALFCARRY, 0, flag); 
     }
 
-    if(did_byte_full_carry(sp & 0xFF, (unsigned char) operand)) {
+    if(did_byte_full_carry(sp & 0xFF, (uint8_t) operand)) {
         set_flag(FLAG_CARRY, 1, flag); 
     } else {
         set_flag(FLAG_CARRY, 0, flag); 
@@ -314,10 +314,10 @@ unsigned short add_sp_signed_byte(const unsigned short sp, const signed char ope
 }
 
 // Shift the carry flag onto the bottom and pop the top into the carry flag
-unsigned char rotate_left(const unsigned char operand, const bool affect_zero, unsigned char *flag) {
+uint8_t rotate_left(const uint8_t operand, const bool affect_zero, uint8_t *flag) {
     
     // Shift the carry flag onto the result
-    const unsigned char result = (operand << 1) | get_flag(FLAG_CARRY, *flag);
+    const uint8_t result = (operand << 1) | get_flag(FLAG_CARRY, *flag);
 
     if((result == 0) && affect_zero) {
         set_flag(FLAG_ZERO, 1, flag);
@@ -335,10 +335,10 @@ unsigned char rotate_left(const unsigned char operand, const bool affect_zero, u
 }
 
 // Shift the carry flag onto the top and pop the bottom into the carry flag
-unsigned char rotate_right(const unsigned char operand, unsigned char *flag) {
+uint8_t rotate_right(const uint8_t operand, uint8_t *flag) {
 
     // Shift the carry flag onto the result
-    const unsigned char result = (operand >> 1) | (get_flag(FLAG_CARRY, *flag) << 7);
+    const uint8_t result = (operand >> 1) | (get_flag(FLAG_CARRY, *flag) << 7);
 
     if(result == 0) {
         set_flag(FLAG_ZERO, 1, flag);
@@ -356,10 +356,10 @@ unsigned char rotate_right(const unsigned char operand, unsigned char *flag) {
 }
 
 // Pop the top into the carry flag and shift it onto the bottom
-unsigned char rotate_left_carry(const unsigned char operand, const bool affect_zero, unsigned char *flag) {
+uint8_t rotate_left_carry(const uint8_t operand, const bool affect_zero, uint8_t *flag) {
 
     // Shift bit 0 onto the top 
-    const unsigned char result = ((operand << 1) | (operand >> 7));
+    const uint8_t result = ((operand << 1) | (operand >> 7));
 
     if((result == 0) && affect_zero) {
         set_flag(FLAG_ZERO, 1, flag);
@@ -377,10 +377,10 @@ unsigned char rotate_left_carry(const unsigned char operand, const bool affect_z
 }
 
 // Pop the bottom into the carry and shift it on the top
-unsigned char rotate_right_carry(const unsigned char operand, const bool affect_zero, unsigned char *flag) {
+uint8_t rotate_right_carry(const uint8_t operand, const bool affect_zero, uint8_t *flag) {
 
     // Shift bit 0 onto the top 
-    const unsigned char result = ((operand >> 1) | (operand << 7));
+    const uint8_t result = ((operand >> 1) | (operand << 7));
 
     if((result == 0) && affect_zero) {
         set_flag(FLAG_ZERO, 1, flag);
@@ -398,7 +398,7 @@ unsigned char rotate_right_carry(const unsigned char operand, const bool affect_
 }
 
 // Shift 0 on the bottom and pop the top into the carry flag
-unsigned char shift_left_arith(const unsigned char operand, unsigned char *flag) {
+uint8_t shift_left_arith(const uint8_t operand, uint8_t *flag) {
 
     // Set the carry flag to the old bit 7
     set_flag(FLAG_CARRY, (operand & 0x80) >> 7, flag);
@@ -407,7 +407,7 @@ unsigned char shift_left_arith(const unsigned char operand, unsigned char *flag)
     set_flag(FLAG_HALFCARRY, 0, flag);
 
     // Shift left (set bit 0 to 0)
-    const unsigned char result = operand << 1;
+    const uint8_t result = operand << 1;
 
     if(result == 0) {
         set_flag(FLAG_ZERO, 1, flag);
@@ -419,7 +419,7 @@ unsigned char shift_left_arith(const unsigned char operand, unsigned char *flag)
 }
 
 // Shift the top bit onto the top and pop the bottom into the carry flag
-unsigned char shift_right_arith(const unsigned char operand, unsigned char *flag) {
+uint8_t shift_right_arith(const uint8_t operand, uint8_t *flag) {
 
     // Set the carry flag to the old bit 0
     set_flag(FLAG_CARRY, operand & 1, flag);
@@ -428,7 +428,7 @@ unsigned char shift_right_arith(const unsigned char operand, unsigned char *flag
     set_flag(FLAG_HALFCARRY, 0, flag);
 
     // Shift right
-    const unsigned char result = (operand & 0x80) | (operand >> 1);
+    const uint8_t result = (operand & 0x80) | (operand >> 1);
 
     if(result == 0) {
         set_flag(FLAG_ZERO, 1, flag);
@@ -440,7 +440,7 @@ unsigned char shift_right_arith(const unsigned char operand, unsigned char *flag
 }
 
 // Shift 0 onto the top and pop the bottom into the carry flag
-unsigned char shift_right_logic(const unsigned char operand, unsigned char *flag) {
+uint8_t shift_right_logic(const uint8_t operand, uint8_t *flag) {
     
     // Set the carry flag to the old bit 0
     set_flag(FLAG_CARRY, operand & 0x01, flag);
@@ -449,7 +449,7 @@ unsigned char shift_right_logic(const unsigned char operand, unsigned char *flag
     set_flag(FLAG_HALFCARRY, 0, flag);
 
     // Shift right
-    const unsigned char result = operand >> 1;
+    const uint8_t result = operand >> 1;
 
     if(result == 0) {
         set_flag(FLAG_ZERO, 1, flag);
@@ -461,10 +461,10 @@ unsigned char shift_right_logic(const unsigned char operand, unsigned char *flag
 }
 
 // Swap the top and bottom nibbles of the operand
-unsigned char swap(const unsigned char operand, unsigned char *flag) {
+uint8_t swap(const uint8_t operand, uint8_t *flag) {
 
     // Swap the top and bottom halves
-    const unsigned char result = ((operand & 0xF0) >> 4) | ((operand & 0x0F) << 4);
+    const uint8_t result = ((operand & 0xF0) >> 4) | ((operand & 0x0F) << 4);
     
     if(result == 0) {
         set_flag(FLAG_ZERO, 1, flag);
@@ -480,10 +480,10 @@ unsigned char swap(const unsigned char operand, unsigned char *flag) {
 }
 
 // Test if a bit is set (modifies zero flag)
-void test_bit(const unsigned char regis, const unsigned char bit, unsigned char *flag) {
+void test_bit(const uint8_t regis, const uint8_t bit, uint8_t *flag) {
 
     // Read the nth bit
-    const unsigned char bit_val = (regis >> bit) & 1;
+    const uint8_t bit_val = (regis >> bit) & 1;
 
     if(bit_val == 0) {
         set_flag(FLAG_ZERO, 1, flag);
@@ -496,27 +496,27 @@ void test_bit(const unsigned char regis, const unsigned char bit, unsigned char 
 }
 
 // Sets a bit to 0
-unsigned char reset_bit(const unsigned char regis, const unsigned char bit) {
+uint8_t reset_bit(const uint8_t regis, const uint8_t bit) {
 
-    unsigned char result = regis;
+    uint8_t result = regis;
     result &= ~(1 << bit);
 
     return result;
 }
 
 // Sets a bit to 1
-unsigned char set_bit(const unsigned char regis, const unsigned char bit) {
+uint8_t set_bit(const uint8_t regis, const uint8_t bit) {
 
-    unsigned char result = regis;
+    uint8_t result = regis;
     result |= (1 << bit);
 
     return result;
 }
 
 // Returns the BCD (Binary Coded Decimal) of the register value
-unsigned char daa(const unsigned char regis, unsigned char *flag) {
+uint8_t daa(const uint8_t regis, uint8_t *flag) {
 
-    unsigned short result = regis;
+    uint16_t result = regis;
 
     if(get_flag(FLAG_SUBTRACT, *flag) == 0)
     {
@@ -553,5 +553,5 @@ unsigned char daa(const unsigned char regis, unsigned char *flag) {
 
     set_flag(FLAG_HALFCARRY, 0, flag);
 
-    return (unsigned short) result;
+    return (uint8_t) result;
 }

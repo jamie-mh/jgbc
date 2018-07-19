@@ -10,8 +10,8 @@
 
 #define WRAM_BANK_COUNT 8
 
-// typedef unsigned short ADDRESS;
-// typedef unsigned char BYTE;
+#define SB 0xFF01
+#define BOOTROM_DISABLE 0xFF50
 
 // Addressable Regions
 #define ROM00_START 0X0
@@ -40,28 +40,15 @@
 #define HRAM_END 0xFFFE
 #define IE_START_END 0xFFFF
 
-// Sound Registers
-// TODO: Implement
-
-
-// GBC Only Registers
-#define KEY1 0xFF4D
-#define SVBK 0xFF70
-
-// Serial
-#define SB 0xFF01
-#define BOOTROM_DISABLE 0xFF50
-
 
 void init_ram(gbc_system *);
+bool is_valid_ram(gbc_ram *, const uint16_t);
 
-bool is_valid_ram(gbc_ram *, const unsigned short);
+uint8_t read_byte(gbc_system *, const uint16_t, const bool);
+uint16_t read_short(gbc_system *, const uint16_t, const bool);
 
-unsigned char read_byte(gbc_system *, const unsigned short, const bool);
-unsigned short read_short(gbc_system *, const unsigned short, const bool);
+void write_byte(gbc_system *, const uint16_t, uint8_t, const bool);
+void write_short(gbc_system *, const uint16_t, const uint16_t, const bool);
 
-void write_byte(gbc_system *, const unsigned short, unsigned char, const bool);
-void write_short(gbc_system *, const unsigned short, const unsigned short, const bool);
-
-void write_register(gbc_system *, const unsigned short, const unsigned char, const unsigned char);
-unsigned char read_register(gbc_system *, const unsigned short, const unsigned char);
+void write_register(gbc_system *, const uint16_t, const uint8_t, const uint8_t);
+uint8_t read_register(gbc_system *, const uint16_t, const uint8_t);

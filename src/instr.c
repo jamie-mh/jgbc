@@ -1,4 +1,4 @@
-#include "lxgbc.h"
+#include "jgbc.h"
 #include "ram.h"
 #include "cpu.h"
 #include "alu.h"
@@ -10,7 +10,7 @@ void op_nop(gbc_system *gbc) {
 }
 
 // 0x01: LD BC, d16 (- - - -)
-void op_ld_bc_d16(gbc_system *gbc, unsigned short operand) {
+void op_ld_bc_d16(gbc_system *gbc, uint16_t operand) {
     gbc->cpu->registers->BC = operand;
 }
 
@@ -46,7 +46,7 @@ void op_dec_b(gbc_system *gbc) {
 }
 
 // 0x06: LD B, d8 (- - - -)
-void op_ld_b_d8(gbc_system *gbc, unsigned char operand) {
+void op_ld_b_d8(gbc_system *gbc, uint8_t operand) {
     gbc->cpu->registers->B = operand;
 }
 
@@ -60,7 +60,7 @@ void op_rlca(gbc_system *gbc) {
 }
 
 // 0x08: LD (a16), SP (- - - -)
-void op_ld_a16p_sp(gbc_system *gbc, unsigned short operand) {
+void op_ld_a16p_sp(gbc_system *gbc, uint16_t operand) {
     write_short(
         gbc, 
         operand, 
@@ -109,7 +109,7 @@ void op_dec_c(gbc_system *gbc) {
 }
 
 // 0x0E: LD C, d8 (- - - -)
-void op_ld_c_d8(gbc_system *gbc, unsigned char operand) {
+void op_ld_c_d8(gbc_system *gbc, uint8_t operand) {
     gbc->cpu->registers->C = operand;
 }
 
@@ -128,7 +128,7 @@ void op_stop(gbc_system *gbc) {
 }
 
 // 0x11: LD DE, d16 (- - - -)
-void op_ld_de_d16(gbc_system *gbc, unsigned short operand) {
+void op_ld_de_d16(gbc_system *gbc, uint16_t operand) {
     gbc->cpu->registers->DE = operand;
 }
 
@@ -164,7 +164,7 @@ void op_dec_d(gbc_system *gbc) {
 }
 
 // 0x16: LD D, d8 (- - - -)
-void op_ld_d_d8(gbc_system *gbc, unsigned char operand) {
+void op_ld_d_d8(gbc_system *gbc, uint8_t operand) {
     gbc->cpu->registers->D = operand;
 }
 
@@ -178,7 +178,7 @@ void op_rla(gbc_system *gbc) {
 }
 
 // 0x18: JR r8 (- - - -)
-void op_jr_r8(gbc_system *gbc, char operand) {
+void op_jr_r8(gbc_system *gbc, int8_t operand) {
     gbc->cpu->registers->PC += operand;
 }
 
@@ -222,7 +222,7 @@ void op_dec_e(gbc_system *gbc) {
 }
 
 // 0x1E: LD E, d8 (- - - -)
-void op_ld_e_d8(gbc_system *gbc, unsigned char operand) {
+void op_ld_e_d8(gbc_system *gbc, uint8_t operand) {
     gbc->cpu->registers->E = operand;
 }
 
@@ -236,14 +236,14 @@ void op_rra(gbc_system *gbc) {
 }
 
 // 0x20: JR NZ, r8 (- - - -)
-void op_jr_nz_r8(gbc_system *gbc, char operand) {
+void op_jr_nz_r8(gbc_system *gbc, int8_t operand) {
     if(get_flag(FLAG_ZERO, gbc->cpu->registers->F) == 0) {
         gbc->cpu->registers->PC += operand;
     }
 }
 
 // 0x21: LD HL, d16 (- - - -)
-void op_ld_hl_d16(gbc_system *gbc, unsigned short operand) {
+void op_ld_hl_d16(gbc_system *gbc, uint16_t operand) {
     gbc->cpu->registers->HL = operand;
 }
 
@@ -280,7 +280,7 @@ void op_dec_h(gbc_system *gbc) {
 }
 
 // 0x26: LD H, d8 (- - - -)
-void op_ld_h_d8(gbc_system *gbc, unsigned char operand) {
+void op_ld_h_d8(gbc_system *gbc, uint8_t operand) {
     gbc->cpu->registers->H = operand;
 }
 
@@ -293,7 +293,7 @@ void op_daa(gbc_system *gbc) {
 }
 
 // 0x28: JR Z, r8 (- - - -)
-void op_jr_z_r8(gbc_system *gbc, char operand) {
+void op_jr_z_r8(gbc_system *gbc, int8_t operand) {
     if(get_flag(FLAG_ZERO, gbc->cpu->registers->F) == 1) {
         gbc->cpu->registers->PC += operand;
     }
@@ -340,7 +340,7 @@ void op_dec_l(gbc_system *gbc) {
 }
 
 // 0x2E: LD L, d8 (- - - -)
-void op_ld_l_d8(gbc_system *gbc, unsigned char operand) {
+void op_ld_l_d8(gbc_system *gbc, uint8_t operand) {
     gbc->cpu->registers->L = operand;
 }
 
@@ -352,14 +352,14 @@ void op_cpl(gbc_system *gbc) {
 }
 
 // 0x30: JR NC, r8 (- - - -)
-void op_jr_nc_r8(gbc_system *gbc, char operand) {
+void op_jr_nc_r8(gbc_system *gbc, int8_t operand) {
     if(get_flag(FLAG_CARRY, gbc->cpu->registers->F) == 0) {
         gbc->cpu->registers->PC += operand;
     }
 }
 
 // 0x31: LD SP, d16 (- - - -)
-void op_ld_sp_d16(gbc_system *gbc, unsigned short operand) {
+void op_ld_sp_d16(gbc_system *gbc, uint16_t operand) {
     gbc->cpu->registers->SP = operand;
 }
 
@@ -406,7 +406,7 @@ void op_dec_hlp(gbc_system *gbc) {
 }
 
 // 0x36: LD (HL), d8 (- - - -)
-void op_ld_hlp_d8(gbc_system *gbc, unsigned char operand) {
+void op_ld_hlp_d8(gbc_system *gbc, uint8_t operand) {
     write_byte(
         gbc, 
         gbc->cpu->registers->HL, 
@@ -423,7 +423,7 @@ void op_scf(gbc_system *gbc) {
 }
 
 // 0x38: JR C, r8 (- - - -)
-void op_jr_c_r8(gbc_system *gbc, char operand) {
+void op_jr_c_r8(gbc_system *gbc, int8_t operand) {
     if(get_flag(FLAG_CARRY, gbc->cpu->registers->F) == 1) {
         gbc->cpu->registers->PC += operand;
     }
@@ -466,7 +466,7 @@ void op_dec_a(gbc_system *gbc) {
 }
 
 // 0x3E: LD A, d8 (- - - -)
-void op_ld_a_d8(gbc_system *gbc, unsigned char operand) {
+void op_ld_a_d8(gbc_system *gbc, uint8_t operand) {
     gbc->cpu->registers->A = operand;
 }
 
@@ -1452,19 +1452,19 @@ void op_pop_bc(gbc_system *gbc) {
 }
 
 // 0xC2: JP NZ, a16 (- - - -)
-void op_jp_nz_a16(gbc_system *gbc, unsigned short operand) {
+void op_jp_nz_a16(gbc_system *gbc, uint16_t operand) {
     if(get_flag(FLAG_ZERO, gbc->cpu->registers->F) == 0) {
         gbc->cpu->registers->PC = operand; 
     } 
 }
 
 // 0xC3: JP a16 (- - - -)
-void op_jp_a16(gbc_system *gbc, unsigned short operand) {
+void op_jp_a16(gbc_system *gbc, uint16_t operand) {
     gbc->cpu->registers->PC = operand;
 }
 
 // 0xC4: CALL NZ, a16 (- - - -)
-void op_call_nz_a16(gbc_system *gbc, unsigned short operand) {
+void op_call_nz_a16(gbc_system *gbc, uint16_t operand) {
     if(get_flag(FLAG_ZERO, gbc->cpu->registers->F) == 0) {
         op_call_a16(gbc, operand); 
     } 
@@ -1480,7 +1480,7 @@ void op_push_bc(gbc_system *gbc) {
 }
 
 // 0xC6: ADD A, d8 (Z 0 H C)
-void op_add_a_d8(gbc_system *gbc, unsigned char operand) {
+void op_add_a_d8(gbc_system *gbc, uint8_t operand) {
     gbc->cpu->registers->A = add_byte(
         gbc->cpu->registers->A, 
         operand, 
@@ -1514,7 +1514,7 @@ void op_ret(gbc_system *gbc) {
 }
 
 // 0xCA: JP Z, a16 (- - - -)
-void op_jp_z_a16(gbc_system *gbc, unsigned short operand) {
+void op_jp_z_a16(gbc_system *gbc, uint16_t operand) {
     if(get_flag(FLAG_ZERO, gbc->cpu->registers->F) == 1) {
         gbc->cpu->registers->PC = operand; 
     } 
@@ -1526,14 +1526,14 @@ void op_prefix_cb(gbc_system *gbc) {
 }
 
 // 0xCC: CALL Z, a16 (- - - -)
-void op_call_z_a16(gbc_system *gbc, unsigned short operand) {
+void op_call_z_a16(gbc_system *gbc, uint16_t operand) {
     if(get_flag(FLAG_ZERO, gbc->cpu->registers->F) == 1) {
         op_call_a16(gbc, operand); 
     } 
 }
 
 // 0xCD: CALL a16 (- - - -)
-void op_call_a16(gbc_system *gbc, unsigned short operand) {
+void op_call_a16(gbc_system *gbc, uint16_t operand) {
     stack_push_short(
         gbc, 
         &gbc->cpu->registers->SP,
@@ -1543,7 +1543,7 @@ void op_call_a16(gbc_system *gbc, unsigned short operand) {
 }
 
 // 0xCE: ADC A, d8 (Z 0 H C)
-void op_adc_a_d8(gbc_system *gbc, unsigned char operand) {
+void op_adc_a_d8(gbc_system *gbc, uint8_t operand) {
     gbc->cpu->registers->A = add_byte_carry(
         gbc->cpu->registers->A,
         operand,
@@ -1577,14 +1577,14 @@ void op_pop_de(gbc_system *gbc) {
 }
 
 // 0xD2: JP NC, a16 (- - - -)
-void op_jp_nc_a16(gbc_system *gbc, unsigned short operand) {
+void op_jp_nc_a16(gbc_system *gbc, uint16_t operand) {
     if(get_flag(FLAG_CARRY, gbc->cpu->registers->F) == 0) {
         gbc->cpu->registers->PC = operand; 
     }
 }
 
 // 0xD4: CALL NC, a16 (- - - -)
-void op_call_nc_a16(gbc_system *gbc, unsigned short operand) {
+void op_call_nc_a16(gbc_system *gbc, uint16_t operand) {
     if(get_flag(FLAG_CARRY, gbc->cpu->registers->F) == 0) {
         op_call_a16(gbc, operand); 
     }
@@ -1600,7 +1600,7 @@ void op_push_de(gbc_system *gbc) {
 }
 
 // 0xD6: SUB d8 (Z 1 H C)
-void op_sub_d8(gbc_system *gbc, unsigned char operand) {
+void op_sub_d8(gbc_system *gbc, uint8_t operand) {
     gbc->cpu->registers->A = sub_byte(
         gbc->cpu->registers->A, 
         operand, 
@@ -1632,21 +1632,21 @@ void op_reti(gbc_system *gbc) {
 }
 
 // 0xDA: JP C, a16 (- - - -)
-void op_jp_c_a16(gbc_system *gbc, unsigned short operand) {
+void op_jp_c_a16(gbc_system *gbc, uint16_t operand) {
     if(get_flag(FLAG_CARRY, gbc->cpu->registers->F) == 1) {
         gbc->cpu->registers->PC = operand; 
     }
 }
 
 // 0xDC: CALL C, a16 (- - - -)
-void op_call_c_a16(gbc_system *gbc, unsigned short operand) {
+void op_call_c_a16(gbc_system *gbc, uint16_t operand) {
     if(get_flag(FLAG_CARRY, gbc->cpu->registers->F) == 1) {
         op_call_a16(gbc, operand); 
     }
 }
 
 // 0xDE: SBC A, d8 (Z 1 H C)
-void op_sbc_a_d8(gbc_system *gbc, unsigned char operand) {
+void op_sbc_a_d8(gbc_system *gbc, uint8_t operand) {
     gbc->cpu->registers->A = sub_byte_carry(
         gbc->cpu->registers->A,
         operand,
@@ -1665,7 +1665,7 @@ void op_rst_18h(gbc_system *gbc) {
 }
 
 // 0xE0: LDH (a8), A (- - - -)
-void op_ldh_a8p_a(gbc_system *gbc, unsigned char operand) {
+void op_ldh_a8p_a(gbc_system *gbc, uint8_t operand) {
     write_byte(
         gbc, 
         0xFF00 + operand, 
@@ -1702,7 +1702,7 @@ void op_push_hl(gbc_system *gbc) {
 }
 
 // 0xE6: AND d8 (Z 0 1 0)
-void op_and_d8(gbc_system *gbc, unsigned char operand) {
+void op_and_d8(gbc_system *gbc, uint8_t operand) {
     gbc->cpu->registers->A = and(
         gbc->cpu->registers->A, 
         operand, 
@@ -1721,7 +1721,7 @@ void op_rst_20h(gbc_system *gbc) {
 }
 
 // 0xE8: ADD SP, r8 (0 0 H C)
-void op_add_sp_r8(gbc_system *gbc, char operand) {
+void op_add_sp_r8(gbc_system *gbc, int8_t operand) {
     gbc->cpu->registers->SP = add_sp_signed_byte(
         gbc->cpu->registers->SP, 
         operand, 
@@ -1735,7 +1735,7 @@ void op_jp_hlp(gbc_system *gbc) {
 }
 
 // 0xEA: LD (a16), A (- - - -)
-void op_ld_a16p_a(gbc_system *gbc, unsigned short operand) {
+void op_ld_a16p_a(gbc_system *gbc, uint16_t operand) {
     write_byte(
         gbc, 
         operand, 
@@ -1745,7 +1745,7 @@ void op_ld_a16p_a(gbc_system *gbc, unsigned short operand) {
 }
 
 // 0xEE: XOR d8 (Z 0 0 0)
-void op_xor_d8(gbc_system *gbc, unsigned char operand) {
+void op_xor_d8(gbc_system *gbc, uint8_t operand) {
     gbc->cpu->registers->A = xor(
         operand, 
         gbc->cpu->registers->A, 
@@ -1764,7 +1764,7 @@ void op_rst_28h(gbc_system *gbc) {
 }
 
 // 0xF0: LDH A, (a8) (- - - -)
-void op_ldh_a_a8p(gbc_system *gbc, unsigned char operand) {
+void op_ldh_a_a8p(gbc_system *gbc, uint8_t operand) {
     gbc->cpu->registers->A = read_byte(
         gbc, 
         0xFF00 + operand,
@@ -1807,7 +1807,7 @@ void op_push_af(gbc_system *gbc) {
 }
 
 // 0xF6: OR d8 (Z 0 0 0)
-void op_or_d8(gbc_system *gbc, unsigned char operand) {
+void op_or_d8(gbc_system *gbc, uint8_t operand) {
     gbc->cpu->registers->A = or(
         gbc->cpu->registers->A, 
         operand, 
@@ -1826,7 +1826,7 @@ void op_rst_30h(gbc_system *gbc) {
 }
 
 // 0xF8: LD HL, SP+r8 (0 0 H C)
-void op_ld_hl_sppr8(gbc_system *gbc, char operand) {
+void op_ld_hl_sppr8(gbc_system *gbc, int8_t operand) {
     gbc->cpu->registers->HL = add_sp_signed_byte(
         gbc->cpu->registers->SP, 
         operand, 
@@ -1840,7 +1840,7 @@ void op_ld_sp_hl(gbc_system *gbc) {
 }
 
 // 0xFA: LD A, (a16) (- - - -)
-void op_ld_a_a16p(gbc_system *gbc, unsigned short operand) {
+void op_ld_a_a16p(gbc_system *gbc, uint16_t operand) {
     gbc->cpu->registers->A = read_byte(
         gbc, 
         operand,
@@ -1854,7 +1854,7 @@ void op_ei(gbc_system *gbc) {
 }
 
 // 0xFE: CP d8 (Z 1 H C)
-void op_cp_d8(gbc_system *gbc, unsigned char operand) {
+void op_cp_d8(gbc_system *gbc, uint8_t operand) {
     sub_byte(
         gbc->cpu->registers->A, 
         operand, 

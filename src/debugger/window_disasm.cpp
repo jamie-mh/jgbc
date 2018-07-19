@@ -1,5 +1,5 @@
 extern "C" {
-    #include "lxgbc.h"
+    #include "jgbc.h"
     #include "ram.h"
     #include "cpu.h"
     #include "cart.h"
@@ -10,9 +10,9 @@ extern "C" {
 #include "debugger/window_disasm.h"
 #include "imgui_dock/imgui_dock.h"
 
-static void draw_break_selector(gbc_debugger *, unsigned short);
-static unsigned short get_nth_instr_addr(gbc_system *, const unsigned short);
-static unsigned short get_instr_count(gbc_system *, const unsigned short);
+static void draw_break_selector(gbc_debugger *, uint16_t);
+static uint16_t get_nth_instr_addr(gbc_system *, const uint16_t);
+static uint16_t get_instr_count(gbc_system *, const uint16_t);
 
 
 void window_disasm_show(gbc_system *gbc, gbc_debugger *debugger) {
@@ -26,10 +26,10 @@ void window_disasm_show(gbc_system *gbc, gbc_debugger *debugger) {
         static const ImVec4 instr_colour = ImVec4(0.93f, 0.93f, 0.93f, 1.0f);
         static const ImVec4 curr_colour = ImVec4(0.46f, 1.0f, 0.01f, 1.0f);
                 
-        static const unsigned short instr_count = get_instr_count(gbc, WRAMNN_END);
+        static const uint16_t instr_count = get_instr_count(gbc, WRAMNN_END);
 
         ImGuiListClipper clipper(instr_count);
-        unsigned short pointer = 0x0;
+        uint16_t pointer = 0x0;
 
         while(clipper.Step()) {
             pointer = get_nth_instr_addr(gbc, clipper.DisplayStart);
@@ -39,10 +39,10 @@ void window_disasm_show(gbc_system *gbc, gbc_debugger *debugger) {
                 draw_break_selector(debugger, pointer);
                 ImGui::SameLine();
 
-                unsigned char opcode = read_byte(gbc, pointer, false);
+                uint8_t opcode = read_byte(gbc, pointer, false);
 
                 gbc_instruction instr = find_instr(opcode, pointer, gbc);
-                unsigned char length = instr.length;
+                uint8_t length = instr.length;
 
                 ImGui::TextColored(addr_colour, "0x%04X: ", pointer);
                 ImGui::SameLine();
@@ -53,7 +53,7 @@ void window_disasm_show(gbc_system *gbc, gbc_debugger *debugger) {
                 if(length > 1 && opcode != 0xCB) {
 
                     // Read the operand based on the length and increment the pointer
-                    unsigned short operand = 0;
+                    uint16_t operand = 0;
                     if(length == 2) {
                         operand = read_byte(gbc, pointer + 1, false);
 
@@ -95,7 +95,7 @@ void window_disasm_show(gbc_system *gbc, gbc_debugger *debugger) {
 }
 
 // Draws the breakpoint selectable
-static void draw_break_selector(gbc_debugger *debugger, unsigned short pointer) {
+static void draw_break_selector(gbc_debugger *debugger, uint16_t pointer) {
 
     bool is_breakpoint = (find_breakpoint(pointer, debugger) != nullptr);
 
@@ -111,7 +111,7 @@ static void draw_break_selector(gbc_debugger *debugger, unsigned short pointer) 
 }
 
 // Gets the address in memory of the nth instruction
-static unsigned short get_nth_instr_addr(gbc_system *gbc, const unsigned short n) {
+static uint16_t get_nth_instr_addr(gbc_system *gbc, const uint16_t n) {
 
     for(unsigned int pointer = 0, i = 0; pointer <= 0xFFFF; i++) {
 
@@ -121,7 +121,7 @@ static unsigned short get_nth_instr_addr(gbc_system *gbc, const unsigned short n
             continue;
         }
 
-        const unsigned char opcode = read_byte(gbc, pointer, false);
+        const uint8_t opcode = read_byte(gbc, pointer, false);
         const gbc_instruction instr = find_instr(opcode, pointer, gbc);
 
         if(i >= n) {
@@ -135,9 +135,9 @@ static unsigned short get_nth_instr_addr(gbc_system *gbc, const unsigned short n
 }
 
 // Gets the number of instructions from the start of memory to the limit
-static unsigned short get_instr_count(gbc_system *gbc, const unsigned short limit_addr) {
+static uint16_t get_instr_count(gbc_system *gbc, const uint16_t limit_addr) {
 
-    unsigned short count = 0;
+    uint16_t count = 0;
 
     // Don't interpret the header as instructions
     for(unsigned int pointer = 0; pointer <= limit_addr;) {
@@ -147,7 +147,7 @@ static unsigned short get_instr_count(gbc_system *gbc, const unsigned short limi
             continue;
         }
 
-        const unsigned char opcode = read_byte(gbc, pointer, false);
+        const uint8_t opcode = read_byte(gbc, pointer, false);
         const gbc_instruction instr = find_instr(opcode, pointer, gbc);
         count++;
 

@@ -1,10 +1,10 @@
-#include "lxgbc.h"
+#include "jgbc.h"
 #include "ram.h"
 #include "cpu.h"
 #include "mbc.h"
 #include "cart.h"
 #include "ppu.h"
-#include "sound.h"
+#include "apu.h"
 #include "input.h"
 #include "emu.h"
 
@@ -32,8 +32,8 @@ int main(int argc, char **argv) {
     write_byte(gbc, 0xff50, 1, false);
 
     SDL_Event event;
-    static const unsigned int max_clocks = CLOCK_SPEED / FRAMERATE;
-    unsigned int frame_clocks = 0;
+    static const uint32_t max_clocks = CLOCK_SPEED / FRAMERATE;
+    uint32_t frame_clocks = 0;
 
     // Main endless loop 
     while(gbc->is_running) {

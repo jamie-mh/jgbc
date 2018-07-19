@@ -8,7 +8,7 @@
 
 
 typedef struct gbc_breakpoint {
-    unsigned int address;
+    uint16_t address;
     struct gbc_breakpoint *next;
 } gbc_breakpoint;
 
@@ -16,16 +16,15 @@ typedef struct gbc_debugger {
     SDL_Window *window;
     SDL_GLContext gl_context;
 
-    unsigned short next_addr;
-
+    uint16_t next_addr;
     bool is_paused;
     bool modal_rom_open;
     
     gbc_breakpoint *breakpoint_head;
-    unsigned long long clocks;
+    uint64_t clocks;
 } gbc_debugger;
 
 
-bool add_breakpoint(const unsigned int, gbc_debugger *);
-bool remove_breakpoint(const unsigned int, gbc_debugger *);
-gbc_breakpoint *find_breakpoint(const unsigned int, gbc_debugger *);
+bool add_breakpoint(const uint16_t, gbc_debugger *);
+bool remove_breakpoint(const uint16_t, gbc_debugger *);
+gbc_breakpoint *find_breakpoint(const uint16_t, gbc_debugger *);

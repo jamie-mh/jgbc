@@ -1,5 +1,5 @@
 extern "C" {
-    #include "lxgbc.h"
+    #include "jgbc.h"
     #include "cpu.h"
 }
 

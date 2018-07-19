@@ -1,5 +1,5 @@
 extern "C" {
-    #include "lxgbc.h"
+    #include "jgbc.h"
     #include "cpu.h"
 }
 
@@ -14,7 +14,7 @@ void menu_show(gbc_system *gbc, gbc_debugger *debugger) {
 
     if(ImGui::BeginMenuBar()) {
 
-        if(ImGui::BeginMenu("LXGBC")) {
+        if(ImGui::BeginMenu("jgbc")) {
             if(ImGui::MenuItem("Open")) {
 
             }

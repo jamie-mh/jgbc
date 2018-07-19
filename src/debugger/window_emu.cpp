@@ -1,5 +1,5 @@
 extern "C" {
-    #include "lxgbc.h"
+    #include "jgbc.h"
     #include "ppu.h"
 }
 
@@ -16,9 +16,9 @@ void window_emu_show(gbc_system *gbc) {
         ImDrawList *draw_list = ImGui::GetWindowDrawList();
         ImVec2 pos = ImGui::GetWindowPos();
 
-        unsigned int buf_offset;
-        for(int x = 0; x < SCREEN_WIDTH; x++) {
-            for(int y = 0; y < SCREEN_HEIGHT; y++) {
+        uint32_t buf_offset;
+        for(uint8_t x = 0; x < SCREEN_WIDTH; x++) {
+            for(uint8_t y = 0; y < SCREEN_HEIGHT; y++) {
 
                 buf_offset = (x * 3) + (y * SCREEN_WIDTH * 3);
                 

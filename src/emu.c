@@ -1,4 +1,4 @@
-#include "lxgbc.h"
+#include "jgbc.h"
 #include "ram.h"
 #include "ppu.h"
 #include "cart.h"
@@ -41,12 +41,12 @@ void set_window_title(SDL_Window *window, const char *game_title, const bool deb
     char *title;
 
     if(debugger) {
-        const unsigned char len = TITLE_LENGTH + strlen(MAIN_WINDOW_TITLE " -  (DEBUGGER)") + 1;
+        const size_t len = TITLE_LENGTH + strlen(MAIN_WINDOW_TITLE " -  (DEBUGGER)") + 1;
         title = malloc(sizeof(char) * len);
 
         snprintf(title, len, "(DEBUGGER) %s - %s", MAIN_WINDOW_TITLE, game_title);
     } else {
-        const unsigned char len = TITLE_LENGTH + strlen(MAIN_WINDOW_TITLE " - ") + 1;
+        const size_t len = TITLE_LENGTH + strlen(MAIN_WINDOW_TITLE " - ") + 1;
         title = malloc(sizeof(char) * len);
 
         snprintf(title, len, "%s - %s", MAIN_WINDOW_TITLE, game_title);

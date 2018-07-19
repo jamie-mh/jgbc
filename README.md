@@ -1,28 +1,31 @@
-# LXGBC: GameBoy (Color) Emulator
+# jgbc: GameBoy (Color) Emulator
 
 **License: MIT**
 
-A GameBoy and GameBoy Color emulator. Written in C/C++ with SDL2.
+A fast and semi-accurate GameBoy (Color) emulator for Windows, macOS And Linux.
+Written in C/C++ with SDL2.
 
 - Compiled and tested on Fedora 28 with gcc 8.1.1.
 - Compiled and tested on Ubuntu 16.04 LTS with gcc 5.4.0.
+- Compiled and tested on Windows 10 with Visual Studio 2017.
 
-![Debugger](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/debugger.png)
+![Debugger](https://raw.githubusercontent.com/jamie-mh/jgbc/master/doc/debugger.png)
 
 ### Screenshots
 
-![Zelda](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/zelda.png)
-![Tetris](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/tetris.png)
-![Tetris DX](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/tetrisdx.png)
-![Dr Mario](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/drmario.png)
-![Super Mario Land 1](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/mario1.png)
-![Super Mario Land 2](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/mario2.png)
-![Super Mario Land 3](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/mario3.png)
-![Kirby's Dream Land](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/kirby.png)
-![Metroid II](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/metroid.png)
-![Donkey Kong Land](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/donkeykong.png)
-![Tennis](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/tennis.png)
-![CPU test](https://raw.githubusercontent.com/jamie-mh/lxgbc/master/doc/cpuinstr.png)
+![Zelda](https://raw.githubusercontent.com/jamie-mh/jgbc/master/doc/zelda.png)
+![Tetris](https://raw.githubusercontent.com/jamie-mh/jgbc/master/doc/tetris.png)
+![Dr Mario](https://raw.githubusercontent.com/jamie-mh/jgbc/master/doc/drmario.png)
+![Pokemon Blue](https://raw.githubusercontent.com/jamie-mh/jgbc/master/doc/pokemonblue.png)
+![Super Mario Land 1](https://raw.githubusercontent.com/jamie-mh/jgbc/master/doc/mario1.png)
+![Super Mario Land 2](https://raw.githubusercontent.com/jamie-mh/jgbc/master/doc/mario2.png)
+![Super Mario Land 3](https://raw.githubusercontent.com/jamie-mh/jgbc/master/doc/mario3.png)
+![Kirby's Dream Land](https://raw.githubusercontent.com/jamie-mh/jgbc/master/doc/kirby.png)
+![Metroid II](https://raw.githubusercontent.com/jamie-mh/jgbc/master/doc/metroid.png)
+![Donkey Kong Land](https://raw.githubusercontent.com/jamie-mh/jgbc/master/doc/donkeykong.png)
+![Tennis](https://raw.githubusercontent.com/jamie-mh/jgbc/master/doc/tennis.png)
+![Pinball Deluxe](https://raw.githubusercontent.com/jamie-mh/jgbc/master/doc/pinballdeluxe.png)
+![CPU test](https://raw.githubusercontent.com/jamie-mh/jgbc/master/doc/cpuinstr.png)
 
 ### Project Status
 
@@ -83,8 +86,8 @@ sudo dnf install SDL2-devel cmake
 Compile the program with these commands.
 
 ```
-git clone https://github.com/jamie-mh/lxgbc
-cd lxgbc
+git clone https://github.com/jamie-mh/jgbc
+cd jgbc
 cmake CMakeLists.txt
 make
 ```
@@ -92,7 +95,7 @@ make
 To run it, just specify some arguments.
 
 ```
-./bin/lxgbc (path to rom)
+./bin/jgbc (path to rom)
 ```
 
 Roms are not included in the repository, steal them if you want, not like I advocate that or anything (pls nintendo no sue).
@@ -103,11 +106,11 @@ Don't try and run anything other than GB roms, it will crash (duh).
 ##### Example: Playing Tetris
 
 ```
-./bin/lxgbc roms/Tetris.gb
+./bin/jgbc roms/Tetris.gb
 ```
 
 ### Using the debugger
 
-You can launch the debugger by running the ``` lxgbc_debugger ``` executable in the ``` bin ``` directory.
+You can launch the debugger by running the ``` jgbc_debugger ``` executable in the ``` bin ``` directory.
 
 #### WIP
