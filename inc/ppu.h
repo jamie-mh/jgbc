@@ -74,5 +74,5 @@
 void init_ppu(gbc_ppu *);
 void init_window(gbc_ppu *);
 
-void update_ppu(gbc_system *);
+void update_ppu(gbc_system *, uint8_t);
 void render_to_window(gbc_ppu *);

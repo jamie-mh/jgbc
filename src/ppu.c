@@ -41,10 +41,6 @@ void init_window(gbc_ppu *ppu) {
         SDL_WINDOW_SHOWN
     );
 
-    SDL_DisplayMode mode;
-    mode.refresh_rate = FRAMERATE;
-    SDL_SetWindowDisplayMode(ppu->window, &mode);
-
     ppu->renderer = SDL_CreateRenderer(
         ppu->window,
         -1,
@@ -64,7 +60,7 @@ void init_window(gbc_ppu *ppu) {
 }
 
 // Renders the picture on the screen scanline by scanline
-void update_ppu(gbc_system *gbc) {
+void update_ppu(gbc_system *gbc, uint8_t clocks) {
 
     const bool lcd_on = read_register(gbc, LCDC, LCDC_LCD_ENABLE);
     uint8_t ly_val = read_byte(gbc, LY, false);
@@ -82,7 +78,7 @@ void update_ppu(gbc_system *gbc) {
         gbc->ppu->sprite_buffer = get_sprites(gbc); 
     }
 
-    gbc->ppu->scan_clock += gbc->clocks;
+    gbc->ppu->scan_clock += clocks;
 
     if(gbc->ppu->scan_clock >= CLOCKS_PER_SCANLINE) { 
 

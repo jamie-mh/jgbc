@@ -70,24 +70,29 @@ int main(int argc, char **argv) {
 
     SDL_Event event;
     static const unsigned int max_clocks = CLOCK_SPEED / FRAMERATE;
+	uint32_t frame_clocks = 0;
+	uint8_t clocks;
 
     while(gbc->is_running) {
 
-        uint32_t frame_clocks = 0;
+		frame_clocks = 0;
 
         // Run the clocks for this frame
         while(!debugger->is_paused && frame_clocks < max_clocks) {
 
-            gbc->clocks = 0;
+			if(!gbc->cpu->is_halted) {
+				clocks = execute_instr(gbc);
+			} else {
+				clocks = 4;
+			}
 
-            execute_instr(gbc);                
             check_interrupts(gbc);
 
-            update_timer(gbc);
-            update_ppu(gbc);
+            update_timer(gbc, clocks);
+            update_ppu(gbc, clocks);
 
-            frame_clocks += gbc->clocks;
-            debugger->clocks += gbc->clocks;
+            frame_clocks += clocks;
+            debugger->clocks += clocks;
 
             if(find_breakpoint(gbc->cpu->registers->PC, debugger) != nullptr) {
                 debugger->is_paused = true;

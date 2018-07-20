@@ -21,13 +21,10 @@ void init_cpu(gbc_cpu *cpu) {
     cpu->registers->PC = DEFAULT_PC;
     cpu->registers->SP = DEFAULT_SP;
 
-    // Enable interrupts
     cpu->registers->IME = false;
     cpu->is_halted = false;
-
-    // Reset the timers
-    cpu->div_clock = 0;
-    cpu->cnt_clock = 0;
+	cpu->timer = 0;
+	cpu->timer_overflow_time = 0;
 }
 
 // Returns an instruction struct of the provided opcode
@@ -45,12 +42,7 @@ gbc_instruction find_instr(const uint8_t opcode, const uint16_t address, gbc_sys
 }
 
 // Executes an instruction by calling the function associated with it and returns the cycles it took
-void execute_instr(gbc_system *gbc) {
-
-    if(gbc->cpu->is_halted) {
-        gbc->clocks += 4;
-        return;
-    }
+uint8_t execute_instr(gbc_system *gbc) {
 
     gbc_instruction instruction = get_curr_instr(gbc);
 
@@ -85,7 +77,7 @@ void execute_instr(gbc_system *gbc) {
             break;
     }
 
-    gbc->clocks += instruction.clocks;
+    return instruction.clocks;
 }
 
 // Gets the current instruction at the program counter
@@ -206,58 +198,57 @@ static void service_interrupt(gbc_system *gbc, const uint8_t number) {
 }
 
 // Updates the timer if they are enabled and requests interrupts
-void update_timer(gbc_system *gbc) {
+void update_timer(gbc_system *gbc, uint8_t clocks) {
 
-    gbc->cpu->div_clock += gbc->clocks;
+	static uint8_t old_result = 0;
 
-    // The divider register updates at one 256th of the clock speed (aka 256 clocks)
-    // Reset the clock and update the register
-    while(gbc->cpu->div_clock >= 256) {
+	// See: http://gbdev.gg8.se/wiki/articles/Timer_Obscure_Behaviour
 
-        // Increment the register (don't care if it overflows)
-        const uint8_t curr_div = read_byte(gbc, DIV, false);
-        write_byte(gbc, DIV, curr_div + 1, false);
+	// When the timer overflows, TIMA is set to 0 for 4 clocks.
+	// Then an interrupt is called
+	if(gbc->cpu->timer_overflow_time > 0) {
+		gbc->cpu->timer_overflow_time = 0;
 
-        gbc->cpu->div_clock -= 256;
-    }
+		if(read_byte(gbc, TIMA, false) == 0x00) {
+			write_byte(gbc, TIMA, read_byte(gbc, TMA, false), false);
+			write_register(gbc, IF, IEF_TIMER, 1);
+		}
+	}
 
-    // The timer counter updates at the rate given in the control register
-    // Although unlike the divider, it must be enabled in the control register
-    // (0 == Stopped) (1 == Running)
-    if(read_register(gbc, TAC, TAC_STOP) == 1) {
+	// Emulate the timer multiplexer
+	const uint8_t frequency_id = read_byte(gbc, TAC, false) & 0x3;
+	uint8_t timer_bit;
 
-        gbc->cpu->cnt_clock += gbc->clocks;
+	switch(frequency_id) {
+		case 0: timer_bit = 9; break;
+		case 1: timer_bit = 3; break;
+		case 2: timer_bit = 5; break;
+		case 3: timer_bit = 7; break;
+	}
 
-        // Get the speed to update the timer at
-        const uint8_t speed_index = read_byte(gbc, TAC, false) & 0x3;
+	for(uint8_t i = 0; i <= clocks; i++) {
 
-        // Get the array of possible tick to clock ratios
-        static const uint16_t timer_thresholds[4] = {
-            CLOCK_SPEED / 4096,
-            CLOCK_SPEED / 262144,
-            CLOCK_SPEED / 65536,
-            CLOCK_SPEED / 16384
-        };
+		const uint16_t timer = gbc->cpu->timer + i;
+		const uint8_t mu_output = GET_BIT(timer, timer_bit);
+		const uint8_t result = mu_output & read_register(gbc, TAC, TAC_STOP);
 
-        const uint16_t threshold = timer_thresholds[speed_index];
+		// Emulate the falling edge detector
+		if(old_result == 1 && result == 0) {
+			uint8_t tima = read_byte(gbc, TIMA, false);
 
-        // If the clock is at the current tick rate
-        if(gbc->cpu->cnt_clock >= threshold) {
+			// If the counter is about to overflow, reset it to the modulo
+			if(tima + 1 == 0x100) {
+				tima = 0;
+				gbc->cpu->timer_overflow_time = gbc->clocks;
+			} else {
+				tima++;
+			}
 
-            const uint8_t curr_cnt = read_byte(gbc, TIMA, false);
-            uint8_t new_cnt;
+			write_byte(gbc, TIMA, tima, false);	
+		}
 
-            // If the counter is about to overflow, reset it to the modulo
-            if(curr_cnt + 1 == 256) {
-                new_cnt = read_byte(gbc, TMA, false);
-                write_register(gbc, IF, IEF_TIMER, 1);
-            } else {
-                new_cnt = curr_cnt + 1;
-            }
+		old_result = result;
+	}
 
-            // Write the new value and reset the clock
-            write_byte(gbc, TIMA, new_cnt, false);
-            gbc->cpu->cnt_clock -= threshold;
-        }
-    }
+	gbc->cpu->timer += clocks;
 }

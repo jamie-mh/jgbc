@@ -127,6 +127,10 @@ uint8_t read_byte(gbc_system *gbc, const uint16_t address, const bool is_program
         return joypad_state(gbc);  
     }
 
+	if(address == DIV) {
+		return (gbc->cpu->timer & 0xFF00) >> 8;
+	}
+
     if(!is_valid_ram(gbc->ram, address)) {
         return 0x0;
     }
@@ -153,6 +157,12 @@ uint16_t read_short(gbc_system *gbc, const uint16_t address, const bool is_progr
 void write_byte(gbc_system *gbc, const uint16_t address, uint8_t value, const bool is_program) {
     mbc_check(gbc, address, value);
 
+    // If the timer divider register is written to, it is reset
+    if(address == DIV) {
+		gbc->cpu->timer = 0;
+		return;
+    }
+
     if(!is_valid_ram(gbc->ram, address)) {
         return;
     }
@@ -171,12 +181,6 @@ void write_byte(gbc_system *gbc, const uint16_t address, uint8_t value, const bo
         DMA_transfer(gbc, value); 
     }
 
-    // If the timer divider register is written to, it is reset
-    // Unless we are forcing the write
-    if(is_program && address == DIV) {
-        value = 0x0;
-    }
-
     // If the vertical line register is written to, it is reset
     if(is_program && address == LY) {
         value = 0x0;
@@ -187,6 +191,11 @@ void write_byte(gbc_system *gbc, const uint16_t address, uint8_t value, const bo
     uint8_t *mem = get_memory_location(gbc, &rel_address);
     
     mem[rel_address] = value;
+
+	if(is_program && address == TAC) {
+		update_timer(gbc, 0);
+		update_timer(gbc, 0);
+	}
 }
 
 // Writes two bytes in memory starting at the address

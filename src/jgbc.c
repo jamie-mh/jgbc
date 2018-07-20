@@ -34,22 +34,26 @@ int main(int argc, char **argv) {
     SDL_Event event;
     static const uint32_t max_clocks = CLOCK_SPEED / FRAMERATE;
     uint32_t frame_clocks = 0;
+	uint8_t instr_clocks = 0;
 
     // Main endless loop 
     while(gbc->is_running) {
 
         // Run the clocks for this frame
         while(frame_clocks < max_clocks) {
+            frame_clocks += instr_clocks;
+			gbc->clocks += instr_clocks;
 
-            gbc->clocks = 0;
+			if(!gbc->cpu->is_halted) {
+				instr_clocks = execute_instr(gbc);
+			} else {
+				instr_clocks = 4;
+			}
 
-            execute_instr(gbc);
             check_interrupts(gbc);
 
-            update_timer(gbc);
-            update_ppu(gbc);
-
-            frame_clocks += gbc->clocks;
+            update_timer(gbc, instr_clocks);
+            update_ppu(gbc, instr_clocks);
         }
 
         frame_clocks -= max_clocks;

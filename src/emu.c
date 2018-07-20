@@ -23,6 +23,9 @@ void init_system(gbc_system *gbc, const char *rom_path) {
     init_ppu(gbc->ppu);
     init_input(gbc->input);
 
+    gbc->is_running = true;
+	gbc->clocks = 0;
+
     if(!load_rom(gbc, rom_path)) {
         fprintf(stderr, "ERROR: Could not load rom file!\n");
         exit(EXIT_FAILURE);
@@ -30,9 +33,6 @@ void init_system(gbc_system *gbc, const char *rom_path) {
 
     write_byte(gbc, LCDC, DEFAULT_LCDC, false);
     write_byte(gbc, IF, DEFAULT_IF, false);
-
-    gbc->is_running = true;
-    gbc->clocks = 0;
 }
 
 // Sets the window title to the game title

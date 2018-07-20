@@ -56,10 +56,11 @@ typedef struct gbc_registers {
 } gbc_registers;
 
 typedef struct gbc_cpu {
-    gbc_registers *registers;
-    uint16_t div_clock; // Divider Timer Clock
-    uint16_t cnt_clock; // Timer Counter Clock
     bool is_halted;
+    gbc_registers *registers;
+
+	uint16_t timer; // Current Timer
+	uint64_t timer_overflow_time; // Clock Time when TIMA overflows
 } gbc_cpu;
 
 typedef struct gbc_sprite {
@@ -125,7 +126,7 @@ typedef struct gbc_input {
 
 typedef struct gbc_system {
     bool is_running;
-    uint8_t clocks;
+	uint64_t clocks;
 
     gbc_cpu *cpu;
     gbc_ppu *ppu;

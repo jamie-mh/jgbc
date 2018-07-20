@@ -61,7 +61,7 @@ typedef struct gbc_instruction {
 
 void init_cpu(gbc_cpu *);
 gbc_instruction find_instr(const uint8_t, const uint16_t, gbc_system *);
-void execute_instr(gbc_system *);
+uint8_t execute_instr(gbc_system *);
 
 void set_flag(const char, const uint8_t, uint8_t *);
 char get_flag(const char, const uint8_t);
@@ -72,4 +72,4 @@ uint8_t stack_pop_byte(gbc_system *, uint16_t *);
 uint16_t stack_pop_short(gbc_system *, uint16_t *);
 
 void check_interrupts(gbc_system *);
-void update_timer(gbc_system *);
+void update_timer(gbc_system *, uint8_t);

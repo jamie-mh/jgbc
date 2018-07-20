@@ -30,8 +30,8 @@ add_executable(
     ${PROJECT_SOURCE_DIR}/ppu.c
     ${PROJECT_SOURCE_DIR}/ram.c
     ${PROJECT_SOURCE_DIR}/cart.c
+	${PROJECT_SOURCE_DIR}/apu.c
 	
-    ${PROJECT_INCLUDE_DIR}/apu.h
 	${PROJECT_INCLUDE_DIR}/alu.h
     ${PROJECT_INCLUDE_DIR}/cpu.h
     ${PROJECT_INCLUDE_DIR}/emu.h
@@ -61,7 +61,6 @@ add_executable(
     ${PROJECT_SOURCE_DIR}/cart.c
     ${PROJECT_SOURCE_DIR}/apu.c
 	
-	${PROJECT_INCLUDE_DIR}/apu.h
 	${PROJECT_INCLUDE_DIR}/alu.h
     ${PROJECT_INCLUDE_DIR}/cpu.h
     ${PROJECT_INCLUDE_DIR}/emu.h
