@@ -2,9 +2,6 @@
 
 #define SCREEN_WIDTH 160
 #define SCREEN_HEIGHT 144
-#define SCREEN_SCALE 4
-#define MAIN_WINDOW_TITLE "jgbc"
-
 #define FRAMERATE 60.0
 #define CLOCKS_PER_SCANLINE 456 
 
@@ -18,8 +15,6 @@
 #define LCDC_OBJ_SIZE 2 // OBJ (Sprite) Size 
 #define LCDC_OBJ_DISPLAY 1 // OBJ (Sprite) Display Enable
 #define LCDC_BG_DISPLAY 0 // BG Display
-
-#define DEFAULT_LCDC 0x91
 
 // STAT: LCDC Status Register
 #define STAT 0xFF41
@@ -66,13 +61,19 @@
 #define DMA 0xFF46
 
 // GameBoy Monochrome Palette
-#define WHITE 0xFF, 0xFF, 0xFF, 0xFF 
-#define BLACK 0x00, 0x00, 0x00, 0xFF 
-#define LGREY 0xD3, 0xD3, 0xD3, 0xFF 
-#define DGREY 0x80, 0x80, 0x80, 0xFF 
+#define WHITE 0xFF, 0xFF, 0xFF
+#define BLACK 0x00, 0x00, 0x00 
+#define LGREY 0xD3, 0xD3, 0xD3 
+#define DGREY 0x80, 0x80, 0x80 
 
-void init_ppu(gbc_ppu *);
-void init_window(gbc_ppu *);
+typedef struct Colour {
+    uint8_t r, g, b;
+}
+Colour;
 
-void update_ppu(gbc_system *, uint8_t);
-void render_to_window(gbc_ppu *);
+void init_ppu(GameBoy *gb);
+void use_external_renderer(GameBoy *gb, void(*render_fn)(GameBoy *), Display *display);
+void update_ppu(GameBoy *gb);
+
+int sprite_cmp(const void *a, const void *b);
+void get_sprites(GameBoy *gb);

@@ -9,8 +9,6 @@ Written in C/C++ with SDL2.
 - Compiled and tested on Ubuntu 16.04 LTS with gcc 5.4.0.
 - Compiled and tested on Windows 10 with Visual Studio 2017.
 
-![Debugger](https://raw.githubusercontent.com/jamie-mh/jgbc/master/doc/debugger.png)
-
 ### Screenshots
 
 ![Zelda](https://raw.githubusercontent.com/jamie-mh/jgbc/master/doc/zelda.png)
@@ -33,7 +31,6 @@ Written in C/C++ with SDL2.
 
 - Loading roms (parsing header, etc...)
 - All CPU instructions implemented correctly
-- Disassembly and debugger
 - Background / Window graphics
 - Sprites
 - Interrupts

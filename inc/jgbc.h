@@ -1,23 +1,31 @@
 #pragma once
 
+#ifdef _MSC_VER
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <time.h>
-#include <string.h>
-#include <stdbool.h>
-#include <assert.h>
 #include <stdint.h>
-#include <SDL.h>
+#include <stdbool.h>
+#include <string.h>
+#include <assert.h>
 
-#define ROM_PATH_LENGTH 256
-#define GET_BIT(val, i) (((val) >> (i)) & 1)
+#define GET_BIT(data, bit) (((data) >> (bit)) & 1)
+
+typedef struct Registers Registers;
+typedef struct CPU CPU;
+typedef struct Sprite Sprite;
+typedef struct Display Display;
+typedef struct PPU PPU;
+typedef struct MMU MMU;
+typedef struct APU APU;
+typedef struct Cart Cart;
+typedef struct Input Input;
+typedef struct GameBoy GameBoy;
 
 
-typedef struct gbc_registers {
-
-    // Combined register idea thanks to
-    // https://cturt.github.io/cinoop.html
+typedef struct Registers {
     union {
         struct {
             uint8_t F;
@@ -50,70 +58,72 @@ typedef struct gbc_registers {
         uint16_t HL;
     };
 
-    uint16_t PC; // Program Counter
-    uint16_t SP; // Stack Pointer
-    bool IME; // Interrupt Master Enable
-} gbc_registers;
+    uint16_t PC;
+    uint16_t SP;
+    bool IME;
+}
+Registers;
 
-typedef struct gbc_cpu {
+typedef struct CPU {
     bool is_halted;
-    gbc_registers *registers;
+    Registers reg;
+    uint8_t ticks;
 
-	uint16_t timer; // Current Timer
-	uint64_t timer_overflow_time; // Clock Time when TIMA overflows
-} gbc_cpu;
+    uint16_t timer;
+    bool timer_overflow;
+}
+CPU;
 
-typedef struct gbc_sprite {
+typedef struct Sprite {
     uint8_t y;
     uint8_t x;
     uint8_t tile;
     uint8_t attributes;
-} gbc_sprite;
+}
+Sprite;
 
-typedef struct gbc_ppu {
-    SDL_Window *window;
-    SDL_Renderer *renderer;
-    SDL_Texture *texture;
+typedef struct PPU {
     uint8_t *framebuffer;
+    Sprite sprite_buffer[40];
     uint16_t scan_clock;
     uint16_t frame_clock;
-    gbc_sprite *sprite_buffer; // Only fetch the sprites once per frame    
-} gbc_ppu;
 
-typedef struct gbc_ram {
-    uint8_t *bootrom;
-    uint8_t *rom00; // 16KB ROM Bank
-    uint8_t *romNN; // 16KB Switchable ROM Bank
-    uint8_t *vram; // 8KB Video RAM
-    uint8_t *extram; // 8KB External Ram (cartridge)
-    uint8_t *wram00; // 4KB Work RAM bank 0
-    uint8_t *wramNN; // 4KB Work RAM bank 1-7 (switchable) 
-    uint8_t *oam; // 1.59KB Sprite Attribute Table
-    uint8_t *io; // 128B IO Ports
-    uint8_t *hram; // 128B High RAM
-    uint8_t *ier; // 1B Interrupt Enable Register
+    void (*render_fn)(GameBoy *);
+    Display *display;
+}
+PPU;
 
-    uint8_t **wram_banks; // 8x4KB WRAM Banks (CGB Only)
-} gbc_ram;
+typedef struct MMU {
+    uint8_t *ram;
+    uint8_t rom_bank;
+    uint8_t ram_bank;
+    uint8_t wram_bank;
+    uint8_t vram_bank;
 
-typedef struct gbc_cart {
-    char *title; // Uppercase ASCII Game Name
-    uint8_t cgb_flag; // Color Support Flag
-    uint8_t type; // Cartridge Type Code
-    uint8_t mbc_type; // MBC Type (1, 2, 3)
-    uint8_t rom_size; // Number of ROM banks
-    uint8_t ram_size; // Number of EXT RAM banks
-    uint8_t dest_code; // Destination Code (0: Japan, 1: World)
-    uint8_t ver_no; // ROM Version Number
+    uint8_t **vram_banks;
+    uint8_t **wram_banks;
+}
+MMU;
 
-    uint8_t curr_rom_bank;
-    uint8_t curr_ram_bank;
+typedef struct APU {
+    bool enabled;
+}
+APU;
+
+typedef struct Cart {
+    char title[17]; // Uppercase ASCII Game Name
+    uint8_t gbc_flag; // Color Support Flag
+    uint8_t type;
+    uint8_t mbc_type;
+    uint8_t rom_size;
+    uint8_t ram_size;
 
     uint8_t **rom_banks;
     uint8_t **ram_banks;
-} gbc_cart;
+}
+Cart;
 
-typedef struct gbc_input {
+typedef struct Input {
     bool up;
     bool right;
     bool down;
@@ -122,15 +132,21 @@ typedef struct gbc_input {
     bool select;
     bool a;
     bool b;
-} gbc_input;
+}
+Input;
 
-typedef struct gbc_system {
+typedef struct GameBoy {
     bool is_running;
-	uint64_t clocks;
+    void (*event_fn)(GameBoy *);
 
-    gbc_cpu *cpu;
-    gbc_ppu *ppu;
-    gbc_ram *ram;
-    gbc_cart *cart;
-    gbc_input *input;
-} gbc_system;
+    CPU cpu;
+    PPU ppu;
+    MMU mmu;
+    APU apu;
+    Cart cart;
+    Input input;
+}
+GameBoy;
+
+void init(GameBoy *gb, void (*event_fn)(GameBoy *));
+void run(GameBoy *gb);

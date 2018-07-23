@@ -3,43 +3,37 @@
 #include "alu.h"
 #include "instr.h"
 
-static bool did_byte_half_carry(uint8_t, uint8_t);
-static bool did_byte_full_carry(uint8_t, uint8_t);
-static bool did_byte_half_borrow(uint8_t, uint8_t);
-static bool did_byte_full_borrow(uint8_t, uint8_t);
-static bool did_short_half_carry(uint16_t, uint16_t);
+static bool did_byte_half_carry(uint8_t a, uint8_t b);
+static bool did_byte_full_carry(uint8_t a, uint8_t b);
+static bool did_byte_half_borrow(uint8_t a, uint8_t b);
+static bool did_byte_full_borrow(uint8_t a, uint8_t b);
+static bool did_short_half_carry(uint16_t a, uint16_t b);
 static bool did_short_full_carry(uint16_t a, uint16_t b);
 
 /*
 *   Helper Functions
 */
 
-// Checks if a byte operation resulted in a half-carry
 static bool did_byte_half_carry(uint8_t a, uint8_t b) {
     return ((a & 0xF) + (b & 0xF)) > 0xF;
 }
 
-// Checks if a byte operation resulted in a half-borrow
 static bool did_byte_half_borrow(uint8_t a, uint8_t b) {
     return ((a & 0xF) < (b & 0xF));
 }
 
-// Checks if a byte operation resulted in a full carry
 static bool did_byte_full_carry(uint8_t a, uint8_t b) {
     return (a + b) > 0xFF;
 }
 
-// Checks if a byte operation resulted in a full borrow
 static bool did_byte_full_borrow(uint8_t a, uint8_t b) {
     return (a < b);
 }
 
-// Checks if a short operation resulted in a half-carry
 static bool did_short_half_carry(uint16_t a, uint16_t b) {
     return (a & 0xFFF) + (b & 0xFFF) > 0xFFF;
 }
 
-// Checks if a short operation resulted in a full carry
 static bool did_short_full_carry(uint16_t a, uint16_t b) {
     return ((a + b) & 0xF0000) > 0;
 }
@@ -48,7 +42,6 @@ static bool did_short_full_carry(uint16_t a, uint16_t b) {
 *   Instruction ALU
 */
 
-// Bitwise AND of a and b
 uint8_t and(const uint8_t a, const uint8_t b, uint8_t *flag) {
     
     const uint8_t result = a & b;
@@ -66,7 +59,6 @@ uint8_t and(const uint8_t a, const uint8_t b, uint8_t *flag) {
     return result;
 }
 
-// Bitwise OR of a and b
 uint8_t or(const uint8_t a, const uint8_t b, uint8_t *flag) {
 
     const uint8_t result = a | b;
@@ -84,7 +76,6 @@ uint8_t or(const uint8_t a, const uint8_t b, uint8_t *flag) {
     return result;
 }
 
-// Bitwise XOR of a and b
 uint8_t xor(const uint8_t a, const uint8_t b, uint8_t *flag) {
     
     const uint8_t result = a ^ b;
@@ -102,7 +93,6 @@ uint8_t xor(const uint8_t a, const uint8_t b, uint8_t *flag) {
     return result;
 }
 
-// Increment byte
 uint8_t inc(const uint8_t operand, uint8_t *flag) {
 
     const uint8_t result = operand + 1;
@@ -115,7 +105,6 @@ uint8_t inc(const uint8_t operand, uint8_t *flag) {
     
     set_flag(FLAG_SUBTRACT, 0, flag);
 
-    // Carry from bit 3 to 4
     if(did_byte_half_carry(operand, 1)) {
         set_flag(FLAG_HALFCARRY, 1, flag);
     } else {
@@ -125,7 +114,6 @@ uint8_t inc(const uint8_t operand, uint8_t *flag) {
     return result;
 }
 
-// Decrement byte
 uint8_t dec(const uint8_t operand, uint8_t *flag) {
 
     const uint8_t result = operand - 1;
@@ -138,7 +126,6 @@ uint8_t dec(const uint8_t operand, uint8_t *flag) {
 
     set_flag(FLAG_SUBTRACT, 1, flag);
 
-    // Borrow from bit 4 to 3
     if(did_byte_half_borrow(operand, 1)) {
         set_flag(FLAG_HALFCARRY, 1, flag);
     } else {
@@ -148,7 +135,6 @@ uint8_t dec(const uint8_t operand, uint8_t *flag) {
     return result;
 }
 
-// Add two bytes and return a byte
 uint8_t add_byte(const uint8_t a, const uint8_t b, uint8_t *flag) {
     
     const uint8_t result = a + b;
@@ -161,14 +147,12 @@ uint8_t add_byte(const uint8_t a, const uint8_t b, uint8_t *flag) {
 
     set_flag(FLAG_SUBTRACT, 0, flag);
 
-    // Check for a carry from bit 3 to 4
     if(did_byte_half_carry(a, b)) {
         set_flag(FLAG_HALFCARRY, 1, flag); 
     } else {
         set_flag(FLAG_HALFCARRY, 0, flag); 
     }
 
-    // Check for carry
     if(did_byte_full_carry(a, b)) {
         set_flag(FLAG_CARRY, 1, flag);
     } else {
@@ -178,7 +162,6 @@ uint8_t add_byte(const uint8_t a, const uint8_t b, uint8_t *flag) {
     return result;
 }
 
-// Add two bytes with the carry flag and return a byte
 uint8_t add_byte_carry(const uint8_t a, const uint8_t b, uint8_t *flag) {
 
     const uint8_t carry = get_flag(FLAG_CARRY, *flag);
@@ -207,7 +190,6 @@ uint8_t add_byte_carry(const uint8_t a, const uint8_t b, uint8_t *flag) {
     return result;
 }
 
-// Subtract two bytes and return a byte
 uint8_t sub_byte(const uint8_t a, const uint8_t b, uint8_t *flag) {
 
     const uint8_t result = a - b;
@@ -220,14 +202,12 @@ uint8_t sub_byte(const uint8_t a, const uint8_t b, uint8_t *flag) {
 
     set_flag(FLAG_SUBTRACT, 1, flag);
 
-    // Borrow from bit 4 to 3
     if(did_byte_half_borrow(a, b)) {
         set_flag(FLAG_HALFCARRY, 1, flag);
     } else {
         set_flag(FLAG_HALFCARRY, 0, flag);
     }
 
-    // If the result underflows a byte
     if(did_byte_full_borrow(a, b)) {
         set_flag(FLAG_CARRY, 1, flag);
     } else {
@@ -237,7 +217,6 @@ uint8_t sub_byte(const uint8_t a, const uint8_t b, uint8_t *flag) {
     return result;
 }
 
-// Subtract two bytes, the carry flag and return a byte
 uint8_t sub_byte_carry(const uint8_t a, const uint8_t b, uint8_t *flag) {
 
     const uint8_t carry = get_flag(FLAG_CARRY, *flag);
@@ -251,14 +230,12 @@ uint8_t sub_byte_carry(const uint8_t a, const uint8_t b, uint8_t *flag) {
 
     set_flag(FLAG_SUBTRACT, 1, flag);
 
-    // Borrow from bit 4 to 3
     if(did_byte_half_borrow(a, carry) || did_byte_half_borrow(a - carry, b)) {
         set_flag(FLAG_HALFCARRY, 1, flag);
     } else {
         set_flag(FLAG_HALFCARRY, 0, flag);
     }
 
-    // If the result underflows a byte
     if(did_byte_full_borrow(a, carry) || did_byte_full_borrow(a - carry, b)) {
         set_flag(FLAG_CARRY, 1, flag);
     } else {
@@ -268,21 +245,18 @@ uint8_t sub_byte_carry(const uint8_t a, const uint8_t b, uint8_t *flag) {
     return result;
 }
 
-// Add two 16 bit numbers
 uint16_t add_short(const uint16_t a, const uint16_t b, uint8_t *flag) {
     
     const uint16_t result = a + b;
 
     set_flag(FLAG_SUBTRACT, 0, flag);
 
-    // Carry from bit 11 to 12
     if(did_short_half_carry(a, b)) {
         set_flag(FLAG_HALFCARRY, 1, flag); 
     } else {
         set_flag(FLAG_HALFCARRY, 0, flag); 
     }
 
-    // Result overflows a 16 bit integer
     if(did_short_full_carry(a, b)) {
         set_flag(FLAG_CARRY, 1, flag);
     } else {
@@ -463,7 +437,6 @@ uint8_t shift_right_logic(const uint8_t operand, uint8_t *flag) {
 // Swap the top and bottom nibbles of the operand
 uint8_t swap(const uint8_t operand, uint8_t *flag) {
 
-    // Swap the top and bottom halves
     const uint8_t result = ((operand & 0xF0) >> 4) | ((operand & 0x0F) << 4);
     
     if(result == 0) {
@@ -479,11 +452,9 @@ uint8_t swap(const uint8_t operand, uint8_t *flag) {
     return result;
 }
 
-// Test if a bit is set (modifies zero flag)
 void test_bit(const uint8_t regis, const uint8_t bit, uint8_t *flag) {
 
-    // Read the nth bit
-    const uint8_t bit_val = (regis >> bit) & 1;
+    const uint8_t bit_val = GET_BIT(regis, bit);
 
     if(bit_val == 0) {
         set_flag(FLAG_ZERO, 1, flag);
@@ -495,18 +466,14 @@ void test_bit(const uint8_t regis, const uint8_t bit, uint8_t *flag) {
     set_flag(FLAG_HALFCARRY, 1, flag);
 }
 
-// Sets a bit to 0
 uint8_t reset_bit(const uint8_t regis, const uint8_t bit) {
-
     uint8_t result = regis;
     result &= ~(1 << bit);
 
     return result;
 }
 
-// Sets a bit to 1
 uint8_t set_bit(const uint8_t regis, const uint8_t bit) {
-
     uint8_t result = regis;
     result |= (1 << bit);
 

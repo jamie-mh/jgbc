@@ -1,19 +1,23 @@
 #pragma once
 
-// Default Register Values (Original GameBoy)
-#define DEFAULT_PC 0x0
-#define PROGRAM_START 0x100
-#define DEFAULT_SP 0xFFFE
-#define DEFAULT_AF 0x1B0
-#define DEFAULT_BC 0x13
-#define DEFAULT_DE 0xD8
-#define DEFAULT_HL 0x14D
+#define CPU_STEP 4
 
-// F Register Flags
-#define FLAG_ZERO 'Z'
-#define FLAG_SUBTRACT 'N'
-#define FLAG_HALFCARRY 'H'
-#define FLAG_CARRY 'C'
+// Shortcut Macros
+#define TICK(T) gb->cpu.ticks += CPU_STEP * T
+#define REG(N) gb->cpu.reg.N
+
+#define READ8(addr) read_byte(gb, (addr), true)
+#define WRITE8(addr, value) write_byte(gb, (addr), (value), true)
+#define READ16(addr) read_short(gb, (addr), true)
+#define WRITE16(addr, value) write_short(gb, (addr), (value), true)
+
+#define SET_FLAG(flag, value) set_flag(flag, value, &REG(F)) 
+#define GET_FLAG(flag) get_flag(flag, REG(F)) 
+
+#define PUSH8(val) stack_push_byte(gb, &REG(SP), val)
+#define POP8 stack_pop_byte(gb, &REG(SP))
+#define PUSH16(val) stack_push_short(gb, &REG(SP), val)
+#define POP16 stack_pop_short(gb, &REG(SP))
 
 // Interupt Addresses
 #define INT_VBLANK 0x40
@@ -44,32 +48,37 @@
 #define IEF_SERIAL 3
 #define IEF_JOYPAD 4
 
-#define DEFAULT_IF 0xE0
-
 // Instruction Set
 #define INSTRUCTION_COUNT 256
 #define CB_INSTRUCTION_COUNT 256
 
+// F Register Flags
+#define FLAG_ZERO 7 
+#define FLAG_SUBTRACT 6 
+#define FLAG_HALFCARRY 5 
+#define FLAG_CARRY 4 
 
-typedef struct gbc_instruction {
+
+typedef struct {
     char *disassembly;
     uint8_t length;
-    uint8_t clocks;
     bool signed_operand;
+    bool extended;
     void *execute;
-} gbc_instruction;
+} 
+Instruction;
 
-void init_cpu(gbc_cpu *);
-gbc_instruction find_instr(const uint8_t, const uint16_t, gbc_system *);
-uint8_t execute_instr(gbc_system *);
+void init_cpu(GameBoy *gb);
+Instruction find_instr(GameBoy *gb, const uint16_t address);
+void execute_instr(GameBoy *);
 
-void set_flag(const char, const uint8_t, uint8_t *);
-char get_flag(const char, const uint8_t);
+void stack_push_byte(GameBoy *gb, uint16_t *sp, const uint8_t value);
+void stack_push_short(GameBoy *gb, uint16_t *sp, const uint16_t value);
+uint8_t stack_pop_byte(GameBoy *gb, uint16_t *sp);
+uint16_t stack_pop_short(GameBoy *gb, uint16_t *sp);
 
-void stack_push_byte(gbc_system *, uint16_t *, const uint8_t);
-void stack_push_short(gbc_system *, uint16_t *, const uint16_t);
-uint8_t stack_pop_byte(gbc_system *, uint16_t *);
-uint16_t stack_pop_short(gbc_system *, uint16_t *);
+void set_flag(const uint8_t flag, const uint8_t value, uint8_t *regis);
+uint8_t get_flag(const uint8_t flag, const uint8_t regis);
 
-void check_interrupts(gbc_system *);
-void update_timer(gbc_system *, uint8_t);
+void check_interrupts(GameBoy *gb);
+void update_timer(GameBoy *gb);

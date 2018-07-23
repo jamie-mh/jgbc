@@ -1,94 +1,59 @@
 #include "jgbc.h"
-#include "ram.h"
-#include "cpu.h"
-#include "mbc.h"
-#include "cart.h"
 #include "ppu.h"
-#include "apu.h"
 #include "input.h"
-#include "emu.h"
+#include "cpu.h"
+#include "mmu.h"
 
-static void handle_event(SDL_Event, gbc_system *);
-static void print_rom_info(gbc_cart *);
+static void init_hw_registers(GameBoy *gb);
 
 
-int main(int argc, char **argv) {
+void init(GameBoy *gb, void (*event_fn)(GameBoy *)) {
+    init_cpu(gb);
+    init_mmu(gb);
+    init_ppu(gb);
+    init_input(gb);
+    init_hw_registers(gb);
 
-    gbc_system *gbc = malloc(sizeof(gbc_system));
-
-    if(argc != 2) {
-        fprintf(stderr, "ERROR: Please specify a rom file\n");
-        return EXIT_FAILURE; 
-    }
-
-    init_system(gbc, argv[1]);
-    init_window(gbc->ppu);
-
-    set_window_title(gbc->ppu->window, gbc->cart->title, false);
-    print_rom_info(gbc->cart);
-
-    // TEMP: skip logo
-    gbc->cpu->registers->PC = 0x100;
-    write_byte(gbc, 0xff50, 1, false);
-
-    SDL_Event event;
-    static const uint32_t max_clocks = CLOCK_SPEED / FRAMERATE;
-    uint32_t frame_clocks = 0;
-	uint8_t instr_clocks = 0;
-
-    // Main endless loop 
-    while(gbc->is_running) {
-
-        // Run the clocks for this frame
-        while(frame_clocks < max_clocks) {
-            frame_clocks += instr_clocks;
-			gbc->clocks += instr_clocks;
-
-			if(!gbc->cpu->is_halted) {
-				instr_clocks = execute_instr(gbc);
-			} else {
-				instr_clocks = 4;
-			}
-
-            check_interrupts(gbc);
-
-            update_timer(gbc, instr_clocks);
-            update_ppu(gbc, instr_clocks);
-        }
-
-        frame_clocks -= max_clocks;
-
-        while(SDL_PollEvent(&event)) {
-            handle_event(event, gbc);
-        }
-    }
-
-    SDL_Quit();
-    return EXIT_SUCCESS;
+    gb->event_fn = event_fn;
+    gb->is_running = true;
 }
 
-// Handles events from SDL
-static void handle_event(SDL_Event event, gbc_system *gbc) {
+void run(GameBoy *gb) {
 
-    switch(event.type) {
-        case SDL_QUIT:
-            gbc->is_running = 0;
-            break;
+    while(gb->is_running) {
 
-        case SDL_KEYDOWN:
-        case SDL_KEYUP:
-            handle_input(gbc->input, event.key); 
-            break;
+        static const uint32_t max_clocks = CLOCK_SPEED / FRAMERATE;
+        uint32_t frame_ticks = 0;
+
+        while(frame_ticks < max_clocks) {
+            execute_instr(gb);
+            check_interrupts(gb);
+
+            update_timer(gb);
+            update_ppu(gb);
+
+            frame_ticks += gb->cpu.ticks;
+        }
+
+        frame_ticks -= max_clocks;
+        gb->event_fn(gb);
     }
 }
 
-// Prints the rom info to the terminal
-static void print_rom_info(gbc_cart *cart) {
-    printf("Title: %s\n", cart->title);
-    printf("CGB Flag: %02X\n", cart->cgb_flag);
-    printf("Cartridge Type: %02X\n", cart->type);
-    printf("ROM Size: %d x %d KB\n", cart->rom_size, ROM_BANK_SIZE);
-    printf("RAM Size: %d x %d KB\n", cart->ram_size, EXTRAM_BANK_SIZE);
-    printf("Destination Code: %02X\n", cart->dest_code);
-    printf("Version Number: %02X\n\n", cart->ver_no);
+static void init_hw_registers(GameBoy *gb) {
+    SWRITE8(JOYP, 0x1F);
+    SWRITE8(IF, 0xE0);
+    SWRITE8(TIMA, 0x00);
+    SWRITE8(TMA, 0x00);
+    SWRITE8(TAC, 0x00);
+    SWRITE8(LCDC, 0x91);
+    SWRITE8(SCY, 0x00);
+    SWRITE8(SCX, 0x00);
+    SWRITE8(LYC, 0x00);
+    SWRITE8(BGP, 0xFC);
+    SWRITE8(OBP0, 0xFF);
+    SWRITE8(OBP1, 0xFF);
+    SWRITE8(WY, 0x00);
+    SWRITE8(WX, 0x00);
+    SWRITE8(IE, 0x00);
 }
