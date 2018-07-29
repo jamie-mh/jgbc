@@ -22,20 +22,20 @@ void run(GameBoy *gb) {
 
     while(gb->is_running) {
 
-        static const uint32_t max_clocks = CLOCK_SPEED / FRAMERATE;
+        static const uint32_t max_ticks = CLOCK_SPEED / FRAMERATE;
         uint32_t frame_ticks = 0;
 
-        while(frame_ticks < max_clocks) {
+        while(frame_ticks < max_ticks) {
             execute_instr(gb);
-            check_interrupts(gb);
 
             update_timer(gb);
             update_ppu(gb);
 
+            //check_interrupts(gb);
             frame_ticks += gb->cpu.ticks;
         }
 
-        frame_ticks -= max_clocks;
+        frame_ticks -= max_ticks;
         gb->event_fn(gb);
     }
 }

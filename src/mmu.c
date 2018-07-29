@@ -49,10 +49,6 @@ uint8_t read_byte(GameBoy *gb, uint16_t address, const bool is_program) {
         return joypad_state(gb);
     }
 
-	if(address == DIV) {
-		return (gb->cpu.timer & 0xFF00) >> 8;
-	}
-
     if(!is_accessible(gb, address)) {
         return 0xFF;
     }
@@ -75,8 +71,11 @@ void write_byte(GameBoy *gb, uint16_t address, uint8_t value, const bool is_prog
         return;
     }
 
-    if(address == DIV) {
-		gb->cpu.timer = 0;
+    if(is_program && address == DIV) {
+        gb->cpu.div_clock = 0;
+        gb->cpu.cnt_clock = 0;
+
+        value = 0x0;
 		return;
     }
 

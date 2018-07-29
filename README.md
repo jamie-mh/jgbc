@@ -1,6 +1,6 @@
 # jgbc: GameBoy (Color) Emulator
 
-**License: MIT**
+**License: CC BY-NC 3.0**
 
 A fast and semi-accurate GameBoy (Color) emulator for Windows, macOS And Linux.
 Written in C/C++ with SDL2.

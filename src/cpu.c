@@ -18,7 +18,9 @@ void init_cpu(GameBoy *gb) {
     REG(IME) = false;
 
     gb->cpu.is_halted = false;
-	gb->cpu.timer = 0;
+	//gb->cpu.timer = 0;
+    gb->cpu.div_clock = 0;
+    gb->cpu.cnt_clock = 0;
 }
 
 /*
@@ -172,54 +174,49 @@ static void service_interrupt(GameBoy *gb, const uint8_t number) {
 
 void update_timer(GameBoy *gb) {
 
-	static uint8_t old_result = 0;
+    gb->cpu.div_clock += gb->cpu.ticks;
 
-	// See: http://gbdev.gg8.se/wiki/articles/Timer_Obscure_Behaviour
+    // The divider register updates at one 256th of the clock speed (aka 256 clocks)
+    // Reset the clock and update the register
+    if(gb->cpu.div_clock >= 256) {
+        const uint8_t curr_div = read_byte(gb, DIV, false);
+        write_byte(gb, DIV, curr_div + 1, false);
 
-	// When the timer overflows, TIMA is set to 0 for 4 clocks.
-	// Then an interrupt is called
-	if(gb->cpu.timer_overflow) {
-        gb->cpu.timer_overflow = false;
+        gb->cpu.div_clock = 0;
+    }
 
-		if(read_byte(gb, TIMA, false) == 0x00) {
-			write_byte(gb, TIMA, read_byte(gb, TMA, false), false);
-			write_register(gb, IF, IEF_TIMER, 1);
-		}
-	}
+    // The timer counter updates at the rate given in the control register
+    // Although unlike the divider, it must be enabled in the control register
+    // (0 == Stopped) (1 == Running)
+    if(read_register(gb, TAC, TAC_STOP) == 1) {
 
-	// Emulate the timer multiplexer
-	const uint8_t frequency_id = read_byte(gb, TAC, false) & 0x3;
-	uint8_t timer_bit;
+        gb->cpu.cnt_clock += gb->cpu.ticks;
+        const uint8_t speed_index = read_byte(gb, TAC, false) & 0x3;
 
-	switch(frequency_id) {
-		case 0: timer_bit = 9; break;
-		case 1: timer_bit = 3; break;
-		case 2: timer_bit = 5; break;
-		case 3: timer_bit = 7; break;
-	}
+        static const uint16_t timer_thresholds[4] = {
+            CLOCK_SPEED / 4096,
+            CLOCK_SPEED / 262144,
+            CLOCK_SPEED / 65536,
+            CLOCK_SPEED / 16384
+        };
 
-	for(uint8_t i = 0; i <= gb->cpu.ticks; i++) {
+        const uint16_t threshold = timer_thresholds[speed_index];
 
-		const uint16_t timer = gb->cpu.timer + i;
-		const uint8_t mu_output = GET_BIT(timer, timer_bit);
-		const uint8_t result = mu_output & read_register(gb, TAC, TAC_STOP);
+        while(gb->cpu.cnt_clock >= threshold) {
 
-		// Emulate the falling edge detector
-		if(old_result == 1 && result == 0) {
-			uint8_t tima = read_byte(gb, TIMA, false);
+            const uint8_t curr_cnt = read_byte(gb, TIMA, false);
+            uint8_t new_cnt;
 
-			if(tima + 1 == 0x100) {
-				tima = 0;
-                gb->cpu.timer_overflow = true;
-			} else {
-				tima++;
-			}
+            if(curr_cnt + 1 == 256) {
+                new_cnt = read_byte(gb, TMA, false);
+                write_register(gb, IF, IEF_TIMER, 1);
+            }
+            else {
+                new_cnt = curr_cnt + 1;
+            }
 
-			write_byte(gb, TIMA, tima, false);	
-		}
-
-		old_result = result;
-	}
-
-    gb->cpu.timer += gb->cpu.ticks;
+            write_byte(gb, TIMA, new_cnt, false);
+            gb->cpu.cnt_clock -= threshold;
+        }
+    }
 }

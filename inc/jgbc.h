@@ -68,9 +68,8 @@ typedef struct CPU {
     bool is_halted;
     Registers reg;
     uint8_t ticks;
-
-    uint16_t timer;
-    bool timer_overflow;
+    uint16_t div_clock; // Divider Timer Clock
+    uint16_t cnt_clock; // Timer Counter Clock
 }
 CPU;
 
