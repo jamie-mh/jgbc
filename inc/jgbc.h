@@ -10,20 +10,9 @@
 #include <stdbool.h>
 #include <string.h>
 #include <assert.h>
+#include <SDL.h>
 
 #define GET_BIT(data, bit) (((data) >> (bit)) & 1)
-
-typedef struct Registers Registers;
-typedef struct CPU CPU;
-typedef struct Sprite Sprite;
-typedef struct Display Display;
-typedef struct PPU PPU;
-typedef struct MMU MMU;
-typedef struct APU APU;
-typedef struct Cart Cart;
-typedef struct Input Input;
-typedef struct GameBoy GameBoy;
-
 
 typedef struct Registers {
     union {
@@ -87,20 +76,31 @@ typedef struct PPU {
     uint16_t scan_clock;
     uint16_t frame_clock;
 
-    void (*render_fn)(GameBoy *);
-    Display *display;
+    SDL_Window *window;
+    SDL_Renderer *renderer;
+    SDL_Texture *texture;
 }
 PPU;
 
 typedef struct MMU {
-    uint8_t *ram;
     uint8_t rom_bank;
     uint8_t ram_bank;
     uint8_t wram_bank;
     uint8_t vram_bank;
 
-    uint8_t **vram_banks;
-    uint8_t **wram_banks;
+    uint8_t *rom00; // 16KB ROM Bank
+    uint8_t *romNN; // 16KB Switchable ROM Bank
+    uint8_t *vram; // 8KB Video RAM
+    uint8_t *extram; // 8KB External Ram (cartridge)
+    uint8_t *wram00; // 4KB Work RAM bank 0
+    uint8_t *wramNN; // 4KB Work RAM bank 1-7 (switchable) 
+    uint8_t *oam; // 1.59KB Sprite Attribute Table
+    uint8_t *io; // 128B IO Ports
+    uint8_t *hram; // 128B High RAM
+    uint8_t *ier; // 1B Interrupt Enable Register
+
+    uint8_t **wram_banks; // 8x4KB WRAM Banks (GBC Only)
+    uint8_t **vram_banks; // 2x8KB VRAM Banks (GBC Only)
 }
 MMU;
 
@@ -136,7 +136,6 @@ Input;
 
 typedef struct GameBoy {
     bool is_running;
-    void (*event_fn)(GameBoy *);
 
     CPU cpu;
     PPU ppu;
@@ -147,5 +146,4 @@ typedef struct GameBoy {
 }
 GameBoy;
 
-void init(GameBoy *gb, void (*event_fn)(GameBoy *));
-void run(GameBoy *gb);
+void init(GameBoy *gb);

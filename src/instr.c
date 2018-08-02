@@ -23,6 +23,7 @@ void op_ld_bcp_a(GameBoy *gb) {
 // 0x03: INC BC (- - - -)
 void op_inc_bc(GameBoy *gb) {
     REG(BC)++;
+    TICK(1);
 }
 
 // 0x04: INC B (Z 0 H -)
@@ -66,6 +67,7 @@ void op_ld_a_bcp(GameBoy *gb) {
 // 0x0B: DEC BC (- - - -)
 void op_dec_bc(GameBoy *gb) {
     REG(BC)--;
+    TICK(1);
 }
 
 // 0x0C: INC C (Z 0 H -)

@@ -6,11 +6,14 @@
 #define SREAD16(addr) read_short(gb, (addr), false)
 #define SWRITE16(addr, value) write_short(gb, (addr), (value), false)
 
-// Bank Sizes
-#define RAM_SIZE 0x10000
+// Region Sizes
 #define ROM_BANK_SIZE 16384
+#define VRAM_BANK_SIZE 8192
 #define EXTRAM_BANK_SIZE 8192
 #define WRAM_BANK_SIZE 4096
+#define OAM_SIZE 160
+#define IO_SIZE 128
+#define HRAM_SIZE 128
 
 // Addressable Regions
 #define ROM00_START 0X0
@@ -29,6 +32,19 @@
 #define WRAM00_MIRROR_END 0xEFFF
 #define WRAMNN_MIRROR_START 0xF000
 #define WRAMNN_MIRROR_END 0xFDFF
+#define OAM_START 0xFE00
+#define OAM_END 0xFE9F
+#define UNUSABLE_START 0xFEA0
+#define UNUSABLE_END 0xFEFF
+#define IO_START 0xFF00
+#define IO_END 0xFF7F
+#define HRAM_START 0xFF80
+#define HRAM_END 0xFFFE
+#define IE_START_END 0xFFFF
+
+// GBC Banks
+#define WRAM_BANK_COUNT 8
+#define VRAM_BANK_COUNT 2
 
 
 void init_mmu(GameBoy *gb);

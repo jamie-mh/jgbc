@@ -7,37 +7,12 @@
 static void init_hw_registers(GameBoy *gb);
 
 
-void init(GameBoy *gb, void (*event_fn)(GameBoy *)) {
+void init(GameBoy *gb) {
     init_cpu(gb);
     init_mmu(gb);
     init_ppu(gb);
     init_input(gb);
     init_hw_registers(gb);
-
-    gb->event_fn = event_fn;
-    gb->is_running = true;
-}
-
-void run(GameBoy *gb) {
-
-    while(gb->is_running) {
-
-        static const uint32_t max_ticks = CLOCK_SPEED / FRAMERATE;
-        uint32_t frame_ticks = 0;
-
-        while(frame_ticks < max_ticks) {
-            execute_instr(gb);
-
-            update_timer(gb);
-            update_ppu(gb);
-
-            //check_interrupts(gb);
-            frame_ticks += gb->cpu.ticks;
-        }
-
-        frame_ticks -= max_ticks;
-        gb->event_fn(gb);
-    }
 }
 
 static void init_hw_registers(GameBoy *gb) {

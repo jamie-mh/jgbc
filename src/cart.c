@@ -6,6 +6,7 @@ static void parse_header(GameBoy *gb, uint8_t *header);
 static bool read_header(GameBoy *gb, FILE *file, uint8_t *header);
 static void alloc_banks(GameBoy *gb);
 static void copy_data(GameBoy *gb, FILE *file);
+static void set_banks(GameBoy *gb);
 
 
 bool load_rom(GameBoy *gb, const char *path) {
@@ -26,6 +27,7 @@ bool load_rom(GameBoy *gb, const char *path) {
     parse_header(gb, header);
     alloc_banks(gb);
     copy_data(gb, file);
+    set_banks(gb);
 
     free(header);
     fclose(file);
@@ -107,4 +109,12 @@ static void copy_data(GameBoy *gb, FILE *file) {
         gb->cart.rom_banks[bank][position - (ROM_BANK_SIZE * bank)] = (uint8_t) byte;
         position++;
     }
+}
+
+static void set_banks(GameBoy *gb) {
+    gb->mmu.ram_bank = -1;
+    gb->mmu.rom_bank = 1;
+
+    gb->mmu.rom00 = gb->cart.rom_banks[0];
+    gb->mmu.romNN = gb->cart.rom_banks[1];
 }

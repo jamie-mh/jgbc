@@ -11,31 +11,102 @@ static void DMA_transfer(GameBoy *gb, const uint8_t value);
 
 
 void init_mmu(GameBoy *gb) {
-    gb->mmu.ram = malloc(RAM_SIZE);
-    gb->mmu.ram_bank = 0;
-    gb->mmu.rom_bank = 1;
+    gb->mmu.rom00 = NULL;
+    gb->mmu.romNN = NULL;
+    gb->mmu.extram = NULL;
+
+    gb->mmu.vram_banks = malloc(sizeof(uint8_t *) * VRAM_BANK_COUNT);
+    for(uint8_t i = 0; i < VRAM_BANK_COUNT; ++i) {
+        gb->mmu.vram_banks[i] = malloc(VRAM_BANK_SIZE * sizeof(uint8_t));
+    }
+
+    gb->mmu.wram_banks = malloc(sizeof(uint8_t *) * WRAM_BANK_COUNT); 
+    for(uint8_t i = 0; i < WRAM_BANK_COUNT; ++i) {
+        gb->mmu.wram_banks[i] = malloc(WRAM_BANK_SIZE * sizeof(uint8_t));
+    }
+
+    gb->mmu.vram = gb->mmu.vram_banks[0];
+    gb->mmu.wram00 = gb->mmu.wram_banks[0];
+    gb->mmu.wramNN = gb->mmu.wram_banks[1];
+    
+    gb->mmu.oam = malloc(OAM_SIZE * sizeof(uint8_t));
+    gb->mmu.io = malloc(IO_SIZE * sizeof(uint8_t));
+    gb->mmu.hram = malloc(HRAM_SIZE * sizeof(uint8_t));
+    gb->mmu.ier = malloc(1 * sizeof(uint8_t));
 }
 
 static uint8_t *get_memory(GameBoy *gb, uint16_t *address) {
 
-    if(*address <= ROM00_END) {
-        return gb->cart.rom_banks[0];
+    // 16KB ROM Bank 00 
+    if(*address >= ROM00_START && *address <= ROM00_END) {
+        return gb->mmu.rom00;
     }
+    // 16KB ROM Bank NN
     else if(*address >= ROMNN_START && *address <= ROMNN_END) {
         *address -= ROMNN_START;
-        return gb->cart.rom_banks[gb->mmu.rom_bank];
+        return gb->mmu.romNN;
+    }
+    // 8KB Video RAM
+    else if(*address >= VRAM_START && *address <= VRAM_END) {
+        *address -= VRAM_START;
+        return gb->mmu.vram;
+    }
+    // 8KB External RAM (in cartridge)
+    else if(*address >= EXTRAM_START && *address <= EXTRAM_END) {
+        *address -= EXTRAM_START;
+        return gb->mmu.extram;
+    }
+    // 4KB Work RAM Bank 00
+    else if(*address >= WRAM00_START && *address <= WRAM00_END) {
+        *address -= WRAM00_START;
+        return gb->mmu.wram00;
+    }
+    // 4KB Work RAM Bank NN
+    else if(*address >= WRAMNN_START && *address <= WRAMNN_END) {
+        *address -= WRAMNN_START;
+        return gb->mmu.wramNN;
+    }
+    // Mirror of Work RAM (wram 00)
+    else if(*address >= WRAM00_MIRROR_START && *address <= WRAM00_MIRROR_END) {
+        *address -= WRAM00_MIRROR_START;
+        return gb->mmu.wram00;
+    }
+    // Mirror of Work RAM (wram nn)
+    else if(*address >= WRAMNN_MIRROR_START && *address <= WRAMNN_MIRROR_END) {
+        *address -= WRAMNN_MIRROR_START;
+        return gb->mmu.wramNN;
+    }
+    // Sprite Attibute Table
+    else if(*address >= OAM_START && *address <= OAM_END) {
+        *address -= OAM_START;
+        return gb->mmu.oam;
+    }
+    // IO Registers
+    else if(*address >= IO_START && *address <= IO_END) {
+        *address -= IO_START;
+        return gb->mmu.io;
+    }
+    // High RAM
+    else if(*address >= HRAM_START && *address <= HRAM_END) {
+        *address -= HRAM_START;
+        return gb->mmu.hram;
+    }
+    // Interrupt Enable Register
+    else if(*address == IE_START_END) {
+        *address = 0;
+        return gb->mmu.ier;
     }
 
-    return gb->mmu.ram;
+    return NULL;
 }
 
 static bool is_accessible(GameBoy *gb, const uint16_t address) {
 
-    //if(address >= UNUSABLE_START && address <= UNUSABLE_END) {
-    //    return false;
-    //}
+    if(address >= UNUSABLE_START && address <= UNUSABLE_END) {
+        return false;
+    }
 
-    if(address >= EXTRAM_START && address <= EXTRAM_END && gb->mmu.ram_bank == -1) {
+    if(address >= EXTRAM_START && address <= EXTRAM_END && gb->mmu.extram == NULL) {
         return false;
     }
 

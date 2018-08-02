@@ -13,17 +13,58 @@ static void fill_shade_table(const uint8_t, Colour *);
 
 
 void init_ppu(GameBoy *gb) {
-    gb->ppu.display = NULL;
-    gb->ppu.render_fn = NULL;
-
     gb->ppu.framebuffer = calloc(SCREEN_WIDTH * SCREEN_HEIGHT * 3, sizeof(uint8_t));
     gb->ppu.scan_clock = 0;
     gb->ppu.frame_clock = 0;
+
+    gb->ppu.window = NULL;
+    gb->ppu.renderer = NULL;
+    gb->ppu.texture = NULL;
 }
 
-void use_external_renderer(GameBoy *gb, void(*render_fn)(GameBoy *), Display *display) {
-    gb->ppu.render_fn = render_fn;
-    gb->ppu.display = display;
+void init_window(GameBoy *gb) {
+
+    gb->ppu.window = SDL_CreateWindow(
+        WINDOW_TITLE,
+        SDL_WINDOWPOS_UNDEFINED,
+        SDL_WINDOWPOS_UNDEFINED,
+        SCREEN_WIDTH * SCREEN_SCALE,
+        SCREEN_HEIGHT * SCREEN_SCALE,
+        SDL_WINDOW_SHOWN
+    );
+
+    gb->ppu.renderer = SDL_CreateRenderer(
+        gb->ppu.window,
+        -1,
+        SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
+    );
+
+	SDL_DisplayMode mode;
+	mode.refresh_rate = FRAMERATE;
+	SDL_SetWindowDisplayMode(gb->ppu.window, &mode);
+
+    gb->ppu.texture = SDL_CreateTexture(
+        gb->ppu.renderer,
+        SDL_PIXELFORMAT_RGB24,
+        SDL_TEXTUREACCESS_STREAMING,
+        SCREEN_WIDTH,
+        SCREEN_HEIGHT
+    );
+
+    SDL_RenderSetScale(gb->ppu.renderer, SCREEN_SCALE, SCREEN_SCALE);
+}
+
+void render(GameBoy *gb) {
+
+    SDL_UpdateTexture(
+        gb->ppu.texture,
+        NULL,
+        gb->ppu.framebuffer,
+        SCREEN_WIDTH * 3
+    );
+
+    SDL_RenderCopy(gb->ppu.renderer, gb->ppu.texture, NULL, NULL);
+    SDL_RenderPresent(gb->ppu.renderer);
 }
 
 void update_ppu(GameBoy *gb) {
@@ -57,8 +98,8 @@ void update_ppu(GameBoy *gb) {
         else if(ly_val == 144) {
             write_register(gb, IF, IEF_VBLANK, 1); 
 
-            if(gb->ppu.render_fn != NULL) {
-                gb->ppu.render_fn(gb);
+            if(gb->ppu.window != NULL) {
+                render(gb);
             }
         }
 

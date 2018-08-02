@@ -15,6 +15,37 @@ void init_input(GameBoy *gb) {
     gb->input.b = false;
 }
 
+void set_key(GameBoy *gb, const SDL_Scancode code, const bool is_pressed) {
+
+    switch(code) {
+        case SDL_SCANCODE_RETURN:
+            gb->input.start = is_pressed; break;
+
+        case SDL_SCANCODE_BACKSPACE:
+            gb->input.select = is_pressed; break;
+
+        case SDL_SCANCODE_A:
+            gb->input.a = is_pressed; break;
+
+        case SDL_SCANCODE_S:
+            gb->input.b = is_pressed; break;
+
+        case SDL_SCANCODE_UP:
+            gb->input.up = is_pressed; break;
+
+        case SDL_SCANCODE_RIGHT:
+            gb->input.right = is_pressed; break;
+
+        case SDL_SCANCODE_DOWN:
+            gb->input.down = is_pressed; break;
+
+        case SDL_SCANCODE_LEFT:
+            gb->input.left = is_pressed; break;
+
+        default: break;
+    }
+}
+
 uint8_t joypad_state(GameBoy *gb) {
     uint8_t joypad = read_byte(gb, JOYP, false);
 

@@ -72,11 +72,14 @@ static void mbc1(GameBoy *gb, const uint16_t address, const uint8_t value) {
     }
 
     gb->mmu.rom_bank = rom_bank % gb->cart.rom_size;
+    gb->mmu.romNN = gb->cart.rom_banks[gb->mmu.rom_bank];
 
     if(ram_enabled && gb->cart.ram_size > 0) {
         gb->mmu.ram_bank = ram_bank % gb->cart.ram_size;
+        gb->mmu.extram = gb->cart.ram_banks[gb->mmu.ram_bank];
     } else {
         gb->mmu.ram_bank = -1;
+        gb->mmu.extram = NULL;
     }
 }
 

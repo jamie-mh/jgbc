@@ -5,6 +5,9 @@
 #define FRAMERATE 60.0
 #define CLOCKS_PER_SCANLINE 456 
 
+#define SCREEN_SCALE 4
+#define WINDOW_TITLE "jgbc"
+
 // LCDC: LCD Control Register 
 #define LCDC 0xFF40
 #define LCDC_LCD_ENABLE 7 // LCD Display Enable
@@ -72,7 +75,9 @@ typedef struct Colour {
 Colour;
 
 void init_ppu(GameBoy *gb);
-void use_external_renderer(GameBoy *gb, void(*render_fn)(GameBoy *), Display *display);
+void init_window(GameBoy *gb);
+
+void render(GameBoy *gb);
 void update_ppu(GameBoy *gb);
 
 int sprite_cmp(const void *a, const void *b);

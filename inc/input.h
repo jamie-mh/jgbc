@@ -16,4 +16,5 @@
 
 
 void init_input(GameBoy *gb);
+void set_key(GameBoy *gb, const SDL_Scancode code, const bool is_pressed);
 uint8_t joypad_state(GameBoy *gb);
