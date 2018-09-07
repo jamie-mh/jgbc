@@ -10,7 +10,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_ROOT}/bin")
 set(OpenGL_GL_PREFERENCE "GLVND")
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-	add_definitions(-Wall -Wextra -g)
+    add_definitions(-Wall -Wextra -g)
 endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_ROOT}/cmake/")
@@ -20,7 +20,7 @@ find_package(OpenGL REQUIRED)
 
 add_executable(
     jgbc
-	${PROJECT_SOURCE_DIR}/jgbc.c
+    ${PROJECT_SOURCE_DIR}/jgbc.c
     ${PROJECT_SOURCE_DIR}/alu.c
     ${PROJECT_SOURCE_DIR}/cpu.c
     ${PROJECT_SOURCE_DIR}/input.c
@@ -29,11 +29,11 @@ add_executable(
     ${PROJECT_SOURCE_DIR}/ppu.c
     ${PROJECT_SOURCE_DIR}/mmu.c
     ${PROJECT_SOURCE_DIR}/cart.c
-	${PROJECT_SOURCE_DIR}/apu.c
-	${PROJECT_SOURCE_DIR}/main.c
+    ${PROJECT_SOURCE_DIR}/apu.c
+    ${PROJECT_SOURCE_DIR}/main.c
 
     ${PROJECT_INCLUDE_DIR}/jgbc.h	
-	${PROJECT_INCLUDE_DIR}/alu.h
+    ${PROJECT_INCLUDE_DIR}/alu.h
     ${PROJECT_INCLUDE_DIR}/cpu.h
     ${PROJECT_INCLUDE_DIR}/input.h
     ${PROJECT_INCLUDE_DIR}/instr.h
@@ -49,7 +49,7 @@ target_include_directories(jgbc PRIVATE ${PROJECT_INCLUDE_DIR})
 
 add_executable(
     jgbc_debugger
-	${PROJECT_SOURCE_DIR}/jgbc.c
+    ${PROJECT_SOURCE_DIR}/jgbc.c
     ${PROJECT_SOURCE_DIR}/alu.c
     ${PROJECT_SOURCE_DIR}/cpu.c
     ${PROJECT_SOURCE_DIR}/input.c
@@ -58,10 +58,10 @@ add_executable(
     ${PROJECT_SOURCE_DIR}/ppu.c
     ${PROJECT_SOURCE_DIR}/mmu.c
     ${PROJECT_SOURCE_DIR}/cart.c
-	${PROJECT_SOURCE_DIR}/apu.c
+    ${PROJECT_SOURCE_DIR}/apu.c
 
     ${PROJECT_INCLUDE_DIR}/jgbc.h	
-	${PROJECT_INCLUDE_DIR}/alu.h
+    ${PROJECT_INCLUDE_DIR}/alu.h
     ${PROJECT_INCLUDE_DIR}/cpu.h
     ${PROJECT_INCLUDE_DIR}/input.h
     ${PROJECT_INCLUDE_DIR}/instr.h
@@ -73,8 +73,8 @@ add_executable(
     
     ${PROJECT_SOURCE_DIR}/debug.cpp
 	
-	${PROJECT_INCLUDE_DIR}/debug.h
-	${PROJECT_INCLUDE_DIR}/font.h
+    ${PROJECT_INCLUDE_DIR}/debug.h
+    ${PROJECT_INCLUDE_DIR}/font.h
 
     ${PROJECT_LIB_DIR}/imgui/imgui.cpp
     ${PROJECT_LIB_DIR}/imgui/imgui_draw.cpp

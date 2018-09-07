@@ -39,9 +39,9 @@ void init_window(GameBoy *gb) {
         SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
     );
 
-	SDL_DisplayMode mode;
-	mode.refresh_rate = FRAMERATE;
-	SDL_SetWindowDisplayMode(gb->ppu.window, &mode);
+    SDL_DisplayMode mode;
+    mode.refresh_rate = FRAMERATE;
+    SDL_SetWindowDisplayMode(gb->ppu.window, &mode);
 
     gb->ppu.texture = SDL_CreateTexture(
         gb->ppu.renderer,
@@ -307,11 +307,11 @@ static void render_sprite_scan(GameBoy *gb, const uint8_t ly) {
                 
                 const Colour shade = shades[shade_num];
                 const uint32_t buf_offset = ((x + px) * 3) + (ly * SCREEN_WIDTH * 3);
-				static const Colour white = {WHITE};
+                static const Colour white = {WHITE};
 
-				// If the sprite is behind the background, it is only visible above white
-				if(is_behind_bg && gb->ppu.framebuffer[buf_offset] != white.r) {
-					continue; 
+                // If the sprite is behind the background, it is only visible above white
+                if(is_behind_bg && gb->ppu.framebuffer[buf_offset] != white.r) {
+                    continue; 
                 }
 
                 gb->ppu.framebuffer[buf_offset + 0] = shade.r; // R

@@ -141,7 +141,7 @@ void Debugger::init_imgui() {
     ImGui_ImplOpenGL3_Init();
 
     ImGui::StyleColorsDark();
-	ImGui::GetIO().Fonts->AddFontFromMemoryCompressedTTF(
+        ImGui::GetIO().Fonts->AddFontFromMemoryCompressedTTF(
         LiberationMono_compressed_data, 
         LiberationMono_compressed_size, 
         18.0f

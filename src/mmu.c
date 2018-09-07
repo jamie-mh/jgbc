@@ -38,7 +38,7 @@ void init_mmu(GameBoy *gb) {
 static uint8_t *get_memory(GameBoy *gb, uint16_t *address) {
 
     // 16KB ROM Bank 00 
-    if(*address >= ROM00_START && *address <= ROM00_END) {
+    if(*address <= ROM00_END) {
         return gb->mmu.rom00;
     }
     // 16KB ROM Bank NN
@@ -115,7 +115,6 @@ static bool is_accessible(GameBoy *gb, const uint16_t address) {
 
 uint8_t read_byte(GameBoy *gb, uint16_t address, const bool is_program) {
 
-    const uint16_t old = address;
     if(is_program && address == JOYP) {
         return joypad_state(gb);
     }
@@ -147,7 +146,7 @@ void write_byte(GameBoy *gb, uint16_t address, uint8_t value, const bool is_prog
         gb->cpu.cnt_clock = 0;
 
         value = 0x0;
-		return;
+        return;
     }
 
     if(!is_accessible(gb, address)) {

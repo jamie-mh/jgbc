@@ -3,7 +3,7 @@
 #include "mmu.h"
 
 static void parse_header(GameBoy *gb, uint8_t *header);
-static bool read_header(GameBoy *gb, FILE *file, uint8_t *header);
+static bool read_header(FILE *file, uint8_t *header);
 static void alloc_banks(GameBoy *gb);
 static void copy_data(GameBoy *gb, FILE *file);
 static void set_banks(GameBoy *gb);
@@ -19,7 +19,7 @@ bool load_rom(GameBoy *gb, const char *path) {
 
     uint8_t *header = malloc(CART_HEADER_SIZE * sizeof(uint8_t));
 
-    if(!read_header(gb, file, header)) {
+    if(!read_header(file, header)) {
         free(header);
         return false;
     }
@@ -42,11 +42,11 @@ void print_cart_info(GameBoy *gb) {
     printf("RAM Size: %d x %d KB\n", gb->cart.ram_size, EXTRAM_BANK_SIZE);
 }
 
-static bool read_header(GameBoy *gb, FILE *file, uint8_t *header) {
+static bool read_header(FILE *file, uint8_t *header) {
     assert(file != NULL);
 
     fseek(file, CART_HEADER_START, SEEK_SET);
-    uint32_t byte;
+    int32_t byte;
 
     for(uint16_t i = CART_HEADER_START; i < CART_HEADER_END; ++i) {
         if((byte = fgetc(file)) == EOF) {
@@ -101,7 +101,7 @@ static void alloc_banks(GameBoy *gb) {
 
 static void copy_data(GameBoy *gb, FILE *file) {
     assert(file != NULL);
-    uint32_t byte;
+    int32_t byte;
     uint32_t position = 0;
 
     while((byte = fgetc(file)) != EOF) {
