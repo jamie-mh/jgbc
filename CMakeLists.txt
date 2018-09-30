@@ -10,10 +10,11 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_ROOT}/bin")
 set(OpenGL_GL_PREFERENCE "GLVND")
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    add_definitions(-Wall -Wextra -g)
+    add_definitions(-Wall -Wextra -O2)
 endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_ROOT}/cmake/")
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON) 
 
 find_package(SDL2 REQUIRED)
 find_package(OpenGL REQUIRED)

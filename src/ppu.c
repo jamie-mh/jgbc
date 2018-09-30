@@ -3,13 +3,22 @@
 #include "cpu.h"
 #include "ppu.h"
 
-static void update_render_mode(GameBoy *, const uint8_t, const bool);
+static void update_render_mode(GameBoy *gb, const uint8_t ly, const bool lcd_on);
 
-static void render_bg_scan(GameBoy *, const uint8_t);
-static void render_sprite_scan(GameBoy *, const uint8_t);
+static inline bool get_bg_tile_data_start(GameBoy *gb, uint16_t *start);
+static inline uint16_t get_tile_map_offset(Position screen);
+static inline uint16_t get_tile_data_offset(GameBoy *gb, const uint16_t map_addr, const bool signed_tile_num);
+static inline void get_tile_row_data(GameBoy *gb, const uint8_t line, const uint16_t data_addr, uint8_t *data);
+static inline Colour get_tile_pixel(Position screen_pos, uint8_t *data, Colour *shades);
+static inline void plot_tile_pixel(uint8_t *framebuffer, Position display_pos, Colour shade);
 
-static Colour get_shade(const uint8_t);
-static void fill_shade_table(const uint8_t, Colour *);
+static void render_bg_scan(GameBoy *, const uint8_t ly);
+static void render_window_scan(GameBoy *gb, const uint8_t ly);
+static void render_sprite_scan(GameBoy *gb, const uint8_t ly);
+
+static int sprite_cmp(const void *a, const void *b);
+static Colour get_shade(const uint8_t num);
+static void fill_shade_table(const uint8_t palette, Colour *table);
 
 
 void init_ppu(GameBoy *gb) {
@@ -69,13 +78,13 @@ void render(GameBoy *gb) {
 
 void update_ppu(GameBoy *gb) {
 
-    const bool lcd_on = read_register(gb, LCDC, LCDC_LCD_ENABLE);
-    uint8_t ly_val = read_byte(gb, LY, false);
+    const bool lcd_on = RREG(LCDC, LCDC_LCD_ENABLE);
+    uint8_t ly = SREAD8(LY);
 
-    update_render_mode(gb, ly_val, lcd_on);
+    update_render_mode(gb, ly, lcd_on);
 
     if(!lcd_on) {
-        write_byte(gb, LY, 0, false);
+        SWRITE8(LY, 0);
         gb->ppu.scan_clock = 0;
         return;
     }
@@ -85,18 +94,18 @@ void update_ppu(GameBoy *gb) {
     if(gb->ppu.scan_clock >= CLOCKS_PER_SCANLINE) { 
 
         gb->ppu.scan_clock = 0;
-
-        ly_val = (ly_val == 153) ? 0 : ly_val + 1;
-        write_byte(gb, LY, ly_val, false);
+        ly = (ly == 153) ? 0 : ly + 1;
+        SWRITE8(LY, ly);
 
         // Render scanlines (144 pixel tall screen)
-        if(ly_val < 144) {
-            render_bg_scan(gb, ly_val);
-            render_sprite_scan(gb, ly_val);
+        if(ly < 144) {
+            render_bg_scan(gb, ly);
+            render_window_scan(gb, ly);
+            render_sprite_scan(gb, ly);
         }
         // End of frame, request vblank interrupt
-        else if(ly_val == 144) {
-            write_register(gb, IF, IEF_VBLANK, 1); 
+        else if(ly == 144) {
+            WREG(IF, IEF_VBLANK, 1);
 
             if(gb->ppu.window != NULL) {
                 render(gb);
@@ -105,31 +114,31 @@ void update_ppu(GameBoy *gb) {
 
         // Check if LY == LYC
         // And request an interrupt
-        if(read_byte(gb, LYC, false) == ly_val) {
-            write_register(gb, STAT, STAT_COINCID_FLAG, 1);
+        if(read_byte(gb, LYC, false) == ly) {
+            WREG(STAT, STAT_COINCID_FLAG, 1);
 
             // If the LY == LYC interrupt is enabled, request it
-            if(read_register(gb, STAT, STAT_COINCID_INT)) {
-                write_register(gb, IF, IEF_LCD_STAT, 1);
+            if(RREG(STAT, STAT_COINCID_INT)) {
+                WREG(IF, IEF_LCD_STAT, 1); 
             }
 
         } else {
-            write_register(gb, STAT, STAT_COINCID_FLAG, 0);
+            WREG(STAT, STAT_COINCID_FLAG, 0);
         }
     }
 }
 
 // Updates the mode in the STAT register based on the ly and scan clock 
-static void update_render_mode(GameBoy *gb, const uint8_t ly_val, const bool lcd_on) {
+static void update_render_mode(GameBoy *gb, const uint8_t ly, const bool lcd_on) {
     
-    const uint8_t curr_mode = read_byte(gb, STAT, false) & 0x3;
+    const uint8_t curr_mode = SREAD8(STAT) & 0x3;
     uint8_t new_mode = 0;
     bool request_int = false;
 
-    // V-Blank (10 lines) or when the screen is off
-    if(ly_val >= 144 || !lcd_on) {
+    // V-Blank (10 lines)
+    if(ly >= 144 || !lcd_on) {
         new_mode = 1;
-        request_int = read_register(gb, STAT, STAT_VBLANK_INT);
+        request_int = RREG(STAT, STAT_VBLANK_INT);
     }
     // Screen rendering (144 lines aka height of screen in px)
     else {
@@ -137,7 +146,7 @@ static void update_render_mode(GameBoy *gb, const uint8_t ly_val, const bool lcd
         // OAM Transfer
         if(gb->ppu.scan_clock < 80) {
             new_mode = 2;
-            request_int = read_register(gb, STAT, STAT_OAM_INT);
+            request_int = RREG(STAT, STAT_OAM_INT);
         }
         // Pixel Transfer
         else if(gb->ppu.scan_clock >= 80 && gb->ppu.scan_clock <= 252) {
@@ -146,7 +155,7 @@ static void update_render_mode(GameBoy *gb, const uint8_t ly_val, const bool lcd
         // H-Blank
         else if(gb->ppu.scan_clock > 252) {
             new_mode = 0; 
-            request_int = read_register(gb, STAT, STAT_HBLANK_INT);
+            request_int = RREG(STAT, STAT_HBLANK_INT);
         }
     }
 
@@ -155,108 +164,176 @@ static void update_render_mode(GameBoy *gb, const uint8_t ly_val, const bool lcd
         // We've changed mode and the interrupt for this mode is active
         // So request a LCD STAT interrupt
         if(request_int) {
-            write_register(gb, IF, IEF_LCD_STAT, 1);
+            WREG(IF, IEF_LCD_STAT, 1);
         }
 
-        write_register(gb, STAT, STAT_MODE1, (new_mode >> 1) & 1);
-        write_register(gb, STAT, STAT_MODE0, (new_mode >> 0) & 1);
+        WREG(STAT, STAT_MODE1, (new_mode >> 1) & 1);
+        WREG(STAT, STAT_MODE0, (new_mode >> 0) & 1);
     }
 }
 
-static void render_bg_scan(GameBoy *gb, const uint8_t ly) {
-
-    if(!read_register(gb, LCDC, LCDC_BG_DISPLAY)) {
-        return;
-    } 
-
-    const uint16_t bg_tile_map_start = (read_register(gb, LCDC, LCDC_BG_TILE_MAP) ? 0x9C00 : 0x9800);
+// Get the start of the tile data for background and window tiles
+// Returns true if the tile number is a signed integer
+static inline bool get_bg_tile_data_start(GameBoy *gb, uint16_t *start) {
 
     // When this bit is enabled, the tile data is stored starting at 0x8000
     // The tile numbers are unsigned (0 to 255)
     // When this bit is disabled, the tile data is stored starting at 0x8800 (pattern 0 at 0x9000)
     // The tile numbers are signed (-128 to 127)
-    bool signed_tile_num;
-    uint16_t bg_tile_data_start;
-
-    if(read_register(gb, LCDC, LCDC_BG_WINDOW_TILE_DATA)) {
-        bg_tile_data_start = 0x8000;
-        signed_tile_num = false;
+    if(RREG(LCDC, LCDC_BG_WINDOW_TILE_DATA)) {
+        *start = 0x8000;
+        return false;
     } else {
-        bg_tile_data_start = 0x8800;
-        signed_tile_num = true;
+        *start = 0x8800;
+        return true;
     }
+}
 
-    const bool window_enabled = read_register(gb, LCDC, LCDC_WINDOW_DISPLAY);
-    const uint16_t window_tile_map_start = (read_register(gb, LCDC, LCDC_WINDOW_TILE_MAP) ? 0x9C00 : 0x9800);
-        
-    const uint8_t scroll_x = read_byte(gb, SCX, false);
-    const uint8_t scroll_y = read_byte(gb, SCY, false);
+// Get the position of the nearest tile in the map that matches any given screen position
+static inline uint16_t get_tile_map_offset(Position screen) {
+    return (screen.x / 8) + ((screen.y / 8) * 32);
+}
+
+// Get the offset of the tile data that matches a map address
+static inline uint16_t get_tile_data_offset(GameBoy *gb, const uint16_t map_addr, 
+        const bool signed_tile_num) {
+
+    if(signed_tile_num) {
+        const int8_t tile_number = (int8_t) SREAD8(map_addr);
+        return ((tile_number + 128) * 16);
+    } else {
+        const uint8_t tile_number = SREAD8(map_addr);
+        return (tile_number * 16);
+    }
+}
+
+// Fetches two bytes in tile data memory for any given line in a tile
+static inline void get_tile_row_data(GameBoy *gb, const uint8_t line, 
+        const uint16_t data_addr, uint8_t *data) {
+    
+    const uint8_t tile_y = line * 2;
+    data[0] = SREAD8(data_addr + tile_y + 0);
+    data[1] = SREAD8(data_addr + tile_y + 1);
+}
+
+// Get the colour of a pixel in a tile
+static inline Colour get_tile_pixel(Position screen_pos, uint8_t *data, Colour *shades) {
+
+    uint8_t bit = 7 - (screen_pos.x % 8);
+    
+    const uint8_t shade_num = GET_BIT(data[0], bit) | (GET_BIT(data[1], bit) << 1);
+    return shades[shade_num];
+}
+
+// Plots a single grayscale pixel on the screen at the given coordinate
+static inline void plot_tile_pixel(uint8_t *framebuffer, Position display_pos, Colour shade) {
+
+    const uint32_t buf_offset = (display_pos.x * 3) + (display_pos.y * SCREEN_WIDTH * 3);
+
+    framebuffer[buf_offset + 0] = shade.r; // R
+    framebuffer[buf_offset + 1] = shade.g; // G
+    framebuffer[buf_offset + 2] = shade.b; // B
+}
+
+static void render_bg_scan(GameBoy *gb, const uint8_t ly) {
+
+    if(!RREG(LCDC, LCDC_BG_DISPLAY)) {
+        return;
+    } 
+
+    const uint16_t map_start = (RREG(LCDC, LCDC_BG_TILE_MAP) ? 0x9C00 : 0x9800);
+
+    uint16_t data_start;
+    bool signed_tile_num = get_bg_tile_data_start(gb, &data_start);
+
+    const uint8_t scroll_x = SREAD8(SCX);
+    const uint8_t scroll_y = SREAD8(SCY);
 
     Colour shades[4];
-    const uint8_t palette = read_byte(gb, BGP, false);
+    const uint8_t palette = SREAD8(BGP);
     fill_shade_table(palette, shades);
 
-    uint16_t tile_map;
-    uint8_t pos_x;
-    uint8_t pos_y;
+    for(uint8_t scan_x = 0; scan_x < SCREEN_WIDTH; scan_x++) {
 
-    for(uint8_t x = 0; x < SCREEN_WIDTH; x++) {
+        // Position in screen memory after scrolling
+        const Position screen_pos = { 
+            scroll_x + scan_x, 
+            scroll_y + ly 
+        };
 
-        pos_x = scroll_x + x;
-        pos_y = scroll_y + ly; 
-        tile_map = bg_tile_map_start; 
+        const uint16_t map_addr = map_start + get_tile_map_offset(screen_pos); 
+        const uint16_t data_addr = data_start + get_tile_data_offset(gb, map_addr, signed_tile_num);
 
-        if(window_enabled) {
-            const uint8_t window_x = read_byte(gb, WX, false) - 7;
-            const uint8_t window_y = read_byte(gb, WY, false);
+        uint8_t data[2];
+        const uint8_t line = screen_pos.y % 8;
+        get_tile_row_data(gb, line, data_addr, data);
 
-            if(ly >= window_y && x >= window_x) {
-                tile_map = window_tile_map_start;
-                pos_x = window_x + x;
-                pos_y = ly - window_y;
-            }
-        } 
+        Colour shade = get_tile_pixel(screen_pos, data, shades);
 
-        const uint16_t tile_col = pos_x / 8;
-        const uint16_t tile_row = (pos_y / 8) * 32;
+        // Position on the physical display
+        const Position display_pos = { scan_x, ly };
 
-        const uint8_t tile_y = (pos_y % 8) * 2;
+        plot_tile_pixel(gb->ppu.framebuffer, display_pos, shade);
+    }
+}
 
-        const uint16_t tile_addr_map = tile_map + tile_col + tile_row;
-        int16_t tile_number;
-        uint16_t tile_addr_data;
+static void render_window_scan(GameBoy *gb, const uint8_t ly) {
 
-        if(signed_tile_num) {
-            tile_number = (int8_t) read_byte(gb, tile_addr_map, false);
-            tile_addr_data = bg_tile_data_start + ((tile_number + 128) * 16);
-        } else {
-            tile_number = read_byte(gb, tile_addr_map, false);
-            tile_addr_data = bg_tile_data_start + (tile_number * 16);
+    if(!RREG(LCDC, LCDC_WINDOW_DISPLAY)) {
+        return; 
+    }
+
+    const uint16_t map_start = (RREG(LCDC, LCDC_WINDOW_TILE_MAP) ? 0x9C00 : 0x9800);
+
+    uint16_t data_start;
+    bool signed_tile_num = get_bg_tile_data_start(gb, &data_start);
+
+    Colour shades[4];
+    const uint8_t palette = SREAD8(BGP);
+    fill_shade_table(palette, shades);
+
+    const uint8_t window_x = SREAD8(WX) - 7;
+    const uint8_t window_y = SREAD8(WY);
+
+    for(uint8_t scan_x = 0; scan_x < SCREEN_WIDTH; scan_x++) {
+
+        if(ly < window_y) {
+            return; 
         }
 
-        const uint8_t data_byte_1 = read_byte(gb, tile_addr_data + tile_y + 0, false);
-        const uint8_t data_byte_2 = read_byte(gb, tile_addr_data + tile_y + 1, false);
+        if(scan_x < window_x) {
+            continue; 
+        }
 
-        uint8_t bit = 7 - (pos_x % 8);
+        // Position in screen memory after scrolling
+        const Position screen_pos = { 
+            window_x + scan_x,
+            ly - window_y
+        };
 
-        const uint8_t shade_num = GET_BIT(data_byte_1, bit) | (GET_BIT(data_byte_2, bit) << 1);
-        const Colour shade = shades[shade_num];
+        const uint16_t map_addr = map_start + get_tile_map_offset(screen_pos); 
+        const uint16_t data_addr = data_start + get_tile_data_offset(gb, map_addr, signed_tile_num);
 
-        const uint32_t buf_offset = (x * 3) + (ly * SCREEN_WIDTH * 3);
+        uint8_t data[2];
+        const uint8_t line = screen_pos.y % 8;
+        get_tile_row_data(gb, line, data_addr, data);
 
-        gb->ppu.framebuffer[buf_offset + 0] = shade.r; // R
-        gb->ppu.framebuffer[buf_offset + 1] = shade.g; // G
-        gb->ppu.framebuffer[buf_offset + 2] = shade.b; // B
+        Colour shade = get_tile_pixel(screen_pos, data, shades);
+
+        // Position on the physical display
+        const Position display_pos = { scan_x, ly };
+
+        plot_tile_pixel(gb->ppu.framebuffer, display_pos, shade);
     }
 }
 
 static void render_sprite_scan(GameBoy *gb, const uint8_t ly) {
 
-    if(!read_register(gb, LCDC, LCDC_OBJ_DISPLAY)) {
+    if(!RREG(LCDC, LCDC_OBJ_DISPLAY)) {
         return;
     }
 
-    const bool tall_sprites = read_register(gb, LCDC, LCDC_OBJ_SIZE);
+    const bool tall_sprites = RREG(LCDC, LCDC_OBJ_SIZE);
     const uint8_t height = (tall_sprites) ? 16 : 8;
 
     for(int i = 0; i < 40; i++) {
@@ -268,7 +345,7 @@ static void render_sprite_scan(GameBoy *gb, const uint8_t ly) {
         if(y <= ly && y + height > ly) {
 
             const uint16_t palette_addr = (GET_BIT(sprite.attributes, SPRITE_ATTR_PALETTE)) ? OBP1 : OBP0;
-            const uint8_t palette = read_byte(gb, palette_addr, false);
+            const uint8_t palette = SREAD8(palette_addr);
 
             Colour shades[4];
             fill_shade_table(palette, shades);
@@ -282,8 +359,10 @@ static void render_sprite_scan(GameBoy *gb, const uint8_t ly) {
             }
 
             const uint16_t row_offset = (tile * 16) + row_index * 2;
-            const uint16_t data_byte_1 = read_short(gb, 0x8000 + row_offset + 0, false);
-            const uint16_t data_byte_2 = read_short(gb, 0x8000 + row_offset + 1, false);
+
+            uint16_t data[2];
+            data[0] = SREAD16(0x8000 + row_offset + 0);
+            data[1] = SREAD16(0x8000 + row_offset + 1);
 
             const bool is_flipped_x = GET_BIT(sprite.attributes, SPRITE_ATTR_FLIP_X);
             const bool is_behind_bg = GET_BIT(sprite.attributes, SPRITE_ATTR_PRIORITY);
@@ -293,12 +372,12 @@ static void render_sprite_scan(GameBoy *gb, const uint8_t ly) {
             for(uint8_t px = ((x < 0) ? -x : 0); px < 8; px++) {
 
                 if(x + px > SCREEN_WIDTH) {
-                    break; 
+                    break;
                 }
 
                 const uint8_t bit = (is_flipped_x) ? px : 7 - px;
 
-                uint8_t shade_num = GET_BIT(data_byte_1, bit) | (GET_BIT(data_byte_2, bit) << 1);
+                uint8_t shade_num = GET_BIT(data[0], bit) | (GET_BIT(data[1], bit) << 1);
 
                 // White is transparent for sprites
                 if(shade_num == 0) {
@@ -322,10 +401,12 @@ static void render_sprite_scan(GameBoy *gb, const uint8_t ly) {
     } 
 }
 
-int sprite_cmp(const void *a, const void *b) {
+// Sorting comparison function for sprite priority
+static int sprite_cmp(const void *a, const void *b) {
     return ((Sprite *) b)->x - ((Sprite *) a)->x;
 }
 
+// Fills the sprite buffer with sprite structs from memory
 void get_sprites(GameBoy *gb) {
 
     for(uint8_t i = 0; i < 40; i++) {
@@ -333,10 +414,10 @@ void get_sprites(GameBoy *gb) {
         Sprite *sprite = &gb->ppu.sprite_buffer[i];
         uint16_t address = 0xFE00 + (i * 4);
 
-        sprite->y = read_byte(gb, address + 0, false); 
-        sprite->x = read_byte(gb, address + 1, false); 
-        sprite->tile = read_byte(gb, address + 2, false); 
-        sprite->attributes = read_byte(gb, address + 3, false);
+        sprite->y = SREAD8(address + 0); 
+        sprite->x = SREAD8(address + 1); 
+        sprite->tile = SREAD8(address + 2); 
+        sprite->attributes = SREAD8(address + 3);
     }
 
     qsort(gb->ppu.sprite_buffer, 40, sizeof(Sprite), sprite_cmp);

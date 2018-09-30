@@ -74,11 +74,15 @@ typedef struct Colour {
 }
 Colour;
 
+typedef struct Position {
+    uint8_t x, y;
+}
+Position;
+
 void init_ppu(GameBoy *gb);
 void init_window(GameBoy *gb);
 
 void render(GameBoy *gb);
 void update_ppu(GameBoy *gb);
 
-int sprite_cmp(const void *a, const void *b);
 void get_sprites(GameBoy *gb);

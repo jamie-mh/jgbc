@@ -6,6 +6,9 @@
 #define SREAD16(addr) read_short(gb, (addr), false)
 #define SWRITE16(addr, value) write_short(gb, (addr), (value), false)
 
+#define RREG(addr, bit) read_register(gb, addr, bit)
+#define WREG(addr, bit, value) write_register(gb, addr, bit, value)
+
 // Region Sizes
 #define ROM_BANK_SIZE 16384
 #define VRAM_BANK_SIZE 8192
@@ -56,4 +59,4 @@ void write_byte(GameBoy *gb, uint16_t address, uint8_t value, const bool is_prog
 void write_short(GameBoy *gb, const uint16_t address, const uint16_t value, const bool is_program);
 
 void write_register(GameBoy *gb, const uint16_t address, const uint8_t bit, const uint8_t value);
-uint8_t read_register(GameBoy *, const uint16_t address, const uint8_t bit);
+uint8_t read_register(GameBoy *gb, const uint16_t address, const uint8_t bit);
