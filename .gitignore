@@ -71,7 +71,6 @@ compile_commands.json
 CTestTestfile.cmake
 
 # jgbc
-imgui.ini
 *.gb
 *.gbc
 

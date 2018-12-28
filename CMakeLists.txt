@@ -80,18 +80,19 @@ add_executable(
     ${PROJECT_LIB_DIR}/imgui/imgui.cpp
     ${PROJECT_LIB_DIR}/imgui/imgui_draw.cpp
     ${PROJECT_LIB_DIR}/imgui/imgui_demo.cpp
+    ${PROJECT_LIB_DIR}/imgui/imgui_widgets.cpp
 
     ${PROJECT_LIB_DIR}/glad/glad.c
-    ${PROJECT_LIB_DIR}/imgui_impl/imgui_impl_opengl3.cpp
-    ${PROJECT_LIB_DIR}/imgui_impl/imgui_impl_sdl.cpp
-    ${PROJECT_LIB_DIR}/imgui_dock/imgui_dock.cpp
-    ${PROJECT_LIB_DIR}/imgui_plot/imgui_plot.cpp
+    ${PROJECT_LIB_DIR}/imgui/examples/imgui_impl_opengl3.cpp
+    ${PROJECT_LIB_DIR}/imgui/examples/imgui_impl_sdl.cpp
 )
+
 set_property(TARGET jgbc_debugger PROPERTY CXX_STANDARD 11)
 set_property(TARGET jgbc_debugger PROPERTY CXX_STANDARD_REQUIRED ON)
 
 target_include_directories(jgbc_debugger PRIVATE ${PROJECT_INCLUDE_DIR})
 target_include_directories(jgbc_debugger PUBLIC ${PROJECT_LIB_DIR})
+target_include_directories(jgbc_debugger PUBLIC ${PROJECT_LIB_DIR}/imgui)
 
 target_link_libraries(jgbc ${SDL2_LIBRARY})
 target_link_libraries(jgbc_debugger ${SDL2_LIBRARY})

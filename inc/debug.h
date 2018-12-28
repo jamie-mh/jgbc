@@ -89,12 +89,6 @@ class WindowMem : public Window {
         virtual void show() override;
 };
 
-class WindowPerf : public Window {
-    using Window::Window;
-    public:
-        virtual void show() override;
-};
-
 class WindowReg: public Window {
     using Window::Window;
     public:
@@ -120,7 +114,6 @@ class Debugger {
         WindowDisasm window_disasm = 0;
         WindowEmu window_emu = 0;
         WindowMem window_mem = 0;
-        WindowPerf window_perf = 0;
         WindowReg window_reg = 0;
         WindowStack window_stack = 0;
 

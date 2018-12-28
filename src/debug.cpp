@@ -13,10 +13,8 @@ extern "C" {
 #include <SDL.h>
 
 #include "imgui/imgui.h"
-#include "imgui_impl/imgui_impl_sdl.h"
-#include "imgui_impl/imgui_impl_opengl3.h"
-#include "imgui_dock/imgui_dock.h"
-#include "imgui_plot/imgui_plot.h"
+#include "imgui/examples/imgui_impl_sdl.h"
+#include "imgui/examples/imgui_impl_opengl3.h"
 #include "imgui_memory_editor/imgui_memory_editor.h"
 #include "glad/glad.h"
 
@@ -27,7 +25,7 @@ extern "C" {
 int main(int argc, char **argv) {
 
     if(argc != 2) {
-        fprintf(stderr, "Usage: jgbc.exe <path to rom>\n");
+        fprintf(stderr, "Usage: jgbc_debugger.exe <path to rom>\n");
         return EXIT_FAILURE; 
     }
 
@@ -43,6 +41,8 @@ int main(int argc, char **argv) {
     dbg->run();
 
     delete dbg;
+    delete gb;
+
     return EXIT_SUCCESS;
 }
 
@@ -129,22 +129,23 @@ void Debugger::init_gl() {
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 }
 
 void Debugger::init_imgui() {
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
+    ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
     ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
     ImGui_ImplOpenGL3_Init();
 
     ImGui::StyleColorsDark();
-        ImGui::GetIO().Fonts->AddFontFromMemoryCompressedTTF(
+    ImGui::GetIO().Fonts->AddFontFromMemoryCompressedTTF(
         LiberationMono_compressed_data, 
         LiberationMono_compressed_size, 
-        18.0f
+        16.0f
     );
 }
 
@@ -181,7 +182,6 @@ void Debugger::init_windows() {
     window_disasm = WindowDisasm(this);
     window_emu = WindowEmu(this);
     window_mem = WindowMem(this);
-    window_perf = WindowPerf(this);
     window_reg = WindowReg(this);
     window_stack = WindowStack(this);
 }
@@ -193,49 +193,33 @@ void Debugger::render() {
     ImGui::NewFrame();
 
     ImGuiWindowFlags flags =
-        ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
-        ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
+        ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDocking |
+        ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoBackground |
         ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoCollapse |
         ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoBringToFrontOnFocus;
 
     ImGui::SetNextWindowPos(ImVec2(0, 0));
     ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
+
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
     ImGui::Begin("##workspace", nullptr, flags);
+    ImGui::PopStyleVar();
+
+    ImGui::DockSpace(ImGui::GetID("##dockspace"), ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruDockspace);
 
     main_menu.show();
 
-    ImGui::BeginWorkspace();
-    ImGui::SetNextDock(ImGuiDockSlot_Left);
     window_emu.show();
-
-    ImGui::SetNextDock(ImGuiDockSlot_Bottom);
     window_break.show();
-
-    ImGui::SetNextDock(ImGuiDockSlot_Top);
-    window_perf.show();
-
-    ImGui::SetNextDock(ImGuiDockSlot_Right);
     window_ctrl.show();
-
-    ImGui::SetNextDockParentToRoot();
-    ImGui::SetNextDock(ImGuiDockSlot_Right);
     window_disasm.show();
-
-    ImGui::SetNextDock(ImGuiDockSlot_Right);
     window_mem.show();
-
-    ImGui::SetNextDock(ImGuiDockSlot_Bottom);
     window_cart_info.show();
-
-    ImGui::SetNextDock(ImGuiDockSlot_Bottom);
     window_reg.show();
-
-    ImGui::SetNextDock(ImGuiDockSlot_Bottom);
     window_stack.show();
-    ImGui::EndWorkspace();
 
+    // ImGui::ShowDemoWindow();
     ImGui::End();
-    //ImGui::ShowDemoWindow();
 
     ImGui::Render();
     SDL_GL_MakeCurrent(window, gl_context);
@@ -378,7 +362,6 @@ void MainMenu::show() {
             ImGui::MenuItem("Controls", nullptr, &dbg->window_ctrl.is_open);
             ImGui::MenuItem("Disassembly", nullptr, &dbg->window_disasm.is_open);
             ImGui::MenuItem("Emulator", nullptr, &dbg->window_emu.is_open);
-            ImGui::MenuItem("Performance", nullptr, &dbg->window_perf.is_open);
             ImGui::MenuItem("Registers", nullptr, &dbg->window_reg.is_open);
             ImGui::MenuItem("Stack", nullptr, &dbg->window_stack.is_open);
 
@@ -393,7 +376,7 @@ void WindowBreak::show() {
 
     static GameBoy *gb = dbg->gb;
 
-    if(ImGui::BeginDock("Breakpoints", &is_open)) {
+    if(ImGui::Begin("Breakpoints", &is_open)) {
 
         static const ImVec4 addr_colour = ImVec4(ADDR_COLOUR);
 
@@ -435,12 +418,12 @@ void WindowBreak::show() {
         ImGui::EndChild();
     }
 
-    ImGui::EndDock();
+    ImGui::End();
 }
 
 void WindowCartInfo::show() {
 
-    if(ImGui::BeginDock("Cart Info", &is_open)) {
+    if(ImGui::Begin("Cart Info", &is_open)) {
 
         ImGui::Text("Title: %s", dbg->gb->cart.title);
         ImGui::Text("GBC Flag: %02X", dbg->gb->cart.gbc_flag);
@@ -448,7 +431,7 @@ void WindowCartInfo::show() {
         ImGui::Text("ROM Size: %d x %d KB", dbg->gb->cart.rom_size, ROM_BANK_SIZE);
         ImGui::Text("RAM Size: %d x %d KB", dbg->gb->cart.ram_size, EXTRAM_BANK_SIZE);
 
-        ImGui::EndDock();
+        ImGui::End();
     }
 }
 
@@ -456,7 +439,7 @@ void WindowCTRL::show() {
 
     static GameBoy *gb = dbg->gb;
 
-    if(ImGui::BeginDock("Controls", &is_open)) {
+    if(ImGui::Begin("Controls", &is_open)) {
 
         ImGui::Columns(2);
         ImGui::Text("Debugger");
@@ -493,7 +476,7 @@ void WindowCTRL::show() {
          }
     }
     
-    ImGui::EndDock();
+    ImGui::End();
 }
 
 void WindowCTRL::step_into() {
@@ -586,7 +569,7 @@ void WindowDisasm::show() {
 
     static GameBoy *gb = dbg->gb;
 
-    if(ImGui::BeginDock("Disassembly", &is_open)) {
+    if(ImGui::Begin("Disassembly", &is_open)) {
 
         ImGui::BeginChild("##scroll");
                 
@@ -654,7 +637,7 @@ void WindowDisasm::show() {
         ImGui::EndChild();
     }
 
-    ImGui::EndDock();
+    ImGui::End();
 }
 
 void WindowDisasm::draw_break_selectable(uint16_t addr) {
@@ -723,7 +706,7 @@ void WindowEmu::show() {
     const ImVec2 size = ImVec2(SCREEN_WIDTH * WINDOW_EMU_SCALE, SCREEN_HEIGHT * WINDOW_EMU_SCALE);
     ImGui::SetNextWindowSize(size);
 
-    if(ImGui::BeginDock("Emulator", &is_open)) {
+    if(ImGui::Begin("Emulator", &is_open)) {
 
         ImDrawList *draw_list = ImGui::GetWindowDrawList();
         ImVec2 pos = ImGui::GetWindowPos();
@@ -751,14 +734,14 @@ void WindowEmu::show() {
         }
     }
 
-    ImGui::EndDock();
+    ImGui::End();
 }
 
 void WindowMem::show() {
 
     static GameBoy *gb = dbg->gb;
 
-    if(ImGui::BeginDock("Memory", &is_open)) {
+    if(ImGui::Begin("Memory", &is_open)) {
 
         static MemoryEditor mem;
 
@@ -793,27 +776,14 @@ void WindowMem::show() {
         }
     }
 
-    ImGui::EndDock();
-}
-
-void WindowPerf::show() {
-
-    if(ImGui::BeginDock("Performance")) {
-
-        const float framerate = ImGui::GetIO().Framerate;
-
-        ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / framerate, framerate);
-        ImGui::PlotVar("Framerate", framerate);
-    }
-
-    ImGui::EndDock();
+    ImGui::End();
 }
 
 void WindowReg::show() {
 
     static GameBoy *gb = dbg->gb;
 
-    if(ImGui::BeginDock("Registers")) {
+    if(ImGui::Begin("Registers")) {
 
         ImGui::Text("AF: %04X   LCDC: %02X", REG(AF), SREAD8(LCDC));
         ImGui::Text("BC: %04X   STAT: %02X", REG(BC), SREAD8(STAT));
@@ -833,7 +803,7 @@ void WindowReg::show() {
         ImGui::Text("HALT: %02X", dbg->gb->cpu.is_halted);
     }
 
-    ImGui::EndDock();
+    ImGui::End();
 }
 
 void WindowStack::show() {
@@ -841,7 +811,7 @@ void WindowStack::show() {
     static const ImVec4 addr_colour = ImVec4(ADDR_COLOUR);
     static GameBoy *gb = dbg->gb;
 
-    if(ImGui::BeginDock("Stack")) {
+    if(ImGui::Begin("Stack")) {
         ImGui::BeginChild("##scroll");
 
         ImGuiListClipper clipper(0xFFFF - REG(SP));
@@ -869,5 +839,5 @@ void WindowStack::show() {
         ImGui::EndChild();
     }
 
-    ImGui::EndDock();
+    ImGui::End();
 }
