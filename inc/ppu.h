@@ -5,7 +5,7 @@
 #define FRAMERATE 60.0
 #define CLOCKS_PER_SCANLINE 456 
 
-#define SCREEN_SCALE 4
+#define SCREEN_INITIAL_SCALE 4
 #define WINDOW_TITLE "jgbc"
 
 // LCDC: LCD Control Register 

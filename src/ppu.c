@@ -37,9 +37,9 @@ void init_window(GameBoy *gb) {
         WINDOW_TITLE,
         SDL_WINDOWPOS_UNDEFINED,
         SDL_WINDOWPOS_UNDEFINED,
-        SCREEN_WIDTH * SCREEN_SCALE,
-        SCREEN_HEIGHT * SCREEN_SCALE,
-        SDL_WINDOW_SHOWN
+        SCREEN_WIDTH * SCREEN_INITIAL_SCALE,
+        SCREEN_HEIGHT * SCREEN_INITIAL_SCALE,
+        SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE
     );
 
     gb->ppu.renderer = SDL_CreateRenderer(
@@ -47,6 +47,8 @@ void init_window(GameBoy *gb) {
         -1,
         SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
     );
+
+    SDL_RenderSetLogicalSize(gb->ppu.renderer, SCREEN_WIDTH, SCREEN_HEIGHT);
 
     SDL_DisplayMode mode;
     mode.refresh_rate = FRAMERATE;
@@ -59,11 +61,12 @@ void init_window(GameBoy *gb) {
         SCREEN_WIDTH,
         SCREEN_HEIGHT
     );
-
-    SDL_RenderSetScale(gb->ppu.renderer, SCREEN_SCALE, SCREEN_SCALE);
 }
 
 void render(GameBoy *gb) {
+
+    SDL_SetRenderDrawColor(gb->ppu.renderer, 0, 0, 0, 255);
+    SDL_RenderClear(gb->ppu.renderer);
 
     SDL_UpdateTexture(
         gb->ppu.texture,
