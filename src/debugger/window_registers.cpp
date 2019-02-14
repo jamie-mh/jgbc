@@ -69,7 +69,7 @@ void WindowRegisters::render() {
 		Emulator::set_flag(FLAG_CARRY, flag_carry, &REG(F));
 
 	ImGui::Separator();
-	ImGui::Text("HALT: %s", _gb.cpu.is_halted ? "yes" : "no");
+	ImGui::Text("Halted? %s", _gb.cpu.is_halted ? "yes" : "no");
 
     ImGui::End();
 }

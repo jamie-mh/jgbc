@@ -1,6 +1,7 @@
 #include "debugger/debugger.h"
 #include "debugger/window_emulator.h"
 #include <imgui.h>
+#include <glad/glad.h>
 
 void WindowEmulator::render() {
 
@@ -12,29 +13,15 @@ void WindowEmulator::render() {
 	const auto window_size = ImGui::GetContentRegionAvail();
 	const auto scale = std::min(window_size.x / SCREEN_WIDTH, window_size.y / SCREEN_HEIGHT);
 
-	ImDrawList *draw_list = ImGui::GetWindowDrawList();
-	ImVec2 pos = ImGui::GetCursorScreenPos();
+	GLuint texture;
+	glad_glGenTextures(1, &texture);
+	glad_glBindTexture(GL_TEXTURE_2D, texture);
 
-	uint32_t buf_offset;
-	static const uint8_t *buf = _gb.ppu.framebuffer;
+	glad_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glad_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glad_glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, _gb.ppu.framebuffer);
+	glad_glGenerateMipmap(GL_TEXTURE_2D);
 
-	for(auto x = 0; x < SCREEN_WIDTH; x++) {
-		for(auto y = 0; y < SCREEN_HEIGHT; y++) {
-
-			buf_offset = (x * 3) + (y * SCREEN_WIDTH * 3);
-			
-			draw_list->AddRectFilled(
-				ImVec2(pos.x + x * scale, pos.y + y * scale), 
-				ImVec2(pos.x + x * scale + scale, pos.y + y * scale + scale),
-				IM_COL32(
-					buf[buf_offset + 0],
-					buf[buf_offset + 1],
-					buf[buf_offset + 2],
-					0xFF
-				)
-			);
-		}
-	}
-
+	ImGui::Image((ImTextureID)texture, ImVec2(SCREEN_WIDTH * scale, SCREEN_HEIGHT * scale));
     ImGui::End();
 }

@@ -1,4 +1,5 @@
 #include "debugger/debugger.h"
+#include "debugger/colours.h"
 #include "debugger/window_cart_info.h"
 #include <imgui.h>
 
@@ -10,25 +11,24 @@ void WindowCartInfo::render() {
 	}
 
 	const auto &style = ImGui::GetStyle();
-	const auto name_colour = style.Colors[ImGuiCol_ButtonActive];
 
-	ImGui::TextColored(name_colour, "Title ");
+	ImGui::TextColored(Colours::address, "Title");
 	ImGui::SameLine();
 	ImGui::Text("%s", _gb.cart.title);
 
-	ImGui::TextColored(name_colour, "GBC Flag");
+	ImGui::TextColored(Colours::address, "GBC Flag");
 	ImGui::SameLine();
 	ImGui::Text("%02X", _gb.cart.gbc_flag);
 
-	ImGui::TextColored(name_colour, "Cartridge Type");
+	ImGui::TextColored(Colours::address, "Cartridge Type");
 	ImGui::SameLine();
 	ImGui::Text("%02X", _gb.cart.type);
 
-	ImGui::TextColored(name_colour, "ROM Size");
+	ImGui::TextColored(Colours::address, "ROM Size");
 	ImGui::SameLine();
 	ImGui::Text("%d x %d KB", _gb.cart.rom_size, ROM_BANK_SIZE);
 
-	ImGui::TextColored(name_colour, "RAM Size");
+	ImGui::TextColored(Colours::address, "RAM Size");
 	ImGui::SameLine();
 	ImGui::Text("%d x %d KB", _gb.cart.ram_size, EXTRAM_BANK_SIZE);
 

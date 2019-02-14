@@ -83,7 +83,7 @@ add_executable(
     ${PROJECT_SOURCE_DIR}/debugger/window_emulator.cpp
     ${PROJECT_SOURCE_DIR}/debugger/window_memory.cpp
     ${PROJECT_SOURCE_DIR}/debugger/window_registers.cpp
-    ${PROJECT_SOURCE_DIR}/debugger/window_io_map.cpp
+    ${PROJECT_SOURCE_DIR}/debugger/window_io.cpp
     ${PROJECT_SOURCE_DIR}/debugger/window_stack.cpp
 	
     ${PROJECT_INCLUDE_DIR}/debugger/debugger.h
@@ -98,7 +98,7 @@ add_executable(
     ${PROJECT_INCLUDE_DIR}/debugger/window_disassembly.h
     ${PROJECT_INCLUDE_DIR}/debugger/window_emulator.h
     ${PROJECT_INCLUDE_DIR}/debugger/window_memory.h
-    ${PROJECT_INCLUDE_DIR}/debugger/window_io_map.h
+    ${PROJECT_INCLUDE_DIR}/debugger/window_io.h
     ${PROJECT_INCLUDE_DIR}/debugger/window_registers.h
     ${PROJECT_INCLUDE_DIR}/debugger/window_stack.h
 

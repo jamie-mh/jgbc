@@ -33,7 +33,7 @@ void MenuBar::render() const {
 	if(ImGui::BeginMenu("View")) {
 		ImGui::MenuItem("Breakpoints", nullptr, &(_dbg.get_window_breakpoints().is_open));
 		ImGui::MenuItem("Cartridge Info", nullptr, &(_dbg.get_window_cart_info().is_open));
-		ImGui::MenuItem("IO Map", nullptr, &(_dbg.get_window_io_map().is_open));
+		ImGui::MenuItem("IO", nullptr, &(_dbg.get_window_io().is_open));
 		ImGui::MenuItem("Controls", nullptr, &(_dbg.get_window_controls().is_open));
 		ImGui::MenuItem("Disassembly", nullptr, &(_dbg.get_window_disassembly().is_open));
 		ImGui::MenuItem("Emulator", nullptr, &(_dbg.get_window_emulator().is_open));

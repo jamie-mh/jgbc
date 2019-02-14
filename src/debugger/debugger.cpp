@@ -37,7 +37,7 @@ Debugger::Debugger(const char *rom_path) {
 
 	_windows.push_back(new WindowBreakpoints(*this));
 	_windows.push_back(new WindowCartInfo(gb));
-	_windows.push_back(new WindowIOMap(gb));
+	_windows.push_back(new WindowIO(gb));
 	_windows.push_back(new WindowControls(*this));
 	_windows.push_back(new WindowDisassembly(*this));
 	_windows.push_back(new WindowEmulator(gb));
@@ -187,7 +187,7 @@ void Debugger::render() {
 	for(auto &window : _windows)
 		window->render();
 
-    ImGui::ShowDemoWindow();
+    //ImGui::ShowDemoWindow();
     ImGui::End();
 
     ImGui::Render();

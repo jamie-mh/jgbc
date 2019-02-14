@@ -12,7 +12,6 @@ class WindowControls final : public Window {
 
         void step_into();
         void step_over();
-        void step_out();
         void run_to_next();
 
         bool is_subroutine_call(uint8_t opcode) const;

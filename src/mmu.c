@@ -175,14 +175,14 @@ void write_short(GameBoy *gb, const uint16_t address, const uint16_t value, cons
 }
 
 void write_register(GameBoy *gb, const uint16_t address, const uint8_t bit, const uint8_t value) {
-    uint8_t byte = read_byte(gb, address, false);
+    uint8_t byte = SREAD8(address);
     byte ^= (-value ^ byte) & (1 << bit);
 
-    write_byte(gb, address, byte, false);
+    SWRITE8(address, byte);
 }
 
 uint8_t read_register(GameBoy *gb, const uint16_t address, const uint8_t bit) {
-    const uint8_t byte = read_byte(gb, address, false);
+    const uint8_t byte = SREAD8(address);
     return GET_BIT(byte, bit);
 }
 
@@ -190,7 +190,7 @@ static void DMA_transfer(GameBoy *gb, const uint8_t value) {
     const uint16_t address = value * 0x100;
 
     for(uint8_t i = 0; i <= 0x9F; ++i) {
-        write_byte(gb, 0xFE00 + i, read_byte(gb, address + i, false), false); 
+		SWRITE8(0xFE00 + i, SREAD8(address + i));
     }
     get_sprites(gb);
 }

@@ -20,10 +20,10 @@
 #include "debugger/window_emulator.h"
 #include "debugger/window_memory.h"
 #include "debugger/window_registers.h"
-#include "debugger/window_io_map.h"
+#include "debugger/window_io.h"
 #include "debugger/window_stack.h"
 
-constexpr unsigned int WINDOW_WIDTH = 1600;
+constexpr unsigned int WINDOW_WIDTH = 1500;
 constexpr unsigned int WINDOW_HEIGHT = 900;
 
 #define BG_COLOUR 0.45f, 0.55f, 0.60f, 1.00f
@@ -45,9 +45,6 @@ class Debugger final {
         Debugger(const char *rom_path);
         ~Debugger();
 
-		
-		void read_mem(uint16_t addr);
-		
 		size_t breakpoint_count() const;
 		bool is_breakpoint(uint16_t addr) const;
 		void add_breakpoint(uint16_t addr);
@@ -57,15 +54,14 @@ class Debugger final {
         void run();
         void render();
 
-		// Windows
 		inline WindowBreakpoints &get_window_breakpoints() { return *static_cast<WindowBreakpoints *>(_windows[0]); }
 		inline WindowCartInfo &get_window_cart_info() { return *static_cast<WindowCartInfo *>(_windows[1]); }
-		inline WindowRegisters &get_window_io_map() { return *static_cast<WindowRegisters *>(_windows[2]); }
+		inline WindowIO &get_window_io() { return *static_cast<WindowIO *>(_windows[2]); }
 		inline WindowControls &get_window_controls() { return *static_cast<WindowControls *>(_windows[3]); }
 		inline WindowDisassembly &get_window_disassembly() { return *static_cast<WindowDisassembly *>(_windows[4]); }
 		inline WindowEmulator &get_window_emulator() { return *static_cast<WindowEmulator *>(_windows[5]); }
 		inline WindowMemory &get_window_memory() { return *static_cast<WindowMemory *>(_windows[6]); }
-		inline WindowIOMap &get_window_registers() { return *static_cast<WindowIOMap *>(_windows[7]); }
+		inline WindowRegisters &get_window_registers() { return *static_cast<WindowRegisters *>(_windows[7]); }
 		inline WindowStack &get_window_stack() { return *static_cast<WindowStack *>(_windows[8]); }
 
     private:

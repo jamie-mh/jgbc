@@ -22,9 +22,6 @@ void WindowControls::render() {
 	if(ImGui::Button("Step Into"))
 		step_into();
 
-	if(ImGui::Button("Step Out"))
-		step_out();
-
 	if(ImGui::Button("Restart"))
 		REG(PC) = 0x100;
 
@@ -68,10 +65,6 @@ void WindowControls::step_over() {
     }
 
     _dbg.is_paused = false;
-}
-
-void WindowControls::step_out() {
-
 }
 
 void WindowControls::run_to_next() {
