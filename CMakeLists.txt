@@ -72,10 +72,35 @@ add_executable(
     ${PROJECT_INCLUDE_DIR}/cart.h
     ${PROJECT_INCLUDE_DIR}/apu.h
     
-    ${PROJECT_SOURCE_DIR}/debug.cpp
+    ${PROJECT_SOURCE_DIR}/debugger/main.cpp
+    ${PROJECT_SOURCE_DIR}/debugger/debugger.cpp
+    ${PROJECT_SOURCE_DIR}/debugger/colours.cpp
+    ${PROJECT_SOURCE_DIR}/debugger/menubar.cpp
+    ${PROJECT_SOURCE_DIR}/debugger/window_breakpoints.cpp
+    ${PROJECT_SOURCE_DIR}/debugger/window_cart_info.cpp
+    ${PROJECT_SOURCE_DIR}/debugger/window_controls.cpp
+    ${PROJECT_SOURCE_DIR}/debugger/window_disassembly.cpp
+    ${PROJECT_SOURCE_DIR}/debugger/window_emulator.cpp
+    ${PROJECT_SOURCE_DIR}/debugger/window_memory.cpp
+    ${PROJECT_SOURCE_DIR}/debugger/window_registers.cpp
+    ${PROJECT_SOURCE_DIR}/debugger/window_io_map.cpp
+    ${PROJECT_SOURCE_DIR}/debugger/window_stack.cpp
 	
-    ${PROJECT_INCLUDE_DIR}/debug.h
-    ${PROJECT_INCLUDE_DIR}/font.h
+    ${PROJECT_INCLUDE_DIR}/debugger/debugger.h
+    ${PROJECT_INCLUDE_DIR}/debugger/emulator.h
+    ${PROJECT_INCLUDE_DIR}/debugger/font.h
+    ${PROJECT_INCLUDE_DIR}/debugger/colours.h
+    ${PROJECT_INCLUDE_DIR}/debugger/menubar.h
+    ${PROJECT_INCLUDE_DIR}/debugger/window.h
+    ${PROJECT_INCLUDE_DIR}/debugger/window_breakpoints.h
+    ${PROJECT_INCLUDE_DIR}/debugger/window_cart_info.h
+    ${PROJECT_INCLUDE_DIR}/debugger/window_controls.h
+    ${PROJECT_INCLUDE_DIR}/debugger/window_disassembly.h
+    ${PROJECT_INCLUDE_DIR}/debugger/window_emulator.h
+    ${PROJECT_INCLUDE_DIR}/debugger/window_memory.h
+    ${PROJECT_INCLUDE_DIR}/debugger/window_io_map.h
+    ${PROJECT_INCLUDE_DIR}/debugger/window_registers.h
+    ${PROJECT_INCLUDE_DIR}/debugger/window_stack.h
 
     ${PROJECT_LIB_DIR}/imgui/imgui.cpp
     ${PROJECT_LIB_DIR}/imgui/imgui_draw.cpp

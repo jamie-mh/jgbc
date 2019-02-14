@@ -14,10 +14,12 @@
 #define SET_FLAG(flag, value) set_flag(flag, value, &REG(F)) 
 #define GET_FLAG(flag) get_flag(flag, REG(F)) 
 
-#define PUSH8(val) stack_push_byte(gb, &REG(SP), val)
-#define POP8 stack_pop_byte(gb, &REG(SP))
-#define PUSH16(val) stack_push_short(gb, &REG(SP), val)
-#define POP16 stack_pop_short(gb, &REG(SP))
+#define PUSH8(val) stack_push_byte(gb, val)
+#define POP8() stack_pop_byte(gb)
+#define PUSH16(val) stack_push_short(gb, val)
+#define POP16() stack_pop_short(gb)
+#define PEEK8() stack_peek_byte(gb)
+#define PEEK16() stack_peek_short(gb)
 
 // Interupt Addresses
 #define INT_VBLANK 0x40
@@ -72,10 +74,12 @@ void init_cpu(GameBoy *gb);
 Instruction find_instr(GameBoy *gb, const uint16_t address);
 void execute_instr(GameBoy *);
 
-void stack_push_byte(GameBoy *gb, uint16_t *sp, const uint8_t value);
-void stack_push_short(GameBoy *gb, uint16_t *sp, const uint16_t value);
-uint8_t stack_pop_byte(GameBoy *gb, uint16_t *sp);
-uint16_t stack_pop_short(GameBoy *gb, uint16_t *sp);
+void stack_push_byte(GameBoy *gb, const uint8_t value);
+void stack_push_short(GameBoy *gb, const uint16_t value);
+uint8_t stack_pop_byte(GameBoy *gb);
+uint16_t stack_pop_short(GameBoy *gb);
+uint8_t stack_peek_byte(GameBoy *gb);
+uint16_t stack_peek_short(GameBoy *gb);
 
 void set_flag(const uint8_t flag, const uint8_t value, uint8_t *regis);
 uint8_t get_flag(const uint8_t flag, const uint8_t regis);

@@ -9,7 +9,7 @@ Individuals/hobbyists: support continued maintenance and development via the mon
 <br>&nbsp;&nbsp;[![Patreon](https://raw.githubusercontent.com/wiki/ocornut/imgui/web/patreon_01.png)](http://www.patreon.com/imgui)
 
 Individuals/hobbyists: support continued maintenance and development via PayPal:
-<br>&nbsp;&nbsp;[![PayPal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=5Q73FPZ9C526U)
+<br>&nbsp;&nbsp;[![PayPal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WGHNC6MBFLZ2S)
 
 Businesses: support continued maintenance and development via support contracts or sponsoring:
 <br>&nbsp;&nbsp;_E-mail: omarcornut at gmail dot com_
@@ -18,9 +18,9 @@ Dear ImGui is a bloat-free graphical user interface library for C++. It outputs 
 
 Dear ImGui is designed to enable fast iterations and to empower programmers to create content creation tools and visualization / debug tools (as opposed to UI for the average end-user). It favors simplicity and productivity toward this goal, and lacks certain features normally found in more high-level libraries.
 
-Dear ImGui is particularly suited to integration in games engine (for tooling), real-time 3D applications, fullscreen applications, embedded applications, or any applications on consoles platforms where operating system features are non-standard. 
+Dear ImGui is particularly suited to integration in games engine (for tooling), real-time 3D applications, fullscreen applications, embedded applications, or any applications on consoles platforms where operating system features are non-standard.
 
-See [Software using dear imgui](https://github.com/ocornut/imgui/wiki/Software-using-dear-imgui), [Quotes](https://github.com/ocornut/imgui/wiki/Quotes) and [Gallery](https://github.com/ocornut/imgui/issues/1902) pages to get an idea of its use cases.
+See [Software using dear imgui](https://github.com/ocornut/imgui/wiki/Software-using-dear-imgui), [Quotes](https://github.com/ocornut/imgui/wiki/Quotes) and [Gallery](https://github.com/ocornut/imgui/issues/2265) pages to get an idea of its use cases.
 
 Dear ImGui is self-contained within a few files that you can easily copy and compile into your application/engine:
 - imgui.cpp
@@ -76,7 +76,7 @@ ImGui::ColorEdit4("Color", my_color);
 // Plot some values
 const float my_values[] = { 0.2f, 0.1f, 1.0f, 0.5f, 0.9f, 2.2f };
 ImGui::PlotLines("Frame Times", my_values, IM_ARRAYSIZE(my_values));
- 
+
 // Display contents in a scrolling region
 ImGui::TextColored(ImVec4(1,1,0,1), "Important Stuff");
 ImGui::BeginChild("Scrolling");
@@ -90,13 +90,13 @@ Result:
 
 ### How it works
 
-Check out the References section if you want to understand the core principles behind the IMGUI paradigm. An IMGUI tries to minimize superfluous state duplication, state synchronization and state retention from the user's point of view. It is less error prone (less code and less bugs) than traditional retained-mode interfaces, and lends itself to create dynamic user interfaces. 
+Check out the References section if you want to understand the core principles behind the IMGUI paradigm. An IMGUI tries to minimize superfluous state duplication, state synchronization and state retention from the user's point of view. It is less error prone (less code and less bugs) than traditional retained-mode interfaces, and lends itself to create dynamic user interfaces.
 
-Dear ImGui outputs vertex buffers and command lists that you can easily render in your application. The number of draw calls and state changes required to render them is fairly small. Because Dear ImGui doesn't know or touch graphics state directly, you can call its functions  anywhere in your code (e.g. in the middle of a running algorithm, or in the middle of your own rendering process). Refer to the sample applications in the examples/ folder for instructions on how to integrate dear imgui with your existing codebase. 
+Dear ImGui outputs vertex buffers and command lists that you can easily render in your application. The number of draw calls and state changes required to render them is fairly small. Because Dear ImGui doesn't know or touch graphics state directly, you can call its functions  anywhere in your code (e.g. in the middle of a running algorithm, or in the middle of your own rendering process). Refer to the sample applications in the examples/ folder for instructions on how to integrate dear imgui with your existing codebase.
 
 _A common misunderstanding is to mistake immediate mode gui for immediate mode rendering, which usually implies hammering your driver/GPU with a bunch of inefficient draw calls and state changes as the gui functions are called. This is NOT what Dear ImGui does. Dear ImGui outputs vertex buffers and a small list of draw calls batches. It never touches your GPU directly. The draw call batches are decently optimal and you can render them later, in your app or even remotely._
 
-Dear ImGui allows you create elaborate tools as well as very short-lived ones. On the extreme side of short-liveness: using the Edit&Continue (hot code reload) feature of modern compilers you can add a few widgets to tweaks variables while your application is running, and remove the code a minute later! Dear ImGui is not just for tweaking values. You can use it to trace a running algorithm by just emitting text commands. You can use it along with your own reflection data to browse your dataset live. You can use it to expose the internals of a subsystem in your engine, to create a logger, an inspection tool, a profiler, a debugger, an entire game making editor/framework, etc.  
+Dear ImGui allows you create elaborate tools as well as very short-lived ones. On the extreme side of short-liveness: using the Edit&Continue (hot code reload) feature of modern compilers you can add a few widgets to tweaks variables while your application is running, and remove the code a minute later! Dear ImGui is not just for tweaking values. You can use it to trace a running algorithm by just emitting text commands. You can use it along with your own reflection data to browse your dataset live. You can use it to expose the internals of a subsystem in your engine, to create a logger, an inspection tool, a profiler, a debugger, an entire game making editor/framework, etc.
 
 Demo Binaries
 -------------
@@ -126,8 +126,9 @@ Languages: (third-party bindings)
 - Odin: [odin-dear_imgui](https://github.com/ThisDrunkDane/odin-dear_imgui)
 - Pascal: [imgui-pas](https://github.com/dpethes/imgui-pas)
 - PureBasic: [pb-cimgui](https://github.com/hippyau/pb-cimgui)
-- Python [CyImGui](https://github.com/chromy/cyimgui) or [pyimgui](https://github.com/swistakm/pyimgui)
-- Rust: [imgui-rs](https://github.com/Gekkio/imgui-rs)
+- Python: [pyimgui](https://github.com/swistakm/pyimgui) or [CyImGui](https://github.com/chromy/cyimgui) 
+- Ruby: [ruby-imgui](https://github.com/vaiorabbit/ruby-imgui)
+- Rust: [imgui-rs](https://github.com/Gekkio/imgui-rs) or [imgui-rust](https://github.com/nsf/imgui-rust)
 - Swift [swift-imgui](https://github.com/mnmly/Swift-imgui)
 
 Frameworks:
@@ -146,9 +147,9 @@ Frameworks:
 - OpenSceneGraph/OSG: [gist](https://gist.github.com/fulezi/d2442ca7626bf270226014501357042c)
 - ORX: [pr #1843](https://github.com/ocornut/imgui/pull/1843)
 - LÖVE+Lua: [love-imgui](https://github.com/slages/love-imgui)
-- Magnum: [magnum-imgui](https://github.com/lecopivo/magnum-imgui), [MagnumImguiPort](https://github.com/lecopivo/MagnumImguiPort)
+- Magnum: [ImGuiIntegration](https://doc.magnum.graphics/magnum/namespaceMagnum_1_1ImGuiIntegration.html) ([example](https://doc.magnum.graphics/magnum/examples-imgui.html))
 - NanoRT: [syoyo/imgui](https://github.com/syoyo/imgui/tree/nanort)
-- Qt3d: [imgui-qt3d](https://github.com/alpqr/imgui-qt3d), QOpenGLWindow [qtimgui](https://github.com/ocornut/imgui/issues/1910)
+- Qt: [imgui-qt3d](https://github.com/alpqr/imgui-qt3d) / [QOpenGLWindow (qtimgui)](https://github.com/ocornut/imgui/issues/1910) / [QtDirect3D](https://github.com/giladreich/QtDirect3D) / [qt6](https://github.com/alpqr/qvk6/tree/imgui/examples/rhi/imguidemo)
 - SFML: [imgui-sfml](https://github.com/EliasD/imgui-sfml)
 - Software renderer: [imgui_software_renderer](https://github.com/emilk/imgui_software_renderer)
 - Unreal Engine 4: [segross/UnrealImGui](https://github.com/segross/UnrealImGui) or [sronsse/UnrealEngine_ImGui](https://github.com/sronsse/UnrealEngine_ImGui)
@@ -174,7 +175,8 @@ User screenshots:
 <br>[Gallery Part 4](https://github.com/ocornut/imgui/issues/973) (Jan 2017 to Aug 2017)
 <br>[Gallery Part 5](https://github.com/ocornut/imgui/issues/1269) (Aug 2017 to Feb 2018)
 <br>[Gallery Part 6](https://github.com/ocornut/imgui/issues/1607) (Feb 2018 to June 2018)
-<br>[Gallery Part 7](https://github.com/ocornut/imgui/issues/1902) (June 2018 onward)
+<br>[Gallery Part 7](https://github.com/ocornut/imgui/issues/1902) (June 2018 to January 2019)
+<br>[Gallery Part 8](https://github.com/ocornut/imgui/issues/2265) (January 2019 onward)
 <br>Also see the [Mega screenshots](https://github.com/ocornut/imgui/issues/1273) for an idea of the available features.
 
 Custom engine
@@ -192,7 +194,7 @@ Demo window
 References
 ----------
 
-The Immediate Mode GUI paradigm may at first appear unusual to some users. This is mainly because "Retained Mode" GUIs have been so widespread and predominant. The following links can give you a better understanding about how Immediate Mode GUIs works. 
+The Immediate Mode GUI paradigm may at first appear unusual to some users. This is mainly because "Retained Mode" GUIs have been so widespread and predominant. The following links can give you a better understanding about how Immediate Mode GUIs works.
 - [Johannes 'johno' Norneby's article](http://www.johno.se/book/imgui.html).
 - [A presentation by Rickard Gustafsson and Johannes Algelind](http://www.cse.chalmers.se/edu/year/2011/course/TDA361/Advanced%20Computer%20Graphics/IMGUI.pdf).
 - [Jari Komppa's tutorial on building an ImGui library](http://iki.fi/sol/imgui/).
@@ -205,7 +207,7 @@ See the [Wiki](https://github.com/ocornut/imgui/wiki) for more references and [B
 Support Forums
 --------------
 
-If you have issues with: compiling, linking, adding fonts, running or displaying Dear ImGui, or wiring inputs: please post on the Discourse forum: https://discourse.dearimgui.org.
+If you have issues with: compiling, linking, adding fonts, running or displaying Dear ImGui, or wiring inputs: please post on the Discourse forums: https://discourse.dearimgui.org.
 
 For any other questions, bug reports, requests, feedback, you may post on https://github.com/ocornut/imgui/issues. Please read and fill the New Issue template carefully.
 
@@ -214,15 +216,15 @@ Frequently Asked Question (FAQ)
 
 **Where is the documentation?**
 
-- The documentation is at the top of imgui.cpp + effectively imgui.h. 
-- Example code is in imgui_demo.cpp and particularly the ImGui::ShowDemoWindow() function. It covers most features of ImGui so you can read the code and call the function itself to see its output. 
-- Standalone example applications using e.g. OpenGL/DirectX are provided in the examples/ folder. 
+- The documentation is at the top of imgui.cpp + effectively imgui.h.
+- Example code is in imgui_demo.cpp and particularly the ImGui::ShowDemoWindow() function. It covers most features of ImGui so you can read the code and call the function itself to see its output.
+- Standalone example applications using e.g. OpenGL/DirectX are provided in the examples/ folder.
 - We obviously needs better documentation! Consider contributing or becoming a [Patron](http://www.patreon.com/imgui) to promote this effort.
-- Your programming IDE is your friend, find the type or function declaration to find comments associated to it. 
+- Your programming IDE is your friend, find the type or function declaration to find comments associated to it.
 
 **Which version should I get?**
 
-I occasionally tag [Releases](https://github.com/ocornut/imgui/releases) but it is generally safe and recommended to sync to master/latest. The library is fairly stable and regressions tend to be fixed fast when reported. 
+I occasionally tag [Releases](https://github.com/ocornut/imgui/releases) but it is generally safe and recommended to sync to master/latest. The library is fairly stable and regressions tend to be fixed fast when reported.
 
 You may also peak at the [Multi-Viewport](https://github.com/ocornut/imgui/issues/1542) and [Docking](https://github.com/ocornut/imgui/issues/2109) branches. Even though they are marked beta, several projects are using them and they are kept in sync with master regularly.
 
@@ -236,12 +238,13 @@ The library started its life and is best known as "ImGui" only due to the fact t
 
 **How can I tell whether to dispatch mouse/keyboard to imgui or to my application?**
 <br>**How can I display an image? What is ImTextureID, how does it works?**
-<br>**How can I have multiple widgets with the same label or without a label? A primer on labels and the ID Stack.**
+<br>**How can I have multiple widgets with the same label or with an empty label? A primer on labels and the ID Stack.**
 <br>**How can I use my own math types instead of ImVec2/ImVec4?**
 <br>**How can I load a different font than the default?**
 <br>**How can I easily use icons in my application?**
 <br>**How can I load multiple fonts?**
 <br>**How can I display and input non-latin characters such as Chinese, Japanese, Korean, Cyrillic?** ([example](https://github.com/ocornut/imgui/wiki/Loading-Font-Example))
+<br>**How can I interact with standard C++ types (such as std::string and std::vector)?**
 <br>**How can I use the drawing facilities without an Dear ImGui window? (using ImDrawList API)**
 <br>**How can I use this without a mouse, without a keyboard or without a screen? (gamepad, input share, remote display)**
 <br>**I integrated Dear ImGui in my engine and the text or lines are blurry..**
@@ -273,9 +276,9 @@ Support dear imgui
 
 **How can I help?**
 
-- You may participate in the Discourse and GitHub [issues trackers](https://github.com/ocornut/imgui/issues).
+- You may participate in the [Discourse forums](https://discourse.dearimgui.org) and the GitHub [issues tracker](https://github.com/ocornut/imgui/issues).
 - You may help with development and submit pull requests! Please understand that by submitting a PR you are also submitting a request for the maintainer to review your code and then take over its maintenance forever. PR should be crafted both in the interest in the end-users and also to ease the maintainer into understanding and accepting it.
-- See [Help wanted](https://github.com/ocornut/imgui/wiki/Help-Wanted) on the Wiki for some more ideas.
+- See [Help wanted](https://github.com/ocornut/imgui/wiki/Help-Wanted) on the [Wiki](https://github.com/ocornut/imgui/wiki/) for some more ideas.
 - Convince your company to financially support this project.
 
 **How can I help financing further development of Dear ImGui?**
@@ -286,7 +289,7 @@ Individuals/hobbyists: support continued maintenance and development via the mon
 <br>&nbsp;&nbsp;[![Patreon](https://raw.githubusercontent.com/wiki/ocornut/imgui/web/patreon_01.png)](http://www.patreon.com/imgui)
 
 Individuals/hobbyists: support continued maintenance and development via PayPal:
-<br>&nbsp;&nbsp;[![PayPal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=5Q73FPZ9C526U)
+<br>&nbsp;&nbsp;[![PayPal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WGHNC6MBFLZ2S)
 
 Businesses: support continued maintenance and development via support contracts or sponsoring:
 <br>&nbsp;&nbsp;_E-mail: omarcornut at gmail dot com_
@@ -297,7 +300,7 @@ Ongoing dear imgui development is financially supported by users and private spo
 - **Blizzard Entertainment**.
 
 **Double-chocolate sponsors**
-- Media Molecule, Mobigame, Insomniac Games, Aras Pranckevičius, Lizardcube, Greggman, DotEmu, Nadeo, Supercell, Runner, Aiden Koss.
+- Media Molecule, Mobigame, Insomniac Games, Aras Pranckevičius, Lizardcube, Greggman, DotEmu, Nadeo, Supercell, Runner, Aiden Koss, Kylotonn.
 
 **Salty caramel supporters**
 - Jetha Chan, Wild Sheep Studio, Pastagames, Mārtiņš Možeiko, Daniel Collin, Recognition Robotics, Chris Genova, ikrima, Glenn Fiedler, Geoffrey Evans, Dakko Dakko, Mercury Labs, Singularity Demo Group, Mischa Alff, Sebastien Ronsse, Lionel Landwerlin, Nikolay Ivanov, Ron Gilbert, Brandon Townsend, Nikhil Deshpande, Cort Stratton, drudru, Harfang 3D, Jeff Roberts, Rainway inc.
@@ -311,9 +314,9 @@ And all other supporters; THANK YOU!
 Credits
 -------
 
-Developed by [Omar Cornut](http://www.miracleworld.net) and every direct or indirect contributors to the GitHub. The early version of this library was developed with the support of [Media Molecule](http://www.mediamolecule.com) and first used internally on the game [Tearaway](http://tearaway.mediamolecule.com). 
+Developed by [Omar Cornut](http://www.miracleworld.net) and every direct or indirect contributors to the GitHub. The early version of this library was developed with the support of [Media Molecule](http://www.mediamolecule.com) and first used internally on the game [Tearaway](http://tearaway.mediamolecule.com).
 
-I first discovered the IMGUI paradigm at [Q-Games](http://www.q-games.com) where Atman had dropped his own simple implementation in the codebase, which I spent quite some time improving and thinking about. It turned out that Atman was exposed to the concept directly by working with Casey. When I moved to Media Molecule I rewrote a new library trying to overcome the flaws and limitations of the first one I've worked with. It became this library and since then I have spent an unreasonable amount of time iterating on it. 
+I first discovered the IMGUI paradigm at [Q-Games](http://www.q-games.com) where Atman had dropped his own simple implementation in the codebase, which I spent quite some time improving and thinking about. It turned out that Atman was exposed to the concept directly by working with Casey. When I moved to Media Molecule I rewrote a new library trying to overcome the flaws and limitations of the first one I've worked with. It became this library and since then I have spent an unreasonable amount of time iterating on it.
 
 Embeds [ProggyClean.ttf](http://upperbounds.net) font by Tristan Grimmer (MIT license).
 

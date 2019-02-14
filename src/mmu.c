@@ -17,22 +17,22 @@ void init_mmu(GameBoy *gb) {
 
     gb->mmu.vram_banks = malloc(sizeof(uint8_t *) * VRAM_BANK_COUNT);
     for(uint8_t i = 0; i < VRAM_BANK_COUNT; ++i) {
-        gb->mmu.vram_banks[i] = malloc(VRAM_BANK_SIZE * sizeof(uint8_t));
+        gb->mmu.vram_banks[i] = calloc(VRAM_BANK_SIZE, sizeof(uint8_t));
     }
 
     gb->mmu.wram_banks = malloc(sizeof(uint8_t *) * WRAM_BANK_COUNT); 
     for(uint8_t i = 0; i < WRAM_BANK_COUNT; ++i) {
-        gb->mmu.wram_banks[i] = malloc(WRAM_BANK_SIZE * sizeof(uint8_t));
+        gb->mmu.wram_banks[i] = calloc(WRAM_BANK_SIZE, sizeof(uint8_t));
     }
 
     gb->mmu.vram = gb->mmu.vram_banks[0];
     gb->mmu.wram00 = gb->mmu.wram_banks[0];
     gb->mmu.wramNN = gb->mmu.wram_banks[1];
     
-    gb->mmu.oam = malloc(OAM_SIZE * sizeof(uint8_t));
-    gb->mmu.io = malloc(IO_SIZE * sizeof(uint8_t));
-    gb->mmu.hram = malloc(HRAM_SIZE * sizeof(uint8_t));
-    gb->mmu.ier = malloc(1 * sizeof(uint8_t));
+    gb->mmu.oam = calloc(OAM_SIZE, sizeof(uint8_t));
+    gb->mmu.io = calloc(IO_SIZE, sizeof(uint8_t));
+    gb->mmu.hram = calloc(HRAM_SIZE, sizeof(uint8_t));
+    gb->mmu.ier = calloc(1, sizeof(uint8_t));
 }
 
 static uint8_t *get_memory(GameBoy *gb, uint16_t *address) {

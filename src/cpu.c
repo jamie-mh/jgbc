@@ -27,10 +27,10 @@ void init_cpu(GameBoy *gb) {
 */
 
 Instruction find_instr(GameBoy *gb, const uint16_t address) {
-    const uint8_t opcode = read_byte(gb, address, false);
+    const uint8_t opcode = SREAD8(address);
 
     if(opcode == 0xCB) {
-        const uint8_t next_opcode = read_byte(gb, address + 1, false);
+        const uint8_t next_opcode = SREAD8(address + 1);
         return cb_instructions[next_opcode];
     } else {
         return instructions[opcode];
@@ -103,26 +103,37 @@ uint8_t get_flag(const uint8_t flag, const uint8_t regis) {
     Stack
 */
 
-void stack_push_byte(GameBoy *gb, uint16_t *sp, const uint8_t value) {
-    *sp -= sizeof(uint8_t);
-    write_byte(gb, *sp, value, true);
+void stack_push_byte(GameBoy *gb, const uint8_t value) {
+	REG(SP)--;
+	WRITE8(REG(SP), value);
 }
 
-void stack_push_short(GameBoy *gb, uint16_t *sp, const uint16_t value) {
-    stack_push_byte(gb, sp, (value & 0xFF00) >> 8);
-    stack_push_byte(gb, sp, value & 0x00FF);
+void stack_push_short(GameBoy *gb, const uint16_t value) {
+	PUSH8((value & 0xFF00) >> 8);
+	PUSH8(value & 0x00FF);
 }
 
-uint8_t stack_pop_byte(GameBoy *gb, uint16_t *sp) {
-    const uint8_t value = read_byte(gb, *sp, false);
-    *sp += sizeof(uint8_t);
+uint8_t stack_pop_byte(GameBoy *gb) {
+	const uint8_t value = READ8(REG(SP));
+	REG(SP)++;
 
     return value;
 }
 
-uint16_t stack_pop_short(GameBoy *gb, uint16_t *sp) {
-    const uint8_t byte_a = stack_pop_byte(gb, sp); 
-    const uint8_t byte_b = stack_pop_byte(gb, sp); 
+uint16_t stack_pop_short(GameBoy *gb) {
+	const uint8_t byte_a = POP8();
+	const uint8_t byte_b = POP8();
+
+    return byte_a | (byte_b << 8);
+}
+
+uint8_t stack_peek_byte(GameBoy *gb) {
+	return SREAD8(REG(SP));
+}
+
+uint16_t stack_peek_short(GameBoy *gb) {
+	const uint8_t byte_a = SREAD8(REG(SP));
+	const uint8_t byte_b = SREAD8(REG(SP) + 1);
 
     return byte_a | (byte_b << 8);
 }
@@ -160,7 +171,7 @@ static void service_interrupt(GameBoy *gb, const uint8_t number) {
     };
 
     assert(number < 5);
-    stack_push_short(gb, &REG(SP), REG(PC));
+	PUSH16(REG(PC));
     
     write_register(gb, IF, number, 0);
     REG(IME) = false;
