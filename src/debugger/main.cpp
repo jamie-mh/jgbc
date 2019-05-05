@@ -9,8 +9,8 @@ int main(const int argc, char **argv) {
         return EXIT_FAILURE; 
     }
 
-	Debugger debugger(argv[1]);
-	debugger.run();
+    Debugger debugger(argv[1]);
+    debugger.run();
 
     return EXIT_SUCCESS;
 }

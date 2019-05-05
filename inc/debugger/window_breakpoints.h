@@ -3,10 +3,10 @@
 
 class Debugger;
 class WindowBreakpoints final : public Window {
-	private:
-		Debugger &_dbg;
+    private:
+        Debugger &_dbg;
 
-	public:
-		WindowBreakpoints(Debugger &dbg) : _dbg(dbg) { }
-		void render() override;
+    public:
+        WindowBreakpoints(Debugger &dbg) : _dbg(dbg) { }
+        void render() override;
 };

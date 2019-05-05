@@ -3,6 +3,7 @@
 #include "cpu.h"
 #include "mmu.h"
 #include "mbc.h"
+#include "apu.h"
 #include "input.h"
 
 static uint8_t *get_memory(GameBoy *gb, uint16_t *address);
@@ -162,6 +163,10 @@ void write_byte(GameBoy *gb, uint16_t address, uint8_t value, const bool is_prog
         value = 0x0;
     }
 
+    if(is_program && (address >= NR10 && address <= NR52)) {
+        audio_register_write(gb, address, value);
+    }
+
     uint8_t *mem = get_memory(gb, &address);
     mem[address] = value;
 }
@@ -190,7 +195,7 @@ static void DMA_transfer(GameBoy *gb, const uint8_t value) {
     const uint16_t address = value * 0x100;
 
     for(uint8_t i = 0; i <= 0x9F; ++i) {
-		SWRITE8(0xFE00 + i, SREAD8(address + i));
+        SWRITE8(0xFE00 + i, SREAD8(address + i));
     }
     get_sprites(gb);
 }

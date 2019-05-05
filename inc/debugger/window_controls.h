@@ -3,12 +3,12 @@
 
 class Debugger;
 class WindowControls final : public Window {
-	public:
-		WindowControls(Debugger &dbg) : _dbg(dbg) { }
-		void render() override;
+    public:
+        WindowControls(Debugger &dbg) : _dbg(dbg) { }
+        void render() override;
 
     private:
-		Debugger &_dbg;
+        Debugger &_dbg;
 
         void step_into();
         void step_over();

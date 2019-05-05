@@ -4,10 +4,10 @@
 #include "debugger/debugger.h"
 
 class MenuBar final {
-	private:
-		Debugger &_dbg;
+    private:
+        Debugger &_dbg;
 
-	public:
-		MenuBar(Debugger &dbg): _dbg(dbg) { };
-		void render() const;
+    public:
+        MenuBar(Debugger &dbg): _dbg(dbg) { };
+        void render() const;
 };

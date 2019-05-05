@@ -11,20 +11,20 @@
 
 Debugger::Debugger(const char *rom_path) {
 
-	Emulator::init(&gb);
+    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
+    Emulator::init(&gb);
 
     if(!Emulator::load_rom(&gb, rom_path)) {
         fprintf(stderr, "ERROR: Cannot load rom file\n");
         exit(EXIT_FAILURE);
     }
 
-    SDL_Init(SDL_INIT_VIDEO);
     _window = SDL_CreateWindow(
         WINDOW_TITLE, 
         SDL_WINDOWPOS_CENTERED, 
         SDL_WINDOWPOS_CENTERED, 
         WINDOW_WIDTH, 
-		WINDOW_HEIGHT,
+        WINDOW_HEIGHT,
         SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE
     );
 
@@ -35,15 +35,16 @@ Debugger::Debugger(const char *rom_path) {
     snprintf(buffer, 50, "%s - %s (DEBUGGER)", WINDOW_TITLE, gb.cart.title);
     SDL_SetWindowTitle(_window, buffer);
 
-	_windows.push_back(new WindowBreakpoints(*this));
-	_windows.push_back(new WindowCartInfo(gb));
-	_windows.push_back(new WindowIO(gb));
-	_windows.push_back(new WindowControls(*this));
-	_windows.push_back(new WindowDisassembly(*this));
-	_windows.push_back(new WindowEmulator(gb));
-	_windows.push_back(new WindowMemory(gb));
-	_windows.push_back(new WindowRegisters(gb));
-	_windows.push_back(new WindowStack(gb));
+    _windows.push_back(new WindowBreakpoints(*this));
+    _windows.push_back(new WindowCartInfo(gb));
+    _windows.push_back(new WindowIO(gb));
+    _windows.push_back(new WindowAudio(gb));
+    _windows.push_back(new WindowControls(*this));
+    _windows.push_back(new WindowDisassembly(*this));
+    _windows.push_back(new WindowEmulator(gb));
+    _windows.push_back(new WindowMemory(gb));
+    _windows.push_back(new WindowRegisters(gb));
+    _windows.push_back(new WindowStack(gb));
 }
 
 void Debugger::init_gl() {
@@ -69,18 +70,18 @@ void Debugger::init_imgui() const {
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-	auto &io = ImGui::GetIO();
+    auto &io = ImGui::GetIO();
 
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
     ImGui_ImplSDL2_InitForOpenGL(_window, _gl_context);
     ImGui_ImplOpenGL3_Init();
 
-	ImGui::StyleColorsDark();
-	auto &style = ImGui::GetStyle();
-	style.ScrollbarSize = 20.0f;
-	style.GrabMinSize = 20.0f;
-	style.ScrollbarRounding = 0.0f;
+    ImGui::StyleColorsDark();
+    auto &style = ImGui::GetStyle();
+    style.ScrollbarSize = 20.0f;
+    style.GrabMinSize = 20.0f;
+    style.ScrollbarRounding = 0.0f;
 
     io.Fonts->AddFontFromMemoryCompressedTTF(
         LiberationMono_compressed_data, 
@@ -113,20 +114,21 @@ void Debugger::run() {
 
             Emulator::execute_instr(&gb);
             Emulator::update_timer(&gb);
+            Emulator::update_apu(&gb);
             Emulator::update_ppu(&gb);
             Emulator::check_interrupts(&gb);
 
             frame_ticks += gb.cpu.ticks;
-			
-			if(gb.cpu.reg.PC == next_stop) {
-				next_stop = 0;
-				is_paused = true;
-			}
+            
+            if(gb.cpu.reg.PC == next_stop) {
+                next_stop = 0;
+                is_paused = true;
+            }
 
-			if(is_breakpoint(gb.cpu.reg.PC)) {
-				get_window_disassembly().set_goto_addr(gb.cpu.reg.PC);
-				is_paused = true;
-			}
+            if(is_breakpoint(gb.cpu.reg.PC)) {
+                get_window_disassembly().set_goto_addr(gb.cpu.reg.PC);
+                is_paused = true;
+            }
         }
 
         frame_ticks -= max_ticks;
@@ -183,9 +185,9 @@ void Debugger::render() {
 
     ImGui::DockSpace(ImGui::GetID("##dockspace"), ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruDockspace);
 
-	_menu.render();
-	for(auto &window : _windows)
-		window->render();
+    _menu.render();
+    for(auto &window : _windows)
+        window->render();
 
     //ImGui::ShowDemoWindow();
     ImGui::End();
@@ -202,34 +204,34 @@ void Debugger::render() {
 }
 
 size_t Debugger::breakpoint_count() const {
-	return _breakpoints.size();
+    return _breakpoints.size();
 }
 
 bool Debugger::is_breakpoint(const uint16_t addr) const {
-	for(auto bp : _breakpoints) {
-		if(bp == addr)
-			return true;
-	}
+    for(auto bp : _breakpoints) {
+        if(bp == addr)
+            return true;
+    }
 
-	return false;
+    return false;
 }
 
 void Debugger::add_breakpoint(const uint16_t addr) {
-	if(is_breakpoint(addr))
-		return;
+    if(is_breakpoint(addr))
+        return;
 
-	_breakpoints.push_back(addr);
+    _breakpoints.push_back(addr);
 }
 
 void Debugger::remove_breakpoint(const uint16_t addr) {
-	for(unsigned int i = 0; i < _breakpoints.size(); ++i) {
-		if(_breakpoints[i] == addr) {
-			_breakpoints.erase(_breakpoints.begin() + i);
-			return;
-		}
-	}
+    for(unsigned int i = 0; i < _breakpoints.size(); ++i) {
+        if(_breakpoints[i] == addr) {
+            _breakpoints.erase(_breakpoints.begin() + i);
+            return;
+        }
+    }
 }
 
 const std::vector<uint16_t>& Debugger::get_breakpoints() const {
-	return _breakpoints;
+    return _breakpoints;
 }

@@ -104,36 +104,36 @@ uint8_t get_flag(const uint8_t flag, const uint8_t regis) {
 */
 
 void stack_push_byte(GameBoy *gb, const uint8_t value) {
-	REG(SP)--;
-	WRITE8(REG(SP), value);
+    REG(SP)--;
+    WRITE8(REG(SP), value);
 }
 
 void stack_push_short(GameBoy *gb, const uint16_t value) {
-	PUSH8((value & 0xFF00) >> 8);
-	PUSH8(value & 0x00FF);
+    PUSH8((value & 0xFF00) >> 8);
+    PUSH8(value & 0x00FF);
 }
 
 uint8_t stack_pop_byte(GameBoy *gb) {
-	const uint8_t value = READ8(REG(SP));
-	REG(SP)++;
+    const uint8_t value = READ8(REG(SP));
+    REG(SP)++;
 
     return value;
 }
 
 uint16_t stack_pop_short(GameBoy *gb) {
-	const uint8_t byte_a = POP8();
-	const uint8_t byte_b = POP8();
+    const uint8_t byte_a = POP8();
+    const uint8_t byte_b = POP8();
 
     return byte_a | (byte_b << 8);
 }
 
 uint8_t stack_peek_byte(GameBoy *gb) {
-	return SREAD8(REG(SP));
+    return SREAD8(REG(SP));
 }
 
 uint16_t stack_peek_short(GameBoy *gb) {
-	const uint8_t byte_a = SREAD8(REG(SP));
-	const uint8_t byte_b = SREAD8(REG(SP) + 1);
+    const uint8_t byte_a = SREAD8(REG(SP));
+    const uint8_t byte_b = SREAD8(REG(SP) + 1);
 
     return byte_a | (byte_b << 8);
 }
@@ -171,7 +171,7 @@ static void service_interrupt(GameBoy *gb, const uint8_t number) {
     };
 
     assert(number < 5);
-	PUSH16(REG(PC));
+    PUSH16(REG(PC));
     
     write_register(gb, IF, number, 0);
     REG(IME) = false;

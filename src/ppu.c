@@ -49,6 +49,7 @@ void init_window(GameBoy *gb) {
     );
 
     SDL_RenderSetLogicalSize(gb->ppu.renderer, SCREEN_WIDTH, SCREEN_HEIGHT);
+    SDL_SetWindowMinimumSize(gb->ppu.window, SCREEN_WIDTH, SCREEN_HEIGHT);
 
     SDL_DisplayMode mode;
     mode.refresh_rate = FRAMERATE;

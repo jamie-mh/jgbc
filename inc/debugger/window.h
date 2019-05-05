@@ -3,7 +3,7 @@
 class Debugger;
 class Window {
     public:
-		Window() = default;
+        Window() = default;
         virtual ~Window() = default;
 
         bool is_open = true;

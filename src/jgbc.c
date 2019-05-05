@@ -12,6 +12,7 @@ void init(GameBoy *gb) {
     init_mmu(gb);
     init_ppu(gb);
     init_input(gb);
+    init_apu(gb);
     init_hw_registers(gb);
 }
 

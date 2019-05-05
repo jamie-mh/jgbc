@@ -17,6 +17,7 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE; 
     }
 
+    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
     GameBoy *gb = malloc(sizeof(GameBoy));
     init(gb);
 
@@ -25,12 +26,12 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
 
-    SDL_Init(SDL_INIT_VIDEO);
     init_window(gb);
 
     print_cart_info(gb);
     set_window_title(gb);
 
+    SDL_PauseAudioDevice(gb->apu.device_id, 0);
     run(gb);
 
     SDL_Quit();
@@ -52,6 +53,7 @@ static void run(GameBoy *gb) {
 
             update_ppu(gb);
             update_timer(gb);
+            update_apu(gb);
             check_interrupts(gb);
 
             frame_ticks += gb->cpu.ticks;

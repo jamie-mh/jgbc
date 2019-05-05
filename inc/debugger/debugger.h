@@ -22,6 +22,7 @@
 #include "debugger/window_registers.h"
 #include "debugger/window_io.h"
 #include "debugger/window_stack.h"
+#include "debugger/window_audio.h"
 
 constexpr unsigned int WINDOW_WIDTH = 1500;
 constexpr unsigned int WINDOW_HEIGHT = 900;
@@ -35,43 +36,44 @@ const ImVec4 CURR_COLOUR { 0.46f, 1.0f, 0.01f, 1.0f };
 
 class Debugger final {
     public:
-		static constexpr unsigned int WINDOW_COUNT = 8;
+        static constexpr unsigned int WINDOW_COUNT = 8;
 
         bool is_paused = true;
-		uint16_t next_stop;
+        uint16_t next_stop;
 
         Emulator::GameBoy gb;
 
         Debugger(const char *rom_path);
         ~Debugger();
 
-		size_t breakpoint_count() const;
-		bool is_breakpoint(uint16_t addr) const;
-		void add_breakpoint(uint16_t addr);
-		void remove_breakpoint(uint16_t addr);
-		const std::vector<uint16_t>& get_breakpoints() const;
+        size_t breakpoint_count() const;
+        bool is_breakpoint(uint16_t addr) const;
+        void add_breakpoint(uint16_t addr);
+        void remove_breakpoint(uint16_t addr);
+        const std::vector<uint16_t>& get_breakpoints() const;
 
         void run();
         void render();
 
-		inline WindowBreakpoints &get_window_breakpoints() { return *static_cast<WindowBreakpoints *>(_windows[0]); }
-		inline WindowCartInfo &get_window_cart_info() { return *static_cast<WindowCartInfo *>(_windows[1]); }
-		inline WindowIO &get_window_io() { return *static_cast<WindowIO *>(_windows[2]); }
-		inline WindowControls &get_window_controls() { return *static_cast<WindowControls *>(_windows[3]); }
-		inline WindowDisassembly &get_window_disassembly() { return *static_cast<WindowDisassembly *>(_windows[4]); }
-		inline WindowEmulator &get_window_emulator() { return *static_cast<WindowEmulator *>(_windows[5]); }
-		inline WindowMemory &get_window_memory() { return *static_cast<WindowMemory *>(_windows[6]); }
-		inline WindowRegisters &get_window_registers() { return *static_cast<WindowRegisters *>(_windows[7]); }
-		inline WindowStack &get_window_stack() { return *static_cast<WindowStack *>(_windows[8]); }
+        inline WindowBreakpoints &get_window_breakpoints() { return *static_cast<WindowBreakpoints *>(_windows[0]); }
+        inline WindowCartInfo &get_window_cart_info() { return *static_cast<WindowCartInfo *>(_windows[1]); }
+        inline WindowIO &get_window_io() { return *static_cast<WindowIO *>(_windows[2]); }
+        inline WindowAudio &get_window_audio() { return *static_cast<WindowAudio *>(_windows[3]); }
+        inline WindowControls &get_window_controls() { return *static_cast<WindowControls *>(_windows[4]); }
+        inline WindowDisassembly &get_window_disassembly() { return *static_cast<WindowDisassembly *>(_windows[5]); }
+        inline WindowEmulator &get_window_emulator() { return *static_cast<WindowEmulator *>(_windows[6]); }
+        inline WindowMemory &get_window_memory() { return *static_cast<WindowMemory *>(_windows[7]); }
+        inline WindowRegisters &get_window_registers() { return *static_cast<WindowRegisters *>(_windows[8]); }
+        inline WindowStack &get_window_stack() { return *static_cast<WindowStack *>(_windows[9]); }
 
     private:
         SDL_Window *_window;
         SDL_GLContext _gl_context;
 
-		std::vector<uint16_t> _breakpoints;
+        std::vector<uint16_t> _breakpoints;
 
-		MenuBar _menu = MenuBar(*this);
-		std::vector<Window *> _windows;
+        MenuBar _menu = MenuBar(*this);
+        std::vector<Window *> _windows;
 
         void init_gl();
         void init_imgui() const;

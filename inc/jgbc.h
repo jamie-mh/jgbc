@@ -104,8 +104,69 @@ typedef struct MMU {
 }
 MMU;
 
+typedef enum EnvelopeMode {
+    Decrease = 0,
+    Increase = 1
+}
+EnvelopeMode;
+
+typedef struct SquareWave1 {
+    bool enabled;
+    bool dac_enabled;
+
+    struct {
+        uint8_t period;
+        bool negate;
+        uint8_t shift;
+    }
+    sweep;
+
+    struct {
+        uint8_t initial_volume;
+        uint8_t current_volume;
+        EnvelopeMode mode;
+        uint8_t period;
+    }
+    envelope;
+
+    struct {
+        uint8_t mode;
+        uint8_t step;
+    }
+    duty;
+
+    struct {
+        bool enabled;
+        uint8_t initial;
+        uint8_t counter;
+    }
+    length;
+
+    int32_t clock;
+    uint16_t frequency;
+}
+SquareWave1;
+
 typedef struct APU {
     bool enabled;
+    SDL_AudioDeviceID device_id;
+    SDL_AudioSpec desired_spec;
+    SDL_AudioSpec actual_spec;
+
+    struct {
+        float *data;
+        uint32_t size;
+        uint32_t read_cursor;
+        uint32_t write_cursor;
+    }
+    buffer;
+    
+    uint8_t frame_sequencer_step;
+    uint16_t frame_sequencer_clock;
+    uint8_t downsample_clock;
+
+    uint8_t channels[1];
+    SquareWave1 square_wave_1;
 }
 APU;
 

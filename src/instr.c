@@ -1040,7 +1040,7 @@ void op_ret_nz(GameBoy *gb) {
 
 // 0xC1: POP BC (- - - -)
 void op_pop_bc(GameBoy *gb) {
-	REG(BC) = POP16();
+    REG(BC) = POP16();
     TICK(2);
 }
 
@@ -1066,7 +1066,7 @@ void op_call_nz_a16(GameBoy *gb, uint16_t operand) {
 
 // 0xC5: PUSH BC (- - - -)
 void op_push_bc(GameBoy *gb) {
-	PUSH16(REG(BC));
+    PUSH16(REG(BC));
     TICK(3);
 }
 
@@ -1077,7 +1077,7 @@ void op_add_a_d8(GameBoy *gb, uint8_t operand) {
 
 // 0xC7: RST 00H (- - - -)
 void op_rst_00h(GameBoy *gb) {
-	PUSH16(REG(PC));
+    PUSH16(REG(PC));
     REG(PC) = 0x0;
     TICK(3);
 }
@@ -1092,7 +1092,7 @@ void op_ret_z(GameBoy *gb) {
 
 // 0xC9: RET (- - - -)
 void op_ret(GameBoy *gb) {
-	REG(PC) = POP16();
+    REG(PC) = POP16();
     TICK(3);
 }
 
@@ -1117,7 +1117,7 @@ void op_call_z_a16(GameBoy *gb, uint16_t operand) {
 
 // 0xCD: CALL a16 (- - - -)
 void op_call_a16(GameBoy *gb, uint16_t operand) {
-	PUSH16(REG(PC));
+    PUSH16(REG(PC));
     REG(PC) = operand;
     TICK(3);
 }
@@ -1129,7 +1129,7 @@ void op_adc_a_d8(GameBoy *gb, uint8_t operand) {
 
 // 0xCF: RST 08H (- - - -)
 void op_rst_08h(GameBoy *gb) {
-	PUSH16(REG(PC));
+    PUSH16(REG(PC));
     REG(PC) = 0x8;
     TICK(3);
 }
@@ -1144,7 +1144,7 @@ void op_ret_nc(GameBoy *gb) {
 
 // 0xD1: POP DE (- - - -)
 void op_pop_de(GameBoy *gb) {
-	REG(DE) = POP16();
+    REG(DE) = POP16();
     TICK(2);
 }
 
@@ -1164,7 +1164,7 @@ void op_call_nc_a16(GameBoy *gb, uint16_t operand) {
 
 // 0xD5: PUSH DE (- - - -)
 void op_push_de(GameBoy *gb) {
-	PUSH16(REG(DE));
+    PUSH16(REG(DE));
     TICK(3);
 }
 
@@ -1175,7 +1175,7 @@ void op_sub_d8(GameBoy *gb, uint8_t operand) {
 
 // 0xD7: RST 10H (- - - -)
 void op_rst_10h(GameBoy *gb) {
-	PUSH16(REG(PC));
+    PUSH16(REG(PC));
     REG(PC) = 0x10;
     TICK(3);
 }
@@ -1215,7 +1215,7 @@ void op_sbc_a_d8(GameBoy *gb, uint8_t operand) {
 
 // 0xDF: RST 18H (- - - -)
 void op_rst_18h(GameBoy *gb) {
-	PUSH16(REG(PC));
+    PUSH16(REG(PC));
     REG(PC) = 0x18;
     TICK(3);
 }
@@ -1228,7 +1228,7 @@ void op_ldh_a8p_a(GameBoy *gb, uint8_t operand) {
 
 // 0xE1: POP HL (- - - -)
 void op_pop_hl(GameBoy *gb) {
-	REG(HL) = POP16();
+    REG(HL) = POP16();
     TICK(2);
 }
 
@@ -1240,7 +1240,7 @@ void op_ld_cp_a(GameBoy *gb) {
 
 // 0xE5: PUSH HL (- - - -)
 void op_push_hl(GameBoy *gb) {
-	PUSH16(REG(HL));
+    PUSH16(REG(HL));
     TICK(3);
 }
 
@@ -1251,7 +1251,7 @@ void op_and_d8(GameBoy *gb, uint8_t operand) {
 
 // 0xE7: RST 20H (- - - -)
 void op_rst_20h(GameBoy *gb) {
-	PUSH16(REG(PC));
+    PUSH16(REG(PC));
     REG(PC) = 0x20;
     TICK(3);
 }
@@ -1280,7 +1280,7 @@ void op_xor_d8(GameBoy *gb, uint8_t operand) {
 
 // 0xEF: RST 28H (- - - -)
 void op_rst_28h(GameBoy *gb) {
-	PUSH16(REG(PC));
+    PUSH16(REG(PC));
     REG(PC) = 0x28;
     TICK(3);
 }
@@ -1293,7 +1293,7 @@ void op_ldh_a_a8p(GameBoy *gb, uint8_t operand) {
 
 // 0xF1: POP AF (Z N H C)
 void op_pop_af(GameBoy *gb) {
-	REG(AF) = POP16();
+    REG(AF) = POP16();
     TICK(2);
     // The unused bits are cleared
     REG(F) &= 0xF0;
@@ -1312,7 +1312,7 @@ void op_di(GameBoy *gb) {
 
 // 0xF5: PUSH AF (- - - -)
 void op_push_af(GameBoy *gb) {
-	PUSH16(REG(AF));
+    PUSH16(REG(AF));
     TICK(3);
 }
 
@@ -1323,7 +1323,7 @@ void op_or_d8(GameBoy *gb, uint8_t operand) {
 
 // 0xF7: RST 30H (- - - -)
 void op_rst_30h(GameBoy *gb) {
-	PUSH16(REG(PC));
+    PUSH16(REG(PC));
     REG(PC) = 0x30;
     TICK(3);
 }
@@ -1357,7 +1357,7 @@ void op_cp_d8(GameBoy *gb, uint8_t operand) {
 
 // 0xFF: RST 38H (- - - -)
 void op_rst_38h(GameBoy *gb) {
-	PUSH16(REG(PC));
+    PUSH16(REG(PC));
     REG(PC) = 0x38;
     TICK(3);
 }

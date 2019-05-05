@@ -5,9 +5,9 @@
 
 class WindowRegisters final : public Window {
     private:
-		Emulator::GameBoy &_gb;
+        Emulator::GameBoy &_gb;
 
-	public:
-		WindowRegisters(Emulator::GameBoy &gb) : _gb(gb) { }
-		void render() override;
+    public:
+        WindowRegisters(Emulator::GameBoy &gb) : _gb(gb) { }
+        void render() override;
 };
