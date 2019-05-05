@@ -11,8 +11,8 @@
 #define READ16(addr) read_short(gb, (addr), true)
 #define WRITE16(addr, value) write_short(gb, (addr), (value), true)
 
-#define SET_FLAG(flag, value) set_flag(flag, value, &REG(F)) 
-#define GET_FLAG(flag) get_flag(flag, REG(F)) 
+#define FSET(flag, value) set_flag(gb, flag, value)
+#define FGET(flag) get_flag(gb, flag) 
 
 #define PUSH8(val) stack_push_byte(gb, val)
 #define POP8() stack_pop_byte(gb)
@@ -81,8 +81,8 @@ uint16_t stack_pop_short(GameBoy *gb);
 uint8_t stack_peek_byte(GameBoy *gb);
 uint16_t stack_peek_short(GameBoy *gb);
 
-void set_flag(const uint8_t flag, const uint8_t value, uint8_t *regis);
-uint8_t get_flag(const uint8_t flag, const uint8_t regis);
+void set_flag(GameBoy *gb, const uint8_t flag, const uint8_t value);
+uint8_t get_flag(GameBoy *gb, const uint8_t flag);
 
 void check_interrupts(GameBoy *gb);
 void update_timer(GameBoy *gb);

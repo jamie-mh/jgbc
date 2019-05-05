@@ -69,13 +69,13 @@ void execute_instr(GameBoy *gb) {
 
         case 1:
             TICK(1);
-            operand = read_byte(gb, instr_start + 1, false);
+            operand = SREAD8(instr_start + 1);
             opcode_function(gb, (uint8_t) operand);
             break;
 
         case 2:
             TICK(2);
-            operand = read_short(gb, instr_start + 1, false);
+            operand = SREAD16(instr_start + 1);
             opcode_function(gb, operand);
             break;
     }
@@ -85,18 +85,18 @@ void execute_instr(GameBoy *gb) {
     F Register Flags
 */
 
-void set_flag(const uint8_t flag, const uint8_t value, uint8_t *regis) {
+void set_flag(GameBoy *gb, const uint8_t flag, const uint8_t value) {
     assert(value <= 1);
 
     if(value == 0) {
-        *regis &= ~(1 << flag);
+        REG(F) &= ~(1 << flag);
     } else if(value == 1) {
-        *regis |= 1 << flag;
+        REG(F) |= 1 << flag;
     }
 }
 
-uint8_t get_flag(const uint8_t flag, const uint8_t regis) {
-    return GET_BIT(regis, flag);
+uint8_t get_flag(GameBoy *gb, const uint8_t flag) {
+    return GET_BIT(REG(F), flag);
 }
 
 /*
@@ -144,8 +144,8 @@ uint16_t stack_peek_short(GameBoy *gb) {
 
 void check_interrupts(GameBoy *gb) {
 
-    const uint8_t enable = read_byte(gb, IE, false);
-    const uint8_t request = read_byte(gb, IF, false);
+    const uint8_t enable = SREAD8(IE);
+    const uint8_t request = SREAD8(IF);
 
     for(int i = 0; i < 5; i++) {
         
@@ -173,7 +173,7 @@ static void service_interrupt(GameBoy *gb, const uint8_t number) {
     assert(number < 5);
     PUSH16(REG(PC));
     
-    write_register(gb, IF, number, 0);
+    WREG(IF, number, 0);
     REG(IME) = false;
     REG(PC) = interrupt[number];
 }
@@ -189,8 +189,8 @@ void update_timer(GameBoy *gb) {
     // The divider register updates at one 256th of the clock speed (aka 256 clocks)
     // Reset the clock and update the register
     if(gb->cpu.div_clock >= 256) {
-        const uint8_t curr_div = read_byte(gb, DIV, false);
-        write_byte(gb, DIV, curr_div + 1, false);
+        const uint8_t curr_div = SREAD8(DIV);
+        SWRITE8(DIV, curr_div + 1);
 
         gb->cpu.div_clock = 0;
     }
@@ -198,10 +198,10 @@ void update_timer(GameBoy *gb) {
     // The timer counter updates at the rate given in the control register
     // Although unlike the divider, it must be enabled in the control register
     // (0 == Stopped) (1 == Running)
-    if(read_register(gb, TAC, TAC_STOP) == 1) {
+    if(RREG(TAC, TAC_STOP) == 1) {
 
         gb->cpu.cnt_clock += gb->cpu.ticks;
-        const uint8_t speed_index = read_byte(gb, TAC, false) & 0x3;
+        const uint8_t speed_index = SREAD8(TAC) & 0x3;
 
         static const uint16_t timer_thresholds[4] = {
             CLOCK_SPEED / 4096,
@@ -214,18 +214,18 @@ void update_timer(GameBoy *gb) {
 
         while(gb->cpu.cnt_clock >= threshold) {
 
-            const uint8_t curr_cnt = read_byte(gb, TIMA, false);
+            const uint8_t curr_cnt = SREAD8(TIMA);
             uint8_t new_cnt;
 
             if(curr_cnt + 1 == 256) {
-                new_cnt = read_byte(gb, TMA, false);
-                write_register(gb, IF, IEF_TIMER, 1);
+                new_cnt = SREAD8(TMA);
+                WREG(IF, IEF_TIMER, 1);
             }
             else {
                 new_cnt = curr_cnt + 1;
             }
 
-            write_byte(gb, TIMA, new_cnt, false);
+            SWRITE8(TIMA, new_cnt);
             gb->cpu.cnt_clock -= threshold;
         }
     }

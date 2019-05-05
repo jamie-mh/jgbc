@@ -47,26 +47,26 @@ void WindowRegisters::render() {
     ImGui::Columns(1);
     ImGui::Separator();
 
-    bool flag_zero = Emulator::get_flag(FLAG_ZERO, REG(F));
-    bool flag_subtract = Emulator::get_flag(FLAG_SUBTRACT, REG(F));
-    bool flag_halfcarry = Emulator::get_flag(FLAG_HALFCARRY, REG(F));
-    bool flag_carry = Emulator::get_flag(FLAG_CARRY, REG(F));
+    bool flag_zero = FGET(FLAG_ZERO);
+    bool flag_subtract = FGET(FLAG_SUBTRACT);
+    bool flag_halfcarry = FGET(FLAG_HALFCARRY);
+    bool flag_carry = FGET(FLAG_CARRY);
 
     ImGui::Text("FLAGS");
     if(ImGui::Checkbox("Z", &flag_zero))
-        Emulator::set_flag(FLAG_ZERO, flag_zero, &REG(F));
+        FSET(FLAG_ZERO, flag_zero);
 
     ImGui::SameLine();
     if(ImGui::Checkbox("N", &flag_subtract))
-        Emulator::set_flag(FLAG_SUBTRACT, flag_subtract, &REG(F));
+        FSET(FLAG_SUBTRACT, flag_subtract);
 
     ImGui::SameLine();
     if(ImGui::Checkbox("H", &flag_halfcarry))
-        Emulator::set_flag(FLAG_HALFCARRY, flag_halfcarry, &REG(F));
+        FSET(FLAG_HALFCARRY, flag_halfcarry);
 
     ImGui::SameLine();
     if(ImGui::Checkbox("C", &flag_carry))
-        Emulator::set_flag(FLAG_CARRY, flag_carry, &REG(F));
+        FSET(FLAG_CARRY, flag_carry);
 
     ImGui::Separator();
     ImGui::Text("Halted? %s", _gb.cpu.is_halted ? "yes" : "no");

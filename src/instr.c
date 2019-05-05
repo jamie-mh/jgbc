@@ -28,12 +28,12 @@ void op_inc_bc(GameBoy *gb) {
 
 // 0x04: INC B (Z 0 H -)
 void op_inc_b(GameBoy *gb) {
-    REG(B) = inc(REG(B), &REG(F));
+    REG(B) = inc(gb, REG(B));
 }
 
 // 0x05: DEC B (Z 1 H -)
 void op_dec_b(GameBoy *gb) {
-    REG(B) = dec(REG(B), &REG(F));
+    REG(B) = dec(gb, REG(B));
 }
 
 // 0x06: LD B, d8 (- - - -)
@@ -43,7 +43,7 @@ void op_ld_b_d8(GameBoy *gb, uint8_t operand) {
 
 // 0x07: RLCA (0 0 0 C)
 void op_rlca(GameBoy *gb) {
-    REG(A) = rotate_left_carry(REG(A), false, &REG(F));
+    REG(A) = rotate_left_carry(gb, REG(A), false);
 }
 
 // 0x08: LD (a16), SP (- - - -)
@@ -54,7 +54,7 @@ void op_ld_a16p_sp(GameBoy *gb, uint16_t operand) {
 
 // 0x09: ADD HL, BC (- 0 H C)
 void op_add_hl_bc(GameBoy *gb) {
-    REG(HL) = add_short(REG(HL), REG(BC), &REG(F));
+    REG(HL) = add_short(gb, REG(HL), REG(BC));
     TICK(1);
 }
 
@@ -72,12 +72,12 @@ void op_dec_bc(GameBoy *gb) {
 
 // 0x0C: INC C (Z 0 H -)
 void op_inc_c(GameBoy *gb) {
-    REG(C) = inc(REG(C), &REG(F));
+    REG(C) = inc(gb, REG(C));
 }
 
 // 0x0D: DEC C (Z 1 H -)
 void op_dec_c(GameBoy *gb) {
-    REG(C) = dec(REG(C), &REG(F));
+    REG(C) = dec(gb, REG(C));
 }
 
 // 0x0E: LD C, d8 (- - - -)
@@ -87,7 +87,7 @@ void op_ld_c_d8(GameBoy *gb, uint8_t operand) {
 
 // 0x0F: RRCA (0 0 0 C)
 void op_rrca(GameBoy *gb) {
-    REG(A) = rotate_right_carry(REG(A), false, &REG(F));
+    REG(A) = rotate_right_carry(gb, REG(A), false);
 }
 
 // 0x10: STOP (- - - -)
@@ -114,12 +114,12 @@ void op_inc_de(GameBoy *gb) {
 
 // 0x14: INC D (Z 0 H -)
 void op_inc_d(GameBoy *gb) {
-    REG(D) = inc(REG(D), &REG(F));
+    REG(D) = inc(gb, REG(D));
 }
 
 // 0x15: DEC D (Z 1 H -)
 void op_dec_d(GameBoy *gb) {
-    REG(D) = dec(REG(D), &REG(F));
+    REG(D) = dec(gb, REG(D));
 }
 
 // 0x16: LD D, d8 (- - - -)
@@ -129,7 +129,7 @@ void op_ld_d_d8(GameBoy *gb, uint8_t operand) {
 
 // 0x17: RLA (0 0 0 C)
 void op_rla(GameBoy *gb) {
-    REG(A) = rotate_left(REG(A), false, &REG(F));
+    REG(A) = rotate_left(gb, REG(A), false);
 }
 
 // 0x18: JR r8 (- - - -)
@@ -140,7 +140,7 @@ void op_jr_r8(GameBoy *gb, int8_t operand) {
 
 // 0x19: ADD HL, DE (- 0 H C)
 void op_add_hl_de(GameBoy *gb) {
-    REG(HL) = add_short(REG(HL), REG(DE), &REG(F));
+    REG(HL) = add_short(gb, REG(HL), REG(DE));
     TICK(1);
 }
 
@@ -158,12 +158,12 @@ void op_dec_de(GameBoy *gb) {
 
 // 0x1C: INC E (Z 0 H -)
 void op_inc_e(GameBoy *gb) {
-    REG(E) = inc(REG(E), &REG(F));
+    REG(E) = inc(gb, REG(E));
 }
 
 // 0x1D: DEC E (Z 1 H -)
 void op_dec_e(GameBoy *gb) {
-    REG(E) = dec(REG(E), &REG(F));
+    REG(E) = dec(gb, REG(E));
 }
 
 // 0x1E: LD E, d8 (- - - -)
@@ -173,13 +173,13 @@ void op_ld_e_d8(GameBoy *gb, uint8_t operand) {
 
 // 0x1F: RRA (0 0 0 C)
 void op_rra(GameBoy *gb) {
-    REG(A) = rotate_right(REG(A), &REG(F));
-    SET_FLAG(FLAG_ZERO, 0);
+    REG(A) = rotate_right(gb, REG(A));
+    FSET(FLAG_ZERO, 0);
 }
 
 // 0x20: JR NZ, r8 (- - - -)
 void op_jr_nz_r8(GameBoy *gb, int8_t operand) {
-    if(!GET_FLAG(FLAG_ZERO)) {
+    if(!FGET(FLAG_ZERO)) {
         op_jr_r8(gb, operand);
     }
 }
@@ -204,12 +204,12 @@ void op_inc_hl(GameBoy *gb) {
 
 // 0x24: INC H (Z 0 H -)
 void op_inc_h(GameBoy *gb) {
-    REG(H) = inc(REG(H), &REG(F));
+    REG(H) = inc(gb, REG(H));
 }
 
 // 0x25: DEC H (Z 1 H -)
 void op_dec_h(GameBoy *gb) {
-    REG(H) = dec(REG(H), &REG(F));
+    REG(H) = dec(gb, REG(H));
 }
 
 // 0x26: LD H, d8 (- - - -)
@@ -219,19 +219,19 @@ void op_ld_h_d8(GameBoy *gb, uint8_t operand) {
 
 // 0x27: DAA (Z - 0 C)
 void op_daa(GameBoy *gb) {
-    REG(A) = daa(REG(A), &REG(F));
+    REG(A) = daa(gb, REG(A));
 }
 
 // 0x28: JR Z, r8 (- - - -)
 void op_jr_z_r8(GameBoy *gb, int8_t operand) {
-    if(GET_FLAG(FLAG_ZERO)) {
+    if(FGET(FLAG_ZERO)) {
         op_jr_r8(gb, operand);
     }
 }
 
 // 0x29: ADD HL, HL (- 0 H C)
 void op_add_hl_hl(GameBoy *gb) {
-    REG(HL) = add_short(REG(HL), REG(HL), &REG(F));
+    REG(HL) = add_short(gb, REG(HL), REG(HL));
     TICK(1);
 }
 
@@ -250,12 +250,12 @@ void op_dec_hl(GameBoy *gb) {
 
 // 0x2C: INC L (Z 0 H -)
 void op_inc_l(GameBoy *gb) {
-    REG(L) = inc(REG(L), &REG(F));
+    REG(L) = inc(gb, REG(L));
 }
 
 // 0x2D: DEC L (Z 1 H -)
 void op_dec_l(GameBoy *gb) {
-    REG(L) = dec(REG(L), &REG(F));
+    REG(L) = dec(gb, REG(L));
 }
 
 // 0x2E: LD L, d8 (- - - -)
@@ -266,13 +266,13 @@ void op_ld_l_d8(GameBoy *gb, uint8_t operand) {
 // 0x2F: CPL (- 1 1 -)
 void op_cpl(GameBoy *gb) {
     REG(A) = ~REG(A);
-    SET_FLAG(FLAG_SUBTRACT, 1);
-    SET_FLAG(FLAG_HALFCARRY, 1);
+    FSET(FLAG_SUBTRACT, 1);
+    FSET(FLAG_HALFCARRY, 1);
 }
 
 // 0x30: JR NC, r8 (- - - -)
 void op_jr_nc_r8(GameBoy *gb, int8_t operand) {
-    if(!GET_FLAG(FLAG_CARRY)) {
+    if(!FGET(FLAG_CARRY)) {
         op_jr_r8(gb, operand);
     }
 }
@@ -297,13 +297,13 @@ void op_inc_sp(GameBoy *gb) {
 
 // 0x34: INC (HL) (Z 0 H -)
 void op_inc_hlp(GameBoy *gb) {
-    WRITE8(REG(HL), inc(READ8(REG(HL)), &REG(F)));
+    WRITE8(REG(HL), inc(gb, READ8(REG(HL))));
     TICK(2);
 }
 
 // 0x35: DEC (HL) (Z 1 H -)
 void op_dec_hlp(GameBoy *gb) {
-    WRITE8(REG(HL), dec(READ8(REG(HL)), &REG(F)));
+    WRITE8(REG(HL), dec(gb, READ8(REG(HL))));
     TICK(2);
 }
 
@@ -315,21 +315,21 @@ void op_ld_hlp_d8(GameBoy *gb, uint8_t operand) {
 
 // 0x37: SCF (- 0 0 1)
 void op_scf(GameBoy *gb) {
-    SET_FLAG(FLAG_SUBTRACT, 0);
-    SET_FLAG(FLAG_HALFCARRY, 0);
-    SET_FLAG(FLAG_CARRY, 1);
+    FSET(FLAG_SUBTRACT, 0);
+    FSET(FLAG_HALFCARRY, 0);
+    FSET(FLAG_CARRY, 1);
 }
 
 // 0x38: JR C, r8 (- - - -)
 void op_jr_c_r8(GameBoy *gb, int8_t operand) {
-    if(GET_FLAG(FLAG_CARRY)) {
+    if(FGET(FLAG_CARRY)) {
         op_jr_r8(gb, operand);
     }
 }
 
 // 0x39: ADD HL, SP (- 0 H C)
 void op_add_hl_sp(GameBoy *gb) {
-    REG(HL) = add_short(REG(HL), REG(SP), &REG(F));
+    REG(HL) = add_short(gb, REG(HL), REG(SP));
     TICK(1);
 }
 
@@ -348,12 +348,12 @@ void op_dec_sp(GameBoy *gb) {
 
 // 0x3C: INC A (Z 0 H -)
 void op_inc_a(GameBoy *gb) {
-    REG(A) = inc(REG(A), &REG(F));
+    REG(A) = inc(gb, REG(A));
 }
 
 // 0x3D: DEC A (Z 1 H -)
 void op_dec_a(GameBoy *gb) {
-    REG(A) = dec(REG(A), &REG(F));
+    REG(A) = dec(gb, REG(A));
 }
 
 // 0x3E: LD A, d8 (- - - -)
@@ -363,9 +363,9 @@ void op_ld_a_d8(GameBoy *gb, uint8_t operand) {
 
 // 0x3F: CCF (- 0 0 C)
 void op_ccf(GameBoy *gb) {
-    SET_FLAG(FLAG_SUBTRACT, 0);
-    SET_FLAG(FLAG_HALFCARRY, 0);
-    SET_FLAG(FLAG_CARRY, !GET_FLAG(FLAG_CARRY));
+    FSET(FLAG_SUBTRACT, 0);
+    FSET(FLAG_HALFCARRY, 0);
+    FSET(FLAG_CARRY, !FGET(FLAG_CARRY));
 }
 
 // 0x40: LD B, B (- - - -)
@@ -704,335 +704,335 @@ void op_ld_a_a(GameBoy *gb) {
 
 // 0x80: ADD A, B (Z 0 H C)
 void op_add_a_b(GameBoy *gb) {
-    REG(A) = add_byte(REG(A), REG(B), &REG(F));
+    REG(A) = add_byte(gb, REG(A), REG(B));
 }
 
 // 0x81: ADD A, C (Z 0 H C)
 void op_add_a_c(GameBoy *gb) {
-    REG(A) = add_byte(REG(A), REG(C), &REG(F));
+    REG(A) = add_byte(gb, REG(A), REG(C));
 }
 
 // 0x82: ADD A, D (Z 0 H C)
 void op_add_a_d(GameBoy *gb) {
-    REG(A) = add_byte(REG(A), REG(D), &REG(F));
+    REG(A) = add_byte(gb, REG(A), REG(D));
 }
 
 // 0x83: ADD A, E (Z 0 H C)
 void op_add_a_e(GameBoy *gb) {
-    REG(A) = add_byte(REG(A), REG(E), &REG(F));
+    REG(A) = add_byte(gb, REG(A), REG(E));
 }
 
 // 0x84: ADD A, H (Z 0 H C)
 void op_add_a_h(GameBoy *gb) {
-    REG(A) = add_byte(REG(A), REG(H), &REG(F));
+    REG(A) = add_byte(gb, REG(A), REG(H));
 }
 
 // 0x85: ADD A, L (Z 0 H C)
 void op_add_a_l(GameBoy *gb) {
-    REG(A) = add_byte(REG(A), REG(L), &REG(F));
+    REG(A) = add_byte(gb, REG(A), REG(L));
 }
 
 // 0x86: ADD A, (HL) (Z 0 H C)
 void op_add_a_hlp(GameBoy *gb) {
-    REG(A) = add_byte(REG(A), READ8(REG(HL)), &REG(F));
+    REG(A) = add_byte(gb, REG(A), READ8(REG(HL)));
     TICK(1);
 }
 
 // 0x87: ADD A, A (Z 0 H C)
 void op_add_a_a(GameBoy *gb) {
-    REG(A) = add_byte(REG(A), REG(A), &REG(F));
+    REG(A) = add_byte(gb, REG(A), REG(A));
 }
 
 // 0x88: ADC A, B (Z 0 H C)
 void op_adc_a_b(GameBoy *gb) {
-    REG(A) = add_byte_carry(REG(A), REG(B), &REG(F));
+    REG(A) = add_byte_carry(gb, REG(A), REG(B));
 }
 
 // 0x89: ADC A, C (Z 0 H C)
 void op_adc_a_c(GameBoy *gb) {
-    REG(A) = add_byte_carry(REG(A), REG(C), &REG(F));
+    REG(A) = add_byte_carry(gb, REG(A), REG(C));
 }
 
 // 0x8A: ADC A, D (Z 0 H C)
 void op_adc_a_d(GameBoy *gb) {
-    REG(A) = add_byte_carry(REG(A), REG(D), &REG(F));
+    REG(A) = add_byte_carry(gb, REG(A), REG(D));
 }
 
 // 0x8B: ADC A, E (Z 0 H C)
 void op_adc_a_e(GameBoy *gb) {
-    REG(A) = add_byte_carry(REG(A), REG(E), &REG(F));
+    REG(A) = add_byte_carry(gb, REG(A), REG(E));
 }
 
 // 0x8C: ADC A, H (Z 0 H C)
 void op_adc_a_h(GameBoy *gb) {
-    REG(A) = add_byte_carry(REG(A), REG(H), &REG(F));
+    REG(A) = add_byte_carry(gb, REG(A), REG(H));
 }
 
 // 0x8D: ADC A, L (Z 0 H C)
 void op_adc_a_l(GameBoy *gb) {
-    REG(A) = add_byte_carry(REG(A), REG(L), &REG(F));
+    REG(A) = add_byte_carry(gb, REG(A), REG(L));
 }
 
 // 0x8E: ADC A, (HL) (Z 0 H C)
 void op_adc_a_hlp(GameBoy *gb) {
-    REG(A) = add_byte_carry(REG(A), READ8(REG(HL)), &REG(F));
+    REG(A) = add_byte_carry(gb, REG(A), READ8(REG(HL)));
     TICK(1);
 }
 
 // 0x8F: ADC A, A (Z 0 H C)
 void op_adc_a_a(GameBoy *gb) {
-    REG(A) = add_byte_carry(REG(A), REG(A), &REG(F));
+    REG(A) = add_byte_carry(gb, REG(A), REG(A));
 }
 
 // 0x90: SUB B (Z 1 H C)
 void op_sub_b(GameBoy *gb) {
-    REG(A) = sub_byte(REG(A), REG(B), &REG(F));
+    REG(A) = sub_byte(gb, REG(A), REG(B));
 }
 
 // 0x91: SUB C (Z 1 H C)
 void op_sub_c(GameBoy *gb) {
-    REG(A) = sub_byte(REG(A), REG(C), &REG(F));
+    REG(A) = sub_byte(gb, REG(A), REG(C));
 }
 
 // 0x92: SUB D (Z 1 H C)
 void op_sub_d(GameBoy *gb) {
-    REG(A) = sub_byte(REG(A), REG(D), &REG(F));
+    REG(A) = sub_byte(gb, REG(A), REG(D));
 }
 
 // 0x93: SUB E (Z 1 H C)
 void op_sub_e(GameBoy *gb) {
-    REG(A) = sub_byte(REG(A), REG(E), &REG(F));
+    REG(A) = sub_byte(gb, REG(A), REG(E));
 }
 
 // 0x94: SUB H (Z 1 H C)
 void op_sub_h(GameBoy *gb) {
-    REG(A) = sub_byte(REG(A), REG(H), &REG(F));
+    REG(A) = sub_byte(gb, REG(A), REG(H));
 }
 
 // 0x95: SUB L (Z 1 H C)
 void op_sub_l(GameBoy *gb) {
-    REG(A) = sub_byte(REG(A), REG(L), &REG(F));
+    REG(A) = sub_byte(gb, REG(A), REG(L));
 }
 
 // 0x96: SUB (HL) (Z 1 H C)
 void op_sub_hlp(GameBoy *gb) {
-    REG(A) = sub_byte(REG(A), READ8(REG(HL)), &REG(F));
+    REG(A) = sub_byte(gb, REG(A), READ8(REG(HL)));
     TICK(1);
 }
 
 // 0x97: SUB A (Z 1 H C)
 void op_sub_a(GameBoy *gb) {
-    REG(A) = sub_byte(REG(A), REG(A), &REG(F));
+    REG(A) = sub_byte(gb, REG(A), REG(A));
 }
 
 // 0x98: SBC A, B (Z 1 H C)
 void op_sbc_a_b(GameBoy *gb) {
-    REG(A) = sub_byte_carry(REG(A), REG(B), &REG(F));
+    REG(A) = sub_byte_carry(gb, REG(A), REG(B));
 }
 
 // 0x99: SBC A, C (Z 1 H C)
 void op_sbc_a_c(GameBoy *gb) {
-    REG(A) = sub_byte_carry(REG(A), REG(C), &REG(F));
+    REG(A) = sub_byte_carry(gb, REG(A), REG(C));
 }
 
 // 0x9A: SBC A, D (Z 1 H C)
 void op_sbc_a_d(GameBoy *gb) {
-    REG(A) = sub_byte_carry(REG(A), REG(D), &REG(F));
+    REG(A) = sub_byte_carry(gb, REG(A), REG(D));
 }
 
 // 0x9B: SBC A, E (Z 1 H C)
 void op_sbc_a_e(GameBoy *gb) {
-    REG(A) = sub_byte_carry(REG(A), REG(E), &REG(F));
+    REG(A) = sub_byte_carry(gb, REG(A), REG(E));
 }
 
 // 0x9C: SBC A, H (Z 1 H C)
 void op_sbc_a_h(GameBoy *gb) {
-    REG(A) = sub_byte_carry(REG(A), REG(H), &REG(F));
+    REG(A) = sub_byte_carry(gb, REG(A), REG(H));
 }
 
 // 0x9D: SBC A, L (Z 1 H C)
 void op_sbc_a_l(GameBoy *gb) {
-    REG(A) = sub_byte_carry(REG(A), REG(L), &REG(F));
+    REG(A) = sub_byte_carry(gb, REG(A), REG(L));
 }
 
 // 0x9E: SBC A, (HL) (Z 1 H C)
 void op_sbc_a_hlp(GameBoy *gb) {
-    REG(A) = sub_byte_carry(REG(A), READ8(REG(HL)), &REG(F));
+    REG(A) = sub_byte_carry(gb, REG(A), READ8(REG(HL)));
     TICK(1);
 }
 
 // 0x9F: SBC A, A (Z 1 H C)
 void op_sbc_a_a(GameBoy *gb) {
-    REG(A) = sub_byte_carry(REG(A), REG(A), &REG(F));
+    REG(A) = sub_byte_carry(gb, REG(A), REG(A));
 }
 
 // 0xA0: AND B (Z 0 1 0)
 void op_and_b(GameBoy *gb) {
-    REG(A) = and(REG(A), REG(B), &REG(F));
+    REG(A) = and(gb, REG(A), REG(B));
 }
 
 // 0xA1: AND C (Z 0 1 0)
 void op_and_c(GameBoy *gb) {
-    REG(A) = and(REG(A), REG(C), &REG(F));
+    REG(A) = and(gb, REG(A), REG(C));
 }
 
 // 0xA2: AND D (Z 0 1 0)
 void op_and_d(GameBoy *gb) {
-    REG(A) = and(REG(A), REG(D), &REG(F));
+    REG(A) = and(gb, REG(A), REG(D));
 }
 
 // 0xA3: AND E (Z 0 1 0)
 void op_and_e(GameBoy *gb) {
-    REG(A) = and(REG(A), REG(E), &REG(F));
+    REG(A) = and(gb, REG(A), REG(E));
 }
 
 // 0xA4: AND H (Z 0 1 0)
 void op_and_h(GameBoy *gb) {
-    REG(A) = and(REG(A), REG(H), &REG(F));
+    REG(A) = and(gb, REG(A), REG(H));
 }
 
-// 0xA5: AND L (Z 0 1 0)
+//and(gb,  0xA5: AND L (Z 0 1 0)
 void op_and_l(GameBoy *gb) {
-    REG(A) = and(REG(A), REG(L), &REG(F));
+    REG(A) = and(gb, REG(A), REG(L));
 }
 
 // 0xA6: AND (HL) (Z 0 1 0)
 void op_and_hlp(GameBoy *gb) {
-    REG(A) = and(REG(A), READ8(REG(HL)), &REG(F));
+    REG(A) = and(gb, REG(A), READ8(REG(HL)));
     TICK(1);
 }
 
 // 0xA7: AND A (Z 0 1 0)
 void op_and_a(GameBoy *gb) {
-    REG(A) = and(REG(A), REG(A), &REG(F));
+    REG(A) = and(gb, REG(A), REG(A));
 }
 
 // 0xA8: XOR B (Z 0 0 0)
 void op_xor_b(GameBoy *gb) {
-    REG(A) = xor(REG(B), REG(A), &REG(F));
+    REG(A) = xor(gb, REG(B), REG(A));
 }
 
 // 0xA9: XOR C (Z 0 0 0)
 void op_xor_c(GameBoy *gb) {
-    REG(A) = xor(REG(C), REG(A), &REG(F));
+    REG(A) = xor(gb, REG(C), REG(A));
 }
 
 // 0xAA: XOR D (Z 0 0 0)
 void op_xor_d(GameBoy *gb) {
-    REG(A) = xor(REG(D), REG(A), &REG(F));
+    REG(A) = xor(gb, REG(D), REG(A));
 }
 
 // 0xAB: XOR E (Z 0 0 0)
 void op_xor_e(GameBoy *gb) {
-    REG(A) = xor(REG(E), REG(A), &REG(F));
+    REG(A) = xor(gb, REG(E), REG(A));
 }
 
 // 0xAC: XOR H (Z 0 0 0)
 void op_xor_h(GameBoy *gb) {
-    REG(A) = xor(REG(H), REG(A), &REG(F));
+    REG(A) = xor(gb, REG(H), REG(A));
 }
 
 // 0xAD: XOR L (Z 0 0 0)
 void op_xor_l(GameBoy *gb) {
-    REG(A) = xor(REG(L), REG(A), &REG(F));
+    REG(A) = xor(gb, REG(L), REG(A));
 }
 
 // 0xAE: XOR (HL) (Z 0 0 0)
 void op_xor_hlp(GameBoy *gb) {
-    REG(A) = xor(READ8(REG(HL)), REG(A), &REG(F));
+    REG(A) = xor(gb, READ8(REG(HL)), REG(A));
     TICK(1);
 }
 
 // 0xAF: XOR A (Z 0 0 0)
 void op_xor_a(GameBoy *gb) { 
-    REG(A) = xor(REG(A), REG(A), &REG(F));
+    REG(A) = xor(gb, REG(A), REG(A));
 }
 
 // 0xB0: OR B (Z 0 0 0)
 void op_or_b(GameBoy *gb) {
-    REG(A) = or(REG(A), REG(B), &REG(F));
+    REG(A) = or(gb, REG(A), REG(B));
 }
 
 // 0xB1: OR C (Z 0 0 0)
 void op_or_c(GameBoy *gb) {
-    REG(A) = or(REG(A), REG(C), &REG(F));
+    REG(A) = or(gb, REG(A), REG(C));
 }
 
 // 0xB2: OR D (Z 0 0 0)
 void op_or_d(GameBoy *gb) {
-    REG(A) = or(REG(A), REG(D), &REG(F));
+    REG(A) = or(gb, REG(A), REG(D));
 }
 
 // 0xB3: OR E (Z 0 0 0)
 void op_or_e(GameBoy *gb) {
-    REG(A) = or(REG(A), REG(E), &REG(F));
+    REG(A) = or(gb, REG(A), REG(E));
 }
 
 // 0xB4: OR H (Z 0 0 0)
 void op_or_h(GameBoy *gb) {
-    REG(A) = or(REG(A), REG(H), &REG(F));
+    REG(A) = or(gb, REG(A), REG(H));
 }
 
 // 0xB5: OR L (Z 0 0 0)
 void op_or_l(GameBoy *gb) {
-    REG(A) = or(REG(A), REG(L), &REG(F));
+    REG(A) = or(gb, REG(A), REG(L));
 }
 
 // 0xB6: OR (HL) (Z 0 0 0)
 void op_or_hlp(GameBoy *gb) {
-    REG(A) = or(REG(A), READ8(REG(HL)), &REG(F));
+    REG(A) = or(gb, REG(A), READ8(REG(HL)));
     TICK(1);
 }
 
 // 0xB7: OR A (Z 0 0 0)
 void op_or_a(GameBoy *gb) {
-    REG(A) = or(REG(A), REG(A), &REG(F));
+    REG(A) = or(gb, REG(A), REG(A));
 }
 
 // 0xB8: CP B (Z 1 H C)
 void op_cp_b(GameBoy *gb) {
-    sub_byte(REG(A), REG(B), &REG(F));
+    sub_byte(gb, REG(A), REG(B));
 }
 
 // 0xB9: CP C (Z 1 H C)
 void op_cp_c(GameBoy *gb) {
-    sub_byte(REG(A), REG(C), &REG(F));
+    sub_byte(gb, REG(A), REG(C));
 }
 
 // 0xBA: CP D (Z 1 H C)
 void op_cp_d(GameBoy *gb) {
-    sub_byte(REG(A), REG(D), &REG(F));
+    sub_byte(gb, REG(A), REG(D));
 }
 
 // 0xBB: CP E (Z 1 H C)
 void op_cp_e(GameBoy *gb) {
-    sub_byte(REG(A), REG(E), &REG(F));
+    sub_byte(gb, REG(A), REG(E));
 }
 
 // 0xBC: CP H (Z 1 H C)
 void op_cp_h(GameBoy *gb) {
-    sub_byte(REG(A), REG(H), &REG(F));
+    sub_byte(gb, REG(A), REG(H));
 }
 
 // 0xBD: CP L (Z 1 H C)
 void op_cp_l(GameBoy *gb) {
-    sub_byte(REG(A), REG(L), &REG(F));
+    sub_byte(gb, REG(A), REG(L));
 }
 
 // 0xBE: CP (HL) (Z 1 H C)
 void op_cp_hlp(GameBoy *gb) {
-    sub_byte(REG(A), READ8(REG(HL)), &REG(F));
+    sub_byte(gb, REG(A), READ8(REG(HL)));
     TICK(1);
 }
 
 // 0xBF: CP A (Z 1 H C)
 void op_cp_a(GameBoy *gb) {
-    sub_byte(REG(A), REG(A), &REG(F));
+    sub_byte(gb, REG(A), REG(A));
 }
 
 // 0xC0: RET NZ (- - - -)
 void op_ret_nz(GameBoy *gb) {
-    if(!GET_FLAG(FLAG_ZERO)) {
+    if(!FGET(FLAG_ZERO)) {
         op_ret(gb);
     } 
     TICK(1);
@@ -1046,7 +1046,7 @@ void op_pop_bc(GameBoy *gb) {
 
 // 0xC2: JP NZ, a16 (- - - -)
 void op_jp_nz_a16(GameBoy *gb, uint16_t operand) {
-    if(!GET_FLAG(FLAG_ZERO)) {
+    if(!FGET(FLAG_ZERO)) {
         op_jp_a16(gb, operand);
     } 
 }
@@ -1059,7 +1059,7 @@ void op_jp_a16(GameBoy *gb, uint16_t operand) {
 
 // 0xC4: CALL NZ, a16 (- - - -)
 void op_call_nz_a16(GameBoy *gb, uint16_t operand) {
-    if(!GET_FLAG(FLAG_ZERO)) {
+    if(!FGET(FLAG_ZERO)) {
         op_call_a16(gb, operand); 
     } 
 }
@@ -1072,7 +1072,7 @@ void op_push_bc(GameBoy *gb) {
 
 // 0xC6: ADD A, d8 (Z 0 H C)
 void op_add_a_d8(GameBoy *gb, uint8_t operand) {
-    REG(A) = add_byte(REG(A), operand, &REG(F));
+    REG(A) = add_byte(gb, REG(A), operand);
 }
 
 // 0xC7: RST 00H (- - - -)
@@ -1084,7 +1084,7 @@ void op_rst_00h(GameBoy *gb) {
 
 // 0xC8: RET Z (- - - -)
 void op_ret_z(GameBoy *gb) {
-    if(GET_FLAG(FLAG_ZERO)) {
+    if(FGET(FLAG_ZERO)) {
         op_ret(gb); 
     }
     TICK(1);
@@ -1098,7 +1098,7 @@ void op_ret(GameBoy *gb) {
 
 // 0xCA: JP Z, a16 (- - - -)
 void op_jp_z_a16(GameBoy *gb, uint16_t operand) {
-    if(GET_FLAG(FLAG_ZERO)) {
+    if(FGET(FLAG_ZERO)) {
         op_jp_a16(gb, operand);
     } 
 }
@@ -1110,7 +1110,7 @@ void op_prefix_cb(GameBoy *gb) {
 
 // 0xCC: CALL Z, a16 (- - - -)
 void op_call_z_a16(GameBoy *gb, uint16_t operand) {
-    if(GET_FLAG(FLAG_ZERO)) {
+    if(FGET(FLAG_ZERO)) {
         op_call_a16(gb, operand); 
     } 
 }
@@ -1124,7 +1124,7 @@ void op_call_a16(GameBoy *gb, uint16_t operand) {
 
 // 0xCE: ADC A, d8 (Z 0 H C)
 void op_adc_a_d8(GameBoy *gb, uint8_t operand) {
-    REG(A) = add_byte_carry(REG(A), operand, &REG(F));
+    REG(A) = add_byte_carry(gb, REG(A), operand);
 }
 
 // 0xCF: RST 08H (- - - -)
@@ -1136,7 +1136,7 @@ void op_rst_08h(GameBoy *gb) {
 
 // 0xD0: RET NC (- - - -)
 void op_ret_nc(GameBoy *gb) {
-    if(!GET_FLAG(FLAG_CARRY)) {
+    if(!FGET(FLAG_CARRY)) {
         op_ret(gb); 
     }
     TICK(1);
@@ -1150,14 +1150,14 @@ void op_pop_de(GameBoy *gb) {
 
 // 0xD2: JP NC, a16 (- - - -)
 void op_jp_nc_a16(GameBoy *gb, uint16_t operand) {
-    if(!GET_FLAG(FLAG_CARRY)) {
+    if(!FGET(FLAG_CARRY)) {
         op_jp_a16(gb, operand);
     }
 }
 
 // 0xD4: CALL NC, a16 (- - - -)
 void op_call_nc_a16(GameBoy *gb, uint16_t operand) {
-    if(!GET_FLAG(FLAG_CARRY)) {
+    if(!FGET(FLAG_CARRY)) {
         op_call_a16(gb, operand); 
     }
 }
@@ -1170,7 +1170,7 @@ void op_push_de(GameBoy *gb) {
 
 // 0xD6: SUB d8 (Z 1 H C)
 void op_sub_d8(GameBoy *gb, uint8_t operand) {
-    REG(A) = sub_byte(REG(A), operand, &REG(F));
+    REG(A) = sub_byte(gb, REG(A), operand);
 }
 
 // 0xD7: RST 10H (- - - -)
@@ -1182,7 +1182,7 @@ void op_rst_10h(GameBoy *gb) {
 
 // 0xD8: RET C (- - - -)
 void op_ret_c(GameBoy *gb) {
-    if(GET_FLAG(FLAG_CARRY)) {
+    if(FGET(FLAG_CARRY)) {
         op_ret(gb);
     }
     TICK(1);
@@ -1196,21 +1196,21 @@ void op_reti(GameBoy *gb) {
 
 // 0xDA: JP C, a16 (- - - -)
 void op_jp_c_a16(GameBoy *gb, uint16_t operand) {
-    if(GET_FLAG(FLAG_CARRY)) {
+    if(FGET(FLAG_CARRY)) {
         op_jp_a16(gb, operand);
     }
 }
 
 // 0xDC: CALL C, a16 (- - - -)
 void op_call_c_a16(GameBoy *gb, uint16_t operand) {
-    if(GET_FLAG(FLAG_CARRY)) {
+    if(FGET(FLAG_CARRY)) {
         op_call_a16(gb, operand); 
     }
 }
 
 // 0xDE: SBC A, d8 (Z 1 H C)
 void op_sbc_a_d8(GameBoy *gb, uint8_t operand) {
-    REG(A) = sub_byte_carry(REG(A), operand, &REG(F));
+    REG(A) = sub_byte_carry(gb, REG(A), operand);
 }
 
 // 0xDF: RST 18H (- - - -)
@@ -1246,7 +1246,7 @@ void op_push_hl(GameBoy *gb) {
 
 // 0xE6: AND d8 (Z 0 1 0)
 void op_and_d8(GameBoy *gb, uint8_t operand) {
-    REG(A) = and(REG(A), operand, &REG(F));
+    REG(A) = and(gb, REG(A), operand);
 }
 
 // 0xE7: RST 20H (- - - -)
@@ -1258,7 +1258,7 @@ void op_rst_20h(GameBoy *gb) {
 
 // 0xE8: ADD SP, r8 (0 0 H C)
 void op_add_sp_r8(GameBoy *gb, int8_t operand) {
-    REG(SP) = add_sp_signed_byte(REG(SP), operand, &REG(F)); 
+    REG(SP) = add_sp_signed_byte(gb, REG(SP), operand); 
     TICK(2);
 }
 
@@ -1275,7 +1275,7 @@ void op_ld_a16p_a(GameBoy *gb, uint16_t operand) {
 
 // 0xEE: XOR d8 (Z 0 0 0)
 void op_xor_d8(GameBoy *gb, uint8_t operand) {
-    REG(A) = xor(operand, REG(A), &REG(F));
+    REG(A) = xor(gb, operand, REG(A));
 }
 
 // 0xEF: RST 28H (- - - -)
@@ -1318,7 +1318,7 @@ void op_push_af(GameBoy *gb) {
 
 // 0xF6: OR d8 (Z 0 0 0)
 void op_or_d8(GameBoy *gb, uint8_t operand) {
-    REG(A) = or(REG(A), operand, &REG(F));
+    REG(A) = or(gb, REG(A), operand);
 }
 
 // 0xF7: RST 30H (- - - -)
@@ -1330,7 +1330,7 @@ void op_rst_30h(GameBoy *gb) {
 
 // 0xF8: LD HL, SP+r8 (0 0 H C)
 void op_ld_hl_sppr8(GameBoy *gb, int8_t operand) {
-    REG(HL) = add_sp_signed_byte(REG(SP), operand, &REG(F)); 
+    REG(HL) = add_sp_signed_byte(gb, REG(SP), operand); 
     TICK(1);
 }
 
@@ -1352,7 +1352,7 @@ void op_ei(GameBoy *gb) {
 
 // 0xFE: CP d8 (Z 1 H C)
 void op_cp_d8(GameBoy *gb, uint8_t operand) {
-    sub_byte(REG(A), operand, &REG(F));
+    sub_byte(gb, REG(A), operand);
 }
 
 // 0xFF: RST 38H (- - - -)
@@ -1364,657 +1364,657 @@ void op_rst_38h(GameBoy *gb) {
 
 // 0xCB00: RLC B (Z 0 0 C)
 void op_rlc_b(GameBoy *gb) {
-    REG(B) = rotate_left_carry(REG(B), true, &REG(F));
+    REG(B) = rotate_left_carry(gb, REG(B), true);
 }
 
 // 0xCB01: RLC C (Z 0 0 C)
 void op_rlc_c(GameBoy *gb) {
-    REG(C) = rotate_left_carry(REG(C), true, &REG(F));
+    REG(C) = rotate_left_carry(gb, REG(C), true);
 }
 
 // 0xCB02: RLC D (Z 0 0 C)
 void op_rlc_d(GameBoy *gb) {
-    REG(D) = rotate_left_carry(REG(D), true, &REG(F));
+    REG(D) = rotate_left_carry(gb, REG(D), true);
 }
 
 // 0xCB03: RLC E (Z 0 0 C)
 void op_rlc_e(GameBoy *gb) {
-    REG(E) = rotate_left_carry(REG(E), true, &REG(F));
+    REG(E) = rotate_left_carry(gb, REG(E), true);
 }
 
 // 0xCB04: RLC H (Z 0 0 C)
 void op_rlc_h(GameBoy *gb) {
-    REG(H) = rotate_left_carry(REG(H), true, &REG(F));
+    REG(H) = rotate_left_carry(gb, REG(H), true);
 }
 
 // 0xCB05: RLC L (Z 0 0 C)
 void op_rlc_l(GameBoy *gb) {
-    REG(L) = rotate_left_carry(REG(L), true, &REG(F));
+    REG(L) = rotate_left_carry(gb, REG(L), true);
 }
 
 // 0xCB06: RLC (HL) (Z 0 0 C)
 void op_rlc_hlp(GameBoy *gb) {
-    WRITE8(REG(HL), rotate_left_carry(READ8(REG(HL)), true, &REG(F)));
+    WRITE8(REG(HL), rotate_left_carry(gb, READ8(REG(HL)), true));
     TICK(2);
 }
 
 // 0xCB07: RLC A (Z 0 0 C)
 void op_rlc_a(GameBoy *gb) {
-    REG(A) = rotate_left_carry(REG(A), true, &REG(F));
+    REG(A) = rotate_left_carry(gb, REG(A), true);
 }
 
 // 0xCB08: RRC B (Z 0 0 C)
 void op_rrc_b(GameBoy *gb) {
-    REG(B) = rotate_right_carry(REG(B), true, &REG(F));
+    REG(B) = rotate_right_carry(gb, REG(B), true);
 }
 
 // 0xCB09: RRC C (Z 0 0 C)
 void op_rrc_c(GameBoy *gb) {
-    REG(C) = rotate_right_carry(REG(C), true, &REG(F));
+    REG(C) = rotate_right_carry(gb, REG(C), true);
 }
 
 // 0xCB0A: RRC D (Z 0 0 C)
 void op_rrc_d(GameBoy *gb) {
-    REG(D) = rotate_right_carry(REG(D), true, &REG(F));
+    REG(D) = rotate_right_carry(gb, REG(D), true);
 }
 
 // 0xCB0B: RRC E (Z 0 0 C)
 void op_rrc_e(GameBoy *gb) {
-    REG(E) = rotate_right_carry(REG(E), true, &REG(F));
+    REG(E) = rotate_right_carry(gb, REG(E), true);
 }
 
 // 0xCB0C: RRC H (Z 0 0 C)
 void op_rrc_h(GameBoy *gb) {
-    REG(H) = rotate_right_carry(REG(H), true, &REG(F));
+    REG(H) = rotate_right_carry(gb, REG(H), true);
 }
 
 // 0xCB0D: RRC L (Z 0 0 C)
 void op_rrc_l(GameBoy *gb) {
-    REG(L) = rotate_right_carry(REG(L), true, &REG(F));
+    REG(L) = rotate_right_carry(gb, REG(L), true);
 }
 
 // 0xCB0E: RRC (HL) (Z 0 0 C)
 void op_rrc_hlp(GameBoy *gb) {
-    WRITE8(REG(HL), rotate_right_carry(READ8(REG(HL)), true, &REG(F)));
+    WRITE8(REG(HL), rotate_right_carry(gb, READ8(REG(HL)), true));
     TICK(2);
 }
 
 // 0xCB0F: RRC A (Z 0 0 C)
 void op_rrc_a(GameBoy *gb) {
-    REG(A) = rotate_right_carry(REG(A), true, &REG(F));
+    REG(A) = rotate_right_carry(gb, REG(A), true);
 }
 
 // 0xCB10: RL B (Z 0 0 C)
 void op_rl_b(GameBoy *gb) {
-    REG(B) = rotate_left(REG(B), true, &REG(F));
+    REG(B) = rotate_left(gb, REG(B), true);
 }
 
 // 0xCB11: RL C (Z 0 0 C)
 void op_rl_c(GameBoy *gb) {
-    REG(C) = rotate_left(REG(C), true, &REG(F));
+    REG(C) = rotate_left(gb, REG(C), true);
 }
 
 // 0xCB12: RL D (Z 0 0 C)
 void op_rl_d(GameBoy *gb) {
-    REG(D) = rotate_left(REG(D), true, &REG(F));
+    REG(D) = rotate_left(gb, REG(D), true);
 }
 
 // 0xCB13: RL E (Z 0 0 C)
 void op_rl_e(GameBoy *gb) {
-    REG(E) = rotate_left(REG(E), true, &REG(F));
+    REG(E) = rotate_left(gb, REG(E), true);
 }
 
 // 0xCB14: RL H (Z 0 0 C)
 void op_rl_h(GameBoy *gb) {
-    REG(H) = rotate_left(REG(H), true, &REG(F));
+    REG(H) = rotate_left(gb, REG(H), true);
 }
 
 // 0xCB15: RL L (Z 0 0 C)
 void op_rl_l(GameBoy *gb) {
-    REG(L) = rotate_left(REG(L), true, &REG(F));
+    REG(L) = rotate_left(gb, REG(L), true);
 }
 
 // 0xCB16: RL (HL) (Z 0 0 C)
 void op_rl_hlp(GameBoy *gb) {
-    WRITE8(REG(HL), rotate_left(READ8(REG(HL)), true, &REG(F)));
+    WRITE8(REG(HL), rotate_left(gb, READ8(REG(HL)), true));
     TICK(2);
 }
 
 // 0xCB17: RL A (Z 0 0 C)
 void op_rl_a(GameBoy *gb) {
-    REG(A) = rotate_left(REG(A), true, &REG(F));
+    REG(A) = rotate_left(gb, REG(A), true);
 }
 
 // 0xCB18: RR B (Z 0 0 C)
 void op_rr_b(GameBoy *gb) {
-    REG(B) = rotate_right(REG(B), &REG(F));
+    REG(B) = rotate_right(gb, REG(B));
 }
 
 // 0xCB19: RR C (Z 0 0 C)
 void op_rr_c(GameBoy *gb) {
-    REG(C) = rotate_right(REG(C), &REG(F));
+    REG(C) = rotate_right(gb, REG(C));
 }
 
 // 0xCB1A: RR D (Z 0 0 C)
 void op_rr_d(GameBoy *gb) {
-    REG(D) = rotate_right(REG(D), &REG(F));
+    REG(D) = rotate_right(gb, REG(D));
 }
 
 // 0xCB1B: RR E (Z 0 0 C)
 void op_rr_e(GameBoy *gb) {
-    REG(E) = rotate_right(REG(E), &REG(F));
+    REG(E) = rotate_right(gb, REG(E));
 }
 
 // 0xCB1C: RR H (Z 0 0 C)
 void op_rr_h(GameBoy *gb) {
-    REG(H) = rotate_right(REG(H), &REG(F));
+    REG(H) = rotate_right(gb, REG(H));
 }
 
 // 0xCB1D: RR L (Z 0 0 C)
 void op_rr_l(GameBoy *gb) {
-    REG(L) = rotate_right(REG(L), &REG(F));
+    REG(L) = rotate_right(gb, REG(L));
 }
 
 // 0xCB1E: RR (HL) (Z 0 0 C)
 void op_rr_hlp(GameBoy *gb) {
-    WRITE8(REG(HL), rotate_right(READ8(REG(HL)), &REG(F)));
+    WRITE8(REG(HL), rotate_right(gb, READ8(REG(HL))));
     TICK(2);
 }
 
 // 0xCB1F: RR A (Z 0 0 C)
 void op_rr_a(GameBoy *gb) {
-    REG(A) = rotate_right(REG(A), &REG(F));
+    REG(A) = rotate_right(gb, REG(A));
 }
 
 // 0xCB20: SLA B (Z 0 0 C)
 void op_sla_b(GameBoy *gb) {
-    REG(B) = shift_left_arith(REG(B), &REG(F));
+    REG(B) = shift_left_arith(gb, REG(B));
 }
 
 // 0xCB21: SLA C (Z 0 0 C)
 void op_sla_c(GameBoy *gb) {
-    REG(C) = shift_left_arith(REG(C), &REG(F));
+    REG(C) = shift_left_arith(gb, REG(C));
 }
 
 // 0xCB22: SLA D (Z 0 0 C)
 void op_sla_d(GameBoy *gb) {
-    REG(D) = shift_left_arith(REG(D), &REG(F));
+    REG(D) = shift_left_arith(gb, REG(D));
 }
 
 // 0xCB23: SLA E (Z 0 0 C)
 void op_sla_e(GameBoy *gb) {
-    REG(E) = shift_left_arith(REG(E), &REG(F));
+    REG(E) = shift_left_arith(gb, REG(E));
 }
 
 // 0xCB24: SLA H (Z 0 0 C)
 void op_sla_h(GameBoy *gb) {
-    REG(H) = shift_left_arith(REG(H), &REG(F));
+    REG(H) = shift_left_arith(gb, REG(H));
 }
 
 // 0xCB25: SLA L (Z 0 0 C)
 void op_sla_l(GameBoy *gb) {
-    REG(L) = shift_left_arith(REG(L), &REG(F));
+    REG(L) = shift_left_arith(gb, REG(L));
 }
 
 // 0xCB26: SLA (HL) (Z 0 0 C)
 void op_sla_hlp(GameBoy *gb) {
-    WRITE8(REG(HL), shift_left_arith(READ8(REG(HL)), &REG(F)));
+    WRITE8(REG(HL), shift_left_arith(gb, READ8(REG(HL))));
     TICK(2);
 }
 
 // 0xCB27: SLA A (Z 0 0 C)
 void op_sla_a(GameBoy *gb) {
-    REG(A) = shift_left_arith(REG(A), &REG(F));
+    REG(A) = shift_left_arith(gb, REG(A));
 }
 
 // 0xCB28: SRA B (Z 0 0 0)
 void op_sra_b(GameBoy *gb) {
-    REG(B) = shift_right_arith(REG(B), &REG(F));
+    REG(B) = shift_right_arith(gb, REG(B));
 }
 
 // 0xCB29: SRA C (Z 0 0 0)
 void op_sra_c(GameBoy *gb) {
-    REG(C) = shift_right_arith(REG(C), &REG(F));
+    REG(C) = shift_right_arith(gb, REG(C));
 }
 
 // 0xCB2A: SRA D (Z 0 0 0)
 void op_sra_d(GameBoy *gb) {
-    REG(D) = shift_right_arith(REG(D), &REG(F));
+    REG(D) = shift_right_arith(gb, REG(D));
 }
 
 // 0xCB2B: SRA E (Z 0 0 0)
 void op_sra_e(GameBoy *gb) {
-    REG(E) = shift_right_arith(REG(E), &REG(F));
+    REG(E) = shift_right_arith(gb, REG(E));
 }
 
 // 0xCB2C: SRA H (Z 0 0 0)
 void op_sra_h(GameBoy *gb) {
-    REG(H) = shift_right_arith(REG(H), &REG(F));
+    REG(H) = shift_right_arith(gb, REG(H));
 }
 
 // 0xCB2D: SRA L (Z 0 0 0)
 void op_sra_l(GameBoy *gb) {
-    REG(L) = shift_right_arith(REG(L), &REG(F));
+    REG(L) = shift_right_arith(gb, REG(L));
 }
 
 // 0xCB2E: SRA (HL) (Z 0 0 0)
 void op_sra_hlp(GameBoy *gb) {
-    WRITE8(REG(HL), shift_right_arith(READ8(REG(HL)), &REG(F)));
+    WRITE8(REG(HL), shift_right_arith(gb, READ8(REG(HL))));
     TICK(2);
 }
 
 // 0xCB2F: SRA A (Z 0 0 0)
 void op_sra_a(GameBoy *gb) {
-    REG(A) = shift_right_arith(REG(A), &REG(F));
+    REG(A) = shift_right_arith(gb, REG(A));
 }
 
 // 0xCB30: SWAP B (Z 0 0 0)
 void op_swap_b(GameBoy *gb) {
-    REG(B) = swap(REG(B), &REG(F));
+    REG(B) = swap(gb, REG(B));
 }
 
 // 0xCB31: SWAP C (Z 0 0 0)
 void op_swap_c(GameBoy *gb) {
-    REG(C) = swap(REG(C), &REG(F));
+    REG(C) = swap(gb, REG(C));
 }
 
 // 0xCB32: SWAP D (Z 0 0 0)
 void op_swap_d(GameBoy *gb) {
-    REG(D) = swap(REG(D), &REG(F));
+    REG(D) = swap(gb, REG(D));
 }
 
 // 0xCB33: SWAP E (Z 0 0 0)
 void op_swap_e(GameBoy *gb) {
-    REG(E) = swap(REG(E), &REG(F));
+    REG(E) = swap(gb, REG(E));
 }
 
 // 0xCB34: SWAP H (Z 0 0 0)
 void op_swap_h(GameBoy *gb) {
-    REG(H) = swap(REG(H), &REG(F));
+    REG(H) = swap(gb, REG(H));
 }
 
 // 0xCB35: SWAP L (Z 0 0 0)
 void op_swap_l(GameBoy *gb) {
-    REG(L) = swap(REG(L), &REG(F));
+    REG(L) = swap(gb, REG(L));
 }
 
 // 0xCB36: SWAP (HL) (Z 0 0 0)
 void op_swap_hlp(GameBoy *gb) {
-    WRITE8(REG(HL), swap(READ8(REG(HL)), &REG(F)));
+    WRITE8(REG(HL), swap(gb, READ8(REG(HL))));
     TICK(2);
 }
 
 // 0xCB37: SWAP A (Z 0 0 0)
 void op_swap_a(GameBoy *gb) {
-    REG(A) = swap(REG(A), &REG(F));
+    REG(A) = swap(gb, REG(A));
 }
 
 // 0xCB38: SRL B (Z 0 0 C)
 void op_srl_b(GameBoy *gb) {
-    REG(B) = shift_right_logic(REG(B), &REG(F)); 
+    REG(B) = shift_right_logic(gb, REG(B)); 
 }
 
 // 0xCB39: SRL C (Z 0 0 C)
 void op_srl_c(GameBoy *gb) {
-    REG(C) = shift_right_logic(REG(C), &REG(F)); 
+    REG(C) = shift_right_logic(gb, REG(C)); 
 }
 
 // 0xCB3A: SRL D (Z 0 0 C)
 void op_srl_d(GameBoy *gb) {
-    REG(D) = shift_right_logic(REG(D), &REG(F)); 
+    REG(D) = shift_right_logic(gb, REG(D)); 
 }
 
 // 0xCB3B: SRL E (Z 0 0 C)
 void op_srl_e(GameBoy *gb) {
-    REG(E) = shift_right_logic(REG(E), &REG(F)); 
+    REG(E) = shift_right_logic(gb, REG(E)); 
 }
 
 // 0xCB3C: SRL H (Z 0 0 C)
 void op_srl_h(GameBoy *gb) {
-    REG(H) = shift_right_logic(REG(H), &REG(F)); 
+    REG(H) = shift_right_logic(gb, REG(H)); 
 }
 
 // 0xCB3D: SRL L (Z 0 0 C)
 void op_srl_l(GameBoy *gb) {
-    REG(L) = shift_right_logic(REG(L), &REG(F)); 
+    REG(L) = shift_right_logic(gb, REG(L)); 
 }
 
 // 0xCB3E: SRL (HL) (Z 0 0 C)
 void op_srl_hlp(GameBoy *gb) {
-    WRITE8(REG(HL), shift_right_logic(READ8(REG(HL)), &REG(F))); 
+    WRITE8(REG(HL), shift_right_logic(gb, READ8(REG(HL)))); 
     TICK(2);
 }
 
 // 0xCB3F: SRL A (Z 0 0 C)
 void op_srl_a(GameBoy *gb) {
-    REG(A) = shift_right_logic(REG(A), &REG(F)); 
+    REG(A) = shift_right_logic(gb, REG(A)); 
 }
 
 // 0xCB40: BIT 0, B (Z 0 1 -)
 void op_bit_0_b(GameBoy *gb) {
-    test_bit(REG(B), 0, &REG(F)); 
+    test_bit(gb, REG(B), 0); 
 }
 
 // 0xCB41: BIT 0, C (Z 0 1 -)
 void op_bit_0_c(GameBoy *gb) {
-    test_bit(REG(C), 0, &REG(F)); 
+    test_bit(gb, REG(C), 0); 
 }
 
 // 0xCB42: BIT 0, D (Z 0 1 -)
 void op_bit_0_d(GameBoy *gb) {
-    test_bit(REG(D), 0, &REG(F)); 
+    test_bit(gb, REG(D), 0); 
 }
 
 // 0xCB43: BIT 0, E (Z 0 1 -)
 void op_bit_0_e(GameBoy *gb) {
-    test_bit(REG(E), 0, &REG(F)); 
+    test_bit(gb, REG(E), 0); 
 }
 
 // 0xCB44: BIT 0, H (Z 0 1 -)
 void op_bit_0_h(GameBoy *gb) {
-    test_bit(REG(H), 0, &REG(F)); 
+    test_bit(gb, REG(H), 0); 
 }
 
 // 0xCB45: BIT 0, L (Z 0 1 -)
 void op_bit_0_l(GameBoy *gb) {
-    test_bit(REG(L), 0, &REG(F)); 
+    test_bit(gb, REG(L), 0); 
 }
 
 // 0xCB46: BIT 0, (HL) (Z 0 1 -)
 void op_bit_0_hlp(GameBoy *gb) {
-    test_bit(READ8(REG(HL)), 0, &REG(F)); 
+    test_bit(gb, READ8(REG(HL)), 0); 
     TICK(2);
 }
 
 // 0xCB47: BIT 0, A (Z 0 1 -)
 void op_bit_0_a(GameBoy *gb) {
-    test_bit(REG(A), 0, &REG(F)); 
+    test_bit(gb, REG(A), 0); 
 }
 
 // 0xCB48: BIT 1, B (Z 0 1 -)
 void op_bit_1_b(GameBoy *gb) {
-    test_bit(REG(B), 1, &REG(F)); 
+    test_bit(gb, REG(B), 1); 
 }
 
 // 0xCB49: BIT 1, C (Z 0 1 -)
 void op_bit_1_c(GameBoy *gb) {
-    test_bit(REG(C), 1, &REG(F)); 
+    test_bit(gb, REG(C), 1); 
 }
 
 // 0xCB4A: BIT 1, D (Z 0 1 -)
 void op_bit_1_d(GameBoy *gb) {
-    test_bit(REG(D), 1, &REG(F)); 
+    test_bit(gb, REG(D), 1); 
 }
 
 // 0xCB4B: BIT 1, E (Z 0 1 -)
 void op_bit_1_e(GameBoy *gb) {
-    test_bit(REG(E), 1, &REG(F)); 
+    test_bit(gb, REG(E), 1); 
 }
 
 // 0xCB4C: BIT 1, H (Z 0 1 -)
 void op_bit_1_h(GameBoy *gb) {
-    test_bit(REG(H), 1, &REG(F)); 
+    test_bit(gb, REG(H), 1); 
 }
 
 // 0xCB4D: BIT 1, L (Z 0 1 -)
 void op_bit_1_l(GameBoy *gb) {
-    test_bit(REG(L), 1, &REG(F)); 
+    test_bit(gb, REG(L), 1); 
 }
 
 // 0xCB4E: BIT 1, (HL) (Z 0 1 -)
 void op_bit_1_hlp(GameBoy *gb) {
-    test_bit(READ8(REG(HL)), 1, &REG(F));
+    test_bit(gb, READ8(REG(HL)), 1);
     TICK(2);
 }
 
 // 0xCB4F: BIT 1, A (Z 0 1 -)
 void op_bit_1_a(GameBoy *gb) {
-    test_bit(REG(A), 1, &REG(F)); 
+    test_bit(gb, REG(A), 1); 
 }
 
 // 0xCB50: BIT 2, B (Z 0 1 -)
 void op_bit_2_b(GameBoy *gb) {
-    test_bit(REG(B), 2, &REG(F)); 
+    test_bit(gb, REG(B), 2); 
 }
 
 // 0xCB51: BIT 2, C (Z 0 1 -)
 void op_bit_2_c(GameBoy *gb) {
-    test_bit(REG(C), 2, &REG(F)); 
+    test_bit(gb, REG(C), 2); 
 }
 
 // 0xCB52: BIT 2, D (Z 0 1 -)
 void op_bit_2_d(GameBoy *gb) {
-    test_bit(REG(D), 2, &REG(F)); 
+    test_bit(gb, REG(D), 2); 
 }
 
 // 0xCB53: BIT 2, E (Z 0 1 -)
 void op_bit_2_e(GameBoy *gb) {
-    test_bit(REG(E), 2, &REG(F)); 
+    test_bit(gb, REG(E), 2); 
 }
 
 // 0xCB54: BIT 2, H (Z 0 1 -)
 void op_bit_2_h(GameBoy *gb) {
-    test_bit(REG(H), 2, &REG(F)); 
+    test_bit(gb, REG(H), 2); 
 }
 
 // 0xCB55: BIT 2, L (Z 0 1 -)
 void op_bit_2_l(GameBoy *gb) {
-    test_bit(REG(L), 2, &REG(F)); 
+    test_bit(gb, REG(L), 2); 
 }
 
 // 0xCB56: BIT 2, (HL) (Z 0 1 -)
 void op_bit_2_hlp(GameBoy *gb) {
-    test_bit(READ8(REG(HL)), 2, &REG(F)); 
+    test_bit(gb, READ8(REG(HL)), 2); 
     TICK(2);
 }
 
 // 0xCB57: BIT 2, A (Z 0 1 -)
 void op_bit_2_a(GameBoy *gb) {
-    test_bit(REG(A), 2, &REG(F)); 
+    test_bit(gb, REG(A), 2); 
 }
 
 // 0xCB58: BIT 3, B (Z 0 1 -)
 void op_bit_3_b(GameBoy *gb) {
-    test_bit(REG(B), 3, &REG(F)); 
+    test_bit(gb, REG(B), 3); 
 }
 
 // 0xCB59: BIT 3, C (Z 0 1 -)
 void op_bit_3_c(GameBoy *gb) {
-    test_bit(REG(C), 3, &REG(F)); 
+    test_bit(gb, REG(C), 3); 
 }
 
 // 0xCB5A: BIT 3, D (Z 0 1 -)
 void op_bit_3_d(GameBoy *gb) {
-    test_bit(REG(D), 3, &REG(F)); 
+    test_bit(gb, REG(D), 3); 
 }
 
 // 0xCB5B: BIT 3, E (Z 0 1 -)
 void op_bit_3_e(GameBoy *gb) {
-    test_bit(REG(E), 3, &REG(F)); 
+    test_bit(gb, REG(E), 3); 
 }
 
 // 0xCB5C: BIT 3, H (Z 0 1 -)
 void op_bit_3_h(GameBoy *gb) {
-    test_bit(REG(H), 3, &REG(F)); 
+    test_bit(gb, REG(H), 3); 
 }
 
 // 0xCB5D: BIT 3, L (Z 0 1 -)
 void op_bit_3_l(GameBoy *gb) {
-    test_bit(REG(L), 3, &REG(F)); 
+    test_bit(gb, REG(L), 3); 
 }
 
 // 0xCB5E: BIT 3, (HL) (Z 0 1 -)
 void op_bit_3_hlp(GameBoy *gb) {
-    test_bit(READ8(REG(HL)), 3, &REG(F)); 
+    test_bit(gb, READ8(REG(HL)), 3); 
     TICK(2);
 }
 
 // 0xCB5F: BIT 3, A (Z 0 1 -)
 void op_bit_3_a(GameBoy *gb) {
-    test_bit(REG(A), 3, &REG(F)); 
+    test_bit(gb, REG(A), 3); 
 }
 
 // 0xCB60: BIT 4, B (Z 0 1 -)
 void op_bit_4_b(GameBoy *gb) {
-    test_bit(REG(B), 4, &REG(F)); 
+    test_bit(gb, REG(B), 4); 
 }
 
 // 0xCB61: BIT 4, C (Z 0 1 -)
 void op_bit_4_c(GameBoy *gb) {
-    test_bit(REG(C), 4, &REG(F)); 
+    test_bit(gb, REG(C), 4); 
 }
 
 // 0xCB62: BIT 4, D (Z 0 1 -)
 void op_bit_4_d(GameBoy *gb) {
-    test_bit(REG(D), 4, &REG(F)); 
+    test_bit(gb, REG(D), 4); 
 }
 
 // 0xCB63: BIT 4, E (Z 0 1 -)
 void op_bit_4_e(GameBoy *gb) {
-    test_bit(REG(E), 4, &REG(F)); 
+    test_bit(gb, REG(E), 4); 
 }
 
 // 0xCB64: BIT 4, H (Z 0 1 -)
 void op_bit_4_h(GameBoy *gb) {
-    test_bit(REG(H), 4, &REG(F)); 
+    test_bit(gb, REG(H), 4); 
 }
 
 // 0xCB65: BIT 4, L (Z 0 1 -)
 void op_bit_4_l(GameBoy *gb) {
-    test_bit(REG(L), 4, &REG(F)); 
+    test_bit(gb, REG(L), 4); 
 }
 
 // 0xCB66: BIT 4, (HL) (Z 0 1 -)
 void op_bit_4_hlp(GameBoy *gb) {
-    test_bit(READ8(REG(HL)), 4, &REG(F)); 
+    test_bit(gb, READ8(REG(HL)), 4); 
     TICK(2);
 }
 
 // 0xCB67: BIT 4, A (Z 0 1 -)
 void op_bit_4_a(GameBoy *gb) {
-    test_bit(REG(A), 4, &REG(F)); 
+    test_bit(gb, REG(A), 4); 
 }
 
 // 0xCB68: BIT 5, B (Z 0 1 -)
 void op_bit_5_b(GameBoy *gb) {
-    test_bit(REG(B), 5, &REG(F)); 
+    test_bit(gb, REG(B), 5); 
 }
 
 // 0xCB69: BIT 5, C (Z 0 1 -)
 void op_bit_5_c(GameBoy *gb) {
-    test_bit(REG(C), 5, &REG(F)); 
+    test_bit(gb, REG(C), 5); 
 }
 
 // 0xCB6A: BIT 5, D (Z 0 1 -)
 void op_bit_5_d(GameBoy *gb) {
-    test_bit(REG(D), 5, &REG(F)); 
+    test_bit(gb, REG(D), 5); 
 }
 
 // 0xCB6B: BIT 5, E (Z 0 1 -)
 void op_bit_5_e(GameBoy *gb) {
-    test_bit(REG(E), 5, &REG(F)); 
+    test_bit(gb, REG(E), 5); 
 }
 
 // 0xCB6C: BIT 5, H (Z 0 1 -)
 void op_bit_5_h(GameBoy *gb) {
-    test_bit(REG(H), 5, &REG(F)); 
+    test_bit(gb, REG(H), 5); 
 }
 
 // 0xCB6D: BIT 5, L (Z 0 1 -)
 void op_bit_5_l(GameBoy *gb) {
-    test_bit(REG(L), 5, &REG(F)); 
+    test_bit(gb, REG(L), 5); 
 }
 
 // 0xCB6E: BIT 5, (HL) (Z 0 1 -)
 void op_bit_5_hlp(GameBoy *gb) {
-    test_bit(READ8(REG(HL)), 5, &REG(F)); 
+    test_bit(gb, READ8(REG(HL)), 5); 
     TICK(2);
 }
 
 // 0xCB6F: BIT 5, A (Z 0 1 -)
 void op_bit_5_a(GameBoy *gb) {
-    test_bit(REG(A), 5, &REG(F)); 
+    test_bit(gb, REG(A), 5); 
 }
 
 // 0xCB70: BIT 6, B (Z 0 1 -)
 void op_bit_6_b(GameBoy *gb) {
-    test_bit(REG(B), 6, &REG(F)); 
+    test_bit(gb, REG(B), 6); 
 }
 
 // 0xCB71: BIT 6, C (Z 0 1 -)
 void op_bit_6_c(GameBoy *gb) {
-    test_bit(REG(C), 6, &REG(F)); 
+    test_bit(gb, REG(C), 6); 
 }
 
 // 0xCB72: BIT 6, D (Z 0 1 -)
 void op_bit_6_d(GameBoy *gb) {
-    test_bit(REG(D), 6, &REG(F)); 
+    test_bit(gb, REG(D), 6); 
 }
 
 // 0xCB73: BIT 6, E (Z 0 1 -)
 void op_bit_6_e(GameBoy *gb) {
-    test_bit(REG(E), 6, &REG(F)); 
+    test_bit(gb, REG(E), 6); 
 }
 
 // 0xCB74: BIT 6, H (Z 0 1 -)
 void op_bit_6_h(GameBoy *gb) {
-    test_bit(REG(H), 6, &REG(F)); 
+    test_bit(gb, REG(H), 6); 
 }
 
 // 0xCB75: BIT 6, L (Z 0 1 -)
 void op_bit_6_l(GameBoy *gb) {
-    test_bit(REG(L), 6, &REG(F)); 
+    test_bit(gb, REG(L), 6); 
 }
 
 // 0xCB76: BIT 6, (HL) (Z 0 1 -)
 void op_bit_6_hlp(GameBoy *gb) {
-    test_bit(READ8(REG(HL)), 6, &REG(F)); 
+    test_bit(gb, READ8(REG(HL)), 6); 
     TICK(2);
 }
 
 // 0xCB77: BIT 6, A (Z 0 1 -)
 void op_bit_6_a(GameBoy *gb) {
-    test_bit(REG(A), 6, &REG(F)); 
+    test_bit(gb, REG(A), 6); 
 }
 
 // 0xCB78: BIT 7, B (Z 0 1 -)
 void op_bit_7_b(GameBoy *gb) {
-    test_bit(REG(B), 7, &REG(F)); 
+    test_bit(gb, REG(B), 7); 
 }
 
 // 0xCB79: BIT 7, C (Z 0 1 -)
 void op_bit_7_c(GameBoy *gb) {
-    test_bit(REG(C), 7, &REG(F)); 
+    test_bit(gb, REG(C), 7); 
 }
 
 // 0xCB7A: BIT 7, D (Z 0 1 -)
 void op_bit_7_d(GameBoy *gb) {
-    test_bit(REG(D), 7, &REG(F)); 
+    test_bit(gb, REG(D), 7); 
 }
 
 // 0xCB7B: BIT 7, E (Z 0 1 -)
 void op_bit_7_e(GameBoy *gb) {
-    test_bit(REG(E), 7, &REG(F)); 
+    test_bit(gb, REG(E), 7); 
 }
 
 // 0xCB7C: BIT 7, H (Z 0 1 -)
 void op_bit_7_h(GameBoy *gb) {
-    test_bit(REG(H), 7, &REG(F)); 
+    test_bit(gb, REG(H), 7); 
 }
 
 // 0xCB7D: BIT 7, L (Z 0 1 -)
 void op_bit_7_l(GameBoy *gb) {
-    test_bit(REG(L), 7, &REG(F)); 
+    test_bit(gb, REG(L), 7); 
 }
 
 // 0xCB7E: BIT 7, (HL) (Z 0 1 -)
 void op_bit_7_hlp(GameBoy *gb) {
-    test_bit(READ8(REG(HL)), 7, &REG(F)); 
+    test_bit(gb, READ8(REG(HL)), 7); 
 }
 
 // 0xCB7F: BIT 7, A (Z 0 1 -)
 void op_bit_7_a(GameBoy *gb) {
-    test_bit(REG(A), 7, &REG(F)); 
+    test_bit(gb, REG(A), 7); 
 }
 
 // 0xCB80: RES 0, B (- - - -)
