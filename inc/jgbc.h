@@ -153,14 +153,9 @@ typedef struct APU {
     SDL_AudioSpec desired_spec;
     SDL_AudioSpec actual_spec;
 
-    struct {
-        float *data;
-        uint32_t size;
-        uint32_t read_cursor;
-        uint32_t write_cursor;
-    }
-    buffer;
-    
+    float *buffer;
+    uint32_t buffer_position;
+
     uint8_t frame_sequencer_step;
     uint16_t frame_sequencer_clock;
     uint8_t downsample_clock;

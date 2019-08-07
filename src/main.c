@@ -1,6 +1,7 @@
 #include "jgbc.h"
 #include "ppu.h"
 #include "cpu.h"
+#include "apu.h"
 #include "mmu.h"
 #include "cart.h"
 #include "input.h"
@@ -53,8 +54,8 @@ static void run(GameBoy *gb) {
 
             update_ppu(gb);
             update_timer(gb);
-            update_apu(gb);
             check_interrupts(gb);
+            update_apu(gb);
 
             frame_ticks += gb->cpu.ticks;
         }

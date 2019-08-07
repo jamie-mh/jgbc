@@ -1,7 +1,7 @@
 #pragma once
 
 #define AUDIO_SAMPLES 2048 
-#define AUDIO_CHANNELS 1
+#define AUDIO_CHANNELS 2
 #define SAMPLE_RATE 44100 
 
 // Clock Dividers
@@ -57,5 +57,4 @@
 
 void init_apu(GameBoy *gb);
 void update_apu(GameBoy *gb);
-void audio_callback(void *user_data, uint8_t *buffer, const int length);
 void audio_register_write(GameBoy *gb, const uint16_t address, const uint8_t value);

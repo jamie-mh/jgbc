@@ -1,5 +1,6 @@
 #include "jgbc.h"
 #include "ppu.h"
+#include "apu.h"
 #include "input.h"
 #include "cpu.h"
 #include "mmu.h"

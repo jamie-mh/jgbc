@@ -63,7 +63,7 @@ static bool read_header(FILE *file, uint8_t *header) {
 static void parse_header(GameBoy *gb, uint8_t *header) {
     #define HEADER(addr) header[(addr) - CART_HEADER_START]
 
-    strncpy(gb->cart.title, &HEADER(CART_HEADER_TITLE), 16);
+    memcpy(gb->cart.title, &HEADER(CART_HEADER_TITLE), 16);
     gb->cart.title[16] = '\0';
 
     gb->cart.gbc_flag = HEADER(CART_HEADER_GBC_FLAG);

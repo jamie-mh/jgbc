@@ -10,7 +10,6 @@ void WindowMemory::render() {
         return;
     }
 
-    static const auto default_region_count = 7;
     static const auto gb = &_gb;
     static MemoryEditor mem;
 
