@@ -66,8 +66,8 @@ void WindowIO::render() {
     draw_registers(ief_labels, IF, ief_bits, 5);
 
     ImGui::NextColumn();
-    const char *timer_labels[8] = { "DIV", "TIMA", "TMA", "TAC" };
-    const uint16_t timer_addrs[8] = { DIV, TIMA, TMA, TAC };
+    const char *timer_labels[4] = { "DIV", "TIMA", "TMA", "TAC" };
+    const uint16_t timer_addrs[4] = { DIV, TIMA, TMA, TAC };
     draw_values(timer_labels, timer_addrs, 4);
 
     const char *tac_labels[3] = { "Input (bit 1)", "Input (bit 0)", "Stop (Checked = running)" };
@@ -84,7 +84,16 @@ void WindowIO::render() {
     ImGui::NextColumn();
     ImGui::Separator();
 
-    ImGui::Checkbox("Enabled", &gb->apu.square_wave_1.enabled);
+    ImGui::Checkbox("Enabled", &gb->apu.square_waves[0].enabled);
+    const char *square_1_labels[5] = { "NR10", "NR11", "NR12", "NR13", "NR14" };
+    const uint16_t square_1_addrs[5] = { NR10, NR11, NR12, NR13, NR14 };
+    draw_values(square_1_labels, square_1_addrs, 5);
+
+    ImGui::NextColumn();
+    ImGui::Checkbox("Enabled", &gb->apu.square_waves[1].enabled);
+    const char *square_2_labels[4] = { "NR21", "NR22", "NR23", "NR24" };
+    const uint16_t square_2_addrs[4] = { NR11, NR12, NR13, NR14 };
+    draw_values(square_2_labels, square_2_addrs, 4);
 
     ImGui::End();
 }

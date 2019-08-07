@@ -18,10 +18,7 @@ void WindowAudio::render() {
     ImGui::Text("APU Buffer");
     ImGui::PlotLines("Buffer", gb->apu.buffer, gb->apu.actual_spec.size / sizeof(float), 0, nullptr, 0.0f, 1.0f, ImVec2(width, 150));
 
-    static MemoryEditor mem;
-    mem.DrawContents(gb->apu.buffer, gb->apu.actual_spec.size / sizeof(float), sizeof(float));
-
-    if(ImGui::Button("Dump")) {
+    if(ImGui::Button("Dump buffer to audio.bin")) {
         std::ofstream file;
         file.open("audio.bin");
 
@@ -30,6 +27,9 @@ void WindowAudio::render() {
 
         file.close();
     }
+
+    static MemoryEditor mem;
+    mem.DrawContents(gb->apu.buffer, gb->apu.actual_spec.size / sizeof(float), sizeof(float));
 
     ImGui::End();
 }

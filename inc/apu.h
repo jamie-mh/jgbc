@@ -11,26 +11,32 @@
 // Audio Registers
 // Square Wave 1
 #define NR10 0xFF10
-#define NR10_SWEEP 0x70
-#define NR10_NEGATE 0x8
-#define NR10_SHIFT 0x7
+#define SQUARE_SWEEP 0x70
+#define SQUARE_MODE 0x8
+#define SQUARE_SHIFT 0x7
 
 #define NR11 0xFF11
-#define NR11_DUTY_MODE 0xC0
-#define NR11_LENGTH 0x3F
+#define SQUARE_DUTY_MODE 0xC0
+#define SQUARE_LENGTH 0x3F
 
 #define NR12 0xFF12
-#define NR12_INITIAL_VOLUME 0xF0
-#define NR12_ENVELOPE_MODE 0x8
-#define NR12_ENVELOPE_PERIOD 0x7
-#define NR12_DAC_ENABLED 0xF8
+#define SQUARE_INITIAL_VOLUME 0xF0
+#define SQUARE_ENVELOPE_MODE 0x8
+#define SQUARE_ENVELOPE_PERIOD 0x7
+#define SQUARE_DAC_ENABLED 0xF8
 
 #define NR13 0xFF13 // Frequency LSB
 
 #define NR14 0xFF14
-#define NR14_TRIGGER 0x80
-#define NR14_LENGTH_ENABLE 0x40
-#define NR14_FREQUENCY_MSB 0x7
+#define SQUARE_TRIGGER 0x80
+#define SQUARE_LENGTH_ENABLE 0x40
+#define SQUARE_FREQUENCY_MSB 0x7
+
+// Square Wave 2
+#define NR21 0xFF16
+#define NR22 0xFF17
+#define NR23 0xFF18
+#define NR24 0xFF19
 
 // Control
 #define NR50 0xFF24

@@ -110,14 +110,22 @@ typedef enum EnvelopeMode {
 }
 EnvelopeMode;
 
-typedef struct SquareWave1 {
+typedef enum SweepMode {
+    Addition = 0,
+    Subtraction = 1
+}
+SweepMode;
+
+typedef struct SquareWave {
     bool enabled;
     bool dac_enabled;
 
     struct {
+        bool enabled;
         uint8_t period;
-        bool negate;
+        SweepMode mode;
         uint8_t shift;
+        uint16_t current_frequency;
     }
     sweep;
 
@@ -137,15 +145,14 @@ typedef struct SquareWave1 {
 
     struct {
         bool enabled;
-        uint8_t initial;
-        uint8_t counter;
+        uint8_t clock;
     }
     length;
 
     int32_t clock;
     uint16_t frequency;
 }
-SquareWave1;
+SquareWave;
 
 typedef struct APU {
     bool enabled;
@@ -160,8 +167,8 @@ typedef struct APU {
     uint16_t frame_sequencer_clock;
     uint8_t downsample_clock;
 
-    uint8_t channels[1];
-    SquareWave1 square_wave_1;
+    uint8_t channels[2];
+    SquareWave square_waves[2];
 }
 APU;
 

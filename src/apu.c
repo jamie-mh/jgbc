@@ -3,10 +3,13 @@
 #include "cpu.h"
 #include "apu.h"
 
-static inline void read_nr1(GameBoy *gb, const uint16_t address, const uint8_t value);
-static inline void update_nr1(GameBoy *gb);
-static inline void update_nr1_envelope(GameBoy *gb);
-static inline void trigger_nr1(GameBoy *gb);
+static inline void init_square_wave(GameBoy *gb, const uint8_t idx);
+static inline void read_square(GameBoy *gb, const uint16_t address, const uint8_t value, const uint8_t idx);
+static inline void update_square(GameBoy *gb, const uint8_t idx);
+static inline void update_square_envelope(GameBoy *gb, const uint8_t idx);
+static inline void update_square_sweep(GameBoy *gb);
+static inline void update_square_length(GameBoy *gb, const uint8_t idx);
+static inline void trigger_square(GameBoy *gb, const uint8_t idx);
 
 
 void init_apu(GameBoy *gb) {
@@ -17,7 +20,6 @@ void init_apu(GameBoy *gb) {
     desired->format = AUDIO_F32SYS;
     desired->channels = AUDIO_CHANNELS;
     desired->samples = AUDIO_SAMPLES;
-    desired->userdata = gb;
 
     gb->apu.device_id = SDL_OpenAudioDevice(
         NULL, 
@@ -35,17 +37,36 @@ void init_apu(GameBoy *gb) {
     gb->apu.buffer = malloc(gb->apu.actual_spec.size);
     gb->apu.buffer_position = 0;
 
-    gb->apu.square_wave_1.enabled = true;
-    gb->apu.square_wave_1.dac_enabled = true;
-    gb->apu.square_wave_1.frequency = 0;
-    gb->apu.square_wave_1.clock = 0;
+    init_square_wave(gb, 0);
+    init_square_wave(gb, 1);
+}
 
-    gb->apu.square_wave_1.duty.mode = 0;
-    gb->apu.square_wave_1.duty.step = 0;
+static void init_square_wave(GameBoy *gb, const uint8_t idx) {
 
-    gb->apu.square_wave_1.envelope.period = 0;
-    gb->apu.square_wave_1.envelope.initial_volume = 0;
-    gb->apu.square_wave_1.envelope.current_volume = 0;
+    assert(idx <= 1);
+    SquareWave *square = &gb->apu.square_waves[idx];
+
+    square->enabled = true;
+    square->dac_enabled = true;
+    square->frequency = 0;
+    square->clock = 0;
+
+    square->duty.mode = 0;
+    square->duty.step = 0;
+
+    square->length.enabled = false;
+    square->length.clock = 0;
+
+    square->envelope.period = 0;
+    square->envelope.initial_volume = 0;
+    square->envelope.current_volume = 0;
+    square->envelope.mode = Decrease;
+
+    square->sweep.enabled = false;
+    square->sweep.period = 0;
+    square->sweep.shift = 0;
+    square->sweep.current_frequency = 0;
+    square->sweep.mode = Addition;
 }
 
 void update_apu(GameBoy *gb) {
@@ -62,15 +83,26 @@ void update_apu(GameBoy *gb) {
             gb->apu.frame_sequencer_step %= 9;
 
             switch(gb->apu.frame_sequencer_step) {
+                case 2:
+                case 6:
+                    /*update_square_sweep(gb);*/
+                case 0:
+                case 4:
+                    update_square_length(gb, 0);
+                    update_square_length(gb, 1);
+                    break;
+
                 case 7: // every 8 clocks
-                    update_nr1_envelope(gb);
+                    update_square_envelope(gb, 0);
+                    update_square_envelope(gb, 1);
                     break;
             }
         }
         else
             gb->apu.frame_sequencer_clock++;
 
-        update_nr1(gb);
+        update_square(gb, 0);
+        update_square(gb, 1);
 
         if(gb->apu.downsample_clock++ >= DOWNSAMPLE_DIVIDER) {
             gb->apu.downsample_clock = 0;
@@ -81,8 +113,8 @@ void update_apu(GameBoy *gb) {
             float volume_right = SREAD8(NR50) & NR50_VOL_RIGHT;
             volume_right /= 7;
 
-            const uint8_t left = gb->apu.channels[0] * volume_left;
-            const uint8_t right = gb->apu.channels[0] * volume_right;
+            const uint8_t left = (gb->apu.channels[0] + gb->apu.channels[1]) * volume_left;
+            const uint8_t right = (gb->apu.channels[0] + gb->apu.channels[1]) * volume_right;
 
             gb->apu.buffer[gb->apu.buffer_position] = left / 255.0f;
             gb->apu.buffer[gb->apu.buffer_position + 1] = right / 255.0f;
@@ -107,7 +139,15 @@ void audio_register_write(GameBoy *gb, const uint16_t address, const uint8_t val
         case NR12:
         case NR13:
         case NR14:
-            read_nr1(gb, address, value);
+            read_square(gb, address, value, 0);
+            break;
+
+        // Square Wave 2
+        case NR21:
+        case NR22:
+        case NR23:
+        case NR24:
+            read_square(gb, address, value, 1);
             break;
 
         case NR52:
@@ -115,44 +155,52 @@ void audio_register_write(GameBoy *gb, const uint16_t address, const uint8_t val
     }
 }
 
-static inline void read_nr1(GameBoy *gb, const uint16_t address, const uint8_t value) {
+static inline void read_square(GameBoy *gb, const uint16_t address, const uint8_t value, const uint8_t idx) {
 
-    SquareWave1 *nr1 = &gb->apu.square_wave_1;
+    assert(idx <= 1);
+    SquareWave *square = &gb->apu.square_waves[idx];
 
     switch(address) {
         
         case NR10:
-            nr1->sweep.period = (value & NR10_SWEEP) >> 4;
-            nr1->sweep.negate = (value & NR10_NEGATE) >> 3;
-            nr1->sweep.shift = value & NR10_SHIFT;
+            square->sweep.period = (SweepMode) ((value & SQUARE_SWEEP) >> 4);
+            square->sweep.mode = (value & SQUARE_MODE) >> 3;
+            square->sweep.shift = value & SQUARE_SHIFT;
             break;
 
         case NR11:
-            nr1->duty.mode = (value & NR11_DUTY_MODE) >> 6;
-            nr1->length.initial = value & NR11_LENGTH;
+        case NR21:
+            square->duty.mode = (value & SQUARE_DUTY_MODE) >> 6;
+            square->length.clock = value & SQUARE_LENGTH;
             break;
 
         case NR12:
-            nr1->envelope.initial_volume = (value & NR12_INITIAL_VOLUME) >> 4;
-            nr1->envelope.mode = (EnvelopeMode) (value & NR12_ENVELOPE_MODE) >> 3;
-            nr1->envelope.period = value & NR12_ENVELOPE_PERIOD;
-            nr1->dac_enabled = value & NR12_DAC_ENABLED; // check upper 5 bits for 0
+        case NR22:
+            square->envelope.initial_volume = (value & SQUARE_INITIAL_VOLUME) >> 4;
+            square->envelope.mode = (EnvelopeMode) (value & SQUARE_ENVELOPE_MODE) >> 3;
+            square->envelope.period = value & SQUARE_ENVELOPE_PERIOD;
+            square->dac_enabled = value & SQUARE_DAC_ENABLED; // check upper 5 bits for 0
             break;
 
         case NR13:
-            nr1->frequency &= 0xFF00;
-            nr1->frequency |= value;
+        case NR23:
+            square->frequency &= 0xFF00;
+            square->frequency |= value;
             break;
 
         case NR14:
-            nr1->length.enabled = (value & NR14_LENGTH_ENABLE) >> 6;
-            nr1->frequency = ((value & NR14_FREQUENCY_MSB) << 8) | (nr1->frequency & 0xFF);
-            if(value & NR14_TRIGGER) trigger_nr1(gb);
+        case NR24:
+            square->length.enabled = (value & SQUARE_LENGTH_ENABLE) >> 6;
+            square->frequency = ((value & SQUARE_FREQUENCY_MSB) << 8) | (square->frequency & 0xFF);
+            if(value & SQUARE_TRIGGER) trigger_square(gb, idx);
             break;
     }
 }
 
-static inline void update_nr1(GameBoy *gb) {
+static inline void update_square(GameBoy *gb, const uint8_t idx) {
+
+    assert(idx <= 1);
+    SquareWave *square = &gb->apu.square_waves[idx];
 
     static const bool duty_table[4][8] = {
         { 0, 0, 0, 0, 0, 0, 0, 1 }, // 12.5%
@@ -160,8 +208,6 @@ static inline void update_nr1(GameBoy *gb) {
         { 1, 0, 0, 0, 0, 1, 1, 1 }, // 50%
         { 0, 1, 1, 1, 1, 1, 1, 0 }  // 75%
     };
-
-    SquareWave1 *square = &gb->apu.square_wave_1;
 
     square->clock--;
     if(square->clock <= 0)
@@ -174,37 +220,75 @@ static inline void update_nr1(GameBoy *gb) {
     if(square->enabled && square->dac_enabled && 
        duty_table[square->duty.mode][square->duty.step]) {
 
-        gb->apu.channels[0] = square->envelope.current_volume;
+        // Maximum envelope volume is 15 so fill the byte 255 / 15 = 17
+        gb->apu.channels[idx] = square->envelope.current_volume * 17;
     }
     else {
-        gb->apu.channels[0] = 0;
+        gb->apu.channels[idx] = 0;
     }
 }
 
-static inline void update_nr1_envelope(GameBoy *gb) {
+static inline void update_square_envelope(GameBoy *gb, const uint8_t idx) {
 
-    SquareWave1 *nr1 = &gb->apu.square_wave_1;
+    assert(idx <= 1);
+    SquareWave *square = &gb->apu.square_waves[idx];
 
-    if(nr1->envelope.period == 0)
+    if(square->envelope.period == 0)
         return;
 
-    if(nr1->envelope.current_volume > 15)
-        return;
+    switch(square->envelope.mode) {
+        case Increase: 
+            if(square->envelope.current_volume < 15)
+                square->envelope.current_volume++;
 
-    switch(nr1->envelope.mode) {
-        case Increase: nr1->envelope.current_volume++; break;
-        case Decrease: nr1->envelope.current_volume--; break;
+            break;
+
+        case Decrease: 
+            if(square->envelope.current_volume > 0)
+                square->envelope.current_volume--;
+
+            break;
     }
 }
 
-static inline void trigger_nr1(GameBoy *gb) {
+static inline void update_square_sweep(GameBoy *gb) {
 
-    SquareWave1 *nr1 = &gb->apu.square_wave_1;
-    nr1->enabled = true;
+    SquareWave *square = &gb->apu.square_waves[0];
 
-    if(nr1->length.counter == 0)
-        nr1->length.counter = 64;
+    if(!square->sweep.enabled || square->sweep.period == 0)
+        return;
 
-    nr1->clock = (2048 - nr1->frequency) * 4;
-    nr1->envelope.current_volume = nr1->envelope.initial_volume;
+    // TODO: Implement
+}
+
+static inline void update_square_length(GameBoy *gb, const uint8_t idx) {
+
+    assert(idx <= 1);
+    SquareWave *square = &gb->apu.square_waves[idx];
+
+    if(!square->length.enabled || square->length.clock == 0)
+        return;
+
+    if(square->length.clock-- == 0)
+        square->enabled = false;
+}
+
+static inline void trigger_square(GameBoy *gb, const uint8_t idx) {
+
+    assert(idx <= 1);
+    SquareWave *square = &gb->apu.square_waves[idx];
+    square->enabled = true;
+
+    if(square->length.clock == 0)
+        square->length.clock = 64;
+
+    square->clock = (2048 - square->frequency) * 4;
+    square->envelope.current_volume = square->envelope.initial_volume;
+
+    square->sweep.current_frequency = square->frequency;
+    // sweep timer reset
+    square->sweep.enabled = (square->sweep.period > 0 || square->sweep.shift > 0);
+
+    /*if(square->sweep.shift > 0)*/
+        // frequency calculation and overflow check
 }
