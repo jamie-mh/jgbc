@@ -245,6 +245,9 @@ void audio_register_write(GameBoy *gb, const uint16_t address, const uint8_t val
             gb->apu.left_enabled[CHANNEL_SQUARE_2] = (value & SND_2_TO_SO1) >> 1;
             gb->apu.left_enabled[CHANNEL_SQUARE_1] = value & SND_1_TO_SO1;
             break;
+
+        case NR52:
+            gb->apu.enabled = (value & SND_ENABLED);
     }
 }
 
