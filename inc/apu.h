@@ -17,26 +17,51 @@
 
 #define NR11 0xFF11
 #define SQUARE_DUTY_MODE 0xC0
-#define SQUARE_LENGTH 0x3F
+#define CHANNEL_LENGTH 0x3F
 
 #define NR12 0xFF12
-#define SQUARE_INITIAL_VOLUME 0xF0
-#define SQUARE_ENVELOPE_MODE 0x8
-#define SQUARE_ENVELOPE_PERIOD 0x7
+#define CHANNEL_ENVELOPE_INITIAL_VOLUME 0xF0
+#define CHANNEL_ENVELOPE_MODE 0x8
+#define CHANNEL_ENVELOPE_PERIOD 0x7
 #define SQUARE_DAC_ENABLED 0xF8
 
 #define NR13 0xFF13 // Frequency LSB
 
 #define NR14 0xFF14
-#define SQUARE_TRIGGER 0x80
-#define SQUARE_LENGTH_ENABLE 0x40
-#define SQUARE_FREQUENCY_MSB 0x7
+#define CHANNEL_TRIGGER 0x80
+#define CHANNEL_LENGTH_ENABLE 0x40
+#define CHANNEL_FREQUENCY_MSB 0x7
 
 // Square Wave 2
 #define NR21 0xFF16
 #define NR22 0xFF17
 #define NR23 0xFF18
 #define NR24 0xFF19
+
+// Wave
+#define NR30 0xFF1A
+#define WAVE_ENABLED 0x80
+
+#define NR31 0xFF1B // Length load
+
+#define NR32 0xFF1C
+#define WAVE_VOLUME 0x60
+
+#define NR33 0xFF1D // Frequency LSB
+#define NR34 0xFF1E
+
+#define WAVE_TABLE_START 0xFF30
+
+// Noise
+#define NR41 0xFF20
+#define NR42 0xFF21
+
+#define NR43 0xFF22
+#define NOISE_CLOCK_SHIFT 0xF0
+#define NOISE_WIDTH_MODE 0X8
+#define NOISE_DIVISOR_CODE 0x7
+
+#define NR44 0xFF23
 
 // Control
 #define NR50 0xFF24

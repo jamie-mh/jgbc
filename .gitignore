@@ -407,3 +407,5 @@ ASALocalRun/
 *.vcxproj
 *.filters
 *.sln
+
+audio.bin

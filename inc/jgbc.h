@@ -110,6 +110,20 @@ typedef enum EnvelopeMode {
 }
 EnvelopeMode;
 
+typedef struct ChannelEnvelope {
+    uint8_t initial_volume;
+    uint8_t current_volume;
+    EnvelopeMode mode;
+    uint8_t period;
+}
+ChannelEnvelope;
+
+typedef struct ChannelLength {
+    bool enabled;
+    uint16_t clock;
+}
+ChannelLength;
+
 typedef enum SweepMode {
     Addition = 0,
     Subtraction = 1
@@ -130,29 +144,42 @@ typedef struct SquareWave {
     sweep;
 
     struct {
-        uint8_t initial_volume;
-        uint8_t current_volume;
-        EnvelopeMode mode;
-        uint8_t period;
-    }
-    envelope;
-
-    struct {
         uint8_t mode;
         uint8_t step;
     }
     duty;
 
-    struct {
-        bool enabled;
-        uint8_t clock;
-    }
-    length;
+    ChannelEnvelope envelope;
+    ChannelLength length;
 
     int32_t clock;
     uint16_t frequency;
 }
 SquareWave;
+
+typedef struct Wave {
+    bool enabled;
+    uint8_t volume_code;
+    ChannelLength length;
+
+    uint8_t position;
+    uint32_t clock;
+    uint16_t frequency;
+}
+Wave;
+
+typedef struct Noise {
+    bool enabled;
+    ChannelLength length;
+    ChannelEnvelope envelope;
+    uint8_t clock_shift;
+    uint8_t width_mode;
+    uint8_t divisor_code;
+    uint16_t lfsr;
+    uint32_t clock;
+    uint8_t last_result;
+}
+Noise;
 
 typedef struct APU {
     bool enabled;
@@ -167,8 +194,10 @@ typedef struct APU {
     uint16_t frame_sequencer_clock;
     uint8_t downsample_clock;
 
-    uint8_t channels[2];
+    uint8_t channels[4];
     SquareWave square_waves[2];
+    Wave wave;
+    Noise noise;
 }
 APU;
 
