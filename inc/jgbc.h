@@ -190,11 +190,18 @@ typedef struct APU {
     float *buffer;
     uint32_t buffer_position;
 
-    uint8_t frame_sequencer_step;
-    uint16_t frame_sequencer_clock;
+    struct {
+        uint8_t step;
+        uint16_t clock;
+    }
+    frame_sequencer;
+
     uint8_t downsample_clock;
 
     uint8_t channels[4];
+    bool left_enabled[4];
+    bool right_enabled[4];
+
     SquareWave square_waves[2];
     Wave wave;
     Noise noise;

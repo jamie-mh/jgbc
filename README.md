@@ -39,10 +39,10 @@ Requirements: SDL2, CMake, OpenGL
 - Timers
 - Joypad
 - MBC 1
+- Sound
 
 #### Not Working
 
-- Sound
 - GameBoy Color specific features
 - Other MBCs
 

@@ -41,8 +41,8 @@ void init_apu(GameBoy *gb) {
     );
 
     gb->apu.enabled = true;
-    gb->apu.frame_sequencer_clock = 0;
-    gb->apu.frame_sequencer_step = 0;
+    gb->apu.frame_sequencer.clock = 0;
+    gb->apu.frame_sequencer.step = 0;
     gb->apu.downsample_clock = 0;
 
     gb->apu.buffer = malloc(gb->apu.actual_spec.size);
@@ -54,6 +54,7 @@ void init_apu(GameBoy *gb) {
     init_square_wave(gb, 0);
     init_square_wave(gb, 1);
     init_wave(gb);
+    init_noise(gb);
 }
 
 static void init_square_wave(GameBoy *gb, const uint8_t idx) {
@@ -125,13 +126,13 @@ void update_apu(GameBoy *gb) {
 
     for(int i = 0; i < gb->cpu.ticks; ++i) { 
 
-        if(apu->frame_sequencer_clock >= FRAME_SEQUENCER_DIVIDER) {
+        if(apu->frame_sequencer.clock >= FRAME_SEQUENCER_DIVIDER) {
 
-            apu->frame_sequencer_clock = 0;
-            apu->frame_sequencer_step++;
-            apu->frame_sequencer_step %= 9;
+            apu->frame_sequencer.clock = 0;
+            apu->frame_sequencer.step++;
+            apu->frame_sequencer.step %= 9;
 
-            switch(gb->apu.frame_sequencer_step) {
+            switch(gb->apu.frame_sequencer.step) {
                 case 2:
                 case 6:
                     /*update_square_sweep(gb);*/
@@ -151,7 +152,7 @@ void update_apu(GameBoy *gb) {
             }
         }
         else
-            apu->frame_sequencer_clock++;
+            apu->frame_sequencer.clock++;
 
         update_square(gb, 0);
         update_square(gb, 1);
@@ -161,25 +162,29 @@ void update_apu(GameBoy *gb) {
         if(apu->downsample_clock++ >= DOWNSAMPLE_DIVIDER) {
             apu->downsample_clock = 0;
 
-            float volume_left = (SREAD8(NR50) & NR50_VOL_LEFT) >> 4;
+            float volume_left = (SREAD8(NR50) & VOL_LEFT) >> 4;
             volume_left /= 7;
 
-            float volume_right = SREAD8(NR50) & NR50_VOL_RIGHT;
+            float volume_right = SREAD8(NR50) & VOL_RIGHT;
             volume_right /= 7;
 
-            uint8_t left = 0;
-            uint8_t right = 0;
+            float left = 0.0f;
+            float right = 0.0f;
 
             for(int i = 0; i < 4; ++i) {
-                left += apu->channels[i];
-                right += apu->channels[i];
+
+                if(apu->left_enabled[i])
+                    left += apu->channels[i];
+
+                if(apu->right_enabled[i])
+                    right += apu->channels[i];
             }
 
             left *= volume_left;
             right *= volume_right;
 
-            apu->buffer[apu->buffer_position] = left / 255.0f;
-            apu->buffer[apu->buffer_position + 1] = right / 255.0f;
+            apu->buffer[apu->buffer_position] = left / 60.0f;
+            apu->buffer[apu->buffer_position + 1] = right / 60.0f;
 
             apu->buffer_position += AUDIO_CHANNELS;
         }
@@ -229,12 +234,19 @@ void audio_register_write(GameBoy *gb, const uint16_t address, const uint8_t val
             read_noise(gb, address, value);
             break;
 
-        case NR52:
-            gb->apu.enabled = (value & NR52_SND_ENABLED);
+        case NR51:
+            gb->apu.right_enabled[CHANNEL_NOISE] = (value & SND_4_TO_SO2) >> 7;
+            gb->apu.right_enabled[CHANNEL_WAVE] = (value & SND_3_TO_SO2) >> 6;
+            gb->apu.right_enabled[CHANNEL_SQUARE_2] = (value & SND_2_TO_SO2) >> 5;
+            gb->apu.right_enabled[CHANNEL_SQUARE_1] = (value & SND_1_TO_SO2) >> 4;
+
+            gb->apu.left_enabled[CHANNEL_NOISE] = (value & SND_4_TO_SO1) >> 3;
+            gb->apu.left_enabled[CHANNEL_WAVE] = (value & SND_3_TO_SO1) >> 2;
+            gb->apu.left_enabled[CHANNEL_SQUARE_2] = (value & SND_2_TO_SO1) >> 1;
+            gb->apu.left_enabled[CHANNEL_SQUARE_1] = value & SND_1_TO_SO1;
             break;
     }
 }
-
 
 static inline void update_envelope(ChannelEnvelope *envelope) {
 
@@ -320,14 +332,12 @@ static inline void update_square(GameBoy *gb, const uint8_t idx) {
     if(square->enabled && square->dac_enabled && 
        duty_table[square->duty.mode][square->duty.step]) {
 
-        // Maximum envelope volume is 15 so fill the byte 255 / 15 = 17
-        gb->apu.channels[idx] = square->envelope.current_volume * 17;
+        gb->apu.channels[idx] = square->envelope.current_volume;
     }
     else {
         gb->apu.channels[idx] = 0;
     }
 }
-
 
 static inline void update_square_sweep(GameBoy *gb) {
 
@@ -416,10 +426,10 @@ static inline void update_wave(GameBoy *gb) {
         }
 
         sample = sample >> (wave->volume_code - 1);
-        gb->apu.channels[2] = sample * 3;
+        gb->apu.channels[CHANNEL_WAVE] = sample;
     }
     else
-        gb->apu.channels[2] = 0;
+        gb->apu.channels[CHANNEL_WAVE] = 0;
 }
 
 static inline void trigger_wave(GameBoy *gb) {
@@ -466,12 +476,14 @@ static inline void update_noise(GameBoy *gb) {
 
     Noise *noise = &gb->apu.noise;
 
+    // TODO: figure out why this channel is so loud
+
     if(!noise->enabled)
         return;
 
     if(noise->clock-- <= 0)
     {
-        uint8_t divisor;
+        uint8_t divisor = 0;
 
         switch(noise->divisor_code) {
             case 0: divisor = 8; break;
@@ -497,7 +509,7 @@ static inline void update_noise(GameBoy *gb) {
         noise->last_result = !GET_BIT(noise->lfsr, 0);
     }
 
-    gb->apu.channels[3] = noise->last_result * noise->envelope.current_volume; 
+    gb->apu.channels[CHANNEL_NOISE] = noise->last_result * noise->envelope.current_volume; 
 }
 
 static inline void trigger_noise(GameBoy *gb) {
@@ -508,5 +520,6 @@ static inline void trigger_noise(GameBoy *gb) {
     if(noise->length.clock == 0)
         noise->length.clock = 64;
 
+    noise->envelope.current_volume = noise->envelope.initial_volume;
     noise->lfsr = 0x7FFF;
 }

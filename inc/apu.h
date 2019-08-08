@@ -1,8 +1,13 @@
 #pragma once
 
-#define AUDIO_SAMPLES 2048 
+#define AUDIO_SAMPLES 1024 
 #define AUDIO_CHANNELS 2
 #define SAMPLE_RATE 44100 
+
+#define CHANNEL_SQUARE_1 0
+#define CHANNEL_SQUARE_2 1
+#define CHANNEL_WAVE 2
+#define CHANNEL_NOISE 3
 
 // Clock Dividers
 #define DOWNSAMPLE_DIVIDER CLOCK_SPEED / SAMPLE_RATE
@@ -65,25 +70,25 @@
 
 // Control
 #define NR50 0xFF24
-#define NR50_VOL_LEFT 0x70
-#define NR50_VOL_RIGHT 0x7
+#define VOL_LEFT 0x70
+#define VOL_RIGHT 0x7
 
 #define NR51 0xFF25
-#define NR51_SND_4_TO_SO2 0x80
-#define NR51_SND_3_TO_SO2 0x40
-#define NR51_SND_2_TO_SO2 0x20
-#define NR51_SND_1_TO_SO2 0x10
-#define NR51_SND_4_TO_SO1 0x8
-#define NR51_SND_3_TO_SO1 0x4
-#define NR51_SND_2_TO_SO1 0x2
-#define NR51_SND_1_TO_SO1 0x1
+#define SND_4_TO_SO2 0x80
+#define SND_3_TO_SO2 0x40
+#define SND_2_TO_SO2 0x20
+#define SND_1_TO_SO2 0x10
+#define SND_4_TO_SO1 0x8
+#define SND_3_TO_SO1 0x4
+#define SND_2_TO_SO1 0x2
+#define SND_1_TO_SO1 0x1
 
 #define NR52 0xFF26
-#define NR52_SND_ENABLED 0x80
-#define NR52_SND_4_ON 0x8
-#define NR52_SND_3_ON 0x4
-#define NR52_SND_2_ON 0x2
-#define NR52_SND_1_ON 0x1
+#define SND_ENABLED 0x80
+#define SND_4_ON 0x8
+#define SND_3_ON 0x4
+#define SND_2_ON 0x2
+#define SND_1_ON 0x1
 
 
 void init_apu(GameBoy *gb);
