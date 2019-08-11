@@ -1,13 +1,16 @@
 #pragma once
+#include <glad/glad.h>
 #include "window.h"
 
-constexpr unsigned int EMULATOR_SCALE = 2;
 
 class WindowEmulator final : public Window {
     private:
         Emulator::GameBoy &_gb;
+        GLuint _textureId;
 
     public:
-        WindowEmulator(Emulator::GameBoy &gb) : _gb(gb) { }
+        WindowEmulator(Emulator::GameBoy &gb);
+        ~WindowEmulator();
+
         void render() override;
 };
