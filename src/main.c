@@ -62,6 +62,10 @@ static void run(GameBoy *gb) {
 
         frame_ticks -= max_ticks;
 
+        while(SDL_GetQueuedAudioSize(gb->apu.device_id)) {
+            SDL_Delay(1);
+        }
+
         while(SDL_PollEvent(&event)) {
             handle_event(gb, event);
         }
