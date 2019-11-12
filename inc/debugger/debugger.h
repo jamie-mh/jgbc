@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <string>
 
+#define IMGUI_USER_CONFIG "debugger/imconfig.h"
 #include "imgui/imgui.h"
 
 #include "debugger/emulator.h"
@@ -23,6 +24,7 @@
 #include "debugger/window_io.h"
 #include "debugger/window_stack.h"
 #include "debugger/window_audio.h"
+#include "debugger/window_palettes.h"
 
 constexpr unsigned int WINDOW_WIDTH = 1500;
 constexpr unsigned int WINDOW_HEIGHT = 900;

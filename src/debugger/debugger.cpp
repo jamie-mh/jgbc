@@ -5,7 +5,7 @@
 
 #include "imgui/examples/imgui_impl_sdl.h"
 #include "imgui/examples/imgui_impl_opengl3.h"
-#include "imgui_memory_editor/imgui_memory_editor.h"
+#include "imgui_club/imgui_memory_editor/imgui_memory_editor.h"
 #include "glad/glad.h"
 
 
@@ -45,6 +45,7 @@ Debugger::Debugger(const char *rom_path) {
     _windows.push_back(new WindowMemory(gb));
     _windows.push_back(new WindowRegisters(gb));
     _windows.push_back(new WindowStack(gb));
+    _windows.push_back(new WindowPalettes(gb));
 }
 
 void Debugger::init_gl() {
@@ -113,7 +114,8 @@ void Debugger::run() {
 
             uint32_t frame_ticks = 0;
 
-            while(!is_paused && frame_ticks < max_ticks) {
+            // while(!is_paused && frame_ticks < max_ticks) {
+            while(frame_ticks < max_ticks) {
 
                 Emulator::execute_instr(&gb);
                 Emulator::update_timer(&gb);
@@ -123,15 +125,15 @@ void Debugger::run() {
 
                 frame_ticks += gb.cpu.ticks;
                 
-                if(gb.cpu.reg.PC == next_stop) {
-                    next_stop = 0;
-                    is_paused = true;
-                }
+                // if(gb.cpu.reg.PC == next_stop) {
+                //     next_stop = 0;
+                //     is_paused = true;
+                // }
 
-                if(is_breakpoint(gb.cpu.reg.PC)) {
-                    get_window_disassembly().set_goto_addr(gb.cpu.reg.PC);
-                    is_paused = true;
-                }
+                // if(is_breakpoint(gb.cpu.reg.PC)) {
+                //     get_window_disassembly().set_goto_addr(gb.cpu.reg.PC);
+                //     is_paused = true;
+                // }
             }
 
             frame_ticks -= max_ticks;
@@ -188,7 +190,7 @@ void Debugger::render() {
     ImGui::Begin("##workspace", nullptr, flags);
     ImGui::PopStyleVar();
 
-    ImGui::DockSpace(ImGui::GetID("##dockspace"), ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruDockspace);
+    ImGui::DockSpace(ImGui::GetID("##dockspace"), ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
 
     _menu.render();
     for(auto &window : _windows)

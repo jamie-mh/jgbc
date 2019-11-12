@@ -1,3 +1,10 @@
 [submodule "gb-test-roms"]
 	path = gb-test-roms
 	url = https://github.com/retrio/gb-test-roms.git
+[submodule "lib/imgui"]
+	path = lib/imgui
+        url = https://github.com/ocornut/imgui.git
+        branch = docking
+[submodule "lib/imgui_club"]
+	path = lib/imgui_club
+	url = https://github.com/ocornut/imgui_club.git
