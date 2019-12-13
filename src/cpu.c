@@ -9,7 +9,7 @@ Instruction find_instr(GameBoy *gb, const uint16_t address);
 
 
 void init_cpu(GameBoy *gb) {
-    REG(AF) = 0x01B0;
+    REG(AF) = 0x11B0;
     REG(BC) = 0x0013;
     REG(DE) = 0x00D8;
     REG(HL) = 0x014D;
@@ -50,7 +50,7 @@ void execute_instr(GameBoy *gb) {
     void (*opcode_function)();
     opcode_function = instruction.execute;
 
-    char operand_len = instruction.length - 1;
+    uint8_t operand_len = instruction.length - 1;
     uint16_t operand;
 
     if(instruction.extended) {

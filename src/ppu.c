@@ -462,3 +462,88 @@ static void fill_shade_table(const uint8_t palette, Colour *table) {
         table[j] = get_shade(shade_num); 
     }
 }
+
+void palette_index_write(GameBoy *gb, const uint16_t address, const uint8_t value) {
+
+    assert(address == BGPI || address == OBPI);
+
+    Colour *palette = NULL;
+    uint16_t data_reg_addr = 0;
+
+    if(address == BGPI) {
+        palette = gb->ppu.bg_palette;
+        data_reg_addr = BGPD;
+    } else if(address == OBPI) { 
+        palette = gb->ppu.obj_palette;
+        data_reg_addr = OBPD;
+    }
+
+    const uint8_t index = value & PI_INDEX;
+    const Colour colour = palette[index / 2];
+
+    uint8_t data;
+
+    // First byte of colour data
+    // Contains all 5 bits of red and the lower 3 bits of green
+    if(index % 2 == 0) {
+        const uint8_t green_lsb = colour.g & 0x7;
+        data = (colour.r & PD_RED) | (green_lsb << 5);
+    }
+    // Second byte of colour data
+    // Contains all 5 bits of blue and the upper 2 bits of green
+    else {
+        const uint8_t green_msb = (colour.g & 0x18) >> 3;
+        const uint8_t blue = colour.b & 0x1F;
+
+        data = (blue << 2 & PD_BLUE) | green_msb;
+    }
+
+    SWRITE8(data_reg_addr, data);
+}
+
+void palette_data_write(GameBoy *gb, const uint16_t address, const uint8_t value) {
+
+    assert(address == BGPD || address == OBPD);
+
+    Colour *palette = NULL;
+    uint16_t index_reg_addr = 0;
+
+    if(address == BGPD) {
+        palette = gb->ppu.bg_palette;
+        index_reg_addr = BGPI;
+    } else if(address == OBPD) {
+        palette = gb->ppu.obj_palette;
+        index_reg_addr = OBPI;
+    }
+
+    const uint8_t index_reg = SREAD8(index_reg_addr);
+    const uint8_t index = index_reg & PI_INDEX;
+
+    Colour *colour = &palette[index / 2];
+
+    // First byte of colour data
+    if(index % 2 == 0) {
+        colour->r = value & PD_RED;
+
+        const uint8_t green_lsb = (value & PD_GREEN_LSB) >> 5;
+        colour->g = (colour->g & ~(PD_GREEN_LSB >> 5)) | green_lsb;
+    }
+    // Second byte of colour data
+    else {
+        colour->b = (value & PD_BLUE) >> 2;
+
+        const uint8_t green_msb = value & PD_GREEN_MSB;
+        colour->g = (colour->g & ~(PD_GREEN_MSB << 3)) | (green_msb << 3);
+    }
+
+    colour->r &= 0x1F;
+    colour->g &= 0x1F;
+    colour->b &= 0x1F;
+
+    const bool auto_incr = (index_reg & PI_AUTO_INCR) >> 7;
+
+    if(auto_incr) {
+        const uint8_t new_index = (index + 1) % PI_INDEX;
+        SWRITE8(index_reg_addr, (index_reg & ~PI_INDEX) | new_index);
+    }
+}

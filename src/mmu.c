@@ -147,7 +147,6 @@ void write_byte(GameBoy *gb, uint16_t address, uint8_t value, const bool is_prog
         gb->cpu.cnt_clock = 0;
 
         value = 0x0;
-        return;
     }
 
     if(!is_accessible(gb, address)) {
@@ -165,6 +164,21 @@ void write_byte(GameBoy *gb, uint16_t address, uint8_t value, const bool is_prog
 
     if(is_program && (address >= NR10 && address <= NR52)) {
         audio_register_write(gb, address, value);
+    }
+
+    if(is_program && address == VBK) {
+        const uint8_t bank = GET_BIT(value, VBK_BANK);
+
+        gb->mmu.vram_bank = bank;
+        gb->mmu.vram = gb->mmu.vram_banks[bank];
+    }
+
+    if(is_program && (address == BGPI || address == OBPI)) {
+        palette_index_write(gb, address, value);
+    }
+
+    if(is_program && (address == BGPD || address == OBPD)) {
+        palette_data_write(gb, address, value);
     }
 
     uint8_t *mem = get_memory(gb, &address);

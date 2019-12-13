@@ -67,12 +67,28 @@
 #define WHITE 0xFF, 0xFF, 0xFF
 #define BLACK 0x00, 0x00, 0x00 
 #define LGREY 0xD3, 0xD3, 0xD3 
-#define DGREY 0x80, 0x80, 0x80 
+#define DGREY 0x80, 0x80, 0x80
 
-typedef struct Colour {
-    uint8_t r, g, b;
-}
-Colour;
+// VRAM Bank (CGB)
+#define VBK 0xFF4F
+#define VBK_BANK 0x0
+#define CGB_TILE_ATTR 0x9800
+
+// Colour palettes (CGB)
+#define BGPI 0xFF68
+#define BGPD 0xFF69
+
+#define OBPI 0xFF6A
+#define OBPD 0xFF6B
+
+#define PI_INDEX 0x3F
+#define PI_AUTO_INCR 0x80
+
+#define PD_RED 0x1F
+#define PD_GREEN_LSB 0xE0
+#define PD_GREEN_MSB 0x3
+#define PD_BLUE 0x7C
+
 
 typedef struct Position {
     uint8_t x, y;
@@ -86,3 +102,6 @@ void render(GameBoy *gb);
 void update_ppu(GameBoy *gb);
 
 void get_sprites(GameBoy *gb);
+
+void palette_index_write(GameBoy *gb, const uint16_t address, const uint8_t value);
+void palette_data_write(GameBoy *gb, const uint16_t address, const uint8_t value);

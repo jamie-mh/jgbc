@@ -70,11 +70,19 @@ typedef struct Sprite {
 }
 Sprite;
 
+typedef struct Colour {
+    uint8_t r, g, b;
+}
+Colour;
+
 typedef struct PPU {
     uint8_t *framebuffer;
     Sprite sprite_buffer[40];
     uint16_t scan_clock;
     uint16_t frame_clock;
+
+    Colour bg_palette[32];
+    Colour obj_palette[32];
 
     SDL_Window *window;
     SDL_Renderer *renderer;
