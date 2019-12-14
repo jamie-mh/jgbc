@@ -47,7 +47,7 @@ void set_key(GameBoy *gb, const SDL_Scancode code, const bool is_pressed) {
 }
 
 uint8_t joypad_state(GameBoy *gb) {
-    uint8_t joypad = read_byte(gb, JOYP, false);
+    uint8_t joypad = SREAD8(JOYP);
 
     if((joypad & JOYP_DIR) == 0) {
         SET_KEY(KEY_UP_SELECT, gb->input.up, joypad);
@@ -62,6 +62,6 @@ uint8_t joypad_state(GameBoy *gb) {
         SET_KEY(KEY_LEFT_B, gb->input.b, joypad);
     }
     
-    write_byte(gb, JOYP, joypad, false);
+    SWRITE8(JOYP, joypad);
     return joypad;
 }

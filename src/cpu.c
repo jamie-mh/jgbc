@@ -4,8 +4,8 @@
 #include "alu.h"
 #include "instr.h"
 
-static void service_interrupt(GameBoy *gb, const uint8_t number);
-Instruction find_instr(GameBoy *gb, const uint16_t address);
+static void service_interrupt(GameBoy *, uint8_t);
+Instruction find_instr(GameBoy *, uint16_t);
 
 
 void init_cpu(GameBoy *gb) {
@@ -32,18 +32,16 @@ Instruction find_instr(GameBoy *gb, const uint16_t address) {
     if(opcode == 0xCB) {
         const uint8_t next_opcode = SREAD8(address + 1);
         return cb_instructions[next_opcode];
-    } else {
+    } else
         return instructions[opcode];
-    }
 }
 
 void execute_instr(GameBoy *gb) {
 
     gb->cpu.ticks = CPU_STEP;
 
-    if(gb->cpu.is_halted) {
+    if(gb->cpu.is_halted)
         return;
-    }
 
     Instruction instruction = find_instr(gb, REG(PC));
 
@@ -88,11 +86,10 @@ void execute_instr(GameBoy *gb) {
 void set_flag(GameBoy *gb, const uint8_t flag, const uint8_t value) {
     assert(value <= 1);
 
-    if(value == 0) {
+    if(value == 0)
         REG(F) &= ~(1 << flag);
-    } else if(value == 1) {
+    else
         REG(F) |= 1 << flag;
-    }
 }
 
 uint8_t get_flag(GameBoy *gb, const uint8_t flag) {
@@ -151,9 +148,8 @@ void check_interrupts(GameBoy *gb) {
         
         if(GET_BIT(enable, i) && GET_BIT(request, i)) {
 
-            if(REG(IME)) {
+            if(REG(IME))
                 service_interrupt(gb, i);
-            }
     
             gb->cpu.is_halted = false;
         }
@@ -221,9 +217,8 @@ void update_timer(GameBoy *gb) {
                 new_cnt = SREAD8(TMA);
                 WREG(IF, IEF_TIMER, 1);
             }
-            else {
+            else
                 new_cnt = curr_cnt + 1;
-            }
 
             SWRITE8(TIMA, new_cnt);
             gb->cpu.cnt_clock -= threshold;

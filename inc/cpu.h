@@ -70,19 +70,19 @@ typedef struct {
 } 
 Instruction;
 
-void init_cpu(GameBoy *gb);
-Instruction find_instr(GameBoy *gb, const uint16_t address);
+void init_cpu(GameBoy *);
+Instruction find_instr(GameBoy *, uint16_t);
 void execute_instr(GameBoy *);
 
-void stack_push_byte(GameBoy *gb, const uint8_t value);
-void stack_push_short(GameBoy *gb, const uint16_t value);
-uint8_t stack_pop_byte(GameBoy *gb);
-uint16_t stack_pop_short(GameBoy *gb);
-uint8_t stack_peek_byte(GameBoy *gb);
-uint16_t stack_peek_short(GameBoy *gb);
+void stack_push_byte(GameBoy *, uint8_t);
+void stack_push_short(GameBoy *, uint16_t);
+uint8_t stack_pop_byte(GameBoy *);
+uint16_t stack_pop_short(GameBoy *);
+uint8_t stack_peek_byte(GameBoy *);
+uint16_t stack_peek_short(GameBoy *);
 
-void set_flag(GameBoy *gb, const uint8_t flag, const uint8_t value);
-uint8_t get_flag(GameBoy *gb, const uint8_t flag);
+void set_flag(GameBoy *, uint8_t, uint8_t);
+uint8_t get_flag(GameBoy *, uint8_t);
 
-void check_interrupts(GameBoy *gb);
-void update_timer(GameBoy *gb);
+void check_interrupts(GameBoy *);
+void update_timer(GameBoy *);

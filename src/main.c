@@ -6,12 +6,12 @@
 #include "cart.h"
 #include "input.h"
 
-static void handle_event(GameBoy *gb, SDL_Event event);
-static void set_window_title(GameBoy *gb);
-static void run(GameBoy *gb);
+static void handle_event(GameBoy *, SDL_Event);
+static void set_window_title(GameBoy *);
+static void run(GameBoy *);
 
 
-int main(int argc, char **argv) {
+int main(const int argc, const char **argv) {
 
     if(argc != 2) {
         fprintf(stderr, "Usage: jgbc.exe <path to rom>\n");
@@ -62,17 +62,15 @@ static void run(GameBoy *gb) {
 
         frame_ticks -= max_ticks;
 
-        while(SDL_GetQueuedAudioSize(gb->apu.device_id)) {
+        while(SDL_GetQueuedAudioSize(gb->apu.device_id))
             SDL_Delay(1);
-        }
 
-        while(SDL_PollEvent(&event)) {
+        while(SDL_PollEvent(&event))
             handle_event(gb, event);
-        }
     }
 }
 
-static void handle_event(GameBoy *gb, SDL_Event event) {
+static void handle_event(GameBoy *gb, const SDL_Event event) {
 
     switch(event.type) {
         case SDL_QUIT:

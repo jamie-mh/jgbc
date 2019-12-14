@@ -14,7 +14,7 @@
 
 #define GET_BIT(data, bit) (((data) >> (bit)) & 1)
 
-typedef struct Registers {
+typedef struct {
     union {
         struct {
             uint8_t F;
@@ -53,7 +53,7 @@ typedef struct Registers {
 }
 Registers;
 
-typedef struct CPU {
+typedef struct {
     bool is_halted;
     Registers reg;
     uint8_t ticks;
@@ -62,7 +62,7 @@ typedef struct CPU {
 }
 CPU;
 
-typedef struct Sprite {
+typedef struct {
     uint8_t y;
     uint8_t x;
     uint8_t tile;
@@ -70,12 +70,12 @@ typedef struct Sprite {
 }
 Sprite;
 
-typedef struct Colour {
+typedef struct {
     uint8_t r, g, b;
 }
 Colour;
 
-typedef struct PPU {
+typedef struct {
     uint8_t *framebuffer;
     Sprite sprite_buffer[40];
     uint16_t scan_clock;
@@ -90,7 +90,7 @@ typedef struct PPU {
 }
 PPU;
 
-typedef struct MMU {
+typedef struct {
     uint8_t rom_bank;
     uint8_t ram_bank;
     uint8_t wram_bank;
@@ -112,13 +112,13 @@ typedef struct MMU {
 }
 MMU;
 
-typedef enum EnvelopeMode {
+typedef enum {
     Decrease = 0,
     Increase = 1
 }
 EnvelopeMode;
 
-typedef struct ChannelEnvelope {
+typedef struct {
     uint8_t initial_volume;
     uint8_t current_volume;
     EnvelopeMode mode;
@@ -126,19 +126,19 @@ typedef struct ChannelEnvelope {
 }
 ChannelEnvelope;
 
-typedef struct ChannelLength {
+typedef struct {
     bool enabled;
     uint16_t clock;
 }
 ChannelLength;
 
-typedef enum SweepMode {
+typedef enum {
     Addition = 0,
     Subtraction = 1
 }
 SweepMode;
 
-typedef struct SquareWave {
+typedef struct {
     bool enabled;
     bool dac_enabled;
 
@@ -165,7 +165,7 @@ typedef struct SquareWave {
 }
 SquareWave;
 
-typedef struct Wave {
+typedef struct {
     bool enabled;
     uint8_t volume_code;
     ChannelLength length;
@@ -176,7 +176,7 @@ typedef struct Wave {
 }
 Wave;
 
-typedef struct Noise {
+typedef struct {
     bool enabled;
     ChannelLength length;
     ChannelEnvelope envelope;
@@ -189,7 +189,7 @@ typedef struct Noise {
 }
 Noise;
 
-typedef struct APU {
+typedef struct {
     bool enabled;
     SDL_AudioDeviceID device_id;
     SDL_AudioSpec desired_spec;
@@ -216,11 +216,10 @@ typedef struct APU {
 }
 APU;
 
-typedef struct Cart {
+typedef struct {
     char title[17]; // Uppercase ASCII Game Name
     uint8_t gbc_flag; // Color Support Flag
     uint8_t type;
-    uint8_t mbc_type;
     uint8_t rom_size;
     uint8_t ram_size;
 
@@ -229,7 +228,7 @@ typedef struct Cart {
 }
 Cart;
 
-typedef struct Input {
+typedef struct {
     bool up;
     bool right;
     bool down;
@@ -241,7 +240,7 @@ typedef struct Input {
 }
 Input;
 
-typedef struct GameBoy {
+typedef struct {
     bool is_running;
 
     CPU cpu;

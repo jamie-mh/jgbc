@@ -6,9 +6,9 @@
 #include "apu.h"
 #include "input.h"
 
-static uint8_t *get_memory(GameBoy *gb, uint16_t *address);
-static bool is_accessible(GameBoy *gb, const uint16_t address);
-static void DMA_transfer(GameBoy *gb, const uint8_t value);
+static uint8_t *get_memory(GameBoy *, uint16_t *);
+static bool is_accessible(GameBoy *, uint16_t);
+static void DMA_transfer(GameBoy *, uint8_t);
 
 
 void init_mmu(GameBoy *gb) {
@@ -17,14 +17,12 @@ void init_mmu(GameBoy *gb) {
     gb->mmu.extram = NULL;
 
     gb->mmu.vram_banks = malloc(sizeof(uint8_t *) * VRAM_BANK_COUNT);
-    for(uint8_t i = 0; i < VRAM_BANK_COUNT; ++i) {
+    for(uint8_t i = 0; i < VRAM_BANK_COUNT; ++i)
         gb->mmu.vram_banks[i] = calloc(VRAM_BANK_SIZE, sizeof(uint8_t));
-    }
 
     gb->mmu.wram_banks = malloc(sizeof(uint8_t *) * WRAM_BANK_COUNT); 
-    for(uint8_t i = 0; i < WRAM_BANK_COUNT; ++i) {
+    for(uint8_t i = 0; i < WRAM_BANK_COUNT; ++i)
         gb->mmu.wram_banks[i] = calloc(WRAM_BANK_SIZE, sizeof(uint8_t));
-    }
 
     gb->mmu.vram = gb->mmu.vram_banks[0];
     gb->mmu.wram00 = gb->mmu.wram_banks[0];
@@ -103,26 +101,22 @@ static uint8_t *get_memory(GameBoy *gb, uint16_t *address) {
 
 static bool is_accessible(GameBoy *gb, const uint16_t address) {
 
-    if(address >= UNUSABLE_START && address <= UNUSABLE_END) {
+    if(address >= UNUSABLE_START && address <= UNUSABLE_END)
         return false;
-    }
 
-    if(address >= EXTRAM_START && address <= EXTRAM_END && gb->mmu.extram == NULL) {
+    if(address >= EXTRAM_START && address <= EXTRAM_END && gb->mmu.extram == NULL)
         return false;
-    }
 
     return true;
 }
 
 uint8_t read_byte(GameBoy *gb, uint16_t address, const bool is_program) {
 
-    if(is_program && address == JOYP) {
+    if(is_program && address == JOYP)
         return joypad_state(gb);
-    }
 
-    if(!is_accessible(gb, address)) {
+    if(!is_accessible(gb, address))
         return 0xFF;
-    }
     
     uint8_t *mem = get_memory(gb, &address);
     return mem[address];
@@ -142,43 +136,41 @@ void write_byte(GameBoy *gb, uint16_t address, uint8_t value, const bool is_prog
         return;
     }
 
-    if(is_program && address == DIV) {
-        gb->cpu.div_clock = 0;
-        gb->cpu.cnt_clock = 0;
-
-        value = 0x0;
-    }
-
-    if(!is_accessible(gb, address)) {
+    if(!is_accessible(gb, address))
         return;
-    }
 
-    if(address == DMA) {
-        DMA_transfer(gb, value); 
-        return;
-    }
+    if(is_program) {
+    
+        if(address == DMA) {
+            DMA_transfer(gb, value); 
+            return;
+        }
+    
+        if(address == DIV) {
+            gb->cpu.div_clock = 0;
+            gb->cpu.cnt_clock = 0;
 
-    if(is_program && address == LY) {
-        value = 0x0;
-    }
+            value = 0x0;
+        }
 
-    if(is_program && (address >= NR10 && address <= NR52)) {
-        audio_register_write(gb, address, value);
-    }
+        if(address == LY)
+            value = 0x0;
 
-    if(is_program && address == VBK) {
-        const uint8_t bank = GET_BIT(value, VBK_BANK);
+        if(address >= NR10 && address <= NR52)
+            audio_register_write(gb, address, value);
 
-        gb->mmu.vram_bank = bank;
-        gb->mmu.vram = gb->mmu.vram_banks[bank];
-    }
+        if(address == VBK) {
+            const uint8_t bank = GET_BIT(value, VBK_BANK);
 
-    if(is_program && (address == BGPI || address == OBPI)) {
-        palette_index_write(gb, address, value);
-    }
+            gb->mmu.vram_bank = bank;
+            gb->mmu.vram = gb->mmu.vram_banks[bank];
+        }
 
-    if(is_program && (address == BGPD || address == OBPD)) {
-        palette_data_write(gb, address, value);
+        if(address == BGPI || address == OBPI)
+            palette_index_write(gb, address, value);
+
+        if(address == BGPD || address == OBPD)
+            palette_data_write(gb, address, value);
     }
 
     uint8_t *mem = get_memory(gb, &address);
@@ -208,8 +200,8 @@ uint8_t read_register(GameBoy *gb, const uint16_t address, const uint8_t bit) {
 static void DMA_transfer(GameBoy *gb, const uint8_t value) {
     const uint16_t address = value * 0x100;
 
-    for(uint8_t i = 0; i <= 0x9F; ++i) {
+    for(uint8_t i = 0; i <= 0x9F; ++i)
         SWRITE8(0xFE00 + i, SREAD8(address + i));
-    }
+
     get_sprites(gb);
 }

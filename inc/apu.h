@@ -91,6 +91,6 @@
 #define SND_1_ON 0x1
 
 
-void init_apu(GameBoy *gb);
-void update_apu(GameBoy *gb);
-void audio_register_write(GameBoy *gb, const uint16_t address, const uint8_t value);
+void init_apu(GameBoy *);
+void update_apu(GameBoy *);
+void audio_register_write(GameBoy *, uint16_t, uint8_t);

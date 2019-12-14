@@ -49,14 +49,13 @@
 #define WRAM_BANK_COUNT 8
 #define VRAM_BANK_COUNT 2
 
+void init_mmu(GameBoy *);
 
-void init_mmu(GameBoy *gb);
+uint8_t read_byte(GameBoy *, uint16_t, bool);
+uint16_t read_short(GameBoy *, uint16_t, bool);
 
-uint8_t read_byte(GameBoy *gb, uint16_t address, const bool is_program);
-uint16_t read_short(GameBoy *gb, const uint16_t address, const bool is_program);
+void write_byte(GameBoy *, uint16_t, uint8_t, bool);
+void write_short(GameBoy *, uint16_t, uint16_t, bool);
 
-void write_byte(GameBoy *gb, uint16_t address, uint8_t value, const bool is_program);
-void write_short(GameBoy *gb, const uint16_t address, const uint16_t value, const bool is_program);
-
-void write_register(GameBoy *gb, const uint16_t address, const uint8_t bit, const uint8_t value);
-uint8_t read_register(GameBoy *gb, const uint16_t address, const uint8_t bit);
+void write_register(GameBoy *, uint16_t, uint8_t, uint8_t);
+uint8_t read_register(GameBoy *, uint16_t, uint8_t);

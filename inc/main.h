@@ -10,5 +10,5 @@ typedef struct Display {
 }
 Display;
 
-void render(GameBoy *gb);
-void check_event(GameBoy *gb);
+void render(GameBoy *);
+void check_event(GameBoy *);

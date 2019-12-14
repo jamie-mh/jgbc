@@ -2,34 +2,30 @@
 #include "cart.h"
 #include "mmu.h"
 
-static void parse_header(GameBoy *gb, uint8_t *header);
-static bool read_header(FILE *file, uint8_t *header);
-static void alloc_banks(GameBoy *gb);
-static void copy_data(GameBoy *gb, FILE *file);
-static void set_banks(GameBoy *gb);
+static void parse_header(GameBoy *, const uint8_t *);
+static bool read_header(FILE *file, uint8_t *);
+static void alloc_banks(GameBoy *);
+static void copy_data(GameBoy *, FILE *);
+static void set_banks(GameBoy *);
 
 
 bool load_rom(GameBoy *gb, const char *path) {
 
     FILE *file = NULL;
 
-    if(!(file = fopen(path, "rb"))) {
+    if(!(file = fopen(path, "rb")))
         return false;
-    }
 
-    uint8_t *header = malloc(CART_HEADER_SIZE * sizeof(uint8_t));
+    uint8_t header[CART_HEADER_SIZE];
 
-    if(!read_header(file, header)) {
-        free(header);
+    if(!read_header(file, header))
         return false;
-    }
 
     parse_header(gb, header);
     alloc_banks(gb);
     copy_data(gb, file);
     set_banks(gb);
 
-    free(header);
     fclose(file);
     return true;
 }
@@ -49,9 +45,8 @@ static bool read_header(FILE *file, uint8_t *header) {
     int32_t byte;
 
     for(uint16_t i = CART_HEADER_START; i < CART_HEADER_END; ++i) {
-        if((byte = fgetc(file)) == EOF) {
+        if((byte = fgetc(file)) == EOF)
             return false;
-        }
 
         header[i - CART_HEADER_START] = (uint8_t) byte;
     }
@@ -60,7 +55,7 @@ static bool read_header(FILE *file, uint8_t *header) {
     return true;
 }
 
-static void parse_header(GameBoy *gb, uint8_t *header) {
+static void parse_header(GameBoy *gb, const uint8_t *header) {
     #define HEADER(addr) header[(addr) - CART_HEADER_START]
 
     memcpy(gb->cart.title, &HEADER(CART_HEADER_TITLE), 16);
@@ -85,17 +80,17 @@ static void parse_header(GameBoy *gb, uint8_t *header) {
 static void alloc_banks(GameBoy *gb) {
 
     gb->cart.rom_banks = malloc(sizeof(uint8_t *) * gb->cart.rom_size);
-    for(uint8_t i = 0; i < gb->cart.rom_size; ++i) {
+
+    for(uint8_t i = 0; i < gb->cart.rom_size; ++i)
         gb->cart.rom_banks[i] = malloc(ROM_BANK_SIZE * sizeof(uint8_t));
-    }
 
     gb->cart.ram_banks = NULL;
 
     if(gb->cart.ram_size > 0) {
         gb->cart.ram_banks = malloc(sizeof(uint8_t *) * gb->cart.ram_size);
-        for(uint8_t i = 0; i < gb->cart.ram_size; ++i) {
+
+        for(uint8_t i = 0; i < gb->cart.ram_size; ++i)
             gb->cart.ram_banks[i] = malloc(EXTRAM_BANK_SIZE * sizeof(uint8_t));
-        }
     }
 }
 

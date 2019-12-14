@@ -3,24 +3,24 @@
 #include "cpu.h"
 #include "apu.h"
 
-static inline void update_envelope(ChannelEnvelope *envelope);
-static inline void update_length(ChannelLength *length, bool *channel_enabled);
+static inline void update_envelope(ChannelEnvelope *);
+static inline void update_length(ChannelLength *, bool *);
 
-static inline void init_square_wave(GameBoy *gb, const uint8_t idx);
-static inline void read_square(GameBoy *gb, const uint16_t address, const uint8_t value, const uint8_t idx);
-static inline void update_square(GameBoy *gb, const uint8_t idx);
-static inline void update_square_sweep(GameBoy *gb);
-static inline void trigger_square(GameBoy *gb, const uint8_t idx);
+static inline void init_square_wave(GameBoy *, uint8_t);
+static inline void read_square(GameBoy *, uint16_t, uint8_t, uint8_t);
+static inline void update_square(GameBoy *, uint8_t);
+static inline void update_square_sweep(GameBoy *);
+static inline void trigger_square(GameBoy *, uint8_t);
 
-static inline void init_wave(GameBoy *gb);
-static inline void read_wave(GameBoy *gb, const uint16_t address, const uint8_t value);
-static inline void update_wave(GameBoy *gb);
-static inline void trigger_wave(GameBoy *gb);
+static inline void init_wave(GameBoy *);
+static inline void read_wave(GameBoy *, uint16_t, uint8_t);
+static inline void update_wave(GameBoy *);
+static inline void trigger_wave(GameBoy *);
 
-static inline void init_noise(GameBoy *gb);
-static inline void read_noise(GameBoy *gb, const uint16_t address, const uint8_t value);
-static inline void update_noise(GameBoy *gb);
-static inline void trigger_noise(GameBoy *gb);
+static inline void init_noise(GameBoy *);
+static inline void read_noise(GameBoy *, uint16_t, uint8_t);
+static inline void update_noise(GameBoy *);
+static inline void trigger_noise(GameBoy *);
 
 
 void init_apu(GameBoy *gb) {
@@ -48,9 +48,6 @@ void init_apu(GameBoy *gb) {
     gb->apu.buffer = malloc(gb->apu.actual_spec.size);
     gb->apu.buffer_position = 0;
 
-    // memset(&gb->apu.square_waves[0], 0, sizeof(SquareWave));
-
-    // TODO: replace with memset
     init_square_wave(gb, 0);
     init_square_wave(gb, 1);
     init_wave(gb);
@@ -337,9 +334,8 @@ static inline void update_square(GameBoy *gb, const uint8_t idx) {
 
         gb->apu.channels[idx] = square->envelope.current_volume;
     }
-    else {
+    else
         gb->apu.channels[idx] = 0;
-    }
 }
 
 static inline void update_square_sweep(GameBoy *gb) {
@@ -420,13 +416,12 @@ static inline void update_wave(GameBoy *gb) {
         uint8_t sample;
 
         // Top 4 bits
-        if(wave->position % 2 == 0) {
+        if(wave->position % 2 == 0)
             sample = (SREAD8(WAVE_TABLE_START + wave->position) & 0xF0) >> 4;
-        }
+
         // Lower 4 bits
-        else {
+        else
             sample = SREAD8(WAVE_TABLE_START + wave->position - 1) & 0xF;
-        }
 
         sample = sample >> (wave->volume_code - 1);
         gb->apu.channels[CHANNEL_WAVE] = sample;

@@ -3,38 +3,38 @@
 #include "alu.h"
 #include "instr.h"
 
-static bool did_byte_half_carry(uint8_t a, uint8_t b);
-static bool did_byte_full_carry(uint8_t a, uint8_t b);
-static bool did_byte_half_borrow(uint8_t a, uint8_t b);
-static bool did_byte_full_borrow(uint8_t a, uint8_t b);
-static bool did_short_half_carry(uint16_t a, uint16_t b);
-static bool did_short_full_carry(uint16_t a, uint16_t b);
+static bool did_byte_half_carry(uint8_t, uint8_t);
+static bool did_byte_full_carry(uint8_t, uint8_t);
+static bool did_byte_half_borrow(uint8_t, uint8_t);
+static bool did_byte_full_borrow(uint8_t, uint8_t);
+static bool did_short_half_carry(uint16_t, uint16_t);
+static bool did_short_full_carry(uint16_t, uint16_t);
 
 /*
 *   Helper Functions
 */
 
-static bool did_byte_half_carry(uint8_t a, uint8_t b) {
+static bool did_byte_half_carry(const uint8_t a, const uint8_t b) {
     return ((a & 0xF) + (b & 0xF)) > 0xF;
 }
 
-static bool did_byte_half_borrow(uint8_t a, uint8_t b) {
+static bool did_byte_half_borrow(const uint8_t a, const uint8_t b) {
     return ((a & 0xF) < (b & 0xF));
 }
 
-static bool did_byte_full_carry(uint8_t a, uint8_t b) {
+static bool did_byte_full_carry(const uint8_t a, const uint8_t b) {
     return (a + b) > 0xFF;
 }
 
-static bool did_byte_full_borrow(uint8_t a, uint8_t b) {
+static bool did_byte_full_borrow(const uint8_t a, const uint8_t b) {
     return (a < b);
 }
 
-static bool did_short_half_carry(uint16_t a, uint16_t b) {
+static bool did_short_half_carry(const uint16_t a, const uint16_t b) {
     return (a & 0xFFF) + (b & 0xFFF) > 0xFFF;
 }
 
-static bool did_short_full_carry(uint16_t a, uint16_t b) {
+static bool did_short_full_carry(const uint16_t a, const uint16_t b) {
     return ((a + b) & 0xF0000) > 0;
 }
 
@@ -324,28 +324,23 @@ uint8_t daa(GameBoy *gb, const uint8_t regis) {
 
     if(FGET(FLAG_SUBTRACT) == 0)
     {
-        if((FGET(FLAG_HALFCARRY) == 1) || ((result & 0xF) > 0x09)) { 
+        if((FGET(FLAG_HALFCARRY) == 1) || ((result & 0xF) > 0x09))
             result += 0x06;
-        }
 
-        if((FGET(FLAG_CARRY) == 1) || (result > 0x9F)) {
+        if((FGET(FLAG_CARRY) == 1) || (result > 0x9F))
             result += 0x60;
-        }
     }
     else
     {
-        if(FGET(FLAG_HALFCARRY) == 1)  {
+        if(FGET(FLAG_HALFCARRY) == 1)
             result = ((result - 0x06) & 0xFF);
-        }
 
-        if(FGET(FLAG_CARRY) == 1) {
+        if(FGET(FLAG_CARRY) == 1)
             result -= 0x60;
-        }
     }
 
-    if(result & 0x100) {
+    if(result & 0x100)
         FSET(FLAG_CARRY, 1);
-    }
 
     result &= 0xFF;
     FSET(FLAG_ZERO, result == 0);

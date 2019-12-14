@@ -90,18 +90,24 @@
 #define PD_BLUE 0x7C
 
 
-typedef struct Position {
+typedef struct {
     uint8_t x, y;
 }
 Position;
 
-void init_ppu(GameBoy *gb);
-void init_window(GameBoy *gb);
+typedef enum {
+    HBlank = 0, VBlank = 1, OamTransfer = 2, PixelTransfer = 3
+}
+PpuMode;
 
-void render(GameBoy *gb);
-void update_ppu(GameBoy *gb);
 
-void get_sprites(GameBoy *gb);
+void init_ppu(GameBoy *);
+void init_window(GameBoy *);
 
-void palette_index_write(GameBoy *gb, const uint16_t address, const uint8_t value);
-void palette_data_write(GameBoy *gb, const uint16_t address, const uint8_t value);
+void render(GameBoy *);
+void update_ppu(GameBoy *);
+
+void get_sprites(GameBoy *);
+
+void palette_index_write(GameBoy *, uint16_t, uint8_t);
+void palette_data_write(GameBoy *, uint16_t, uint8_t);
