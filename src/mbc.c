@@ -3,93 +3,50 @@
 #include "cart.h"
 #include "mmu.h"
 
-static void mbc1(GameBoy *, uint16_t, uint8_t);
-static void mbc2(GameBoy *, uint16_t, uint8_t);
-static void mbc3(GameBoy *, uint16_t, uint8_t);
-static void mbc4(GameBoy *, uint16_t, uint8_t);
-static void mbc5(GameBoy *, uint16_t, uint8_t);
 
+void mbc1_handler(GameBoy *gb, const uint16_t address, const uint8_t value) {
 
-// Checks if the memory being written to is attempting to switch banks
-void mbc_check(GameBoy *gb, const uint16_t address, const uint8_t value) {
-
-    switch(gb->cart.type) {
-        case 0x1:
-        case 0x2:
-        case 0x3:
-            mbc1(gb, address, value);
-            break;
-
-        case 0x5:
-        case 0x6:
-            mbc2(gb, address, value);
-            break;
-
-        case 0xF:
-        case 0x10:
-        case 0x11:
-        case 0x12:
-        case 0x13:
-            mbc3(gb, address, value);
-            break;
-
-        case 0x15:
-        case 0x16:
-        case 0x17:
-            mbc4(gb, address, value);
-            break;
-
-        case 0x19:
-        case 0x1A:
-        case 0x1B:
-        case 0x1C:
-        case 0x1D:
-        case 0x1E:
-            mbc5(gb, address, value);
-            break;
-    }
-}
-
-static void mbc1(GameBoy *gb, const uint16_t address, const uint8_t value) {
-
-    static bool rom_mode = true;
+    static MBC1Mode mode = RomBanking;
     static bool ram_enabled = false;
 
     uint8_t rom_bank = gb->mmu.rom_bank;
     uint8_t ram_bank = gb->mmu.ram_bank;
 
-    if(address <= 0x1FFF)
-        ram_enabled = ((value & 0xF) == 0xA) ? true : false;
+    if(address <= MBC1_RAM_ENABLE_END)
+        ram_enabled = (value & 0xF) == MBC1_RAM_ENABLE_NIBBLE ? true : false;
 
     // Select the lower 5 bits of the rom bank
-    else if(address >= 0x2000 && address <= 0x3FFF) {
-        rom_bank &= 0xE0;
-        rom_bank |= (value & 0x1F);
+    else if(address >= MBC1_ROM_CHANGE_START && address <= MBC1_ROM_CHANGE_END) {
+        uint8_t lower = value & MBC1_ROM_CHANGE;
 
-        // Banks 20h, 40h, and 60h are unselectable
-        switch(rom_bank) {
-            case 0x00:
-            case 0x20:
-            case 0x40:
-            case 0x60:
-                rom_bank++;
-        }
+        // Banks 0x0, 0x20, 0x40, and 0x60 are unselectable
+        if(lower == 0)
+            lower++;
+
+        rom_bank = (rom_bank & ~MBC1_ROM_CHANGE) | lower;
     }
     // Select the upper 2 bits of the rom or ram bank (5 and 6) (not bit 7) 
-    else if(address >= 0x4000 && address <= 0x5FFF) {
+    else if(address >= MBC1_ROM_RAM_CHANGE_START && address <= MBC1_ROM_RAM_CHANGE_END) {
 
-        if(rom_mode) {
-            rom_bank &= 0x9F;
-            rom_bank |= (value & 0x60);
-        } else
-            ram_bank = value;
+        rom_bank = (rom_bank & ~MBC1_ROM_RAM_CHANGE) | ((value & 0x3) << 5);
+        ram_bank = value;
     }
-    else if(address >= 0x6000 && address <= 0x7FFF)
-        rom_mode = (value == 0x1) ? false : true;
-
+    else if(address >= MBC1_MODE_CHANGE_START && address <= MBC1_MODE_CHANGE_END)
+        mode = value;
+    
     // Only ram bank 0 can be used in rom mode
-    if(rom_mode)
+    if(mode == RomBanking) {
+        gb->mmu.rom00 = gb->cart.rom_banks[0];
         ram_bank = 0;
+    }
+    // Only rom banks 0-1F can be used in ram mode
+    else if(mode == RamBanking) {
+        uint8_t eff_rom_bank = rom_bank & MBC1_ROM_RAM_CHANGE;
+        eff_rom_bank %= gb->cart.rom_size;
+        gb->mmu.rom00 = gb->cart.rom_banks[eff_rom_bank];
+
+        rom_bank &= MBC1_ROM_CHANGE;
+    }
 
     gb->mmu.rom_bank = rom_bank % gb->cart.rom_size;
     gb->mmu.romNN = gb->cart.rom_banks[gb->mmu.rom_bank];
@@ -103,21 +60,19 @@ static void mbc1(GameBoy *gb, const uint16_t address, const uint8_t value) {
     }
 }
 
-static void mbc2(GameBoy *gb, const uint16_t address, const uint8_t value) {
-    // TODO: Implement
-    mbc1(gb, address, value);
+void mbc2_handler(GameBoy *gb, const uint16_t address, const uint8_t value) {
+    mbc1_handler(gb, address, value);
 }
 
-static void mbc3(GameBoy *gb, const uint16_t address, const uint8_t value) {
-    // TODO: Implement RTC
-    mbc1(gb, address, value);
+void mbc3_handler(GameBoy *gb, const uint16_t address, const uint8_t value) {
+    mbc1_handler(gb, address, value);
 }
 
-static void mbc4(GameBoy *gb, const uint16_t address, const uint8_t value) {
-    mbc1(gb, address, value);
+void mbc4_handler(GameBoy *gb, const uint16_t address, const uint8_t value) {
+    mbc1_handler(gb, address, value);
 }
 
-static void mbc5(GameBoy *gb, const uint16_t address, const uint8_t value) {
-    mbc1(gb, address, value);
+void mbc5_handler(GameBoy *gb, const uint16_t address, const uint8_t value) {
+    mbc1_handler(gb, address, value);
 }
 

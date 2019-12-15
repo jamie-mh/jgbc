@@ -52,6 +52,11 @@ void init_apu(GameBoy *gb) {
     init_square_wave(gb, 1);
     init_wave(gb);
     init_noise(gb);
+
+    for(int i = 0; i < 4; ++i) {
+        gb->apu.left_enabled[i] = true;
+        gb->apu.right_enabled[i] = true;
+    }
 }
 
 static void init_square_wave(GameBoy *gb, const uint8_t idx) {

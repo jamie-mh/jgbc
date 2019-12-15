@@ -1,6 +1,7 @@
 #include "jgbc.h"
 #include "cart.h"
 #include "mmu.h"
+#include "mbc.h"
 
 static void parse_header(GameBoy *, const uint8_t *);
 static bool read_header(FILE *file, uint8_t *);
@@ -75,6 +76,46 @@ static void parse_header(GameBoy *gb, const uint8_t *header) {
     }
 
     #undef HEADER
+
+    switch(gb->cart.type) {
+        case 0x1:
+        case 0x2:
+        case 0x3:
+            gb->mmu.mbc_handler = &mbc1_handler;
+            break;
+
+        case 0x5:
+        case 0x6:
+            gb->mmu.mbc_handler = &mbc2_handler;
+            break;
+
+        case 0xF:
+        case 0x10:
+        case 0x11:
+        case 0x12:
+        case 0x13:
+            gb->mmu.mbc_handler = &mbc3_handler;
+            break;
+
+        case 0x15:
+        case 0x16:
+        case 0x17:
+            gb->mmu.mbc_handler = &mbc4_handler;
+            break;
+
+        case 0x19:
+        case 0x1A:
+        case 0x1B:
+        case 0x1C:
+        case 0x1D:
+        case 0x1E:
+            gb->mmu.mbc_handler = &mbc5_handler;
+            break;
+
+        default:
+            gb->mmu.mbc_handler = NULL;
+            break;
+    }
 }
 
 static void alloc_banks(GameBoy *gb) {

@@ -14,6 +14,9 @@
 
 #define GET_BIT(data, bit) (((data) >> (bit)) & 1)
 
+struct GameBoy_s;
+typedef struct GameBoy_s GameBoy;
+
 typedef struct {
     union {
         struct {
@@ -109,6 +112,8 @@ typedef struct {
 
     uint8_t **wram_banks; // 8x4KB WRAM Banks (GBC Only)
     uint8_t **vram_banks; // 2x8KB VRAM Banks (GBC Only)
+
+    void (*mbc_handler)(GameBoy *, uint16_t, uint8_t);
 }
 MMU;
 
@@ -240,7 +245,7 @@ typedef struct {
 }
 Input;
 
-typedef struct {
+struct GameBoy_s {
     bool is_running;
 
     CPU cpu;
@@ -249,7 +254,6 @@ typedef struct {
     APU apu;
     Cart cart;
     Input input;
-}
-GameBoy;
+};
 
 void init(GameBoy *gb);
