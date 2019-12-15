@@ -94,7 +94,7 @@ typedef struct {
 PPU;
 
 typedef struct {
-    uint8_t rom_bank;
+    uint16_t rom_bank;
     uint8_t ram_bank;
     uint8_t wram_bank;
     uint8_t vram_bank;
@@ -225,7 +225,7 @@ typedef struct {
     char title[17]; // Uppercase ASCII Game Name
     uint8_t gbc_flag; // Color Support Flag
     uint8_t type;
-    uint8_t rom_size;
+    uint16_t rom_size;
     uint8_t ram_size;
 
     uint8_t **rom_banks;

@@ -122,7 +122,7 @@ static void alloc_banks(GameBoy *gb) {
 
     gb->cart.rom_banks = malloc(sizeof(uint8_t *) * gb->cart.rom_size);
 
-    for(uint8_t i = 0; i < gb->cart.rom_size; ++i)
+    for(uint16_t i = 0; i < gb->cart.rom_size; ++i)
         gb->cart.rom_banks[i] = malloc(ROM_BANK_SIZE * sizeof(uint8_t));
 
     gb->cart.ram_banks = NULL;
@@ -141,7 +141,7 @@ static void copy_data(GameBoy *gb, FILE *file) {
     uint32_t position = 0;
 
     while((byte = fgetc(file)) != EOF) {
-        uint8_t bank = position / ROM_BANK_SIZE;
+        uint16_t bank = position / ROM_BANK_SIZE;
         gb->cart.rom_banks[bank][position - (ROM_BANK_SIZE * bank)] = (uint8_t) byte;
         position++;
     }

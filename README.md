@@ -38,7 +38,7 @@ Requirements: SDL2, CMake, OpenGL
 - Interrupts
 - Timers
 - Joypad
-- MBC 1
+- MBC 1, 5
 - Sound
 
 #### Not Working

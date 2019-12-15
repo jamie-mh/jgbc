@@ -73,6 +73,33 @@ void mbc4_handler(GameBoy *gb, const uint16_t address, const uint8_t value) {
 }
 
 void mbc5_handler(GameBoy *gb, const uint16_t address, const uint8_t value) {
-    mbc1_handler(gb, address, value);
+
+    static bool ram_enabled = false;
+
+    uint8_t rom_bank = gb->mmu.rom_bank;
+    uint8_t ram_bank = gb->mmu.ram_bank;
+
+    if(address <= MBC1_RAM_ENABLE_END)
+        ram_enabled = (value & 0xF) == MBC1_RAM_ENABLE_NIBBLE ? true : false;
+
+    else if(address >= MBC5_ROM_CHANGE_LOW_START && address <= MBC5_ROM_CHANGE_LOW_END)
+        rom_bank = (rom_bank & 0x100) | value; // keep the top bit
+
+    else if(address >= MBC5_ROM_CHANGE_HIGH_START && address <= MBC5_ROM_CHANGE_HIGH_END)
+        rom_bank = (rom_bank & 0xFF) | ((value & 0x1) << 8);
+
+    else if(address >= MBC5_RAM_CHANGE_START && address <= MBC5_RAM_CHANGE_END)
+        ram_bank = value & 0xF;
+    
+    gb->mmu.rom_bank = rom_bank % gb->cart.rom_size;
+    gb->mmu.romNN = gb->cart.rom_banks[gb->mmu.rom_bank];
+
+    if(ram_enabled && gb->cart.ram_size > 0) {
+        gb->mmu.ram_bank = ram_bank % gb->cart.ram_size;
+        gb->mmu.extram = gb->cart.ram_banks[gb->mmu.ram_bank];
+    } else {
+        gb->mmu.ram_bank = -1;
+        gb->mmu.extram = NULL;
+    }
 }
 
