@@ -58,7 +58,11 @@
 #define FLAG_ZERO 7 
 #define FLAG_SUBTRACT 6 
 #define FLAG_HALFCARRY 5 
-#define FLAG_CARRY 4 
+#define FLAG_CARRY 4
+
+// CPU Speed Switching (CGB)
+#define KEY1 0xFF4D
+#define KEY1_SPEED_PREPARE 0
 
 
 typedef struct {

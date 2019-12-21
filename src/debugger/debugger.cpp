@@ -114,29 +114,32 @@ void Debugger::run() {
 
             uint32_t frame_ticks = 0;
 
-            // while(!is_paused && frame_ticks < max_ticks) {
-            while(frame_ticks < max_ticks) {
+            while(!is_paused && frame_ticks < max_ticks) {
 
                 Emulator::execute_instr(&gb);
+                Emulator::update_ppu(&gb);
+
+                if(gb.cpu.is_double_speed) {
+                    Emulator::execute_instr(&gb);
+                    Emulator::update_ppu(&gb);
+                }
+
                 Emulator::update_timer(&gb);
                 Emulator::update_apu(&gb);
-                Emulator::update_ppu(&gb);
                 Emulator::check_interrupts(&gb);
 
                 frame_ticks += gb.cpu.ticks;
                 
-                // if(gb.cpu.reg.PC == next_stop) {
-                //     next_stop = 0;
-                //     is_paused = true;
-                // }
+                 if(gb.cpu.reg.PC == next_stop) {
+                     next_stop = 0;
+                     is_paused = true;
+                 }
 
-                // if(is_breakpoint(gb.cpu.reg.PC)) {
-                //     get_window_disassembly().set_goto_addr(gb.cpu.reg.PC);
-                //     is_paused = true;
-                // }
+                 if(is_breakpoint(gb.cpu.reg.PC)) {
+                     get_window_disassembly().set_goto_addr(gb.cpu.reg.PC);
+                     is_paused = true;
+                 }
             }
-
-            frame_ticks -= max_ticks;
         }
 
         render();

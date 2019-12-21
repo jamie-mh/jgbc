@@ -117,9 +117,14 @@ uint8_t read_byte(GameBoy *gb, uint16_t address, const bool is_program) {
 
     if(!is_accessible(gb, address))
         return 0xFF;
-    
+
     uint8_t *mem = get_memory(gb, &address);
-    return mem[address];
+    uint8_t data = mem[address];
+
+    if(address == KEY1)
+        data = (data & 0x7F) | (gb->cpu.is_double_speed << 7);
+
+    return data;
 }
 
 uint16_t read_short(GameBoy *gb, const uint16_t address, const bool is_program) {

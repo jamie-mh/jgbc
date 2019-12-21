@@ -58,6 +58,8 @@ Registers;
 
 typedef struct {
     bool is_halted;
+    bool is_double_speed;
+
     Registers reg;
     uint8_t ticks;
     uint16_t div_clock; // Divider Timer Clock

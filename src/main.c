@@ -51,16 +51,19 @@ static void run(GameBoy *gb) {
 
         while(frame_ticks < max_ticks) {
             execute_instr(gb);
+            update_timer(gb);
+
+            if(gb->cpu.is_double_speed) {
+                execute_instr(gb);
+                update_timer(gb);
+            }
 
             update_ppu(gb);
-            update_timer(gb);
             check_interrupts(gb);
             update_apu(gb);
 
             frame_ticks += gb->cpu.ticks;
         }
-
-        frame_ticks -= max_ticks;
 
         while(SDL_GetQueuedAudioSize(gb->apu.device_id))
             SDL_Delay(1);

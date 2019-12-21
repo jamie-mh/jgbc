@@ -92,7 +92,11 @@ void op_rrca(GameBoy *gb) {
 
 // 0x10: STOP (- - - -)
 void op_stop(GameBoy *gb) {
-    // Do nothing
+
+    if(RREG(KEY1, KEY1_SPEED_PREPARE)) {
+        WREG(KEY1, KEY1_SPEED_PREPARE, 0);
+        gb->cpu.is_double_speed = !gb->cpu.is_double_speed;
+    }
 }
 
 // 0x11: LD DE, d16 (- - - -)

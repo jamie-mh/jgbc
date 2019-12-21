@@ -18,6 +18,7 @@ void init_cpu(GameBoy *gb) {
     REG(IME) = false;
 
     gb->cpu.is_halted = false;
+    gb->cpu.is_double_speed = false;
     gb->cpu.div_clock = 0;
     gb->cpu.cnt_clock = 0;
 }
