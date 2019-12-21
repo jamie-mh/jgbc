@@ -74,18 +74,13 @@ typedef struct {
 Sprite;
 
 typedef struct {
-    uint8_t r, g, b;
-}
-Colour;
-
-typedef struct {
-    uint8_t *framebuffer;
+    uint16_t *framebuffer;
     Sprite sprite_buffer[40];
     uint16_t scan_clock;
     uint16_t frame_clock;
 
-    Colour bg_palette[32];
-    Colour obj_palette[32];
+    uint16_t bg_palette[32];
+    uint16_t obj_palette[32];
 
     SDL_Window *window;
     SDL_Renderer *renderer;
@@ -223,7 +218,7 @@ APU;
 
 typedef struct {
     char title[17]; // Uppercase ASCII Game Name
-    uint8_t gbc_flag; // Color Support Flag
+    bool is_colour;
     uint8_t type;
     uint16_t rom_size;
     uint8_t ram_size;

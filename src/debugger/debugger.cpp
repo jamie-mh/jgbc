@@ -40,12 +40,12 @@ Debugger::Debugger(const char *rom_path) {
     _windows.push_back(new WindowIO(gb));
     _windows.push_back(new WindowAudio(gb));
     _windows.push_back(new WindowControls(*this));
+    _windows.push_back(new WindowPalettes(gb));
     _windows.push_back(new WindowDisassembly(*this));
     _windows.push_back(new WindowEmulator(gb));
     _windows.push_back(new WindowMemory(gb));
     _windows.push_back(new WindowRegisters(gb));
     _windows.push_back(new WindowStack(gb));
-    _windows.push_back(new WindowPalettes(gb));
 }
 
 void Debugger::init_gl() {

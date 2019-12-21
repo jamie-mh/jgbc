@@ -33,7 +33,7 @@ bool load_rom(GameBoy *gb, const char *path) {
 
 void print_cart_info(GameBoy *gb) {
     printf("Title: %s\n", gb->cart.title);
-    printf("GBC Flag: %02X\n", gb->cart.gbc_flag);
+    printf("Colour: %s\n", gb->cart.is_colour ? "yes" : "no");
     printf("Cartridge Type: %02X\n", gb->cart.type);
     printf("ROM Size: %d x %d KB\n", gb->cart.rom_size, ROM_BANK_SIZE);
     printf("RAM Size: %d x %d KB\n", gb->cart.ram_size, EXTRAM_BANK_SIZE);
@@ -62,7 +62,9 @@ static void parse_header(GameBoy *gb, const uint8_t *header) {
     memcpy(gb->cart.title, &HEADER(CART_HEADER_TITLE), 16);
     gb->cart.title[16] = '\0';
 
-    gb->cart.gbc_flag = HEADER(CART_HEADER_GBC_FLAG);
+    const uint8_t gbc_flag = HEADER(CART_HEADER_GBC_FLAG);
+    gb->cart.is_colour = gbc_flag == CART_HEADER_GBC_ONLY;
+
     gb->cart.type = HEADER(CART_HEADER_TYPE);
     gb->cart.rom_size = (2 * ROM_BANK_SIZE << HEADER(CART_HEADER_ROM_SIZE)) / ROM_BANK_SIZE; // 32KB sl N
 
@@ -123,7 +125,7 @@ static void alloc_banks(GameBoy *gb) {
     gb->cart.rom_banks = malloc(sizeof(uint8_t *) * gb->cart.rom_size);
 
     for(uint16_t i = 0; i < gb->cart.rom_size; ++i)
-        gb->cart.rom_banks[i] = malloc(ROM_BANK_SIZE * sizeof(uint8_t));
+        gb->cart.rom_banks[i] = calloc(ROM_BANK_SIZE, sizeof(uint8_t));
 
     gb->cart.ram_banks = NULL;
 
@@ -131,7 +133,7 @@ static void alloc_banks(GameBoy *gb) {
         gb->cart.ram_banks = malloc(sizeof(uint8_t *) * gb->cart.ram_size);
 
         for(uint8_t i = 0; i < gb->cart.ram_size; ++i)
-            gb->cart.ram_banks[i] = malloc(EXTRAM_BANK_SIZE * sizeof(uint8_t));
+            gb->cart.ram_banks[i] = calloc(EXTRAM_BANK_SIZE, sizeof(uint8_t));
     }
 }
 

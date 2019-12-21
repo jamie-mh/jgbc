@@ -35,9 +35,14 @@ void WindowPalettes::render() {
                     ? _gb.ppu.bg_palette[palette * 4 + i]
                     : _gb.ppu.obj_palette[palette * 4 + i];
 
+                ImVec4 vec;
+                vec.x = (colour & 0x1F) / 31.0f;
+                vec.y = ((colour & 0x3E0) >> 5) / 31.0f;
+                vec.z = ((colour & 0x7C00) >> 10) / 31.0f;
+
                 ImGui::ColorButton(
                     "##button",
-                    ImVec4(colour.r / 31.0f, colour.g / 31.0f, colour.b / 31.0f, 0),
+                    vec,
                     ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_NoPicker,
                     ImVec2(30, 30)
                 );

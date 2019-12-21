@@ -16,9 +16,9 @@ void WindowCartInfo::render() {
     ImGui::SameLine();
     ImGui::Text("%s", _gb.cart.title);
 
-    ImGui::TextColored(Colours::address, "GBC Flag");
+    ImGui::TextColored(Colours::address, "Colour");
     ImGui::SameLine();
-    ImGui::Text("%02X", _gb.cart.gbc_flag);
+    ImGui::Text("%s", _gb.cart.is_colour ? "yes" : "no");
 
     ImGui::TextColored(Colours::address, "Cartridge Type");
     ImGui::SameLine();

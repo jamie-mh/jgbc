@@ -5,24 +5,25 @@
 
 static void update_render_mode(GameBoy *, uint8_t, bool);
 
-static inline bool get_bg_tile_data_start(GameBoy *, uint16_t *);
-static inline uint16_t get_tile_map_offset(Position);
-static inline uint16_t get_tile_data_offset(GameBoy *, uint16_t, bool);
-static inline void get_tile_row_data(GameBoy *gb, const uint8_t, uint16_t, uint8_t *);
-static inline Colour get_tile_pixel(Position, uint8_t *, const Colour *);
-static inline void plot_tile_pixel(uint8_t *, Position, Colour);
+static bool get_bg_tile_data_start(GameBoy *, uint16_t *);
+static uint16_t get_tile_map_offset(Position);
+static uint16_t get_tile_data_offset(GameBoy *gb, uint16_t, bool);
+static void get_tile_row_data(GameBoy *gb, uint8_t, uint8_t, uint16_t, uint8_t *);
+static uint16_t get_tile_pixel(Position, const uint8_t *, bool, const uint16_t *);
+static TileAttributes get_tile_attributes(GameBoy *, uint16_t);
+static void plot_tile_pixel(uint16_t *, Position, uint16_t);
 
 static void render_bg_scan(GameBoy *, uint8_t);
 static void render_window_scan(GameBoy *, uint8_t);
 static void render_sprite_scan(GameBoy *, uint8_t);
 
 static int sprite_cmp(const void *, const void *);
-static Colour get_shade(uint8_t);
-static void fill_shade_table(uint8_t, Colour *);
+static uint16_t get_shade(uint8_t);
+static void fill_shade_table(uint8_t, uint16_t *);
 
 
 void init_ppu(GameBoy *gb) {
-    gb->ppu.framebuffer = calloc(SCREEN_WIDTH * SCREEN_HEIGHT * 3, sizeof(uint8_t));
+    gb->ppu.framebuffer = calloc(SCREEN_WIDTH * SCREEN_HEIGHT, sizeof(uint16_t));
     gb->ppu.scan_clock = 0;
     gb->ppu.frame_clock = 0;
 
@@ -30,14 +31,9 @@ void init_ppu(GameBoy *gb) {
     gb->ppu.renderer = NULL;
     gb->ppu.texture = NULL;
 
-    for(int i = 0; i < 32; ++i) {
-        gb->ppu.bg_palette[i].r = 0xFF;
-        gb->ppu.bg_palette[i].g = 0xFF;
-        gb->ppu.bg_palette[i].b = 0xFF;
-
-        gb->ppu.obj_palette[i].r = 0xFF;
-        gb->ppu.obj_palette[i].g = 0xFF;
-        gb->ppu.obj_palette[i].b = 0xFF;
+    for(uint8_t i = 0; i < 32; ++i) {
+        gb->ppu.bg_palette[i] = 0;
+        gb->ppu.obj_palette[i] = 0;
     }
 }
 
@@ -67,7 +63,7 @@ void init_window(GameBoy *gb) {
 
     gb->ppu.texture = SDL_CreateTexture(
         gb->ppu.renderer,
-        SDL_PIXELFORMAT_RGB24,
+        SDL_PIXELFORMAT_ABGR1555,
         SDL_TEXTUREACCESS_STREAMING,
         SCREEN_WIDTH,
         SCREEN_HEIGHT
@@ -83,7 +79,7 @@ void render(GameBoy *gb) {
         gb->ppu.texture,
         NULL,
         gb->ppu.framebuffer,
-        SCREEN_WIDTH * 3
+        SCREEN_WIDTH * sizeof(uint16_t)
     );
 
     SDL_RenderCopy(gb->ppu.renderer, gb->ppu.texture, NULL, NULL);
@@ -143,7 +139,7 @@ void update_ppu(GameBoy *gb) {
 static void update_render_mode(GameBoy *gb, const uint8_t ly, const bool lcd_on) {
     
     const uint8_t curr_mode = SREAD8(STAT) & 0x3;
-    PpuMode new_mode = -1;
+    PPUMode new_mode = -1;
     bool request_int = false;
 
     // V-Blank (10 lines)
@@ -217,30 +213,49 @@ static inline uint16_t get_tile_data_offset(GameBoy *gb, const uint16_t map_addr
 }
 
 // Fetches two bytes in tile data memory for any given line in a tile
-static inline void get_tile_row_data(GameBoy *gb, const uint8_t line, const uint16_t data_addr, uint8_t *data) {
-    
+static inline void get_tile_row_data(GameBoy *gb, const uint8_t line, const uint8_t vram_bank, const uint16_t data_addr, uint8_t *data) {
+
+    assert(vram_bank <= 1);
     const uint8_t tile_y = line * 2;
-    data[0] = SREAD8(data_addr + tile_y + 0);
-    data[1] = SREAD8(data_addr + tile_y + 1);
+    const uint8_t *vram = gb->mmu.vram_banks[vram_bank];
+
+    data[0] = vram[data_addr + tile_y + 0 - VRAM_START];
+    data[1] = vram[data_addr + tile_y + 1 - VRAM_START];
 }
 
 // Get the colour of a pixel in a tile
-static inline Colour get_tile_pixel(Position screen_pos, uint8_t *data, const Colour *shades) {
+static inline uint16_t get_tile_pixel(Position screen_pos, const uint8_t *data, const bool is_flipped_x, const uint16_t *palette) {
 
-    uint8_t bit = 7 - (screen_pos.x % 8);
+    const uint8_t bit = is_flipped_x
+        ? screen_pos.x % 8
+        : 7 - screen_pos.x % 8;
     
-    const uint8_t shade_num = GET_BIT(data[0], bit) | (GET_BIT(data[1], bit) << 1);
-    return shades[shade_num];
+    const uint8_t colour_num = GET_BIT(data[0], bit) | (GET_BIT(data[1], bit) << 1);
+    return palette[colour_num];
+}
+
+// Gets the tile attributes for a given tile (CGB only)
+static inline TileAttributes get_tile_attributes(GameBoy *gb, const uint16_t map_addr) {
+
+//    static const uint16_t offset = TILE_ATTR_START - VRAM_START;
+    const uint8_t data = gb->mmu.vram_banks[1][map_addr - VRAM_START];
+
+    TileAttributes result = {
+        (data & TILE_ATTR_PALETTE),
+        (data & TILE_ATTR_BANK) >> 3,
+        (data & TILE_ATTR_FLIP_X) >> 5,
+        (data & TILE_ATTR_FLIP_Y) >> 6,
+        (data & TILE_ATTR_BG_PRIORITY) >> 7
+    };
+
+    return result;
 }
 
 // Plots a single grayscale pixel on the screen at the given coordinate
-static inline void plot_tile_pixel(uint8_t *framebuffer, const Position display_pos, const Colour shade) {
+static inline void plot_tile_pixel(uint16_t *framebuffer, const Position display_pos, const uint16_t colour) {
 
-    const uint32_t buf_offset = (display_pos.x * 3) + (display_pos.y * SCREEN_WIDTH * 3);
-
-    framebuffer[buf_offset + 0] = shade.r; // R
-    framebuffer[buf_offset + 1] = shade.g; // G
-    framebuffer[buf_offset + 2] = shade.b; // B
+    const uint16_t buf_offset = display_pos.x + display_pos.y * SCREEN_WIDTH;
+    framebuffer[buf_offset] = colour;
 }
 
 static void render_bg_scan(GameBoy *gb, const uint8_t ly) {
@@ -256,10 +271,12 @@ static void render_bg_scan(GameBoy *gb, const uint8_t ly) {
     const uint8_t scroll_x = SREAD8(SCX);
     const uint8_t scroll_y = SREAD8(SCY);
 
-    Colour shades[4];
+    uint16_t colours[4];
     const uint8_t palette = SREAD8(BGP);
-    fill_shade_table(palette, shades);
+    fill_shade_table(palette, colours);
 
+    // TODO: optimise: only fetch attributes and data once per 8 pixels
+    // TODO: merge bg and window code somehow
     for(uint8_t scan_x = 0; scan_x < SCREEN_WIDTH; scan_x++) {
 
         // Position in screen memory after scrolling
@@ -268,19 +285,32 @@ static void render_bg_scan(GameBoy *gb, const uint8_t ly) {
             scroll_y + ly 
         };
 
-        const uint16_t map_addr = map_start + get_tile_map_offset(screen_pos); 
+        const uint16_t map_offset = get_tile_map_offset(screen_pos);
+        const uint16_t map_addr = map_start + map_offset;
+        const TileAttributes attributes = get_tile_attributes(gb, map_addr);
+
+        if(gb->cart.is_colour) {
+
+            for(uint8_t i = 0; i < 4; ++i)
+                colours[i] = gb->ppu.bg_palette[attributes.palette * 4 + i];
+        }
+
         const uint16_t data_addr = data_start + get_tile_data_offset(gb, map_addr, signed_tile_num);
 
         uint8_t data[2];
-        const uint8_t line = screen_pos.y % 8;
-        get_tile_row_data(gb, line, data_addr, data);
 
-        const Colour shade = get_tile_pixel(screen_pos, data, shades);
+        const uint8_t line = attributes.is_flipped_y
+            ? 7 - screen_pos.y % 8
+            : screen_pos.y % 8;
+
+        get_tile_row_data(gb, line, attributes.vram_bank, data_addr, data);
+
+        const uint16_t colour = get_tile_pixel(screen_pos, data, attributes.is_flipped_x, colours);
 
         // Position on the physical display
         const Position display_pos = { scan_x, ly };
 
-        plot_tile_pixel(gb->ppu.framebuffer, display_pos, shade);
+        plot_tile_pixel(gb->ppu.framebuffer, display_pos, colour);
     }
 }
 
@@ -294,9 +324,9 @@ static void render_window_scan(GameBoy *gb, const uint8_t ly) {
     uint16_t data_start;
     const bool signed_tile_num = get_bg_tile_data_start(gb, &data_start);
 
-    Colour shades[4];
+    uint16_t colours[4];
     const uint8_t palette = SREAD8(BGP);
-    fill_shade_table(palette, shades);
+    fill_shade_table(palette, colours);
 
     const uint8_t window_x = SREAD8(WX) - 7;
     const uint8_t window_y = SREAD8(WY);
@@ -315,19 +345,19 @@ static void render_window_scan(GameBoy *gb, const uint8_t ly) {
             ly - window_y
         };
 
-        const uint16_t map_addr = map_start + get_tile_map_offset(screen_pos); 
+        const uint16_t map_addr = map_start + get_tile_map_offset(screen_pos);
         const uint16_t data_addr = data_start + get_tile_data_offset(gb, map_addr, signed_tile_num);
 
         uint8_t data[2];
         const uint8_t line = screen_pos.y % 8;
-        get_tile_row_data(gb, line, data_addr, data);
+        get_tile_row_data(gb, line, 0, data_addr, data);
 
-        const Colour shade = get_tile_pixel(screen_pos, data, shades);
+        const uint16_t colour = get_tile_pixel(screen_pos, data, false, colours);
 
         // Position on the physical display
         const Position display_pos = { scan_x, ly };
 
-        plot_tile_pixel(gb->ppu.framebuffer, display_pos, shade);
+        plot_tile_pixel(gb->ppu.framebuffer, display_pos, colour);
     }
 }
 
@@ -350,7 +380,7 @@ static void render_sprite_scan(GameBoy *gb, const uint8_t ly) {
             const uint16_t palette_addr = (GET_BIT(sprite.attributes, SPRITE_ATTR_PALETTE)) ? OBP1 : OBP0;
             const uint8_t palette = SREAD8(palette_addr);
 
-            Colour shades[4];
+            uint16_t shades[4];
             fill_shade_table(palette, shades);
 
             // A tall sprite has the first bit removed 
@@ -384,17 +414,14 @@ static void render_sprite_scan(GameBoy *gb, const uint8_t ly) {
                 if(shade_num == 0)
                     continue; 
                 
-                const Colour shade = shades[shade_num];
-                const uint32_t buf_offset = ((x + px) * 3) + (ly * SCREEN_WIDTH * 3);
-                static const Colour white = {WHITE};
+                const uint16_t shade = shades[shade_num];
+                const uint32_t buf_offset = (x + px) + (ly * SCREEN_WIDTH);
 
                 // If the sprite is behind the background, it is only visible above white
-                if(is_behind_bg && gb->ppu.framebuffer[buf_offset] != white.r)
+                if(is_behind_bg && gb->ppu.framebuffer[buf_offset] != WHITE)
                     continue; 
 
-                gb->ppu.framebuffer[buf_offset + 0] = shade.r; // R
-                gb->ppu.framebuffer[buf_offset + 1] = shade.g; // G
-                gb->ppu.framebuffer[buf_offset + 2] = shade.b; // B
+                gb->ppu.framebuffer[buf_offset] = shade;
             } 
         }
     } 
@@ -417,6 +444,8 @@ void get_sprites(GameBoy *gb) {
         sprite->x = SREAD8(address + 1); 
         sprite->tile = SREAD8(address + 2); 
         sprite->attributes = SREAD8(address + 3);
+
+        // TODO: put attributes in struct
     }
 
     qsort(gb->ppu.sprite_buffer, 40, sizeof(Sprite), sprite_cmp);
@@ -424,37 +453,32 @@ void get_sprites(GameBoy *gb) {
 
 // Returns the colour associated with a shade number tiles
 // Monochrome GameBoy only
-static Colour get_shade(const uint8_t num) {
-
-    static const Colour white = {WHITE};
-    static const Colour black = {BLACK};
-    static const Colour lgrey = {LGREY};
-    static const Colour dgrey = {DGREY};
+static inline uint16_t get_shade(const uint8_t num) {
 
     switch(num) {
         case 0: 
-            return white;
+            return WHITE;
         case 1:
-            return lgrey;
+            return LGREY;
         case 2: 
-            return dgrey;
+            return DGREY;
         case 3: 
-            return black;
+            return BLACK;
     } 
 
     assert(num <= 3);
-    return black;
+    return BLACK;
 }
 
 // Modifies a table to add the color shades for bg tiles according to the palette register provided
 // Monochrome GameBoy only
-static void fill_shade_table(const uint8_t palette, Colour *table) {
+static void fill_shade_table(const uint8_t palette, uint16_t *colours) {
     uint8_t i = 0;
     uint8_t j = 0;
 
     for(; i < 8; i += 2, j++) {
         const uint8_t shade_num = (GET_BIT(palette, i + 1) << 1) | GET_BIT(palette, i);
-        table[j] = get_shade(shade_num); 
+        colours[j] = get_shade(shade_num);
     }
 }
 
@@ -462,7 +486,7 @@ void palette_index_write(GameBoy *gb, const uint16_t address, const uint8_t valu
 
     assert(address == BGPI || address == OBPI);
 
-    Colour *palette = NULL;
+    uint16_t *palette = NULL;
     uint16_t data_reg_addr = 0;
 
     if(address == BGPI) {
@@ -474,24 +498,18 @@ void palette_index_write(GameBoy *gb, const uint16_t address, const uint8_t valu
     }
 
     const uint8_t index = value & PI_INDEX;
-    const Colour colour = palette[index / 2];
+    const uint16_t colour = palette[index / 2];
 
     uint8_t data;
 
     // First byte of colour data
     // Contains all 5 bits of red and the lower 3 bits of green
-    if(index % 2 == 0) {
-        const uint8_t green_lsb = colour.g & 0x7;
-        data = (colour.r & PD_RED) | (green_lsb << 5);
-    }
+    if(index % 2 == 0)
+        data = colour & 0xFF;
     // Second byte of colour data
     // Contains all 5 bits of blue and the upper 2 bits of green
-    else {
-        const uint8_t green_msb = (colour.g & 0x18) >> 3;
-        const uint8_t blue = colour.b & 0x1F;
-
-        data = (blue << 2 & PD_BLUE) | green_msb;
-    }
+    else
+        data = (colour & 0xFF00) >> 8;
 
     SWRITE8(data_reg_addr, data);
 }
@@ -500,7 +518,7 @@ void palette_data_write(GameBoy *gb, const uint16_t address, const uint8_t value
 
     assert(address == BGPD || address == OBPD);
 
-    Colour *palette = NULL;
+    uint16_t *palette = NULL;
     uint16_t index_reg_addr = 0;
 
     if(address == BGPD) {
@@ -514,26 +532,17 @@ void palette_data_write(GameBoy *gb, const uint16_t address, const uint8_t value
     const uint8_t index_reg = SREAD8(index_reg_addr);
     const uint8_t index = index_reg & PI_INDEX;
 
-    Colour *colour = &palette[index / 2];
+    uint16_t *colour = &palette[index / 2];
 
     // First byte of colour data
-    if(index % 2 == 0) {
-        colour->r = value & PD_RED;
+    if(index % 2 == 0)
+        *colour = (*colour & 0xFF00) | value; 
 
-        const uint8_t green_lsb = (value & PD_GREEN_LSB) >> 5;
-        colour->g = (colour->g & ~(PD_GREEN_LSB >> 5)) | green_lsb;
-    }
     // Second byte of colour data
     else {
-        colour->b = (value & PD_BLUE) >> 2;
-
-        const uint8_t green_msb = value & PD_GREEN_MSB;
-        colour->g = (colour->g & ~(PD_GREEN_MSB << 3)) | (green_msb << 3);
+        *colour = (*colour & 0xFF) | (value << 8); 
+        *colour &= 0x7FFF; // transparency is never set
     }
-
-    colour->r &= 0x1F;
-    colour->g &= 0x1F;
-    colour->b &= 0x1F;
 
     const bool auto_incr = (index_reg & PI_AUTO_INCR) >> 7;
 

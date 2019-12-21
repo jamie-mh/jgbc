@@ -64,15 +64,14 @@
 #define DMA 0xFF46
 
 // GameBoy Monochrome Palette
-#define WHITE 0xFF, 0xFF, 0xFF
-#define BLACK 0x00, 0x00, 0x00 
-#define LGREY 0xD3, 0xD3, 0xD3 
-#define DGREY 0x80, 0x80, 0x80
+#define WHITE 0x7FFF
+#define BLACK 0x0000 
+#define LGREY 0x6B5A
+#define DGREY 0x4210
 
 // VRAM Bank (CGB)
 #define VBK 0xFF4F
 #define VBK_BANK 0x0
-#define CGB_TILE_ATTR 0x9800
 
 // Colour palettes (CGB)
 #define BGPI 0xFF68
@@ -84,10 +83,12 @@
 #define PI_INDEX 0x3F
 #define PI_AUTO_INCR 0x80
 
-#define PD_RED 0x1F
-#define PD_GREEN_LSB 0xE0
-#define PD_GREEN_MSB 0x3
-#define PD_BLUE 0x7C
+// Tile Attributes
+#define TILE_ATTR_PALETTE 0x3
+#define TILE_ATTR_BANK 0x8
+#define TILE_ATTR_FLIP_X 0x20
+#define TILE_ATTR_FLIP_Y 0x40
+#define TILE_ATTR_BG_PRIORITY 0x80
 
 
 typedef struct {
@@ -98,7 +99,16 @@ Position;
 typedef enum {
     HBlank = 0, VBlank = 1, OamTransfer = 2, PixelTransfer = 3
 }
-PpuMode;
+PPUMode;
+
+typedef struct {
+    uint8_t palette;
+    uint8_t vram_bank;
+    bool is_flipped_x;
+    bool is_flipped_y;
+    bool is_bg_above;
+}
+TileAttributes;
 
 
 void init_ppu(GameBoy *);
