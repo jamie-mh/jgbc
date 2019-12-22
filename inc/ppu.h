@@ -84,7 +84,7 @@
 #define PI_AUTO_INCR 0x80
 
 // Tile Attributes
-#define TILE_ATTR_PALETTE 0x3
+#define TILE_ATTR_PALETTE 0x7
 #define TILE_ATTR_BANK 0x8
 #define TILE_ATTR_FLIP_X 0x20
 #define TILE_ATTR_FLIP_Y 0x40
