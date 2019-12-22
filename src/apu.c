@@ -61,6 +61,7 @@ void reset_apu(GameBoy *gb) {
     gb->apu.downsample_clock = 0;
 
     gb->apu.buffer_position = 0;
+    memset(gb->apu.buffer, 0, gb->apu.actual_spec.size);
 }
 
 static void reset_square_wave(GameBoy *gb, const uint8_t idx) {
@@ -177,13 +178,13 @@ void update_apu(GameBoy *gb) {
             float left = 0.0f;
             float right = 0.0f;
 
-            for(int i = 0; i < 4; ++i) {
+            for(int j = 0; j < 4; ++j) {
 
-                if(apu->left_enabled[i])
-                    left += apu->channels[i];
+                if(apu->left_enabled[j])
+                    left += apu->channels[j];
 
-                if(apu->right_enabled[i])
-                    right += apu->channels[i];
+                if(apu->right_enabled[j])
+                    right += apu->channels[j];
             }
 
             left *= volume_left;
@@ -196,7 +197,9 @@ void update_apu(GameBoy *gb) {
         }
     }
 
-    if(apu->buffer_position >= apu->actual_spec.size / sizeof(float)) {
+    const size_t max_samples = apu->actual_spec.size / sizeof(float);
+
+    if(apu->buffer_position >= max_samples) {
         SDL_QueueAudio(apu->device_id, apu->buffer, apu->actual_spec.size);
         apu->buffer_position = 0;
     }
