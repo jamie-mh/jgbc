@@ -2,15 +2,14 @@
 #include <glad/glad.h>
 #include "window.h"
 
-
 class WindowEmulator final : public Window {
     private:
         Emulator::GameBoy &_gb;
-        GLuint _textureId;
+        GLuint _texture_id;
 
     public:
-        WindowEmulator(Emulator::GameBoy &gb);
-        ~WindowEmulator();
+        explicit WindowEmulator(Emulator::GameBoy &gb);
+        ~WindowEmulator() override;
 
         void render() override;
 };

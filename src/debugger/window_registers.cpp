@@ -5,8 +5,8 @@
 
 void WindowRegisters::render() {
 
-    if(!is_open || !ImGui::Begin("Registers", &is_open)) {
-        if(is_open) ImGui::End();
+    if(!_is_open || !ImGui::Begin("Registers", &_is_open)) {
+        if(_is_open) ImGui::End();
         return;
     }
 
@@ -69,7 +69,9 @@ void WindowRegisters::render() {
         FSET(FLAG_CARRY, flag_carry);
 
     ImGui::Separator();
-    ImGui::Text("Halted? %s", _gb.cpu.is_halted ? "yes" : "no");
+    ImGui::Text("STATE");
+    ImGui::Checkbox("Halted", &gb->cpu.is_halted);
+    ImGui::Checkbox("Double Speed", &gb->cpu.is_double_speed);
 
     ImGui::End();
 }

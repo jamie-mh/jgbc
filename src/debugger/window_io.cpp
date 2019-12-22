@@ -5,8 +5,8 @@
 
 void WindowIO::render() {
 
-    if(!is_open || !ImGui::Begin("IO Map", &is_open)) {
-        if(is_open) ImGui::End();
+    if(!_is_open || !ImGui::Begin("IO Map", &_is_open)) {
+        if(_is_open) ImGui::End();
         return;
     }
 
@@ -81,8 +81,8 @@ void WindowIO::render() {
     ImGui::Text("Square NR2X");
     ImGui::NextColumn();
     ImGui::Text("Wave NR3X");
-    ImGui::NextColumn();
     ImGui::Separator();
+    ImGui::NextColumn();
 
     ImGui::Checkbox("Enabled", &gb->apu.square_waves[0].enabled);
     const char *square_1_labels[5] = { "NR10", "NR11", "NR12", "NR13", "NR14" };
@@ -92,13 +92,30 @@ void WindowIO::render() {
     ImGui::NextColumn();
     ImGui::Checkbox("Enabled", &gb->apu.square_waves[1].enabled);
     const char *square_2_labels[4] = { "NR21", "NR22", "NR23", "NR24" };
-    const uint16_t square_2_addrs[4] = { NR11, NR12, NR13, NR14 };
+    const uint16_t square_2_addrs[4] = { NR21, NR22, NR23, NR24 };
     draw_values(square_2_labels, square_2_addrs, 4);
 
+    ImGui::NextColumn();
+    ImGui::Checkbox("Enabled", &gb->apu.wave.enabled);
+    const char *wave_labels[4] = { "NR31", "NR32", "NR33", "NR34" };
+    const uint16_t wave_addrs[4] = { NR31, NR32, NR33, NR34 };
+    draw_values(wave_labels, wave_addrs, 4);
+
+    ImGui::NextColumn();
+    ImGui::Separator();
+    ImGui::Text("Noise NR4X");
+    ImGui::Separator();
+
+    ImGui::Checkbox("Enabled", &gb->apu.noise.enabled);
+    const char *noise_labels[4] = { "NR41", "NR42", "NR43", "NR44" };
+    const uint16_t noise_addrs[4] = { NR41, NR42, NR43, NR44 };
+    draw_values(noise_labels, noise_addrs, 4);
+
+    ImGui::Separator();
     ImGui::End();
 }
 
-inline void WindowIO::draw_values(const char **labels, const uint16_t *addrs, const int count) const {
+void WindowIO::draw_values(const char **labels, const uint16_t *addrs, const int count) const {
     static const auto gb = &_gb;
     static const ImU32 step = 1, step_fast = 10;
 
@@ -108,11 +125,11 @@ inline void WindowIO::draw_values(const char **labels, const uint16_t *addrs, co
 
         int value = SREAD8(addrs[i]);
         if(ImGui::InputScalar(labels[i], ImGuiDataType_U32, &value, &step, &step_fast, "%02X", ImGuiInputTextFlags_CharsHexadecimal))
-            SWRITE8(addrs[i], value);
+            WRITE8(addrs[i], value);
     }
 }
 
-inline void WindowIO::draw_registers(const char **labels, const uint16_t regis, const uint8_t *bits, const int count) const {
+void WindowIO::draw_registers(const char **labels, const uint16_t regis, const uint8_t *bits, const int count) const {
     static const auto gb = &_gb;
 
     for(auto i = 0; i < count; ++i) {

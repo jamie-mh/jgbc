@@ -5,31 +5,34 @@
 #include <iostream>
 #include <fstream>
 
+WindowAudio::WindowAudio(Emulator::GameBoy &gb): _gb(gb) {
+    _editor.OptShowOptions = false;
+    _editor.OptShowAscii = false;
+}
+
 void WindowAudio::render() {
 
-    if(!is_open || !ImGui::Begin("Audio", &is_open)) {
-        if(is_open) ImGui::End();
+    if(!_is_open || !ImGui::Begin("Audio", &_is_open)) {
+        if(_is_open) ImGui::End();
         return;
     }
 
     const auto width = ImGui::GetContentRegionAvailWidth();
-    static const auto gb = &_gb;
 
     ImGui::Text("APU Buffer");
-    ImGui::PlotLines("Buffer", gb->apu.buffer, gb->apu.actual_spec.size / sizeof(float), 0, nullptr, 0.0f, 1.0f, ImVec2(width, 150));
+    ImGui::PlotLines("Buffer", _gb.apu.buffer, _gb.apu.actual_spec.size / sizeof(float), 0, nullptr, 0.0f, 1.0f, ImVec2(width, 150));
 
     if(ImGui::Button("Dump buffer to audio.bin")) {
         std::ofstream file;
         file.open("audio.bin");
 
-        for(auto i = 0; i < gb->apu.actual_spec.size; ++i)
-            file << gb->apu.buffer[i];
+        for(size_t i = 0; i < _gb.apu.actual_spec.size; ++i)
+            file << _gb.apu.buffer[i];
 
         file.close();
     }
 
-    static MemoryEditor mem;
-    mem.DrawContents(gb->apu.buffer, gb->apu.actual_spec.size / sizeof(float), sizeof(float));
+    _editor.DrawContents(_gb.apu.buffer, _gb.apu.actual_spec.size / sizeof(float), sizeof(float));
 
     ImGui::End();
 }

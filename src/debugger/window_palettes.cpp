@@ -3,14 +3,10 @@
 #include <imgui.h>
 
 
-WindowPalettes::WindowPalettes(Emulator::GameBoy &gb) : _gb(gb) {
-
-}
-
 void WindowPalettes::render() {
 
-    if(!is_open || !ImGui::Begin("Palettes", &is_open)) {
-        if(is_open) ImGui::End();
+    if(!_is_open || !ImGui::Begin("Palettes", &_is_open)) {
+        if(_is_open) ImGui::End();
         return;
     }
 
@@ -35,14 +31,14 @@ void WindowPalettes::render() {
                     ? _gb.ppu.bg_palette[palette * 4 + i]
                     : _gb.ppu.obj_palette[palette * 4 + i];
 
-                ImVec4 vec;
-                vec.x = (colour & 0x1F) / 31.0f;
-                vec.y = ((colour & 0x3E0) >> 5) / 31.0f;
-                vec.z = ((colour & 0x7C00) >> 10) / 31.0f;
+                ImVec4 colour_vec;
+                colour_vec.x = (colour & 0x1F) / 31.0f;
+                colour_vec.y = ((colour & 0x3E0) >> 5) / 31.0f;
+                colour_vec.z = ((colour & 0x7C00) >> 10) / 31.0f;
 
                 ImGui::ColorButton(
                     "##button",
-                    vec,
+                    colour_vec,
                     ImGuiColorEditFlags_NoAlpha | ImGuiColorEditFlags_NoPicker,
                     ImVec2(30, 30)
                 );

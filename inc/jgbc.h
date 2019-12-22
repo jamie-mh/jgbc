@@ -254,3 +254,4 @@ struct GameBoy_s {
 };
 
 void init(GameBoy *gb);
+void reset(GameBoy *);

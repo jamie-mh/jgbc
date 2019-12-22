@@ -7,6 +7,6 @@ class WindowPalettes final : public Window {
         Emulator::GameBoy &_gb;
 
     public:
-        WindowPalettes(Emulator::GameBoy &gb);
+        explicit WindowPalettes(Emulator::GameBoy &gb): _gb(gb) { };
         void render() override;
 };

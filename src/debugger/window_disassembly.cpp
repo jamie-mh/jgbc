@@ -3,35 +3,24 @@
 #include "debugger/window_disassembly.h"
 #include <imgui.h>
 
-void WindowDisassembly::set_follow_pc(const bool value) {
-    _follow_pc = value;
-}
-
-void WindowDisassembly::set_goto_addr(const uint16_t addr) {
-    _goto_addr = addr;
-    _goto_lock = true;
-}
-
 void WindowDisassembly::render() {
 
-    if(!is_open || !ImGui::Begin("Disassembly", &is_open)) {
-        if(is_open) ImGui::End();
+    if(!_is_open || !ImGui::Begin("Disassembly", &_is_open)) {
+        if(_is_open) ImGui::End();
         return;
     }
 
-    static const auto gb = &_dbg.gb;
+    static const auto gb = _dbg.gb_p();
     const ImU32 step = 1, step_fast = 50;
     ImGui::InputScalar("ADDR", ImGuiDataType_U32, &_goto_addr, &step, &step_fast, "%04X", ImGuiInputTextFlags_CharsHexadecimal);
     ImGui::SameLine();
 
-    if(ImGui::Button("GOTO"))
-    {
+    if(ImGui::Button("GOTO")) {
         _follow_pc = false;
         _goto_lock = true;
     }
 
     ImGui::Checkbox("Follow PC", &_follow_pc);
-
     ImGui::BeginChild("##scroll");
             
     ImGuiListClipper clipper(get_line_count(0xFFFF));
@@ -69,7 +58,7 @@ void WindowDisassembly::render() {
 
 void WindowDisassembly::line_instr(uint16_t &addr) const {
 
-    static const auto gb = &_dbg.gb;
+    static const auto gb = _dbg.gb_p();
     const auto draw_list = ImGui::GetWindowDrawList();
 
     bool is_breakpoint = _dbg.is_breakpoint(addr);
@@ -113,9 +102,8 @@ void WindowDisassembly::line_instr(uint16_t &addr) const {
             operand = SREAD8(addr + 1);
 
             // If the operand is signed, get the two's complement
-            if(instr.signed_operand) {
+            if(instr.signed_operand)
                 operand = (~(operand - 1)) & 0x00FF;
-            }
 
             ImGui::TextColored(Colours::data, "%02X", operand);
 
@@ -138,15 +126,13 @@ void WindowDisassembly::line_instr(uint16_t &addr) const {
         ImGui::TextColored(Colours::disassembly, instr.disassembly, addr);
     }
 
-    ImGui::SameLine(440);
-    ImGui::TextColored(Colours::comment, "; %d", instr.length);
     addr += instr.length;
 }
 
 void WindowDisassembly::line_data(uint16_t &addr) const {
     
-    static const auto gb = &_dbg.gb;
-    ImGui::Text("");
+    static const auto gb = _dbg.gb_p();
+    ImGui::NewLine();
     prefix_region(addr);
 
     const auto data = SREAD8(addr);
@@ -196,7 +182,7 @@ void WindowDisassembly::line_data(uint16_t &addr) const {
 
 inline void WindowDisassembly::prefix_region(const uint16_t addr) const {
     ImGui::SameLine(40);
-    ImGui::TextColored(Colours::region, "%s: ", get_region_label(addr));
+    ImGui::TextColored(Colours::region, "%s: ", get_region_label(addr).c_str());
 
     ImGui::SameLine(120);
     ImGui::TextColored(Colours::address, "0x%04X", addr);
@@ -207,13 +193,13 @@ bool WindowDisassembly::is_executable(const uint16_t addr) const {
     
     // Executable instructions can be found here
     return 
-        ((addr >= ROM00_START && addr <= 0x103) ||
+        (addr <= 0x103 ||
         (addr > CART_HEADER_END && addr <= ROMNN_END) ||
         (addr >= EXTRAM_START && addr <= OAM_START) ||
         (addr >= HRAM_START && addr <= HRAM_END));
 }
 
-char *WindowDisassembly::get_region_label(const uint16_t addr) const {
+std::string WindowDisassembly::get_region_label(const uint16_t addr) const {
 
     if(addr <= ROM00_END)
         return "ROM00";
@@ -248,7 +234,7 @@ uint16_t WindowDisassembly::get_nth_line_addr(const uint16_t n) const {
     for(uint32_t addr = 0, count = 1; addr <= 0xFFFF; count++) {
 
         if(is_executable(addr))
-            addr += Emulator::find_instr(&_dbg.gb, addr).length;
+            addr += Emulator::find_instr(_dbg.gb_p(), addr).length;
         else
             addr++;
 
@@ -266,7 +252,7 @@ uint16_t WindowDisassembly::get_line_count(const uint16_t limit_addr) const {
     for(uint32_t addr = 0; addr <= limit_addr;) {
 
         if(is_executable(addr))
-            addr += Emulator::find_instr(&_dbg.gb, addr).length;
+            addr += Emulator::find_instr(_dbg.gb_p(), addr).length;
         else
             addr++;
 
@@ -274,4 +260,13 @@ uint16_t WindowDisassembly::get_line_count(const uint16_t limit_addr) const {
     }
 
     return count;
+}
+
+void WindowDisassembly::set_follow_pc(const bool value) {
+    _follow_pc = value;
+}
+
+void WindowDisassembly::set_goto_addr(const uint16_t addr) {
+    _goto_addr = addr;
+    _goto_lock = true;
 }

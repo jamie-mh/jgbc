@@ -26,52 +26,51 @@
 #include "debugger/window_audio.h"
 #include "debugger/window_palettes.h"
 
-constexpr unsigned int WINDOW_WIDTH = 1500;
-constexpr unsigned int WINDOW_HEIGHT = 900;
-
-#define BG_COLOUR 0.45f, 0.55f, 0.60f, 1.00f
-const ImVec4 ADDR_COLOUR { 0.38f, 0.49f, 0.55f, 1.0f };
-const ImVec4 DATA_COLOUR { 1.0f, 0.96f, 0.62f, 1.0f };
-const ImVec4 INSTR_COLOUR { 0.93f, 0.93f, 0.93f, 1.0f };
-const ImVec4 CURR_COLOUR { 0.46f, 1.0f, 0.01f, 1.0f };
-
-
 class Debugger final {
     public:
-        static constexpr unsigned int WINDOW_COUNT = 8;
-
-        bool is_paused = true;
-        uint16_t next_stop;
-
-        Emulator::GameBoy gb;
-
-        Debugger(const char *rom_path);
+        explicit Debugger(const char *rom_path);
         ~Debugger();
 
-        size_t breakpoint_count() const;
-        bool is_breakpoint(uint16_t addr) const;
-        void add_breakpoint(uint16_t addr);
-        void remove_breakpoint(uint16_t addr);
-        const std::vector<uint16_t>& get_breakpoints() const;
+        Emulator::GameBoy &gb();
+        Emulator::GameBoy *gb_p();
+
+        const std::vector<uint16_t>& breakpoints() const;
+        bool is_breakpoint(uint16_t) const;
+        void add_breakpoint(uint16_t);
+        void remove_breakpoint(uint16_t);
+
+        bool is_paused() const;
+        void set_paused(bool);
+
+        uint16_t next_stop() const;
+        void set_next_stop(uint16_t);
 
         void run();
         void render();
 
-        inline WindowBreakpoints &get_window_breakpoints() { return *static_cast<WindowBreakpoints *>(_windows[0]); }
-        inline WindowCartInfo &get_window_cart_info() { return *static_cast<WindowCartInfo *>(_windows[1]); }
-        inline WindowIO &get_window_io() { return *static_cast<WindowIO *>(_windows[2]); }
-        inline WindowAudio &get_window_audio() { return *static_cast<WindowAudio *>(_windows[3]); }
-        inline WindowControls &get_window_controls() { return *static_cast<WindowControls *>(_windows[4]); }
-        inline WindowDisassembly &get_window_disassembly() { return *static_cast<WindowDisassembly *>(_windows[5]); }
-        inline WindowEmulator &get_window_emulator() { return *static_cast<WindowEmulator *>(_windows[6]); }
-        inline WindowMemory &get_window_memory() { return *static_cast<WindowMemory *>(_windows[7]); }
-        inline WindowRegisters &get_window_registers() { return *static_cast<WindowRegisters *>(_windows[8]); }
-        inline WindowStack &get_window_stack() { return *static_cast<WindowStack *>(_windows[9]); }
+        WindowBreakpoints &window_breakpoints() { return *dynamic_cast<WindowBreakpoints *>(_windows[0]); }
+        WindowCartInfo &window_cart_info() { return *dynamic_cast<WindowCartInfo *>(_windows[1]); }
+        WindowIO &window_io() { return *dynamic_cast<WindowIO *>(_windows[2]); }
+        WindowAudio &window_audio() { return *dynamic_cast<WindowAudio *>(_windows[3]); }
+        WindowControls &window_controls() { return *dynamic_cast<WindowControls *>(_windows[4]); }
+        WindowPalettes &window_palettes() { return *dynamic_cast<WindowPalettes *>(_windows[5]); }
+        WindowDisassembly &window_disassembly() { return *dynamic_cast<WindowDisassembly *>(_windows[6]); }
+        WindowEmulator &window_emulator() { return *dynamic_cast<WindowEmulator *>(_windows[7]); }
+        WindowMemory &window_memory() { return *dynamic_cast<WindowMemory *>(_windows[8]); }
+        WindowRegisters &window_registers() { return *dynamic_cast<WindowRegisters *>(_windows[9]); }
+        WindowStack &window_stack() { return *dynamic_cast<WindowStack *>(_windows[10]); }
 
     private:
+        const int WINDOW_WIDTH = 1500;
+        const int WINDOW_HEIGHT = 900;
+
+        Emulator::GameBoy _gb;
+
         SDL_Window *_window;
         SDL_GLContext _gl_context;
 
+        bool _is_paused;
+        uint16_t _next_stop;
         std::vector<uint16_t> _breakpoints;
 
         MenuBar _menu = MenuBar(*this);
@@ -80,5 +79,5 @@ class Debugger final {
         void init_gl();
         void init_imgui() const;
 
-        void handle_event(SDL_Event event);
+        void handle_event(SDL_Event);
 };

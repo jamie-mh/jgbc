@@ -1,11 +1,10 @@
-#include <cstdio>
 #include <cstdlib>
 #include "debugger/debugger.h"
 
-int main(const int argc, char **argv) {
+int main(const int argc, const char **argv) {
 
     if(argc != 2) {
-        fprintf(stderr, "Usage: jgbc_debugger.exe <path to rom>\n");
+        std::cerr << "Usage: jgbc_debugger.exe <path to rom>" << std::endl;
         return EXIT_FAILURE; 
     }
 

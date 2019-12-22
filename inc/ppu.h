@@ -112,6 +112,7 @@ TileAttributes;
 
 
 void init_ppu(GameBoy *);
+void reset_ppu(GameBoy *);
 void init_window(GameBoy *);
 
 void render(GameBoy *);

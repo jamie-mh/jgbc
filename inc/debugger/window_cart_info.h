@@ -7,6 +7,6 @@ class WindowCartInfo final : public Window {
         Emulator::GameBoy &_gb;
 
     public:
-        WindowCartInfo(Emulator::GameBoy &gb) : _gb(gb) { }
+        explicit WindowCartInfo(Emulator::GameBoy &gb) : _gb(gb) { }
         void render() override;
 };

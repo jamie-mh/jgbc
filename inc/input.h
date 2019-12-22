@@ -15,6 +15,6 @@
 #define SET_KEY(mask, value, input) ((value) ? ((input) ^= (mask)) : ((input) |= (mask))) 
 
 
-void init_input(GameBoy *);
+void reset_input(GameBoy *);
 void set_key(GameBoy *, SDL_Scancode, bool);
 uint8_t joypad_state(GameBoy *);

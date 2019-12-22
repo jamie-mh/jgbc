@@ -6,18 +6,18 @@
 static inline void update_envelope(ChannelEnvelope *);
 static inline void update_length(ChannelLength *, bool *);
 
-static inline void init_square_wave(GameBoy *, uint8_t);
+static inline void reset_square_wave(GameBoy *gb, uint8_t idx);
 static inline void read_square(GameBoy *, uint16_t, uint8_t, uint8_t);
 static inline void update_square(GameBoy *, uint8_t);
 static inline void update_square_sweep(GameBoy *);
 static inline void trigger_square(GameBoy *, uint8_t);
 
-static inline void init_wave(GameBoy *);
+static inline void reset_wave(GameBoy *gb);
 static inline void read_wave(GameBoy *, uint16_t, uint8_t);
 static inline void update_wave(GameBoy *);
 static inline void trigger_wave(GameBoy *);
 
-static inline void init_noise(GameBoy *);
+static inline void reset_noise(GameBoy *gb);
 static inline void read_noise(GameBoy *, uint16_t, uint8_t);
 static inline void update_noise(GameBoy *);
 static inline void trigger_noise(GameBoy *);
@@ -40,26 +40,30 @@ void init_apu(GameBoy *gb) {
         SDL_AUDIO_ALLOW_FREQUENCY_CHANGE
     );
 
-    gb->apu.enabled = true;
-    gb->apu.frame_sequencer.clock = 0;
-    gb->apu.frame_sequencer.step = 0;
-    gb->apu.downsample_clock = 0;
-
     gb->apu.buffer = malloc(gb->apu.actual_spec.size);
-    gb->apu.buffer_position = 0;
+}
 
-    init_square_wave(gb, 0);
-    init_square_wave(gb, 1);
-    init_wave(gb);
-    init_noise(gb);
+void reset_apu(GameBoy *gb) {
+
+    reset_square_wave(gb, 0);
+    reset_square_wave(gb, 1);
+    reset_wave(gb);
+    reset_noise(gb);
 
     for(int i = 0; i < 4; ++i) {
         gb->apu.left_enabled[i] = true;
         gb->apu.right_enabled[i] = true;
     }
+
+    gb->apu.enabled = true;
+    gb->apu.frame_sequencer.clock = 0;
+    gb->apu.frame_sequencer.step = 0;
+    gb->apu.downsample_clock = 0;
+
+    gb->apu.buffer_position = 0;
 }
 
-static void init_square_wave(GameBoy *gb, const uint8_t idx) {
+static void reset_square_wave(GameBoy *gb, const uint8_t idx) {
 
     assert(idx <= 1);
     SquareWave *square = &gb->apu.square_waves[idx];
@@ -87,7 +91,7 @@ static void init_square_wave(GameBoy *gb, const uint8_t idx) {
     square->sweep.mode = Addition;
 }
 
-static void init_wave(GameBoy *gb) {
+static void reset_wave(GameBoy *gb) {
 
     Wave *wave = &gb->apu.wave;
     wave->enabled = false;
@@ -99,7 +103,7 @@ static void init_wave(GameBoy *gb) {
     wave->volume_code = 0;
 }
 
-static void init_noise(GameBoy *gb) {
+static void reset_noise(GameBoy *gb) {
 
     Noise *noise = &gb->apu.noise;
     noise->enabled = false;

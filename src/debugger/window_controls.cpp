@@ -4,22 +4,18 @@
 
 void WindowControls::render() {
 
-    if(!is_open || !ImGui::Begin("Controls", &is_open)) {
-        if(is_open) ImGui::End();
+    if(!_is_open || !ImGui::Begin("Controls", &_is_open)) {
+        if(_is_open) ImGui::End();
         return;
     }
-
-    static auto gb = &_dbg.gb;
 
     const auto window_size = ImGui::GetContentRegionAvail();
     const auto size = ImVec2(window_size.x, 30);
 
     ImGui::Text("Debugger");
 
-    if(ImGui::Button(_dbg.is_paused ? "Play" : "Pause", size)) {
-        _dbg.is_paused = !_dbg.is_paused;
-        SDL_PauseAudioDevice(gb->apu.device_id, _dbg.is_paused);
-    }
+    if(ImGui::Button(_dbg.is_paused() ? "Play" : "Pause", size))
+        _dbg.set_paused(!_dbg.is_paused());
 
     if(ImGui::Button("Step Over", size))
         step_over();
@@ -27,55 +23,51 @@ void WindowControls::render() {
     if(ImGui::Button("Step Into", size))
         step_into();
 
-    if(ImGui::Button("Restart", size))
-        REG(PC) = 0x100;
+    if(ImGui::Button("Reset", size))
+        Emulator::reset(_dbg.gb_p());
 
     ImGui::End();
 }
 
 void WindowControls::step_into() {
     
-    static const auto gb = &_dbg.gb;
+    static const auto gb = _dbg.gb_p();
     const auto opcode = SREAD8(REG(PC));
 
-    if(is_jump_call(opcode) || is_subroutine_call(opcode)) {
-        _dbg.next_stop = SREAD16(REG(PC) + 1);
-    } 
+    if(is_jump_call(opcode) || is_subroutine_call(opcode))
+        _dbg.set_next_stop(SREAD16(REG(PC) + 1));
     else if(is_jump_signed(opcode)) {
 
         // Address just before the jump destination (done like this because the PC hasn't been incremented yet)
         const uint16_t before_addr = REG(PC) + (int8_t) SREAD8(REG(PC) + 1);
 
         const auto before_instr = find_instr(gb, SREAD8(before_addr));
-        _dbg.next_stop = before_addr + before_instr.length;
+        _dbg.set_next_stop(before_addr + before_instr.length);
     } 
-    else if(is_return(opcode)){
-        _dbg.next_stop = PEEK16();
-    }
-    else {
+    else if(is_return(opcode))
+        _dbg.set_next_stop(PEEK16());
+    else
         run_to_next();
-    }
 
-    _dbg.is_paused = false;
+    _dbg.set_paused(false);
 }
 
 void WindowControls::step_over() {
-    static const auto gb = &_dbg.gb;
+    static const auto gb = _dbg.gb_p();
     const auto opcode = SREAD8(REG(PC));
 
-    if(is_subroutine_call(opcode)) {
+    if(is_subroutine_call(opcode))
         run_to_next();
-    } else {
+    else
         step_into();
-    }
 
-    _dbg.is_paused = false;
+    _dbg.set_paused(false);
 }
 
 void WindowControls::run_to_next() {
-    static const auto gb = &_dbg.gb;
+    static const auto gb = _dbg.gb_p();
     const auto instr = Emulator::find_instr(gb, REG(PC));
-    _dbg.next_stop = REG(PC) + instr.length;
+    _dbg.set_next_stop(REG(PC) + instr.length);
 }
 
 bool WindowControls::is_subroutine_call(const uint8_t opcode) const {
@@ -87,7 +79,8 @@ bool WindowControls::is_subroutine_call(const uint8_t opcode) const {
         case 0xD3:
             return true;
 
-        default: return false;
+        default:
+            return false;
     }
 }
 
@@ -100,7 +93,8 @@ bool WindowControls::is_jump_call(const uint8_t opcode) const {
         case 0xDA:
             return true;
 
-        default: return false;
+        default:
+            return false;
     }
 }
 
@@ -112,7 +106,8 @@ bool WindowControls::is_jump_signed(const uint8_t opcode) const {
         case 0x30:
             return true;
 
-        default: return false;
+        default:
+            return false;
     }
 }
 
@@ -126,6 +121,7 @@ bool WindowControls::is_return(const uint8_t opcode) const {
         case 0xD9:
             return true;
 
-        default: return false;
+        default:
+            return false;
     }
 }

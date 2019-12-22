@@ -1,14 +1,12 @@
 #include "jgbc.h"
 #include "mmu.h"
 #include "cpu.h"
-#include "alu.h"
 #include "instr.h"
 
 static void service_interrupt(GameBoy *, uint8_t);
-Instruction find_instr(GameBoy *, uint16_t);
 
 
-void init_cpu(GameBoy *gb) {
+void reset_cpu(GameBoy *gb) {
     REG(AF) = 0x11B0;
     REG(BC) = 0x0013;
     REG(DE) = 0x00D8;
@@ -53,7 +51,7 @@ void execute_instr(GameBoy *gb) {
     uint16_t operand;
 
     if(instruction.extended) {
-        operand_len--; 
+        operand_len--;
         TICK(1);
     }
 

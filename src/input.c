@@ -1,10 +1,9 @@
 #include "jgbc.h"
 #include "input.h"
 #include "mmu.h"
-#include "cpu.h"
 
 
-void init_input(GameBoy *gb) {
+void reset_input(GameBoy *gb) {
     gb->input.up = false;
     gb->input.right = false;
     gb->input.down = false;

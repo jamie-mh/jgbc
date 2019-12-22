@@ -5,19 +5,27 @@
 #include "cpu.h"
 #include "mmu.h"
 
-static void init_hw_registers(GameBoy *);
+static void reset_hw_registers(GameBoy *gb);
 
 
 void init(GameBoy *gb) {
-    init_cpu(gb);
     init_mmu(gb);
     init_ppu(gb);
-    init_input(gb);
     init_apu(gb);
-    init_hw_registers(gb);
+
+    reset(gb);
 }
 
-static void init_hw_registers(GameBoy *gb) {
+void reset(GameBoy *gb) {
+    reset_cpu(gb);
+    reset_mmu(gb);
+    reset_ppu(gb);
+    reset_input(gb);
+    reset_apu(gb);
+    reset_hw_registers(gb);
+}
+
+static void reset_hw_registers(GameBoy *gb) {
     SWRITE8(JOYP, 0x1F);
     SWRITE8(IF, 0xE0);
     SWRITE8(TIMA, 0x00);

@@ -24,14 +24,17 @@ void init_mmu(GameBoy *gb) {
     for(uint8_t i = 0; i < WRAM_BANK_COUNT; ++i)
         gb->mmu.wram_banks[i] = calloc(WRAM_BANK_SIZE, sizeof(uint8_t));
 
-    gb->mmu.vram = gb->mmu.vram_banks[0];
-    gb->mmu.wram00 = gb->mmu.wram_banks[0];
-    gb->mmu.wramNN = gb->mmu.wram_banks[1];
-    
     gb->mmu.oam = calloc(OAM_SIZE, sizeof(uint8_t));
     gb->mmu.io = calloc(IO_SIZE, sizeof(uint8_t));
     gb->mmu.hram = calloc(HRAM_SIZE, sizeof(uint8_t));
     gb->mmu.ier = calloc(1, sizeof(uint8_t));
+}
+
+void reset_mmu(GameBoy *gb) {
+
+    gb->mmu.vram = gb->mmu.vram_banks[0];
+    gb->mmu.wram00 = gb->mmu.wram_banks[0];
+    gb->mmu.wramNN = gb->mmu.wram_banks[1];
 }
 
 static uint8_t *get_memory(GameBoy *gb, uint16_t *address) {

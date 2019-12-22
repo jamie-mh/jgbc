@@ -1,15 +1,16 @@
 #include "debugger/debugger.h"
 #include "debugger/window_breakpoints.h"
 #include <imgui.h>
+#include <debugger/colours.h>
 
 void WindowBreakpoints::render() {
 
-    if(!is_open || !ImGui::Begin("Breakpoints", &is_open)) {
-        if(is_open) ImGui::End();
+    if(!_is_open || !ImGui::Begin("Breakpoints", &_is_open)) {
+        if(_is_open) ImGui::End();
         return;
     }
 
-    static auto gb = &_dbg.gb; // required for the c macros
+    static auto gb = _dbg.gb_p();
 
     ImGui::BeginChild("##scroll");
     const ImU32 step = 1, step_fast = 50;
@@ -20,42 +21,45 @@ void WindowBreakpoints::render() {
     if(ImGui::Button("Add"))
         _dbg.add_breakpoint(addr);
 
-    const auto window_size = ImGui::GetContentRegionAvail();
-    const auto size = ImVec2(window_size.x, 20);
-
     ImGui::Text("Presets");
-    if(ImGui::Button("V-Blank Interrupt", size))
+
+    ImGui::Columns(2);
+    const auto button_size = ImVec2(ImGui::GetColumnWidth(), 20);
+
+    if(ImGui::Button("V-Blank", button_size))
         _dbg.add_breakpoint(INT_VBLANK);
 
-    if(ImGui::Button("LCD Interrupt", size))
+    if(ImGui::Button("LCD", button_size))
         _dbg.add_breakpoint(INT_LCD_STAT);
 
-    if(ImGui::Button("Timer Interrupt", size))
+    if(ImGui::Button("Timer", button_size))
         _dbg.add_breakpoint(INT_TIMER);
 
-    if(ImGui::Button("Serial Interrupt", size))
+    ImGui::NextColumn();
+    if(ImGui::Button("Serial", button_size))
         _dbg.add_breakpoint(INT_SERIAL);
 
-    if(ImGui::Button("Joypad Interrupt", size))
+    if(ImGui::Button("Joypad", button_size))
         _dbg.add_breakpoint(INT_JOYPAD);
 
+    ImGui::Columns();
     ImGui::Separator();
 
-    if(_dbg.breakpoint_count() == 0)
+    if(_dbg.breakpoints().empty())
         ImGui::Text("No breakpoints set");
     else {
 
-        auto i = 1;
-        for(const auto bp : _dbg.get_breakpoints()) {
+        for(size_t i = 0; i < _dbg.breakpoints().size(); ++i) {
+            const auto bp = _dbg.breakpoints()[i];
 
             ImGui::PushID(bp);
             if(ImGui::Button("X"))
                 _dbg.remove_breakpoint(bp);
 
             ImGui::SameLine();
-            ImGui::Text("%d: ", i);
+            ImGui::Text("%lu: ", i);
             ImGui::SameLine();
-            ImGui::TextColored(ADDR_COLOUR, "0x%04X", bp);
+            ImGui::TextColored(Colours::address, "0x%04X", bp);
             ImGui::SameLine();
 
             const auto instr = Emulator::find_instr(gb, bp);
@@ -69,23 +73,19 @@ void WindowBreakpoints::render() {
                     operand = SREAD8(bp + 1);
 
                     // If the operand is signed, get the two's complement
-                    if(instr.signed_operand) {
+                    if(instr.signed_operand)
                         operand = (~(operand - 1)) & 0x00FF;
-                    }
 
-                } else if(instr.length == 3) {
+                } else if(instr.length == 3)
                     operand = SREAD16(bp + 1);
-                }
 
                 ImGui::Text(instr.disassembly, operand);
             }
             // If there is no operand (or CB opcode which have no operand)
-            else {
-                ImGui::Text(instr.disassembly);
-            }
+            else
+                ImGui::Text("%s", instr.disassembly);
 
             ImGui::PopID();
-            i++;
         }
     }
 

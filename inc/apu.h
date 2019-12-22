@@ -92,5 +92,6 @@
 
 
 void init_apu(GameBoy *);
+void reset_apu(GameBoy *);
 void update_apu(GameBoy *);
 void audio_register_write(GameBoy *, uint16_t, uint8_t);

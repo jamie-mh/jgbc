@@ -4,7 +4,7 @@
 class Debugger;
 class WindowControls final : public Window {
     public:
-        WindowControls(Debugger &dbg) : _dbg(dbg) { }
+        explicit WindowControls(Debugger &dbg) : _dbg(dbg) { }
         void render() override;
 
     private:

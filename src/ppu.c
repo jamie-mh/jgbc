@@ -23,13 +23,19 @@ static void fill_shade_table(uint8_t, uint16_t *);
 
 
 void init_ppu(GameBoy *gb) {
-    gb->ppu.framebuffer = calloc(SCREEN_WIDTH * SCREEN_HEIGHT, sizeof(uint16_t));
-    gb->ppu.scan_clock = 0;
-    gb->ppu.frame_clock = 0;
+    gb->ppu.framebuffer = malloc(SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(uint16_t));
 
     gb->ppu.window = NULL;
     gb->ppu.renderer = NULL;
     gb->ppu.texture = NULL;
+}
+
+void reset_ppu(GameBoy *gb) {
+    gb->ppu.scan_clock = 0;
+    gb->ppu.frame_clock = 0;
+
+    for(size_t i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; ++i)
+        gb->ppu.framebuffer[i] = 0;
 
     for(uint8_t i = 0; i < 32; ++i) {
         gb->ppu.bg_palette[i] = 0;

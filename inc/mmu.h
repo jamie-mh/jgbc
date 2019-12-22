@@ -50,6 +50,7 @@
 #define VRAM_BANK_COUNT 2
 
 void init_mmu(GameBoy *);
+void reset_mmu(GameBoy *);
 
 uint8_t read_byte(GameBoy *, uint16_t, bool);
 uint16_t read_short(GameBoy *, uint16_t, bool);

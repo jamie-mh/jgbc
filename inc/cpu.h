@@ -74,7 +74,7 @@ typedef struct {
 } 
 Instruction;
 
-void init_cpu(GameBoy *);
+void reset_cpu(GameBoy *gb);
 Instruction find_instr(GameBoy *, uint16_t);
 void execute_instr(GameBoy *);
 

@@ -7,6 +7,6 @@ class WindowBreakpoints final : public Window {
         Debugger &_dbg;
 
     public:
-        WindowBreakpoints(Debugger &dbg) : _dbg(dbg) { }
+        explicit WindowBreakpoints(Debugger &dbg) : _dbg(dbg) { }
         void render() override;
 };

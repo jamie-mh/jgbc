@@ -2,12 +2,12 @@
 
 **License: CC BY-NC 3.0**
 
-A fast and semi-accurate GameBoy (Color) emulator for Windows, macOS And Linux.
+A fast and semi-accurate GameBoy (Color) emulator for Windows and Linux.
 Written in C/C++ with SDL2.
 
+- Compiled and tested on Ubuntu 19.10 with gcc 9.2.1
 - Compiled and tested on Fedora 28 with gcc 8.1.1.
-- Compiled and tested on Ubuntu 16.04 LTS with gcc 5.4.0.
-- Compiled and tested on Windows 10 with Visual Studio 2017.
+- Compiled and tested on Windows 10 with Visual Studio 2019.
 
 Requirements: SDL2, CMake, OpenGL
 
@@ -43,7 +43,7 @@ Requirements: SDL2, CMake, OpenGL
 
 #### Not Working
 
-- GameBoy Color specific features
+- GameBoy Color specific features (in progress)
 - Other MBCs
 
 #### Blargg's CPU Tests
