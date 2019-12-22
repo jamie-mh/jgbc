@@ -34,13 +34,9 @@ void reset_ppu(GameBoy *gb) {
     gb->ppu.scan_clock = 0;
     gb->ppu.frame_clock = 0;
 
-    for(size_t i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; ++i)
-        gb->ppu.framebuffer[i] = 0;
-
-    for(uint8_t i = 0; i < 32; ++i) {
-        gb->ppu.bg_palette[i] = 0;
-        gb->ppu.obj_palette[i] = 0;
-    }
+    memset(gb->ppu.framebuffer, 0, SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(int16_t));
+    memset(gb->ppu.bg_palette, 0, 32 * sizeof(uint16_t));
+    memset(gb->ppu.obj_palette, 0, 32 * sizeof(uint16_t));
 }
 
 void init_window(GameBoy *gb) {
