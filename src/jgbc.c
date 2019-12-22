@@ -35,6 +35,7 @@ static void reset_hw_registers(GameBoy *gb) {
     SWRITE8(SCY, 0x00);
     SWRITE8(SCX, 0x00);
     SWRITE8(LYC, 0x00);
+    SWRITE8(LY, 0x00);
     SWRITE8(BGP, 0xFC);
     SWRITE8(OBP0, 0xFF);
     SWRITE8(OBP1, 0xFF);

@@ -35,6 +35,7 @@ void reset_ppu(GameBoy *gb) {
     gb->ppu.frame_clock = 0;
 
     memset(gb->ppu.framebuffer, 0, SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(int16_t));
+    memset(gb->ppu.sprite_buffer, 0, 40 * sizeof(Sprite));
     memset(gb->ppu.bg_palette, 0, 32 * sizeof(uint16_t));
     memset(gb->ppu.obj_palette, 0, 32 * sizeof(uint16_t));
 }
