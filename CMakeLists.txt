@@ -85,7 +85,6 @@ add_executable(
     ${PROJECT_SOURCE_DIR}/debugger/window_registers.cpp
     ${PROJECT_SOURCE_DIR}/debugger/window_io.cpp
     ${PROJECT_SOURCE_DIR}/debugger/window_stack.cpp
-    ${PROJECT_SOURCE_DIR}/debugger/window_audio.cpp
     ${PROJECT_SOURCE_DIR}/debugger/window_palettes.cpp
     
     ${PROJECT_INCLUDE_DIR}/debugger/debugger.h
@@ -103,7 +102,6 @@ add_executable(
     ${PROJECT_INCLUDE_DIR}/debugger/window_io.h
     ${PROJECT_INCLUDE_DIR}/debugger/window_registers.h
     ${PROJECT_INCLUDE_DIR}/debugger/window_stack.h
-    ${PROJECT_INCLUDE_DIR}/debugger/window_audio.h
     ${PROJECT_INCLUDE_DIR}/debugger/window_palettes.h
 
     ${PROJECT_LIB_DIR}/imgui/imgui.cpp

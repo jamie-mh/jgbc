@@ -57,9 +57,6 @@ void MenuBar::render() const {
         if(ImGui::MenuItem("Stack", nullptr, _dbg.window_stack().is_open()))
             _dbg.window_stack().set_open(!_dbg.window_stack().is_open());
 
-        if(ImGui::MenuItem("Audio", nullptr, _dbg.window_audio().is_open()))
-            _dbg.window_audio().set_open(!_dbg.window_audio().is_open());
-
         if(ImGui::MenuItem("Palettes", nullptr, _dbg.window_palettes().is_open()))
             _dbg.window_palettes().set_open(!_dbg.window_palettes().is_open());
 

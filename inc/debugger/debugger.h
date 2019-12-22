@@ -23,7 +23,6 @@
 #include "debugger/window_registers.h"
 #include "debugger/window_io.h"
 #include "debugger/window_stack.h"
-#include "debugger/window_audio.h"
 #include "debugger/window_palettes.h"
 
 class Debugger final {
@@ -51,14 +50,13 @@ class Debugger final {
         WindowBreakpoints &window_breakpoints() { return *dynamic_cast<WindowBreakpoints *>(_windows[0]); }
         WindowCartInfo &window_cart_info() { return *dynamic_cast<WindowCartInfo *>(_windows[1]); }
         WindowIO &window_io() { return *dynamic_cast<WindowIO *>(_windows[2]); }
-        WindowAudio &window_audio() { return *dynamic_cast<WindowAudio *>(_windows[3]); }
-        WindowControls &window_controls() { return *dynamic_cast<WindowControls *>(_windows[4]); }
-        WindowPalettes &window_palettes() { return *dynamic_cast<WindowPalettes *>(_windows[5]); }
-        WindowDisassembly &window_disassembly() { return *dynamic_cast<WindowDisassembly *>(_windows[6]); }
-        WindowEmulator &window_emulator() { return *dynamic_cast<WindowEmulator *>(_windows[7]); }
-        WindowMemory &window_memory() { return *dynamic_cast<WindowMemory *>(_windows[8]); }
-        WindowRegisters &window_registers() { return *dynamic_cast<WindowRegisters *>(_windows[9]); }
-        WindowStack &window_stack() { return *dynamic_cast<WindowStack *>(_windows[10]); }
+        WindowControls &window_controls() { return *dynamic_cast<WindowControls *>(_windows[3]); }
+        WindowPalettes &window_palettes() { return *dynamic_cast<WindowPalettes *>(_windows[4]); }
+        WindowDisassembly &window_disassembly() { return *dynamic_cast<WindowDisassembly *>(_windows[5]); }
+        WindowEmulator &window_emulator() { return *dynamic_cast<WindowEmulator *>(_windows[6]); }
+        WindowMemory &window_memory() { return *dynamic_cast<WindowMemory *>(_windows[7]); }
+        WindowRegisters &window_registers() { return *dynamic_cast<WindowRegisters *>(_windows[8]); }
+        WindowStack &window_stack() { return *dynamic_cast<WindowStack *>(_windows[9]); }
 
     private:
         const int WINDOW_WIDTH = 1500;

@@ -41,7 +41,6 @@ Debugger::Debugger(const char *rom_path) {
     _windows.push_back(new WindowBreakpoints(*this));
     _windows.push_back(new WindowCartInfo(_gb));
     _windows.push_back(new WindowIO(_gb));
-    _windows.push_back(new WindowAudio(_gb));
     _windows.push_back(new WindowControls(*this));
     _windows.push_back(new WindowPalettes(_gb));
     _windows.push_back(new WindowDisassembly(*this));
