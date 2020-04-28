@@ -1,14 +1,16 @@
+#include <jgbc.h>
 #include "jgbc.h"
 #include "ppu.h"
 #include "cpu.h"
 #include "mmu.h"
-#include "mbc.h"
 #include "apu.h"
 #include "input.h"
 
 static uint8_t *get_memory(GameBoy *, uint16_t *);
 static bool is_accessible(GameBoy *, uint16_t);
-static void DMA_transfer(GameBoy *, uint8_t);
+
+static void sprite_DMA_transfer(GameBoy *, uint8_t);
+static void hdma_write(GameBoy *, uint16_t, uint8_t);
 
 
 void init_mmu(GameBoy *gb) {
@@ -35,6 +37,12 @@ void reset_mmu(GameBoy *gb) {
     gb->mmu.vram = gb->mmu.vram_banks[0];
     gb->mmu.wram00 = gb->mmu.wram_banks[0];
     gb->mmu.wramNN = gb->mmu.wram_banks[1];
+
+    gb->mmu.hdma.is_active = false;
+    gb->mmu.hdma.source_addr = 0;
+    gb->mmu.hdma.dest_addr = 0;
+    gb->mmu.hdma.mode = GeneralPurposeDMA;
+    gb->mmu.hdma.length = 0;
 }
 
 static uint8_t *get_memory(GameBoy *gb, uint16_t *address) {
@@ -121,6 +129,9 @@ uint8_t read_byte(GameBoy *gb, uint16_t address, const bool is_program) {
     if(!is_accessible(gb, address))
         return 0xFF;
 
+    if(address == HDMA5)
+        return (!gb->mmu.hdma.is_active << 7) | (0x1F);
+
     uint8_t *mem = get_memory(gb, &address);
     uint8_t data = mem[address];
 
@@ -150,7 +161,7 @@ void write_byte(GameBoy *gb, uint16_t address, uint8_t value, const bool is_prog
     if(is_program) {
     
         if(address == DMA) {
-            DMA_transfer(gb, value); 
+            sprite_DMA_transfer(gb, value);
             return;
         }
     
@@ -179,6 +190,9 @@ void write_byte(GameBoy *gb, uint16_t address, uint8_t value, const bool is_prog
 
         if(address == BGPD || address == OBPD)
             palette_data_write(gb, address, value);
+
+        if(address >= HDMA1 && address <= HDMA5)
+            hdma_write(gb, address, value);
     }
 
     uint8_t *mem = get_memory(gb, &address);
@@ -205,11 +219,55 @@ uint8_t read_register(GameBoy *gb, const uint16_t address, const uint8_t bit) {
     return GET_BIT(byte, bit);
 }
 
-static void DMA_transfer(GameBoy *gb, const uint8_t value) {
+static void sprite_DMA_transfer(GameBoy *gb, const uint8_t value) {
+    // TODO: emulate timing
     const uint16_t address = value * 0x100;
 
     for(uint8_t i = 0; i <= 0x9F; ++i)
         SWRITE8(0xFE00 + i, SREAD8(address + i));
 
     get_sprites(gb);
+}
+
+void update_hdma(GameBoy *gb) {
+
+    if(!gb->mmu.hdma.is_active)
+        return;
+
+    for(uint8_t i = 0; i < gb->mmu.hdma.length; ++i) {
+        SWRITE8(gb->mmu.hdma.dest_addr + i, SREAD8(gb->mmu.hdma.source_addr + i));
+    }
+
+    gb->mmu.hdma.is_active = false;
+}
+
+static void hdma_write(GameBoy *gb, const uint16_t addr, const uint8_t value) {
+
+    switch(addr) {
+
+        case HDMA1:
+            gb->mmu.hdma.source_addr = (gb->mmu.hdma.source_addr & 0xFF) | (value << 8);
+            break;
+
+        case HDMA2:
+            gb->mmu.hdma.source_addr = (gb->mmu.hdma.source_addr & 0xFF00) | value;
+            gb->mmu.hdma.source_addr &= 0xFFF0; // Lower 4 bits are ignored
+            break;
+
+        case HDMA3:
+            gb->mmu.hdma.dest_addr = (gb->mmu.hdma.dest_addr & 0xFF) | (value << 8);
+            gb->mmu.hdma.dest_addr &= 0x1FFF; // Upper 4 bits are ignored
+            break;
+
+        case HDMA4:
+            gb->mmu.hdma.dest_addr = (gb->mmu.hdma.dest_addr & 0xFF00) | value;
+            gb->mmu.hdma.source_addr &= 0xFFF0;
+            break;
+
+        case HDMA5:
+            gb->mmu.hdma.length = (value & HDMA5_LENGTH) * 0x10 + 1;
+            gb->mmu.hdma.mode = (value & HDMA5_MODE) >> 7;
+            gb->mmu.hdma.is_active = true;
+            break;
+    }
 }

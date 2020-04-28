@@ -3,6 +3,7 @@
 #include "cpu.h"
 #include "apu.h"
 #include "cart.h"
+#include "mmu.h"
 #include "input.h"
 
 static void handle_event(GameBoy *, SDL_Event);
@@ -60,6 +61,7 @@ static void run(GameBoy *gb) {
             update_ppu(gb);
             check_interrupts(gb);
             update_apu(gb);
+            update_hdma(gb);
 
             frame_ticks += gb->cpu.ticks;
         }

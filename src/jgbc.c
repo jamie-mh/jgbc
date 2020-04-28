@@ -5,7 +5,7 @@
 #include "cpu.h"
 #include "mmu.h"
 
-static void reset_hw_registers(GameBoy *gb);
+static void reset_hw_registers(GameBoy *);
 
 
 void init(GameBoy *gb) {

@@ -90,6 +90,11 @@ typedef struct {
 }
 PPU;
 
+typedef enum {
+    GeneralPurposeDMA = 0, HBlankDMA = 1
+}
+HDMAMode;
+
 typedef struct {
     uint16_t rom_bank;
     uint8_t ram_bank;
@@ -111,6 +116,15 @@ typedef struct {
     uint8_t **vram_banks; // 2x8KB VRAM Banks (GBC Only)
 
     void (*mbc_handler)(GameBoy *, uint16_t, uint8_t);
+
+    struct {
+        uint16_t source_addr;
+        uint16_t dest_addr;
+        uint8_t length;
+        HDMAMode mode;
+        bool is_active;
+    }
+    hdma;
 }
 MMU;
 
