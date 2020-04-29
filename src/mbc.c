@@ -1,7 +1,5 @@
 #include "jgbc.h"
 #include "mbc.h"
-#include "cart.h"
-#include "mmu.h"
 
 
 void mbc1_handler(GameBoy *gb, const uint16_t address, const uint8_t value) {
@@ -9,7 +7,7 @@ void mbc1_handler(GameBoy *gb, const uint16_t address, const uint8_t value) {
     static MBC1Mode mode = RomBanking;
     static bool ram_enabled = false;
 
-    uint8_t rom_bank = gb->mmu.rom_bank;
+    uint16_t rom_bank = gb->mmu.rom_bank;
     uint8_t ram_bank = gb->mmu.ram_bank;
 
     if(address <= MBC1_RAM_ENABLE_END)
@@ -76,7 +74,7 @@ void mbc5_handler(GameBoy *gb, const uint16_t address, const uint8_t value) {
 
     static bool ram_enabled = false;
 
-    uint8_t rom_bank = gb->mmu.rom_bank;
+    uint16_t rom_bank = gb->mmu.rom_bank;
     uint8_t ram_bank = gb->mmu.ram_bank;
 
     if(address <= MBC1_RAM_ENABLE_END)

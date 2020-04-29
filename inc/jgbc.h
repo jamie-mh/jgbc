@@ -4,12 +4,8 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <string.h>
-#include <assert.h>
 #include <SDL.h>
 
 #define GET_BIT(data, bit) (((data) >> (bit)) & 1)
@@ -208,8 +204,7 @@ Noise;
 typedef struct {
     bool enabled;
     SDL_AudioDeviceID device_id;
-    SDL_AudioSpec desired_spec;
-    SDL_AudioSpec actual_spec;
+    SDL_AudioSpec audio_spec;
 
     float *buffer;
     uint32_t buffer_position;

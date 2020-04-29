@@ -3,7 +3,7 @@
 #define CPU_STEP 4
 
 // Shortcut Macros
-#define TICK(T) gb->cpu.ticks += CPU_STEP * T
+#define TICK(T) gb->cpu.ticks += CPU_STEP * (T)
 #define REG(N) gb->cpu.reg.N
 
 #define READ8(addr) read_byte(gb, (addr), true)

@@ -1,46 +1,49 @@
+#include <string.h>
+#include <assert.h>
 #include "jgbc.h"
 #include "mmu.h"
 #include "cpu.h"
 #include "apu.h"
 
-static inline void update_envelope(ChannelEnvelope *);
-static inline void update_length(ChannelLength *, bool *);
+static void update_envelope(ChannelEnvelope *);
+static void update_length(ChannelLength *, bool *);
 
-static inline void reset_square_wave(GameBoy *gb, uint8_t idx);
-static inline void read_square(GameBoy *, uint16_t, uint8_t, uint8_t);
-static inline void update_square(GameBoy *, uint8_t);
-static inline void update_square_sweep(GameBoy *);
-static inline void trigger_square(GameBoy *, uint8_t);
+static void reset_square_wave(GameBoy *gb, uint8_t idx);
+static void read_square(GameBoy *, uint16_t, uint8_t, uint8_t);
+static void update_square(GameBoy *, uint8_t);
+static void update_square_sweep(GameBoy *);
+static void trigger_square(GameBoy *, uint8_t);
 
-static inline void reset_wave(GameBoy *gb);
-static inline void read_wave(GameBoy *, uint16_t, uint8_t);
-static inline void update_wave(GameBoy *);
-static inline void trigger_wave(GameBoy *);
+static void reset_wave(GameBoy *gb);
+static void read_wave(GameBoy *, uint16_t, uint8_t);
+static void update_wave(GameBoy *);
+static void trigger_wave(GameBoy *);
 
-static inline void reset_noise(GameBoy *gb);
-static inline void read_noise(GameBoy *, uint16_t, uint8_t);
-static inline void update_noise(GameBoy *);
-static inline void trigger_noise(GameBoy *);
+static void reset_noise(GameBoy *gb);
+static void read_noise(GameBoy *, uint16_t, uint8_t);
+static void update_noise(GameBoy *);
+static void trigger_noise(GameBoy *);
 
 
 void init_apu(GameBoy *gb) {
 
-    SDL_AudioSpec *desired = &gb->apu.desired_spec;
-    SDL_zero(*desired);
-    desired->freq = SAMPLE_RATE;
-    desired->format = AUDIO_F32SYS;
-    desired->channels = AUDIO_CHANNELS;
-    desired->samples = AUDIO_SAMPLES;
+    SDL_AudioSpec desired_spec;
+    SDL_zero(desired_spec);
+    
+    desired_spec.freq = SAMPLE_RATE;
+    desired_spec.format = AUDIO_F32SYS;
+    desired_spec.channels = AUDIO_CHANNELS;
+    desired_spec.samples = AUDIO_SAMPLES;
 
     gb->apu.device_id = SDL_OpenAudioDevice(
         NULL, 
         0, 
-        desired, 
-        &gb->apu.actual_spec, 
+        &desired_spec, 
+        &gb->apu.audio_spec, 
         SDL_AUDIO_ALLOW_FREQUENCY_CHANGE
     );
 
-    gb->apu.buffer = malloc(gb->apu.actual_spec.size);
+    gb->apu.buffer = malloc(gb->apu.audio_spec.size);
 }
 
 void reset_apu(GameBoy *gb) {
@@ -61,7 +64,7 @@ void reset_apu(GameBoy *gb) {
     gb->apu.downsample_clock = 0;
 
     gb->apu.buffer_position = 0;
-    memset(gb->apu.buffer, 0, gb->apu.actual_spec.size);
+    memset(gb->apu.buffer, 0, gb->apu.audio_spec.size);
 }
 
 static void reset_square_wave(GameBoy *gb, const uint8_t idx) {
@@ -197,10 +200,10 @@ void update_apu(GameBoy *gb) {
         }
     }
 
-    const size_t max_samples = apu->actual_spec.size / sizeof(float);
+    const size_t max_samples = apu->audio_spec.size / sizeof(float);
 
     if(apu->buffer_position >= max_samples) {
-        SDL_QueueAudio(apu->device_id, apu->buffer, apu->actual_spec.size);
+        SDL_QueueAudio(apu->device_id, apu->buffer, apu->audio_spec.size);
         apu->buffer_position = 0;
     }
 }
@@ -260,7 +263,7 @@ void audio_register_write(GameBoy *gb, const uint16_t address, const uint8_t val
     }
 }
 
-static inline void update_envelope(ChannelEnvelope *envelope) {
+static void update_envelope(ChannelEnvelope *envelope) {
 
     if(envelope->period == 0)
         return;
@@ -271,7 +274,7 @@ static inline void update_envelope(ChannelEnvelope *envelope) {
         envelope->current_volume--;
 }
 
-static inline void update_length(ChannelLength *length, bool *channel_enabled) {
+static void update_length(ChannelLength *length, bool *channel_enabled) {
 
     if(!length->enabled || length->clock == 0)
         return;
@@ -280,7 +283,7 @@ static inline void update_length(ChannelLength *length, bool *channel_enabled) {
         *channel_enabled = false;
 }
 
-static inline void read_square(GameBoy *gb, const uint16_t address, const uint8_t value, const uint8_t idx) {
+static void read_square(GameBoy *gb, const uint16_t address, const uint8_t value, const uint8_t idx) {
 
     assert(idx <= 1);
     SquareWave *square = &gb->apu.square_waves[idx];
@@ -322,7 +325,7 @@ static inline void read_square(GameBoy *gb, const uint16_t address, const uint8_
     }
 }
 
-static inline void update_square(GameBoy *gb, const uint8_t idx) {
+static void update_square(GameBoy *gb, const uint8_t idx) {
 
     assert(idx <= 1);
     SquareWave *square = &gb->apu.square_waves[idx];
@@ -350,7 +353,7 @@ static inline void update_square(GameBoy *gb, const uint8_t idx) {
         gb->apu.channels[idx] = 0;
 }
 
-static inline void update_square_sweep(GameBoy *gb) {
+static void update_square_sweep(GameBoy *gb) {
 
     SquareWave *square = &gb->apu.square_waves[0];
 
@@ -360,7 +363,7 @@ static inline void update_square_sweep(GameBoy *gb) {
     // TODO: Implement
 }
 
-static inline void trigger_square(GameBoy *gb, const uint8_t idx) {
+static void trigger_square(GameBoy *gb, const uint8_t idx) {
 
     assert(idx <= 1);
     SquareWave *square = &gb->apu.square_waves[idx];
@@ -380,7 +383,7 @@ static inline void trigger_square(GameBoy *gb, const uint8_t idx) {
         // frequency calculation and overflow check
 }
 
-static inline void read_wave(GameBoy *gb, const uint16_t address, const uint8_t value) {
+static void read_wave(GameBoy *gb, const uint16_t address, const uint8_t value) {
 
     Wave *wave = &gb->apu.wave;
 
@@ -411,7 +414,7 @@ static inline void read_wave(GameBoy *gb, const uint16_t address, const uint8_t 
     }
 }
 
-static inline void update_wave(GameBoy *gb) {
+static void update_wave(GameBoy *gb) {
 
     Wave *wave = &gb->apu.wave;
 
@@ -425,7 +428,7 @@ static inline void update_wave(GameBoy *gb) {
 
     if(wave->enabled && wave->volume_code > 0) {
 
-        uint8_t sample;
+        uint8_t sample = 0;
 
         // Top 4 bits
         if(wave->position % 2 == 0)
@@ -442,7 +445,7 @@ static inline void update_wave(GameBoy *gb) {
         gb->apu.channels[CHANNEL_WAVE] = 0;
 }
 
-static inline void trigger_wave(GameBoy *gb) {
+static void trigger_wave(GameBoy *gb) {
 
     Wave *wave = &gb->apu.wave;
     wave->enabled = true;
@@ -453,7 +456,7 @@ static inline void trigger_wave(GameBoy *gb) {
     wave->position = 0; 
 }
 
-static inline void read_noise(GameBoy *gb, const uint16_t address, const uint8_t value) {
+static void read_noise(GameBoy *gb, const uint16_t address, const uint8_t value) {
 
     Noise *noise = &gb->apu.noise;
 
@@ -482,7 +485,7 @@ static inline void read_noise(GameBoy *gb, const uint16_t address, const uint8_t
     }
 }
 
-static inline void update_noise(GameBoy *gb) {
+static void update_noise(GameBoy *gb) {
 
     Noise *noise = &gb->apu.noise;
 
@@ -508,7 +511,7 @@ static inline void update_noise(GameBoy *gb) {
 
         noise->clock = (divisor << noise->clock_shift);
 
-        uint8_t new_bit = (GET_BIT(noise->lfsr, 1) ^ GET_BIT(noise->lfsr, 0));
+        const uint8_t new_bit = (GET_BIT(noise->lfsr, 1) ^ GET_BIT(noise->lfsr, 0));
 
         noise->lfsr = noise->lfsr >> 1;
         noise->lfsr |= (new_bit << 14);
@@ -522,7 +525,7 @@ static inline void update_noise(GameBoy *gb) {
     gb->apu.channels[CHANNEL_NOISE] = noise->last_result * noise->envelope.current_volume; 
 }
 
-static inline void trigger_noise(GameBoy *gb) {
+static void trigger_noise(GameBoy *gb) {
 
     Noise *noise = &gb->apu.noise;
     noise->enabled = true;

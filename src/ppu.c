@@ -1,3 +1,6 @@
+#include <assert.h>
+#include <string.h>
+#include <stdlib.h>
 #include "jgbc.h"
 #include "mmu.h"
 #include "cpu.h"
@@ -126,7 +129,7 @@ void update_ppu(GameBoy *gb) {
 
         // Check if LY == LYC
         // And request an interrupt
-        if(read_byte(gb, LYC, false) == ly) {
+        if(SREAD8(LYC) == ly) {
             WREG(STAT, STAT_COINCID_FLAG, 1);
 
             // If the LY == LYC interrupt is enabled, request it
@@ -183,7 +186,7 @@ static void update_render_mode(GameBoy *gb, const uint8_t ly, const bool lcd_on)
 
 // Get the start of the tile data for background and window tiles
 // Returns true if the tile number is a signed integer
-static inline bool get_bg_tile_data_start(GameBoy *gb, uint16_t *start) {
+static bool get_bg_tile_data_start(GameBoy *gb, uint16_t *start) {
 
     // When this bit is enabled, the tile data is stored starting at 0x8000
     // The tile numbers are unsigned (0 to 255)
@@ -199,12 +202,12 @@ static inline bool get_bg_tile_data_start(GameBoy *gb, uint16_t *start) {
 }
 
 // Get the position of the nearest tile in the map that matches any given screen position
-static inline uint16_t get_tile_map_offset(const Position screen) {
+static uint16_t get_tile_map_offset(const Position screen) {
     return (screen.x / 8) + ((screen.y / 8) * 32);
 }
 
 // Get the offset of the tile data that matches a map address
-static inline uint16_t get_tile_data_offset(GameBoy *gb, const uint16_t map_addr, const bool signed_tile_num) {
+static uint16_t get_tile_data_offset(GameBoy *gb, const uint16_t map_addr, const bool signed_tile_num) {
 
     if(signed_tile_num) {
         const int8_t tile_number = (int8_t) SREAD8(map_addr);
@@ -216,7 +219,7 @@ static inline uint16_t get_tile_data_offset(GameBoy *gb, const uint16_t map_addr
 }
 
 // Fetches two bytes in tile data memory for any given line in a tile
-static inline void get_tile_row_data(GameBoy *gb, const uint8_t line, const uint8_t vram_bank, const uint16_t data_addr, uint8_t *data) {
+static void get_tile_row_data(GameBoy *gb, const uint8_t line, const uint8_t vram_bank, const uint16_t data_addr, uint8_t *data) {
 
     assert(vram_bank <= 1);
     const uint8_t tile_y = line * 2;
@@ -227,7 +230,7 @@ static inline void get_tile_row_data(GameBoy *gb, const uint8_t line, const uint
 }
 
 // Get the colour of a pixel in a tile
-static inline uint16_t get_tile_pixel(Position screen_pos, const uint8_t *data, const bool is_flipped_x, const uint16_t *palette) {
+static uint16_t get_tile_pixel(Position screen_pos, const uint8_t *data, const bool is_flipped_x, const uint16_t *palette) {
 
     const uint8_t bit = is_flipped_x
         ? screen_pos.x % 8
@@ -238,12 +241,12 @@ static inline uint16_t get_tile_pixel(Position screen_pos, const uint8_t *data, 
 }
 
 // Gets the tile attributes for a given tile (CGB only)
-static inline TileAttributes get_tile_attributes(GameBoy *gb, const uint16_t map_addr) {
+static TileAttributes get_tile_attributes(GameBoy *gb, const uint16_t map_addr) {
 
 //    static const uint16_t offset = TILE_ATTR_START - VRAM_START;
     const uint8_t data = gb->mmu.vram_banks[1][map_addr - VRAM_START];
 
-    TileAttributes result = {
+    const TileAttributes result = {
         (data & TILE_ATTR_PALETTE),
         (data & TILE_ATTR_BANK) >> 3,
         (data & TILE_ATTR_FLIP_X) >> 5,
@@ -255,7 +258,7 @@ static inline TileAttributes get_tile_attributes(GameBoy *gb, const uint16_t map
 }
 
 // Plots a single grayscale pixel on the screen at the given coordinate
-static inline void plot_tile_pixel(uint16_t *framebuffer, const Position display_pos, const uint16_t colour) {
+static void plot_tile_pixel(uint16_t *framebuffer, const Position display_pos, const uint16_t colour) {
 
     const uint16_t buf_offset = display_pos.x + display_pos.y * SCREEN_WIDTH;
     framebuffer[buf_offset] = colour;
@@ -268,7 +271,7 @@ static void render_bg_scan(GameBoy *gb, const uint8_t ly) {
 
     const uint16_t map_start = (RREG(LCDC, LCDC_BG_TILE_MAP) ? 0x9C00 : 0x9800);
 
-    uint16_t data_start;
+    uint16_t data_start = 0;
     const bool signed_tile_num = get_bg_tile_data_start(gb, &data_start);
 
     const uint8_t scroll_x = SREAD8(SCX);
@@ -411,7 +414,7 @@ static void render_sprite_scan(GameBoy *gb, const uint8_t ly) {
 
                 const uint8_t bit = (is_flipped_x) ? px : 7 - px;
 
-                uint8_t shade_num = GET_BIT(data[0], bit) | (GET_BIT(data[1], bit) << 1);
+                const uint8_t shade_num = GET_BIT(data[0], bit) | (GET_BIT(data[1], bit) << 1);
 
                 // White is transparent for sprites
                 if(shade_num == 0)
@@ -441,7 +444,7 @@ void get_sprites(GameBoy *gb) {
     for(uint8_t i = 0; i < 40; i++) {
     
         Sprite *sprite = &gb->ppu.sprite_buffer[i];
-        uint16_t address = 0xFE00 + (i * 4);
+        const uint16_t address = 0xFE00 + (i * 4);
 
         sprite->y = SREAD8(address + 0); 
         sprite->x = SREAD8(address + 1); 
@@ -456,7 +459,7 @@ void get_sprites(GameBoy *gb) {
 
 // Returns the colour associated with a shade number tiles
 // Monochrome GameBoy only
-static inline uint16_t get_shade(const uint8_t num) {
+static uint16_t get_shade(const uint8_t num) {
 
     switch(num) {
         case 0: 
@@ -503,7 +506,7 @@ void palette_index_write(GameBoy *gb, const uint16_t address, const uint8_t valu
     const uint8_t index = value & PI_INDEX;
     const uint16_t colour = palette[index / 2];
 
-    uint8_t data;
+    uint8_t data = 0;
 
     // First byte of colour data
     // Contains all 5 bits of red and the lower 3 bits of green

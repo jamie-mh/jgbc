@@ -411,3 +411,7 @@ ASALocalRun/
 audio.bin
 .clangd/
 jgbc.cbp
+
+
+out/
+CMakeSettings.json

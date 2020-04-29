@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include "jgbc.h"
 #include "ppu.h"
 #include "cpu.h"

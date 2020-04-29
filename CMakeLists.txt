@@ -118,9 +118,9 @@ set_property(TARGET jgbc_debugger PROPERTY CXX_STANDARD 11)
 set_property(TARGET jgbc_debugger PROPERTY CXX_STANDARD_REQUIRED ON)
 
 target_include_directories(jgbc_debugger PRIVATE ${PROJECT_INCLUDE_DIR})
-target_include_directories(jgbc_debugger PUBLIC ${PROJECT_LIB_DIR})
-target_include_directories(jgbc_debugger PUBLIC ${PROJECT_LIB_DIR}/imgui)
-target_include_directories(jgbc_debugger PUBLIC ${PROJECT_LIB_DIR}/imgui_club)
+target_include_directories(jgbc_debugger PRIVATE ${PROJECT_LIB_DIR})
+target_include_directories(jgbc_debugger PRIVATE ${PROJECT_LIB_DIR}/imgui)
+target_include_directories(jgbc_debugger PRIVATE ${PROJECT_LIB_DIR}/imgui_club)
 
 target_link_libraries(jgbc ${SDL2_LIBRARY})
 target_link_libraries(jgbc_debugger ${SDL2_LIBRARY})

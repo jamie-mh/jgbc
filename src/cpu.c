@@ -1,3 +1,4 @@
+#include <assert.h>
 #include "jgbc.h"
 #include "mmu.h"
 #include "cpu.h"
@@ -55,7 +56,7 @@ void execute_instr(GameBoy *gb) {
         TICK(1);
     }
 
-    uint16_t instr_start = REG(PC);
+    const uint16_t instr_start = REG(PC);
     REG(PC) += instruction.length;
 
     switch(operand_len) {

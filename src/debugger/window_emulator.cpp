@@ -6,13 +6,13 @@
 WindowEmulator::WindowEmulator(Emulator::GameBoy &gb) : _gb(gb) {
 
     _texture_id = 0;
-    glad_glGenTextures(1, &_texture_id);
-    glad_glBindTexture(GL_TEXTURE_2D, _texture_id);
+    glGenTextures(1, &_texture_id);
+    glBindTexture(GL_TEXTURE_2D, _texture_id);
 
-    glad_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glad_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    glad_glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_SHORT_1_5_5_5_REV, _gb.ppu.framebuffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_SHORT_1_5_5_5_REV, _gb.ppu.framebuffer);
 }
 
 WindowEmulator::~WindowEmulator() {

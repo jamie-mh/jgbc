@@ -1,5 +1,8 @@
+#define SDL_MAIN_HANDLED
+#include <SDL.h>
 #include <cstdlib>
 #include "debugger/debugger.h"
+
 
 int main(const int argc, const char **argv) {
 

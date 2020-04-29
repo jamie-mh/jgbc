@@ -1,3 +1,6 @@
+#include <stdio.h>
+#include <assert.h>
+#include <string.h>
 #include "jgbc.h"
 #include "cart.h"
 #include "mmu.h"
