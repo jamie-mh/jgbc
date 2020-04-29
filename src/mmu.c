@@ -150,10 +150,12 @@ uint16_t read_short(GameBoy *gb, const uint16_t address, const bool is_program) 
 
 void write_byte(GameBoy *gb, uint16_t address, uint8_t value, const bool is_program) {
 
-    if(address <= ROMNN_END && gb->mmu.mbc_handler != NULL) {
-        gb->mmu.mbc_handler(gb, address, value);
-        return;
-    }
+	if(address <= ROMNN_END) {
+		if(gb->mmu.mbc_handler != NULL)
+			gb->mmu.mbc_handler(gb, address, value);
+
+		return;
+	}
 
     if(!is_accessible(gb, address))
         return;
