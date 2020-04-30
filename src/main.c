@@ -74,6 +74,8 @@ static void run(GameBoy *gb) {
         while(SDL_PollEvent(&event))
             handle_event(gb, event);
     }
+
+    save_ram(gb);
 }
 
 static void handle_event(GameBoy *gb, const SDL_Event event) {

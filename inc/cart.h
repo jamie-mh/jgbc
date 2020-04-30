@@ -15,5 +15,8 @@
 #define CART_HEADER_RAM_SIZE 0x149
 
 
+
 bool load_rom(GameBoy *, const char *);
+void save_ram(GameBoy *);
+
 void print_cart_info(GameBoy *);

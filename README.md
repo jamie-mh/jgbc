@@ -40,6 +40,7 @@ Requirements: SDL2, CMake, OpenGL
 - Joypad
 - MBC 1, 5
 - Sound
+- Save games
 
 #### Not Working
 

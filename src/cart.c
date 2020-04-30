@@ -6,32 +6,79 @@
 #include "mmu.h"
 #include "mbc.h"
 
+#define STR_COPY_APPEND(buffer, filename, ext) { \
+    strcpy((buffer), (filename)); \
+    strcat((buffer), (ext)); \
+}
+
 static void parse_header(GameBoy *, const uint8_t *);
 static bool read_header(FILE *file, uint8_t *);
 static void alloc_banks(GameBoy *);
 static void copy_data(GameBoy *, FILE *);
 static void set_banks(GameBoy *);
+static void load_ram(GameBoy *);
 
 
 bool load_rom(GameBoy *gb, const char *path) {
 
-    FILE *file = NULL;
+    FILE *file = fopen(path, "rb");
 
-    if(!(file = fopen(path, "rb")))
+    if(file == NULL)
         return false;
 
     uint8_t header[CART_HEADER_SIZE];
 
-    if(!read_header(file, header))
+    if(!read_header(file, header)) {
+        fclose(file);
         return false;
+    }
 
     parse_header(gb, header);
     alloc_banks(gb);
     copy_data(gb, file);
     set_banks(gb);
-
     fclose(file);
+    
+#ifdef _WIN32
+    const char sep = '\\';
+#else
+    const char sep = '/';
+#endif
+
+    strcpy(gb->cart.filename, strrchr(path, sep) + sizeof(char));
+    load_ram(gb);
+
     return true;
+}
+
+void save_ram(GameBoy *gb) {
+
+    if(gb->cart.ram_size == 0)
+        return;
+
+    char filename[256 + 5];
+    STR_COPY_APPEND(filename, gb->cart.filename, ".save");
+    FILE *file = fopen(filename, "wb");
+
+    if(file != NULL) {
+        fwrite(gb->cart.ram_banks[0], sizeof(uint8_t), EXTRAM_BANK_SIZE, file);
+        fclose(file);
+    }
+}
+
+static void load_ram(GameBoy *gb) {
+
+    if(gb->cart.ram_size == 0)
+        return;
+
+    char filename[256 + 5];
+    STR_COPY_APPEND(filename, gb->cart.filename, ".save");
+    FILE *file = fopen(filename, "rb");
+
+    if(file != NULL) {
+        fread(gb->cart.ram_banks[0], sizeof(uint8_t), EXTRAM_BANK_SIZE, file);
+        fclose(file);
+    }
 }
 
 void print_cart_info(GameBoy *gb) {

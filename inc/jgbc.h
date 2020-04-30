@@ -228,6 +228,8 @@ typedef struct {
 APU;
 
 typedef struct {
+    char filename[256];
+
     char title[17]; // Uppercase ASCII Game Name
     bool is_colour;
     uint8_t type;

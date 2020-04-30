@@ -177,6 +177,8 @@ void Debugger::run() {
         while(SDL_PollEvent(&event))
             handle_event(event);
     }
+
+    Emulator::save_ram(&_gb);
 }
 
 void Debugger::handle_event(SDL_Event event) {
