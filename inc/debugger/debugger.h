@@ -1,11 +1,7 @@
 #pragma once
 
-#include <cstdio>
 #include <SDL.h>
 #include <vector>
-#include <iostream>
-#include <algorithm>
-#include <string>
 #include <map>
 #include <memory>
 #include <optional>
@@ -30,7 +26,7 @@ class Debugger final {
 
         std::shared_ptr<Emulator::GameBoy> &gb();
 
-        const std::vector<uint16_t>& breakpoints() const;
+        const std::vector<uint16_t> &breakpoints() const;
         bool is_breakpoint(uint16_t) const;
         void add_breakpoint(uint16_t);
         void remove_breakpoint(uint16_t);
@@ -39,7 +35,7 @@ class Debugger final {
         void set_paused(bool);
 
         std::optional<uint16_t> next_stop() const;
-        void set_next_stop(const std::optional<uint16_t>);
+        void set_next_stop(std::optional<uint16_t>);
 
         void run();
         void render();

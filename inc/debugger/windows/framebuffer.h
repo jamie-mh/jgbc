@@ -6,7 +6,7 @@ namespace Windows {
     class Framebuffer final : public Window {
         public:
             explicit Framebuffer(Debugger &);
-            ~Framebuffer();
+            ~Framebuffer() override;
 
             void render() override;
             const char *title() const override;

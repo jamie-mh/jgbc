@@ -1,4 +1,6 @@
 #include <sstream>
+#include <iostream>
+#include <algorithm>
 
 #include "debugger/debugger.h"
 #include "debugger/font.h"
