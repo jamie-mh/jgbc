@@ -6,16 +6,16 @@
 #include "imgui/examples/imgui_impl_opengl3.h"
 #include "glad/glad.h"
 
-#include "debugger/window_breakpoints.h"
-#include "debugger/window_cart_info.h"
-#include "debugger/window_controls.h"
-#include "debugger/window_disassembly.h"
-#include "debugger/window_emulator.h"
-#include "debugger/window_io.h"
-#include "debugger/window_memory.h"
-#include "debugger/window_palettes.h"
-#include "debugger/window_registers.h"
-#include "debugger/window_stack.h"
+#include "debugger/windows/breakpoints.h"
+#include "debugger/windows/cart_info.h"
+#include "debugger/windows/controls.h"
+#include "debugger/windows/disassembly.h"
+#include "debugger/windows/framebuffer.h"
+#include "debugger/windows/io.h"
+#include "debugger/windows/memory.h"
+#include "debugger/windows/palettes.h"
+#include "debugger/windows/registers.h"
+#include "debugger/windows/stack.h"
 
 
 Debugger::Debugger(const char *rom_path) {
@@ -42,16 +42,16 @@ Debugger::Debugger(const char *rom_path) {
     title << WINDOW_TITLE << " - " << _gb->cart.title << " (DEBUGGER)";
     SDL_SetWindowTitle(_window, title.str().c_str());
 
-    _windows.emplace(WindowId::Breakpoints, std::make_shared<WindowBreakpoints>(*this));
-    _windows.emplace(WindowId::CartInfo, std::make_shared<WindowCartInfo>(*this));
-    _windows.emplace(WindowId::Controls, std::make_shared<WindowControls>(*this));
-    _windows.emplace(WindowId::Disassembly, std::make_shared<WindowDisassembly>(*this));
-    _windows.emplace(WindowId::Emulator, std::make_shared<WindowEmulator>(*this));
-    _windows.emplace(WindowId::IO, std::make_shared<WindowIO>(*this));
-    _windows.emplace(WindowId::Memory, std::make_shared<WindowMemory>(*this));
-    _windows.emplace(WindowId::Palettes, std::make_shared<WindowPalettes>(*this));
-    _windows.emplace(WindowId::Registers, std::make_shared<WindowRegisters>(*this));
-    _windows.emplace(WindowId::Stack, std::make_shared<WindowStack>(*this));
+    _windows.emplace(WindowId::Breakpoints, std::make_shared<Windows::Breakpoints>(*this));
+    _windows.emplace(WindowId::CartInfo, std::make_shared<Windows::CartInfo>(*this));
+    _windows.emplace(WindowId::Controls, std::make_shared<Windows::Controls>(*this));
+    _windows.emplace(WindowId::Disassembly, std::make_shared<Windows::Disassembly>(*this));
+    _windows.emplace(WindowId::Framebuffer, std::make_shared<Windows::Framebuffer>(*this));
+    _windows.emplace(WindowId::IO, std::make_shared<Windows::IO>(*this));
+    _windows.emplace(WindowId::Memory, std::make_shared<Windows::Memory>(*this));
+    _windows.emplace(WindowId::Palettes, std::make_shared<Windows::Palettes>(*this));
+    _windows.emplace(WindowId::Registers, std::make_shared<Windows::Registers>(*this));
+    _windows.emplace(WindowId::Stack, std::make_shared<Windows::Stack>(*this));
 }
 
 void Debugger::init_sdl() {

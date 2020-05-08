@@ -77,16 +77,16 @@ add_executable(
     ${PROJECT_SOURCE_DIR}/debugger/colours.cpp
     ${PROJECT_SOURCE_DIR}/debugger/menubar.cpp
     ${PROJECT_SOURCE_DIR}/debugger/window.cpp
-    ${PROJECT_SOURCE_DIR}/debugger/window_breakpoints.cpp
-    ${PROJECT_SOURCE_DIR}/debugger/window_cart_info.cpp
-    ${PROJECT_SOURCE_DIR}/debugger/window_controls.cpp
-    ${PROJECT_SOURCE_DIR}/debugger/window_disassembly.cpp
-    ${PROJECT_SOURCE_DIR}/debugger/window_emulator.cpp
-    ${PROJECT_SOURCE_DIR}/debugger/window_io.cpp
-    ${PROJECT_SOURCE_DIR}/debugger/window_memory.cpp
-    ${PROJECT_SOURCE_DIR}/debugger/window_palettes.cpp
-    ${PROJECT_SOURCE_DIR}/debugger/window_registers.cpp
-    ${PROJECT_SOURCE_DIR}/debugger/window_stack.cpp
+    ${PROJECT_SOURCE_DIR}/debugger/windows/breakpoints.cpp
+    ${PROJECT_SOURCE_DIR}/debugger/windows/cart_info.cpp
+    ${PROJECT_SOURCE_DIR}/debugger/windows/controls.cpp
+    ${PROJECT_SOURCE_DIR}/debugger/windows/disassembly.cpp
+    ${PROJECT_SOURCE_DIR}/debugger/windows/framebuffer.cpp
+    ${PROJECT_SOURCE_DIR}/debugger/windows/io.cpp
+    ${PROJECT_SOURCE_DIR}/debugger/windows/memory.cpp
+    ${PROJECT_SOURCE_DIR}/debugger/windows/palettes.cpp
+    ${PROJECT_SOURCE_DIR}/debugger/windows/registers.cpp
+    ${PROJECT_SOURCE_DIR}/debugger/windows/stack.cpp
 
     ${PROJECT_INCLUDE_DIR}/debugger/debugger.h
     ${PROJECT_INCLUDE_DIR}/debugger/emulator.h
@@ -94,16 +94,16 @@ add_executable(
     ${PROJECT_INCLUDE_DIR}/debugger/colours.h
     ${PROJECT_INCLUDE_DIR}/debugger/menubar.h
     ${PROJECT_INCLUDE_DIR}/debugger/window.h
-    ${PROJECT_INCLUDE_DIR}/debugger/window_breakpoints.h
-    ${PROJECT_INCLUDE_DIR}/debugger/window_cart_info.h
-    ${PROJECT_INCLUDE_DIR}/debugger/window_controls.h
-    ${PROJECT_INCLUDE_DIR}/debugger/window_disassembly.h
-    ${PROJECT_INCLUDE_DIR}/debugger/window_emulator.h
-    ${PROJECT_INCLUDE_DIR}/debugger/window_io.h
-    ${PROJECT_INCLUDE_DIR}/debugger/window_memory.h
-    ${PROJECT_INCLUDE_DIR}/debugger/window_palettes.h
-    ${PROJECT_INCLUDE_DIR}/debugger/window_registers.h
-    ${PROJECT_INCLUDE_DIR}/debugger/window_stack.h
+    ${PROJECT_INCLUDE_DIR}/debugger/windows/breakpoints.h
+    ${PROJECT_INCLUDE_DIR}/debugger/windows/cart_info.h
+    ${PROJECT_INCLUDE_DIR}/debugger/windows/controls.h
+    ${PROJECT_INCLUDE_DIR}/debugger/windows/disassembly.h
+    ${PROJECT_INCLUDE_DIR}/debugger/windows/framebuffer.h
+    ${PROJECT_INCLUDE_DIR}/debugger/windows/io.h
+    ${PROJECT_INCLUDE_DIR}/debugger/windows/memory.h
+    ${PROJECT_INCLUDE_DIR}/debugger/windows/palettes.h
+    ${PROJECT_INCLUDE_DIR}/debugger/windows/registers.h
+    ${PROJECT_INCLUDE_DIR}/debugger/windows/stack.h
 
     ${PROJECT_LIB_DIR}/imgui/imgui.cpp
     ${PROJECT_LIB_DIR}/imgui/imgui_draw.cpp

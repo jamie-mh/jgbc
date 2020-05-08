@@ -1,14 +1,16 @@
 #include <imgui.h>
 #include "debugger/debugger.h"
-#include "debugger/window_breakpoints.h"
 #include "debugger/colours.h"
+#include "debugger/windows/breakpoints.h"
+
+using namespace Windows;
 
 
-WindowBreakpoints::WindowBreakpoints(Debugger &debugger) : Window(debugger) {
+Breakpoints::Breakpoints(Debugger &debugger) : Window(debugger) {
 
 }
 
-void WindowBreakpoints::render() {
+void Breakpoints::render() {
 
     if(!ImGui::Begin(title())) {
         ImGui::End();
@@ -98,6 +100,6 @@ void WindowBreakpoints::render() {
     ImGui::End();
 }
 
-const char *WindowBreakpoints::title() const {
+const char *Breakpoints::title() const {
     return "Breakpoints";
 }

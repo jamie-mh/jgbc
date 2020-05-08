@@ -12,7 +12,7 @@ void reset_cpu(GameBoy *gb) {
     REG(BC) = 0x0013;
     REG(DE) = 0x00D8;
     REG(HL) = 0x014D;
-    REG(PC) = 0x0100;
+    REG(PC) = PROGRAM_START;
     REG(SP) = 0xFFFE;
     REG(IME) = false;
 

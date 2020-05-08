@@ -1,14 +1,15 @@
 #include <imgui.h>
 #include "debugger/debugger.h"
 #include "debugger/colours.h"
-#include "debugger/window_stack.h"
+#include "debugger/windows/stack.h"
 
+using namespace Windows;
 
-WindowStack::WindowStack(Debugger &debugger) : Window(debugger) {
+Stack::Stack(Debugger &debugger) : Window(debugger) {
 
 }
 
-void WindowStack::render() {
+void Stack::render() {
 
     if(!ImGui::Begin(title())) {
         ImGui::End();
@@ -48,6 +49,6 @@ void WindowStack::render() {
     ImGui::End();
 }
 
-const char *WindowStack::title() const {
+const char *Stack::title() const {
     return "Stack";
 }

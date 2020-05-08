@@ -1,14 +1,15 @@
 #include <imgui.h>
 #include "debugger/debugger.h"
 #include "debugger/colours.h"
-#include "debugger/window_cart_info.h"
+#include "debugger/windows/cart_info.h"
 
+using namespace Windows;
 
-WindowCartInfo::WindowCartInfo(Debugger &debugger) : Window(debugger) {
+CartInfo::CartInfo(Debugger &debugger) : Window(debugger) {
 
 }
 
-void WindowCartInfo::render() {
+void CartInfo::render() {
 
     if(!ImGui::Begin(title())) {
         ImGui::End();
@@ -38,6 +39,6 @@ void WindowCartInfo::render() {
     ImGui::End();
 }
 
-const char *WindowCartInfo::title() const {
+const char *CartInfo::title() const {
     return "Cartridge Info";
 }

@@ -1,13 +1,14 @@
 #include <imgui.h>
 #include "debugger/debugger.h"
-#include "debugger/window_registers.h"
+#include "debugger/windows/registers.h"
 
+using namespace Windows;
 
-WindowRegisters::WindowRegisters(Debugger &debugger) : Window(debugger) {
+Registers::Registers(Debugger &debugger) : Window(debugger) {
 
 }
 
-void WindowRegisters::render() {
+void Registers::render() {
 
     if(!ImGui::Begin(title())) {
         ImGui::End();
@@ -80,6 +81,6 @@ void WindowRegisters::render() {
     ImGui::End();
 }
 
-const char *WindowRegisters::title() const {
+const char *Registers::title() const {
     return "Registers";
 }

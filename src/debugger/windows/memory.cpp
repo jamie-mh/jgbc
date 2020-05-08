@@ -1,13 +1,14 @@
 #include <imgui.h>
 #include "debugger/debugger.h"
-#include "debugger/window_memory.h"
+#include "debugger/windows/memory.h"
 
+using namespace Windows;
 
-WindowMemory::WindowMemory(Debugger &debugger) : Window(debugger) {
+Memory::Memory(Debugger &debugger) : Window(debugger) {
     _selected_idx = 0;
 }
 
-void WindowMemory::render() {
+void Memory::render() {
 
     if(!ImGui::Begin(title())) {
         ImGui::End();
@@ -37,6 +38,6 @@ void WindowMemory::render() {
     ImGui::End();
 }
 
-const char *WindowMemory::title() const {
+const char *Memory::title() const {
     return "Memory";
 }

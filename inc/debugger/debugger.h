@@ -22,7 +22,7 @@
 class Debugger final {
     public:
         enum class WindowId {
-            Breakpoints, CartInfo, Controls, Disassembly, Emulator, IO, Memory, Palettes, Registers, Stack
+            Breakpoints, CartInfo, Controls, Disassembly, Framebuffer, IO, Memory, Palettes, Registers, Stack
         };
 
         explicit Debugger(const char *);

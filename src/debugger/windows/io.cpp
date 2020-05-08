@@ -1,14 +1,15 @@
 #include <imgui.h>
 #include "debugger/debugger.h"
 #include "debugger/colours.h"
-#include "debugger/window_io.h"
+#include "debugger/windows/io.h"
 
+using namespace Windows;
 
-WindowIO::WindowIO(Debugger &debugger) : Window(debugger) {
+IO::IO(Debugger &debugger) : Window(debugger) {
 
 }
 
-void WindowIO::render() {
+void IO::render() {
 
     if(!ImGui::Begin(title())) {
         ImGui::End();
@@ -120,11 +121,11 @@ void WindowIO::render() {
     ImGui::End();
 }
 
-const char *WindowIO::title() const {
+const char *IO::title() const {
     return "IO Map";
 }
 
-void WindowIO::draw_values(const char **labels, const uint16_t *addrs, const int count) {
+void IO::draw_values(const char **labels, const uint16_t *addrs, const int count) {
     INIT_GB_CTX();
     static const ImU32 step = 1, step_fast = 10;
 
@@ -138,7 +139,7 @@ void WindowIO::draw_values(const char **labels, const uint16_t *addrs, const int
     }
 }
 
-void WindowIO::draw_registers(const char **labels, const uint16_t regis, const uint8_t *bits, const int count) {
+void IO::draw_registers(const char **labels, const uint16_t regis, const uint8_t *bits, const int count) {
     INIT_GB_CTX();
 
     for(auto i = 0; i < count; ++i) {

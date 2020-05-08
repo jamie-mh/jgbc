@@ -1,13 +1,14 @@
 #include <imgui.h>
 #include "debugger/debugger.h"
-#include "debugger/window_controls.h"
+#include "debugger/windows/controls.h"
 
+using namespace Windows;
 
-WindowControls::WindowControls(Debugger &debugger) : Window(debugger) {
+Controls::Controls(Debugger &debugger) : Window(debugger) {
 
 }
 
-void WindowControls::render() {
+void Controls::render() {
 
     if(!ImGui::Begin(title())) {
         ImGui::End();
@@ -34,11 +35,11 @@ void WindowControls::render() {
     ImGui::End();
 }
 
-const char *WindowControls::title() const {
+const char *Controls::title() const {
     return "Controls";
 }
 
-void WindowControls::step_into() {
+void Controls::step_into() {
 
     INIT_GB_CTX();
     const auto opcode = SREAD8(REG(PC));
@@ -61,7 +62,7 @@ void WindowControls::step_into() {
     debugger().set_paused(false);
 }
 
-void WindowControls::step_over() {
+void Controls::step_over() {
     INIT_GB_CTX();
     const auto opcode = SREAD8(REG(PC));
 
@@ -73,13 +74,13 @@ void WindowControls::step_over() {
     debugger().set_paused(false);
 }
 
-void WindowControls::run_to_next() {
+void Controls::run_to_next() {
     INIT_GB_CTX();
     const auto instr = Emulator::find_instr(gb, REG(PC));
     debugger().set_next_stop(REG(PC) + instr.length);
 }
 
-bool WindowControls::is_subroutine_call(const uint8_t opcode) {
+bool Controls::is_subroutine_call(const uint8_t opcode) {
     switch(opcode) {
         case 0xC4:
         case 0xCC:
@@ -93,7 +94,7 @@ bool WindowControls::is_subroutine_call(const uint8_t opcode) {
     }
 }
 
-bool WindowControls::is_jump_call(const uint8_t opcode) {
+bool Controls::is_jump_call(const uint8_t opcode) {
     switch(opcode) {
         case 0xC2:
         case 0xC3:
@@ -107,7 +108,7 @@ bool WindowControls::is_jump_call(const uint8_t opcode) {
     }
 }
 
-bool WindowControls::is_jump_signed(const uint8_t opcode) {
+bool Controls::is_jump_signed(const uint8_t opcode) {
     switch(opcode) {
         case 0x18:
         case 0x20:
@@ -120,7 +121,7 @@ bool WindowControls::is_jump_signed(const uint8_t opcode) {
     }
 }
 
-bool WindowControls::is_return(const uint8_t opcode) {
+bool Controls::is_return(const uint8_t opcode) {
     switch(opcode) {
         case 0xC0:
         case 0xC8:

@@ -1,6 +1,7 @@
 #pragma once
 
 #define CPU_STEP 4
+#define PROGRAM_START 0x100
 
 // Shortcut Macros
 #define TICK(T) gb->cpu.ticks += CPU_STEP * (T)

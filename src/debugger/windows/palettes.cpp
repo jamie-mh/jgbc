@@ -1,13 +1,14 @@
 #include <imgui.h>
 #include "debugger/debugger.h"
-#include "debugger/window_palettes.h"
+#include "debugger/windows/palettes.h"
 
+using namespace Windows;
 
-WindowPalettes::WindowPalettes(Debugger &debugger) : Window(debugger) {
+Palettes::Palettes(Debugger &debugger) : Window(debugger) {
 
 }
 
-void WindowPalettes::render() {
+void Palettes::render() {
 
     if(!ImGui::Begin(title())) {
         ImGui::End();
@@ -55,6 +56,6 @@ void WindowPalettes::render() {
     ImGui::End();
 }
 
-const char *WindowPalettes::title() const {
+const char *Palettes::title() const {
     return "Palettes";
 }

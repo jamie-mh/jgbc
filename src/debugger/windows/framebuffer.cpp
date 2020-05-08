@@ -1,10 +1,11 @@
 #include <imgui.h>
 #include <glad/glad.h>
 #include "debugger/debugger.h"
-#include "debugger/window_emulator.h"
+#include "debugger/windows/framebuffer.h"
 
+using namespace Windows;
 
-WindowEmulator::WindowEmulator(Debugger &debugger) : Window(debugger) {
+Framebuffer::Framebuffer(Debugger &debugger) : Window(debugger) {
     _texture_id = 0;
     glGenTextures(1, &_texture_id);
     glBindTexture(GL_TEXTURE_2D, _texture_id);
@@ -15,11 +16,11 @@ WindowEmulator::WindowEmulator(Debugger &debugger) : Window(debugger) {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_SHORT_1_5_5_5_REV, debugger.gb()->ppu.framebuffer);
 }
 
-WindowEmulator::~WindowEmulator() {
+Framebuffer::~Framebuffer() {
     glDeleteTextures(1, &_texture_id);
 }
 
-void WindowEmulator::render() {
+void Framebuffer::render() {
 
     if(!ImGui::Begin(title())) {
         ImGui::End();
@@ -36,6 +37,6 @@ void WindowEmulator::render() {
     ImGui::End();
 }
 
-const char *WindowEmulator::title() const {
-    return "Emulator";
+const char *Framebuffer::title() const {
+    return "Framebuffer";
 }
