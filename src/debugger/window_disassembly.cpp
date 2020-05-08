@@ -12,7 +12,7 @@ WindowDisassembly::WindowDisassembly(Debugger &debugger) : Window(debugger) {
 
 void WindowDisassembly::render() {
 
-    if(!ImGui::Begin(title(), nullptr)) {
+    if(!ImGui::Begin(title())) {
         ImGui::End();
         return;
     }

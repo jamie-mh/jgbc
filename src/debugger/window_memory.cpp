@@ -9,7 +9,7 @@ WindowMemory::WindowMemory(Debugger &debugger) : Window(debugger) {
 
 void WindowMemory::render() {
 
-    if(!ImGui::Begin(title(), nullptr)) {
+    if(!ImGui::Begin(title())) {
         ImGui::End();
         return;
     }

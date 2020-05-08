@@ -10,7 +10,7 @@ WindowIO::WindowIO(Debugger &debugger) : Window(debugger) {
 
 void WindowIO::render() {
 
-    if(!ImGui::Begin(title(), nullptr)) {
+    if(!ImGui::Begin(title())) {
         ImGui::End();
         return;
     }

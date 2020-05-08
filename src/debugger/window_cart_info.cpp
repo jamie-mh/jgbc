@@ -10,7 +10,7 @@ WindowCartInfo::WindowCartInfo(Debugger &debugger) : Window(debugger) {
 
 void WindowCartInfo::render() {
 
-    if(!ImGui::Begin(title(), nullptr)) {
+    if(!ImGui::Begin(title())) {
         ImGui::End();
         return;
     }
