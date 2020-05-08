@@ -33,7 +33,7 @@ void Framebuffer::render() {
     glBindTexture(GL_TEXTURE_2D, _texture_id);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, GL_RGBA, GL_UNSIGNED_SHORT_1_5_5_5_REV, debugger().gb()->ppu.framebuffer);
 
-    ImGui::Image((ImTextureID) (uintptr_t) _texture_id, ImVec2(SCREEN_WIDTH * scale, SCREEN_HEIGHT * scale));
+    ImGui::Image(reinterpret_cast<void *>(_texture_id), ImVec2(SCREEN_WIDTH * scale, SCREEN_HEIGHT * scale));
     ImGui::End();
 }
 
