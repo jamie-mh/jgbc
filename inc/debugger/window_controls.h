@@ -1,21 +1,20 @@
 #pragma once
 #include "window.h"
 
-class Debugger;
 class WindowControls final : public Window {
     public:
-        explicit WindowControls(Debugger &dbg) : _dbg(dbg) { }
+        explicit WindowControls(Debugger &);
+
         void render() override;
+        const char *title() const override;
 
     private:
-        Debugger &_dbg;
-
         void step_into();
         void step_over();
         void run_to_next();
 
-        bool is_subroutine_call(uint8_t opcode) const;
-        bool is_jump_call(uint8_t opcode) const;
-        bool is_jump_signed(uint8_t opcode) const;
-        bool is_return(uint8_t opcode) const;
+        static bool is_subroutine_call(uint8_t opcode) ;
+        static bool is_jump_call(uint8_t opcode) ;
+        static bool is_jump_signed(uint8_t opcode) ;
+        static bool is_return(uint8_t opcode) ;
 };

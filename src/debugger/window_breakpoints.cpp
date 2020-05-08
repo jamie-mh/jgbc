@@ -1,16 +1,21 @@
+#include <imgui.h>
 #include "debugger/debugger.h"
 #include "debugger/window_breakpoints.h"
-#include <imgui.h>
-#include <debugger/colours.h>
+#include "debugger/colours.h"
+
+
+WindowBreakpoints::WindowBreakpoints(Debugger &debugger) : Window(debugger) {
+
+}
 
 void WindowBreakpoints::render() {
 
-    if(!_is_open || !ImGui::Begin("Breakpoints", &_is_open)) {
-        if(_is_open) ImGui::End();
+    if(!ImGui::Begin(title())) {
+        ImGui::End();
         return;
     }
 
-    static auto gb = _dbg.gb_p();
+    INIT_GB_CTX();
 
     ImGui::BeginChild("##scroll");
     const ImU32 step = 1, step_fast = 50;
@@ -19,7 +24,7 @@ void WindowBreakpoints::render() {
     ImGui::SameLine();
 
     if(ImGui::Button("Add"))
-        _dbg.add_breakpoint(addr);
+        debugger().add_breakpoint(addr);
 
     ImGui::Text("Presets");
 
@@ -27,34 +32,34 @@ void WindowBreakpoints::render() {
     const auto button_size = ImVec2(ImGui::GetColumnWidth(), 20);
 
     if(ImGui::Button("V-Blank", button_size))
-        _dbg.add_breakpoint(INT_VBLANK);
+        debugger().add_breakpoint(INT_VBLANK);
 
     if(ImGui::Button("LCD", button_size))
-        _dbg.add_breakpoint(INT_LCD_STAT);
+        debugger().add_breakpoint(INT_LCD_STAT);
 
     if(ImGui::Button("Timer", button_size))
-        _dbg.add_breakpoint(INT_TIMER);
+        debugger().add_breakpoint(INT_TIMER);
 
     ImGui::NextColumn();
     if(ImGui::Button("Serial", button_size))
-        _dbg.add_breakpoint(INT_SERIAL);
+        debugger().add_breakpoint(INT_SERIAL);
 
     if(ImGui::Button("Joypad", button_size))
-        _dbg.add_breakpoint(INT_JOYPAD);
+        debugger().add_breakpoint(INT_JOYPAD);
 
     ImGui::Columns();
     ImGui::Separator();
 
-    if(_dbg.breakpoints().empty())
+    if(debugger().breakpoints().empty())
         ImGui::Text("No breakpoints set");
     else {
 
-        for(size_t i = 0; i < _dbg.breakpoints().size(); ++i) {
-            const auto bp = _dbg.breakpoints()[i];
+        for(size_t i = 0; i < debugger().breakpoints().size(); ++i) {
+            const auto bp = debugger().breakpoints()[i];
 
             ImGui::PushID(bp);
             if(ImGui::Button("X"))
-                _dbg.remove_breakpoint(bp);
+                debugger().remove_breakpoint(bp);
 
             ImGui::SameLine();
             ImGui::Text("%lu: ", i);
@@ -91,4 +96,8 @@ void WindowBreakpoints::render() {
 
     ImGui::EndChild();
     ImGui::End();
+}
+
+const char *WindowBreakpoints::title() const {
+    return "Breakpoints";
 }

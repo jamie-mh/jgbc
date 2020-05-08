@@ -1,16 +1,21 @@
+#include <imgui.h>
 #include "debugger/debugger.h"
 #include "debugger/colours.h"
 #include "debugger/window_io.h"
-#include <imgui.h>
+
+
+WindowIO::WindowIO(Debugger &debugger) : Window(debugger) {
+
+}
 
 void WindowIO::render() {
 
-    if(!_is_open || !ImGui::Begin("IO Map", &_is_open)) {
-        if(_is_open) ImGui::End();
+    if(!ImGui::Begin(title(), nullptr)) {
+        ImGui::End();
         return;
     }
 
-    static const auto gb = &_gb;
+    INIT_GB_CTX();
 
     ImGui::Columns(3, nullptr, true);
 
@@ -115,8 +120,12 @@ void WindowIO::render() {
     ImGui::End();
 }
 
-void WindowIO::draw_values(const char **labels, const uint16_t *addrs, const int count) const {
-    static const auto gb = &_gb;
+const char *WindowIO::title() const {
+    return "IO Map";
+}
+
+void WindowIO::draw_values(const char **labels, const uint16_t *addrs, const int count) {
+    INIT_GB_CTX();
     static const ImU32 step = 1, step_fast = 10;
 
     for(auto i = 0; i < count; ++i) {
@@ -129,8 +138,8 @@ void WindowIO::draw_values(const char **labels, const uint16_t *addrs, const int
     }
 }
 
-void WindowIO::draw_registers(const char **labels, const uint16_t regis, const uint8_t *bits, const int count) const {
-    static const auto gb = &_gb;
+void WindowIO::draw_registers(const char **labels, const uint16_t regis, const uint8_t *bits, const int count) {
+    INIT_GB_CTX();
 
     for(auto i = 0; i < count; ++i) {
         bool checked = Emulator::read_register(gb, regis, bits[i]);

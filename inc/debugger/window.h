@@ -1,20 +1,24 @@
 #pragma once
 
+// Create local pointer named gb to use the C macros
+#define INIT_GB_CTX() static auto gb = debugger().gb().get()
+
+
 class Debugger;
 class Window {
     public:
-        Window() = default;
+        explicit Window(Debugger &);
         virtual ~Window() = default;
+
         virtual void render() = 0;
+        virtual const char *title() const = 0;
 
-        bool is_open() const {
-            return _is_open;
-        }
+        void set_open(bool);
+        bool is_open() const;
 
-        void set_open(const bool value) {
-            _is_open = value;
-        }
+        Debugger &debugger();
 
-    protected:
+    private:
         bool _is_open = true;
+        Debugger &_debugger;
 };

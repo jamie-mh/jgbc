@@ -1,12 +1,16 @@
+#include <imgui.h>
 #include "debugger/debugger.h"
 #include "debugger/window_palettes.h"
-#include <imgui.h>
 
+
+WindowPalettes::WindowPalettes(Debugger &debugger) : Window(debugger) {
+
+}
 
 void WindowPalettes::render() {
 
-    if(!_is_open || !ImGui::Begin("Palettes", &_is_open)) {
-        if(_is_open) ImGui::End();
+    if(!ImGui::Begin(title())) {
+        ImGui::End();
         return;
     }
 
@@ -28,8 +32,8 @@ void WindowPalettes::render() {
                 ImGui::SameLine();
 
                 const auto colour = type == 0
-                    ? _gb.ppu.bg_palette[palette * 4 + i]
-                    : _gb.ppu.obj_palette[palette * 4 + i];
+                    ? debugger().gb()->ppu.bg_palette[palette * 4 + i]
+                    : debugger().gb()->ppu.obj_palette[palette * 4 + i];
 
                 ImVec4 colour_vec;
                 colour_vec.x = (colour & 0x1F) / 31.0f;
@@ -49,4 +53,8 @@ void WindowPalettes::render() {
     }
     
     ImGui::End();
+}
+
+const char *WindowPalettes::title() const {
+    return "Palettes";
 }

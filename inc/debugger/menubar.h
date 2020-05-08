@@ -1,13 +1,11 @@
 #pragma once
-
 #include "debugger/window.h"
-#include "debugger/debugger.h"
 
-class MenuBar final {
-    private:
-        Debugger &_dbg;
 
+class MenuBar final : Window {
     public:
-        MenuBar(Debugger &dbg): _dbg(dbg) { };
-        void render() const;
+        explicit MenuBar(Debugger &debugger);
+
+        void render() override;
+        const char *title() const override;
 };

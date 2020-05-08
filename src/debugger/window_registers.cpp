@@ -1,16 +1,20 @@
-#include "debugger/debugger.h"
-#include "debugger/colours.h"
-#include "debugger/window_registers.h"
 #include <imgui.h>
+#include "debugger/debugger.h"
+#include "debugger/window_registers.h"
+
+
+WindowRegisters::WindowRegisters(Debugger &debugger) : Window(debugger) {
+
+}
 
 void WindowRegisters::render() {
 
-    if(!_is_open || !ImGui::Begin("Registers", &_is_open)) {
-        if(_is_open) ImGui::End();
+    if(!ImGui::Begin(title())) {
+        ImGui::End();
         return;
     }
 
-    static const auto gb = &_gb;
+    INIT_GB_CTX();
 
     ImGui::Columns(2, nullptr, true);
 
@@ -74,4 +78,8 @@ void WindowRegisters::render() {
     ImGui::Checkbox("Double Speed", &gb->cpu.is_double_speed);
 
     ImGui::End();
+}
+
+const char *WindowRegisters::title() const {
+    return "Registers";
 }

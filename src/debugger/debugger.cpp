@@ -4,50 +4,65 @@
 #include "debugger/font.h"
 #include "imgui/examples/imgui_impl_sdl.h"
 #include "imgui/examples/imgui_impl_opengl3.h"
-#include "imgui_club/imgui_memory_editor/imgui_memory_editor.h"
 #include "glad/glad.h"
+
+#include "debugger/window_breakpoints.h"
+#include "debugger/window_cart_info.h"
+#include "debugger/window_controls.h"
+#include "debugger/window_disassembly.h"
+#include "debugger/window_emulator.h"
+#include "debugger/window_io.h"
+#include "debugger/window_memory.h"
+#include "debugger/window_palettes.h"
+#include "debugger/window_registers.h"
+#include "debugger/window_stack.h"
 
 
 Debugger::Debugger(const char *rom_path) {
-
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
 
     _is_paused = true;
     _next_stop = 0;
+    _window = nullptr;
+    _gl_context = nullptr;
 
-    Emulator::init(&_gb);
+    _gb = std::make_shared<Emulator::GameBoy>();
+    Emulator::init(_gb.get());
 
-    if(!Emulator::load_rom(&_gb, rom_path)) {
+    if(!Emulator::load_rom(_gb.get(), rom_path)) {
         std::cerr << "ERROR: Cannot load rom file" << std::endl;
         std::exit(EXIT_FAILURE);
     }
 
-    _window = SDL_CreateWindow(
-        WINDOW_TITLE, 
-        SDL_WINDOWPOS_CENTERED, 
-        SDL_WINDOWPOS_CENTERED, 
-        WINDOW_WIDTH, 
-        WINDOW_HEIGHT,
-        SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE
-    );
-
+    init_sdl();
     init_gl();
     init_imgui();
 
     std::ostringstream title;
-    title << WINDOW_TITLE << " - " << _gb.cart.title << " (DEBUGGER)";
+    title << WINDOW_TITLE << " - " << _gb->cart.title << " (DEBUGGER)";
     SDL_SetWindowTitle(_window, title.str().c_str());
 
-    _windows.push_back(new WindowBreakpoints(*this));
-    _windows.push_back(new WindowCartInfo(_gb));
-    _windows.push_back(new WindowIO(_gb));
-    _windows.push_back(new WindowControls(*this));
-    _windows.push_back(new WindowPalettes(_gb));
-    _windows.push_back(new WindowDisassembly(*this));
-    _windows.push_back(new WindowEmulator(_gb));
-    _windows.push_back(new WindowMemory(_gb));
-    _windows.push_back(new WindowRegisters(_gb));
-    _windows.push_back(new WindowStack(_gb));
+    _windows.emplace(WindowId::Breakpoints, std::make_shared<WindowBreakpoints>(*this));
+    _windows.emplace(WindowId::CartInfo, std::make_shared<WindowCartInfo>(*this));
+    _windows.emplace(WindowId::Controls, std::make_shared<WindowControls>(*this));
+    _windows.emplace(WindowId::Disassembly, std::make_shared<WindowDisassembly>(*this));
+    _windows.emplace(WindowId::Emulator, std::make_shared<WindowEmulator>(*this));
+    _windows.emplace(WindowId::IO, std::make_shared<WindowIO>(*this));
+    _windows.emplace(WindowId::Memory, std::make_shared<WindowMemory>(*this));
+    _windows.emplace(WindowId::Palettes, std::make_shared<WindowPalettes>(*this));
+    _windows.emplace(WindowId::Registers, std::make_shared<WindowRegisters>(*this));
+    _windows.emplace(WindowId::Stack, std::make_shared<WindowStack>(*this));
+}
+
+void Debugger::init_sdl() {
+    _window = SDL_CreateWindow(
+        WINDOW_TITLE,
+        SDL_WINDOWPOS_CENTERED,
+        SDL_WINDOWPOS_CENTERED,
+        WINDOW_WIDTH,
+        WINDOW_HEIGHT,
+        SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE
+    );
 }
 
 void Debugger::init_gl() {
@@ -69,12 +84,16 @@ void Debugger::init_gl() {
     }
 }
 
-Emulator::GameBoy &Debugger::gb() {
+std::shared_ptr<Emulator::GameBoy> &Debugger::gb() {
     return _gb;
 }
 
-Emulator::GameBoy *Debugger::gb_p() {
-    return &_gb;
+std::map<Debugger::WindowId, std::shared_ptr<Window>> &Debugger::windows() {
+    return _windows;
+}
+
+std::shared_ptr<Window> &Debugger::window(const Debugger::WindowId id) {
+    return _windows.at(id);
 }
 
 bool Debugger::is_paused() const {
@@ -83,14 +102,14 @@ bool Debugger::is_paused() const {
 
 void Debugger::set_paused(const bool value) {
     _is_paused = value;
-    SDL_PauseAudioDevice(_gb.apu.device_id, value);
+    SDL_PauseAudioDevice(_gb->apu.device_id, value);
 }
 
-uint16_t Debugger::next_stop() const {
+std::optional<uint16_t> Debugger::next_stop() const {
     return _next_stop;
 }
 
-void Debugger::set_next_stop(const uint16_t addr) {
+void Debugger::set_next_stop(const std::optional<uint16_t> addr) {
     _next_stop = addr;
 }
 
@@ -117,8 +136,15 @@ void Debugger::init_imgui() const {
     io.Fonts->AddFontFromMemoryCompressedTTF(
         LiberationMono_compressed_data, 
         LiberationMono_compressed_size, 
-        16.0f
+        15.0f
     );
+
+    // const auto dockspace_id = ImGui::GetID("##dockspace");
+    // ImGui::DockBuilderRemoveNode(dockspace_id);
+    // ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_DockSpace);
+    // ImGui::DockBuilderSetNodeSize(dockspace_id, ImGui::GetWindowSize());
+
+    // ImGui::DockBuilderFinish(dockspace_id); 
 }
 
 Debugger::~Debugger() {
@@ -134,41 +160,41 @@ Debugger::~Debugger() {
 void Debugger::run() {
 
     SDL_Event event;
-    _gb.is_running = true;
+    _gb->is_running = true;
 
-    while(_gb.is_running) {
+    while(_gb->is_running) {
 
         static const uint32_t max_ticks = CLOCK_SPEED / FRAMERATE;
 
-        if(!SDL_GetQueuedAudioSize(_gb.apu.device_id)) {
+        if(!SDL_GetQueuedAudioSize(_gb->apu.device_id)) {
 
             uint32_t frame_ticks = 0;
 
             while(!_is_paused && frame_ticks < max_ticks) {
 
-                Emulator::execute_instr(&_gb);
-                Emulator::update_ppu(&_gb);
+                Emulator::execute_instr(_gb.get());
+                Emulator::update_ppu(_gb.get());
 
-                if(_gb.cpu.is_double_speed) {
-                    Emulator::execute_instr(&_gb);
-                    Emulator::update_ppu(&_gb);
+                if(_gb->cpu.is_double_speed) {
+                    Emulator::execute_instr(_gb.get());
+                    Emulator::update_ppu(_gb.get());
                 }
 
-                Emulator::update_timer(&_gb);
-                Emulator::update_apu(&_gb);
-                Emulator::check_interrupts(&_gb);
+                Emulator::update_timer(_gb.get());
+                Emulator::update_apu(_gb.get());
+                Emulator::check_interrupts(_gb.get());
 
-                frame_ticks += _gb.cpu.ticks;
+                frame_ticks += _gb->cpu.ticks;
                 
-                 if(_gb.cpu.reg.PC == _next_stop) {
-                     _next_stop = 0;
-                     _is_paused = true;
-                 }
+//                 if(_gb.cpu.reg.PC == _next_stop) {
+//                     _next_stop = 0;
+//                     _is_paused = true;
+//                 }
 
-                 if(is_breakpoint(_gb.cpu.reg.PC)) {
-                     window_disassembly().set_goto_addr(_gb.cpu.reg.PC);
-                     _is_paused = true;
-                 }
+//                 if(is_breakpoint(_gb.cpu.reg.PC)) {
+//                     window_disassembly().set_goto_addr(_gb.cpu.reg.PC);
+//                     _is_paused = true;
+//                 }
             }
         }
 
@@ -178,7 +204,7 @@ void Debugger::run() {
             handle_event(event);
     }
 
-    Emulator::save_ram(&_gb);
+    Emulator::save_ram(_gb.get());
 }
 
 void Debugger::handle_event(SDL_Event event) {
@@ -187,20 +213,20 @@ void Debugger::handle_event(SDL_Event event) {
 
     switch(event.type) {
         case SDL_QUIT:
-            _gb.is_running = false;
+            _gb->is_running = false;
             break;
 
         case SDL_WINDOWEVENT:
             if(event.window.event == SDL_WINDOWEVENT_CLOSE)
-                _gb.is_running = false;
+                _gb->is_running = false;
             break;
 
         case SDL_KEYDOWN:
-            Emulator::set_key(&_gb, event.key.keysym.scancode, true);
+            Emulator::set_key(_gb.get(), event.key.keysym.scancode, true);
             break;
 
         case SDL_KEYUP:
-            Emulator::set_key(&_gb, event.key.keysym.scancode, false);
+            Emulator::set_key(_gb.get(), event.key.keysym.scancode, false);
             break;
     }
 }
@@ -227,8 +253,10 @@ void Debugger::render() {
     ImGui::DockSpace(ImGui::GetID("##dockspace"), ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
 
     _menu.render();
-    for(const auto &window : _windows)
-        window->render();
+
+    for(const auto &[_, window] : _windows)
+        if(window->is_open())
+            window->render();
 
     // ImGui::ShowDemoWindow();
     ImGui::End();

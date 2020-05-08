@@ -1,15 +1,16 @@
+#include <imgui.h>
 #include "debugger/debugger.h"
 #include "debugger/window_memory.h"
-#include <imgui.h>
 
-WindowMemory::WindowMemory(Emulator::GameBoy &gb): _gb(gb) {
+
+WindowMemory::WindowMemory(Debugger &debugger) : Window(debugger) {
     _selected_idx = 0;
-};
+}
 
 void WindowMemory::render() {
 
-    if(!_is_open || !ImGui::Begin("Memory", &_is_open)) {
-        if(_is_open) ImGui::End();
+    if(!ImGui::Begin(title(), nullptr)) {
+        ImGui::End();
         return;
     }
 
@@ -28,7 +29,7 @@ void WindowMemory::render() {
     }
 
     // Careful not to point to non existent extram
-    if(!(_offsets[_selected_idx] == EXTRAM_START && _gb.mmu.extram == nullptr))
+    if(!(_offsets[_selected_idx] == EXTRAM_START && debugger().gb()->mmu.extram == nullptr))
         _editor.DrawContents((void *) _regions[_selected_idx], _sizes[_selected_idx], _offsets[_selected_idx]);
     else
         ImGui::Text("EXTRAM not available.");
@@ -36,3 +37,6 @@ void WindowMemory::render() {
     ImGui::End();
 }
 
+const char *WindowMemory::title() const {
+    return "Memory";
+}

@@ -1,16 +1,21 @@
-#include "debugger/debugger.h"
-#include "debugger/window_stack.h"
 #include <imgui.h>
-#include <debugger/colours.h>
+#include "debugger/debugger.h"
+#include "debugger/colours.h"
+#include "debugger/window_stack.h"
+
+
+WindowStack::WindowStack(Debugger &debugger) : Window(debugger) {
+
+}
 
 void WindowStack::render() {
 
-    if(!_is_open || !ImGui::Begin("Stack", &_is_open)) {
-        if(_is_open) ImGui::End();
+    if(!ImGui::Begin(title())) {
+        ImGui::End();
         return;
     }
 
-    static const auto gb = &_gb;
+    INIT_GB_CTX();
     const auto draw_list = ImGui::GetWindowDrawList();
 
     ImGui::BeginChild("##scroll");
@@ -41,4 +46,8 @@ void WindowStack::render() {
     clipper.End();
     ImGui::EndChild();
     ImGui::End();
+}
+
+const char *WindowStack::title() const {
+    return "Stack";
 }

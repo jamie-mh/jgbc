@@ -6,32 +6,29 @@
 #include <iostream>
 #include <algorithm>
 #include <string>
+#include <map>
+#include <memory>
+#include <optional>
 
 #define IMGUI_USER_CONFIG "debugger/imconfig.h"
 #include "imgui/imgui.h"
+#include "imgui/imgui_internal.h"
 
 #include "debugger/emulator.h"
 #include "debugger/window.h"
 #include "debugger/menubar.h"
 
-#include "debugger/window_breakpoints.h"
-#include "debugger/window_cart_info.h"
-#include "debugger/window_controls.h"
-#include "debugger/window_disassembly.h"
-#include "debugger/window_emulator.h"
-#include "debugger/window_memory.h"
-#include "debugger/window_registers.h"
-#include "debugger/window_io.h"
-#include "debugger/window_stack.h"
-#include "debugger/window_palettes.h"
 
 class Debugger final {
     public:
-        explicit Debugger(const char *rom_path);
+        enum class WindowId {
+            Breakpoints, CartInfo, Controls, Disassembly, Emulator, IO, Memory, Palettes, Registers, Stack
+        };
+
+        explicit Debugger(const char *);
         ~Debugger();
 
-        Emulator::GameBoy &gb();
-        Emulator::GameBoy *gb_p();
+        std::shared_ptr<Emulator::GameBoy> &gb();
 
         const std::vector<uint16_t>& breakpoints() const;
         bool is_breakpoint(uint16_t) const;
@@ -41,39 +38,32 @@ class Debugger final {
         bool is_paused() const;
         void set_paused(bool);
 
-        uint16_t next_stop() const;
-        void set_next_stop(uint16_t);
+        std::optional<uint16_t> next_stop() const;
+        void set_next_stop(const std::optional<uint16_t>);
 
         void run();
         void render();
 
-        WindowBreakpoints &window_breakpoints() { return *dynamic_cast<WindowBreakpoints *>(_windows[0]); }
-        WindowCartInfo &window_cart_info() { return *dynamic_cast<WindowCartInfo *>(_windows[1]); }
-        WindowIO &window_io() { return *dynamic_cast<WindowIO *>(_windows[2]); }
-        WindowControls &window_controls() { return *dynamic_cast<WindowControls *>(_windows[3]); }
-        WindowPalettes &window_palettes() { return *dynamic_cast<WindowPalettes *>(_windows[4]); }
-        WindowDisassembly &window_disassembly() { return *dynamic_cast<WindowDisassembly *>(_windows[5]); }
-        WindowEmulator &window_emulator() { return *dynamic_cast<WindowEmulator *>(_windows[6]); }
-        WindowMemory &window_memory() { return *dynamic_cast<WindowMemory *>(_windows[7]); }
-        WindowRegisters &window_registers() { return *dynamic_cast<WindowRegisters *>(_windows[8]); }
-        WindowStack &window_stack() { return *dynamic_cast<WindowStack *>(_windows[9]); }
+        std::shared_ptr<Window> &window(WindowId);
+        std::map<Debugger::WindowId, std::shared_ptr<Window>> & windows();
 
     private:
-        const int WINDOW_WIDTH = 1500;
-        const int WINDOW_HEIGHT = 900;
+        static constexpr int WINDOW_WIDTH = 1500;
+        static constexpr int WINDOW_HEIGHT = 900;
 
-        Emulator::GameBoy _gb;
+        std::shared_ptr<Emulator::GameBoy> _gb;
 
         SDL_Window *_window;
         SDL_GLContext _gl_context;
 
         bool _is_paused;
-        uint16_t _next_stop;
+        std::optional<uint16_t> _next_stop;
         std::vector<uint16_t> _breakpoints;
 
         MenuBar _menu = MenuBar(*this);
-        std::vector<Window *> _windows;
+        std::map<WindowId, std::shared_ptr<Window>> _windows;
 
+        void init_sdl();
         void init_gl();
         void init_imgui() const;
 

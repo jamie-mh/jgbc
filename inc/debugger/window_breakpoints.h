@@ -1,12 +1,10 @@
 #pragma once
 #include "window.h"
 
-class Debugger;
 class WindowBreakpoints final : public Window {
-    private:
-        Debugger &_dbg;
-
     public:
-        explicit WindowBreakpoints(Debugger &dbg) : _dbg(dbg) { }
+        explicit WindowBreakpoints(Debugger &);
+
         void render() override;
+        const char *title() const override;
 };

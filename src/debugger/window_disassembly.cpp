@@ -1,16 +1,23 @@
+#include <imgui.h>
 #include "debugger/debugger.h"
 #include "debugger/colours.h"
 #include "debugger/window_disassembly.h"
-#include <imgui.h>
+
+
+WindowDisassembly::WindowDisassembly(Debugger &debugger) : Window(debugger) {
+    _follow_pc = true;
+    _goto_lock = false;
+    _goto_addr = 0;
+}
 
 void WindowDisassembly::render() {
 
-    if(!_is_open || !ImGui::Begin("Disassembly", &_is_open)) {
-        if(_is_open) ImGui::End();
+    if(!ImGui::Begin(title(), nullptr)) {
+        ImGui::End();
         return;
     }
 
-    static const auto gb = _dbg.gb_p();
+    INIT_GB_CTX();
     const ImU32 step = 1, step_fast = 50;
     ImGui::InputScalar("ADDR", ImGuiDataType_U32, &_goto_addr, &step, &step_fast, "%04X", ImGuiInputTextFlags_CharsHexadecimal);
     ImGui::SameLine();
@@ -56,20 +63,24 @@ void WindowDisassembly::render() {
     ImGui::End();
 }
 
-void WindowDisassembly::line_instr(uint16_t &addr) const {
+const char *WindowDisassembly::title() const {
+    return "Disassembly";
+}
 
-    static const auto gb = _dbg.gb_p();
+void WindowDisassembly::line_instr(uint16_t &addr) {
+
+    INIT_GB_CTX();
     const auto draw_list = ImGui::GetWindowDrawList();
 
-    bool is_breakpoint = _dbg.is_breakpoint(addr);
+    const auto is_breakpoint = debugger().is_breakpoint(addr);
     ImGui::PushID(addr);
 
     if(ImGui::Selectable("", is_breakpoint)) {
 
         if(is_breakpoint)
-            _dbg.remove_breakpoint(addr);
+            debugger().remove_breakpoint(addr);
         else
-            _dbg.add_breakpoint(addr);
+            debugger().add_breakpoint(addr);
     }
 
     ImGui::PopID();
@@ -129,9 +140,9 @@ void WindowDisassembly::line_instr(uint16_t &addr) const {
     addr += instr.length;
 }
 
-void WindowDisassembly::line_data(uint16_t &addr) const {
-    
-    static const auto gb = _dbg.gb_p();
+void WindowDisassembly::line_data(uint16_t &addr) {
+
+    INIT_GB_CTX();
     ImGui::NewLine();
     prefix_region(addr);
 
@@ -189,7 +200,7 @@ inline void WindowDisassembly::prefix_region(const uint16_t addr) const {
     ImGui::SameLine(200);
 }
 
-bool WindowDisassembly::is_executable(const uint16_t addr) const {
+bool WindowDisassembly::is_executable(const uint16_t addr) {
     
     // Executable instructions can be found here
     return 
@@ -199,7 +210,7 @@ bool WindowDisassembly::is_executable(const uint16_t addr) const {
         (addr >= HRAM_START && addr <= HRAM_END));
 }
 
-std::string WindowDisassembly::get_region_label(const uint16_t addr) const {
+std::string WindowDisassembly::get_region_label(const uint16_t addr) {
 
     if(addr <= ROM00_END)
         return "ROM00";
@@ -229,12 +240,11 @@ std::string WindowDisassembly::get_region_label(const uint16_t addr) const {
     return "";
 }
 
-uint16_t WindowDisassembly::get_nth_line_addr(const uint16_t n) const {
-
+uint16_t WindowDisassembly::get_nth_line_addr(const uint16_t n) {
     for(uint32_t addr = 0, count = 1; addr <= 0xFFFF; count++) {
 
         if(is_executable(addr))
-            addr += Emulator::find_instr(_dbg.gb_p(), addr).length;
+            addr += Emulator::find_instr(debugger().gb().get(), addr).length;
         else
             addr++;
 
@@ -245,14 +255,14 @@ uint16_t WindowDisassembly::get_nth_line_addr(const uint16_t n) const {
     return 0x0;
 }
 
-uint16_t WindowDisassembly::get_line_count(const uint16_t limit_addr) const {
+uint16_t WindowDisassembly::get_line_count(const uint16_t limit_addr) {
 
     uint16_t count = 0;
 
     for(uint32_t addr = 0; addr <= limit_addr;) {
 
         if(is_executable(addr))
-            addr += Emulator::find_instr(_dbg.gb_p(), addr).length;
+            addr += Emulator::find_instr(debugger().gb().get(), addr).length;
         else
             addr++;
 
@@ -262,11 +272,3 @@ uint16_t WindowDisassembly::get_line_count(const uint16_t limit_addr) const {
     return count;
 }
 
-void WindowDisassembly::set_follow_pc(const bool value) {
-    _follow_pc = value;
-}
-
-void WindowDisassembly::set_goto_addr(const uint16_t addr) {
-    _goto_addr = addr;
-    _goto_lock = true;
-}
