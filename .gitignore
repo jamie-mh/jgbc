@@ -412,6 +412,8 @@ audio.bin
 .clangd/
 jgbc.cbp
 
-
+build/
 out/
 CMakeSettings.json
+
+*.save
