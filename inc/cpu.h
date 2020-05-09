@@ -67,7 +67,7 @@
 
 
 typedef struct {
-    char *disassembly;
+    const char *disassembly;
     uint8_t length;
     bool signed_operand;
     bool extended;
