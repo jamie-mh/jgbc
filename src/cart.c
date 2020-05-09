@@ -45,9 +45,14 @@ bool load_rom(GameBoy *gb, const char *path) {
     const char sep = '/';
 #endif
 
-    strcpy(gb->cart.filename, strrchr(path, sep) + sizeof(char));
-    load_ram(gb);
+    char *last_sep = strrchr(path, sep);
 
+    if(last_sep != NULL)
+        strcpy(gb->cart.filename, strrchr(path, sep) + sizeof(char));
+    else
+        strcpy(gb->cart.filename, path);
+
+    load_ram(gb);
     return true;
 }
 
