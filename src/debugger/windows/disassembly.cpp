@@ -56,6 +56,8 @@ void Disassembly::render() {
     ImGui::BeginChild("##scroll");
     ImGuiListClipper clipper(line_count(0, UINT16_MAX));
 
+    // TODO: fix bug with display when label is placed at 0x0000
+
     while(clipper.Step()) {
 
         if(_address_to_scroll_to.has_value()) {
@@ -125,27 +127,29 @@ void Disassembly::draw_instr_line(uint16_t addr, const Emulator::Instruction &in
     if(instr.length > 1 && opcode != 0xCB) {
 
         uint16_t operand = 0;
+        uint16_t label_addr = 0;
 
         if(instr.length == 2) {
             operand = SREAD8(addr + 1);
-
-            // If the operand is signed, get the two's complement
-            if(instr.signed_operand)
-                operand = (~(operand - 1)) & 0x00FF;
-
             ImGui::TextColored(Colours::data, "%02X", operand);
+
+            if(instr.signed_operand) {
+                const auto jump_addr = addr + static_cast<int8_t>(operand);
+                label_addr = jump_addr + Emulator::find_instr(gb, jump_addr).length;
+            }
 
         } else if(instr.length == 3) {
             operand = SREAD16(addr + 1);
             ImGui::TextColored(Colours::data, "%02X %02X", operand & 0xFF, (operand & 0xFF00) >> 8);
+            label_addr = operand;
         }
 
         ImGui::SameLine(300);
         ImGui::TextColored(Colours::disassembly, instr.disassembly, operand);
 
-        if(instr.length == 3 && _labels.find(operand) != _labels.end()) {
+        if(label_addr > 0 && _labels.find(label_addr) != _labels.end()) {
             ImGui::SameLine();
-            ImGui::Text("[%s]", _labels.at(operand).c_str());
+            ImGui::Text("[%s]", _labels.at(label_addr).c_str());
         }
     }
     // If there is no operand (or CB opcode which have no operand)

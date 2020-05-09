@@ -15,23 +15,24 @@ void Controls::render() {
         return;
     }
 
-    const auto window_size = ImGui::GetContentRegionAvail();
-    const auto size = ImVec2(window_size.x, 30);
-
-    ImGui::Text("Debugger");
-
-    if(ImGui::Button(debugger().is_paused() ? "Play" : "Pause", size)) {
+    if(ImGui::Button(debugger().is_paused() ? "Play" : "Pause")) {
         debugger().set_paused(!debugger().is_paused());
         debugger().set_next_stop(std::nullopt, std::nullopt);
     }
 
-    if(ImGui::Button("Step Over", size))
+    ImGui::SameLine();
+
+    if(ImGui::Button("Step Over"))
         step_over();
 
-    if(ImGui::Button("Step Into", size))
+    ImGui::SameLine();
+
+    if(ImGui::Button("Step Into"))
         step_into();
 
-    if(ImGui::Button("Reset", size))
+    ImGui::SameLine();
+
+    if(ImGui::Button("Reset"))
         Emulator::reset(debugger().gb().get());
 
     ImGui::End();
