@@ -121,6 +121,8 @@ typedef struct {
         bool is_active;
     }
     hdma;
+
+    void (*serial_write_handler)(uint8_t);
 }
 MMU;
 

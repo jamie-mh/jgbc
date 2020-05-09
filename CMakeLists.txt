@@ -43,6 +43,7 @@ add_executable(
     ${PROJECT_INCLUDE_DIR}/mmu.h
     ${PROJECT_INCLUDE_DIR}/cart.h
     ${PROJECT_INCLUDE_DIR}/apu.h
+    ${PROJECT_INCLUDE_DIR}/main.h
 )
 
 include_directories(${SDL2_INCLUDE_DIR})

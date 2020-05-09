@@ -58,6 +58,9 @@
 #define HDMA5_LENGTH 0x7F
 #define HDMA5_MODE 0x80
 
+// Serial output
+#define SB 0xFF01
+
 
 void init_mmu(GameBoy *);
 void reset_mmu(GameBoy *);

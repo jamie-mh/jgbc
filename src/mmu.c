@@ -29,6 +29,8 @@ void init_mmu(GameBoy *gb) {
     gb->mmu.io = calloc(IO_SIZE, sizeof(uint8_t));
     gb->mmu.hram = calloc(HRAM_SIZE, sizeof(uint8_t));
     gb->mmu.ier = calloc(1, sizeof(uint8_t));
+
+    gb->mmu.serial_write_handler = NULL;
 }
 
 void reset_mmu(GameBoy *gb) {
@@ -160,6 +162,11 @@ void write_byte(GameBoy *gb, uint16_t address, uint8_t value, const bool is_prog
         return;
 
     if(is_program) {
+
+        if(address == SB && gb->mmu.serial_write_handler != NULL) {
+            gb->mmu.serial_write_handler(value);
+            return;
+        }
     
         if(address == DMA) {
             sprite_DMA_transfer(gb, value);
