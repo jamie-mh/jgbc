@@ -1,4 +1,3 @@
-#define SDL_MAIN_HANDLED
 #include <cstdlib>
 #include <iostream>
 #include "debugger/debugger.h"

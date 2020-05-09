@@ -1,5 +1,7 @@
 #include <sstream>
+#include <string>
 #include <iostream>
+#include <fstream>
 #include <algorithm>
 
 #include "debugger/debugger.h"
@@ -17,6 +19,7 @@
 #include "debugger/windows/memory.h"
 #include "debugger/windows/palettes.h"
 #include "debugger/windows/registers.h"
+#include "debugger/windows/serial.h"
 #include "debugger/windows/stack.h"
 
 
@@ -24,9 +27,11 @@ Debugger::Debugger(const char *rom_path) {
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
 
     _is_paused = true;
-    _next_stop = 0;
     _window = nullptr;
     _gl_context = nullptr;
+
+    _next_stop_fall_thru = std::nullopt;
+    _next_stop_jump = std::nullopt;
 
     _gb = std::make_shared<Emulator::GameBoy>();
     Emulator::init(_gb.get());
@@ -54,6 +59,12 @@ Debugger::Debugger(const char *rom_path) {
     _windows.emplace(WindowId::Palettes, std::make_shared<Windows::Palettes>(*this));
     _windows.emplace(WindowId::Registers, std::make_shared<Windows::Registers>(*this));
     _windows.emplace(WindowId::Stack, std::make_shared<Windows::Stack>(*this));
+
+    auto serial_window = std::make_shared<Windows::Serial>(*this);
+    _gb->mmu.serial_write_handler = serial_window->serial_write_handler;
+    _windows.emplace(WindowId::Serial, serial_window);
+
+    load_symbols(rom_path);
 }
 
 void Debugger::init_sdl() {
@@ -107,12 +118,9 @@ void Debugger::set_paused(const bool value) {
     SDL_PauseAudioDevice(_gb->apu.device_id, value);
 }
 
-std::optional<uint16_t> Debugger::next_stop() const {
-    return _next_stop;
-}
-
-void Debugger::set_next_stop(const std::optional<uint16_t> addr) {
-    _next_stop = addr;
+void Debugger::set_next_stop(const std::optional<uint16_t> fall_thru_addr, const std::optional<uint16_t> jump_addr) {
+    _next_stop_fall_thru = fall_thru_addr;
+    _next_stop_jump = jump_addr;
 }
 
 void Debugger::init_imgui() const {
@@ -140,13 +148,42 @@ void Debugger::init_imgui() const {
         LiberationMono_compressed_size, 
         15.0f
     );
+}
 
-    // const auto dockspace_id = ImGui::GetID("##dockspace");
-    // ImGui::DockBuilderRemoveNode(dockspace_id);
-    // ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_DockSpace);
-    // ImGui::DockBuilderSetNodeSize(dockspace_id, ImGui::GetWindowSize());
+void Debugger::load_symbols(const char *rom_path) {
 
-    // ImGui::DockBuilderFinish(dockspace_id); 
+    auto symbols_path = std::string(rom_path);
+    auto extension_pos = symbols_path.find_last_of(".");
+
+    if(extension_pos != std::string::npos) {
+        symbols_path.erase(symbols_path.begin() + extension_pos, symbols_path.end());
+    }
+
+    symbols_path.append(".sym");
+
+    std::ifstream file(symbols_path);
+
+    if(!file.is_open())
+        return;
+
+    auto disassembly_window = std::dynamic_pointer_cast<Windows::Disassembly>(_windows.at(WindowId::Disassembly));
+
+    std::string line;
+    while(std::getline(file, line)) {
+
+        if(line.empty() || line[0] == ';')
+            continue;
+
+        // TODO: deal with banks
+        uint8_t bank;
+        uint16_t addr;
+        char label_buffer[30];
+
+        sscanf(line.c_str(), "%2s:%4hX %s", &bank, &addr, &label_buffer);
+
+        std::string label(label_buffer);
+        disassembly_window->add_label(addr, std::move(label));
+    }
 }
 
 Debugger::~Debugger() {
@@ -163,6 +200,9 @@ void Debugger::run() {
 
     SDL_Event event;
     _gb->is_running = true;
+
+    static auto window_disassembly = std::dynamic_pointer_cast<Windows::Disassembly>(_windows.at(WindowId::Disassembly));
+    static auto gb = _gb.get();
 
     while(_gb->is_running) {
 
@@ -187,16 +227,19 @@ void Debugger::run() {
                 Emulator::check_interrupts(_gb.get());
 
                 frame_ticks += _gb->cpu.ticks;
-                
-//                 if(_gb.cpu.reg.PC == _next_stop) {
-//                     _next_stop = 0;
-//                     _is_paused = true;
-//                 }
 
-//                 if(is_breakpoint(_gb.cpu.reg.PC)) {
-//                     window_disassembly().set_goto_addr(_gb.cpu.reg.PC);
-//                     _is_paused = true;
-//                 }
+                if(is_breakpoint(_gb->cpu.reg.PC)) {
+                    window_disassembly->scroll_to_address(_gb->cpu.reg.PC);
+                    _is_paused = true;
+                }
+
+                if(_next_stop_fall_thru == REG(PC) || _next_stop_jump == REG(PC)) {
+                    _next_stop_fall_thru = std::nullopt;
+                    _next_stop_jump = std::nullopt;
+
+                    window_disassembly->scroll_to_address(_gb->cpu.reg.PC);
+                    _is_paused = true;
+                }
             }
         }
 

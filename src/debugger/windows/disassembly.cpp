@@ -8,7 +8,7 @@ using namespace Windows;
 // TODO: improve performance
 
 Disassembly::Disassembly(Debugger &debugger) : Window(debugger) {
-    _address_to_scroll_to = std::nullopt;
+    _address_to_scroll_to = PROGRAM_START;
 
     _labels.emplace(PROGRAM_START, "Program Start");
     _labels.emplace(CART_HEADER_START + 4, "Cartridge Header");
@@ -34,12 +34,12 @@ void Disassembly::render() {
     ImGui::SameLine();
 
     static uint16_t selected_label_addr = _labels.begin()->first;
-    if(ImGui::BeginCombo("Label", _labels.at(selected_label_addr))) {
+    if(ImGui::BeginCombo("Label", _labels.at(selected_label_addr).c_str())) {
 
         for(const auto &[addr, name] : _labels) {
             ImGui::PushID(reinterpret_cast<void *>(addr));
 
-            if(ImGui::Selectable(name, selected_label_addr == addr))
+            if(ImGui::Selectable(name.c_str(), selected_label_addr == addr))
                 selected_label_addr = addr;
 
             ImGui::PopID();
@@ -70,7 +70,7 @@ void Disassembly::render() {
 
             for(const auto &[a, label] : _labels) {
                 if(addr == a) {
-                    ImGui::Text("%s:", label);
+                    ImGui::Text("%s:", label.c_str());
                     break;
                 }
             }
@@ -142,6 +142,11 @@ void Disassembly::draw_instr_line(uint16_t addr, const Emulator::Instruction &in
 
         ImGui::SameLine(300);
         ImGui::TextColored(Colours::disassembly, instr.disassembly, operand);
+
+        if(instr.length == 3 && _labels.find(operand) != _labels.end()) {
+            ImGui::SameLine();
+            ImGui::Text("[%s]", _labels.at(operand).c_str());
+        }
     }
     // If there is no operand (or CB opcode which have no operand)
     else {
@@ -255,7 +260,6 @@ void Disassembly::scroll_to_address(const uint16_t address) {
     _address_to_scroll_to = address;
 }
 
-void Disassembly::add_label(const uint16_t address, const char *label) {
+void Disassembly::add_label(const uint16_t address, const std::string label) {
     _labels.emplace(address, label);
 }
-

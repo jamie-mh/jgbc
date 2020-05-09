@@ -87,6 +87,7 @@ add_executable(
     ${PROJECT_SOURCE_DIR}/debugger/windows/memory.cpp
     ${PROJECT_SOURCE_DIR}/debugger/windows/palettes.cpp
     ${PROJECT_SOURCE_DIR}/debugger/windows/registers.cpp
+    ${PROJECT_SOURCE_DIR}/debugger/windows/serial.cpp
     ${PROJECT_SOURCE_DIR}/debugger/windows/stack.cpp
 
     ${PROJECT_INCLUDE_DIR}/debugger/debugger.h
@@ -104,6 +105,7 @@ add_executable(
     ${PROJECT_INCLUDE_DIR}/debugger/windows/memory.h
     ${PROJECT_INCLUDE_DIR}/debugger/windows/palettes.h
     ${PROJECT_INCLUDE_DIR}/debugger/windows/registers.h
+    ${PROJECT_INCLUDE_DIR}/debugger/windows/serial.h
     ${PROJECT_INCLUDE_DIR}/debugger/windows/stack.h
 
     ${PROJECT_LIB_DIR}/imgui/imgui.cpp

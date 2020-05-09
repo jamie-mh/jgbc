@@ -1,6 +1,7 @@
 #pragma once
 #include <map>
 #include <optional>
+#include <string>
 #include "debugger/window.h"
 
 namespace Windows {
@@ -12,11 +13,11 @@ namespace Windows {
             const char *title() const override;
 
             void scroll_to_address(uint16_t);
-            void add_label(uint16_t, const char *);
+            void add_label(uint16_t, std::string);
 
         private:
             std::optional<uint16_t> _address_to_scroll_to;
-            std::map<uint16_t, const char *> _labels;
+            std::map<uint16_t, const std::string> _labels;
 
             static void draw_region_prefix(const uint16_t addr) ;
             void draw_instr_line(uint16_t, const Emulator::Instruction &);

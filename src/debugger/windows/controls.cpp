@@ -20,8 +20,10 @@ void Controls::render() {
 
     ImGui::Text("Debugger");
 
-    if(ImGui::Button(debugger().is_paused() ? "Play" : "Pause", size))
+    if(ImGui::Button(debugger().is_paused() ? "Play" : "Pause", size)) {
         debugger().set_paused(!debugger().is_paused());
+        debugger().set_next_stop(std::nullopt, std::nullopt);
+    }
 
     if(ImGui::Button("Step Over", size))
         step_over();
@@ -45,17 +47,19 @@ void Controls::step_into() {
     const auto opcode = SREAD8(REG(PC));
 
     if(is_jump_call(opcode) || is_subroutine_call(opcode))
-        debugger().set_next_stop(SREAD16(REG(PC) + 1));
+        debugger().set_next_stop(std::nullopt, SREAD16(REG(PC) + 1));
     else if(is_jump_signed(opcode)) {
 
-        // Address just before the jump destination (done like this because the PC hasn't been incremented yet)
-        const uint16_t before_addr = REG(PC) + (int8_t) SREAD8(REG(PC) + 1);
+        const auto fall_thru_addr = REG(PC) + Emulator::find_instr(gb, REG(PC)).length;
 
-        const auto before_instr = find_instr(gb, SREAD8(before_addr));
-        debugger().set_next_stop(before_addr + before_instr.length);
+        // The PC hasn't been incremented yet, add the length of the current instruction
+        const auto operand = static_cast<int8_t>(SREAD8(REG(PC) + 1));
+        const auto jump_addr = REG(PC) + operand + Emulator::find_instr(gb, REG(PC)).length;
+
+        debugger().set_next_stop(fall_thru_addr, jump_addr);
     }
     else if(is_return(opcode))
-        debugger().set_next_stop(PEEK16());
+        debugger().set_next_stop(PEEK16(), std::nullopt);
     else
         run_to_next();
 
@@ -66,7 +70,7 @@ void Controls::step_over() {
     INIT_GB_CTX();
     const auto opcode = SREAD8(REG(PC));
 
-    if(is_subroutine_call(opcode))
+    if(is_subroutine_call(opcode) || is_jump_call(opcode) || is_jump_signed(opcode))
         run_to_next();
     else
         step_into();
@@ -77,7 +81,7 @@ void Controls::step_over() {
 void Controls::run_to_next() {
     INIT_GB_CTX();
     const auto instr = Emulator::find_instr(gb, REG(PC));
-    debugger().set_next_stop(REG(PC) + instr.length);
+    debugger().set_next_stop(REG(PC) + instr.length, std::nullopt);
 }
 
 bool Controls::is_subroutine_call(const uint8_t opcode) {
