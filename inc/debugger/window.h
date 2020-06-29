@@ -16,7 +16,7 @@ class Window {
         void set_open(bool);
         bool is_open() const;
 
-        Debugger &debugger();
+        Debugger &debugger() const;
 
     private:
         bool _is_open = true;

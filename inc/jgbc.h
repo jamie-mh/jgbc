@@ -8,8 +8,6 @@
 #include <stdbool.h>
 #include <SDL.h>
 
-#define GET_BIT(data, bit) (((data) >> (bit)) & 1)
-
 struct GameBoy_s;
 typedef struct GameBoy_s GameBoy;
 

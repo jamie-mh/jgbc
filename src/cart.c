@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
+#include <stdlib.h>
 #include "jgbc.h"
 #include "cart.h"
 #include "mmu.h"
@@ -198,7 +199,7 @@ static void copy_data(GameBoy *gb, FILE *file) {
     uint32_t position = 0;
 
     while((byte = fgetc(file)) != EOF) {
-        uint16_t bank = position / ROM_BANK_SIZE;
+        const uint16_t bank = position / ROM_BANK_SIZE;
         gb->cart.rom_banks[bank][position - (ROM_BANK_SIZE * bank)] = (uint8_t) byte;
         position++;
     }

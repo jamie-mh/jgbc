@@ -125,7 +125,7 @@ const char *IO::title() const {
     return "IO Map";
 }
 
-void IO::draw_values(const char **labels, const uint16_t *addrs, const int count) {
+void IO::draw_values(const char **labels, const uint16_t *addrs, const int count) const {
     INIT_GB_CTX();
     static const ImU32 step = 1, step_fast = 10;
 
@@ -139,7 +139,7 @@ void IO::draw_values(const char **labels, const uint16_t *addrs, const int count
     }
 }
 
-void IO::draw_registers(const char **labels, const uint16_t regis, const uint8_t *bits, const int count) {
+void IO::draw_registers(const char **labels, const uint16_t regis, const uint8_t *bits, const int count) const {
     INIT_GB_CTX();
 
     for(auto i = 0; i < count; ++i) {

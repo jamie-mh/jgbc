@@ -115,7 +115,7 @@ void Disassembly::draw_instr_line(uint16_t addr, const Emulator::Instruction &in
         ImGui::NewLine();
 
     if(debugger().is_breakpoint(addr)) {
-        const auto draw_list = ImGui::GetWindowDrawList();
+        auto *const draw_list = ImGui::GetWindowDrawList();
         draw_list->AddCircleFilled(ImVec2(line_coords.x + 16.0f, line_center), 6.0f, IM_COL32(255, 0, 0, 255));
     }
 
@@ -164,7 +164,7 @@ void Disassembly::draw_instr_line(uint16_t addr, const Emulator::Instruction &in
     }
 }
 
-void Disassembly::draw_data_line(uint16_t addr) {
+void Disassembly::draw_data_line(uint16_t addr) const {
 
     INIT_GB_CTX();
     ImGui::NewLine();
@@ -178,7 +178,7 @@ void Disassembly::draw_data_line(uint16_t addr) {
 
 void Disassembly::draw_region_prefix(const uint16_t addr) {
     ImGui::SameLine(40);
-    const auto prefix = get_region_label(addr);
+    const auto *const prefix = get_region_label(addr);
 
     if(prefix != nullptr)
         ImGui::TextColored(Colours::region, "%s: ", prefix);
@@ -227,7 +227,7 @@ const char *Disassembly::get_region_label(const uint16_t addr) {
     return nullptr;
 }
 
-uint16_t Disassembly::address_of_nth_line(const uint16_t start_addr, const size_t n) {
+uint16_t Disassembly::address_of_nth_line(const uint16_t start_addr, const size_t n) const {
     size_t count = 1;
 
     for(uint32_t addr = start_addr; addr <= 0xFFFF; count++) {
@@ -244,7 +244,7 @@ uint16_t Disassembly::address_of_nth_line(const uint16_t start_addr, const size_
     return 0;
 }
 
-size_t Disassembly::line_count(const uint16_t from_addr, const uint16_t to_addr) {
+size_t Disassembly::line_count(const uint16_t from_addr, const uint16_t to_addr) const {
     size_t count = 0;
 
     for(uint32_t addr = from_addr; addr <= to_addr;) {
@@ -264,6 +264,6 @@ void Disassembly::scroll_to_address(const uint16_t address) {
     _address_to_scroll_to = address;
 }
 
-void Disassembly::add_label(const uint16_t address, const std::string label) {
+void Disassembly::add_label(const uint16_t address, const std::string &label) {
     _labels.emplace(address, label);
 }

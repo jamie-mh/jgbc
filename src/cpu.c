@@ -1,5 +1,6 @@
 #include <assert.h>
 #include "jgbc.h"
+#include "macro.h"
 #include "mmu.h"
 #include "cpu.h"
 #include "instr.h"
@@ -43,10 +44,9 @@ void execute_instr(GameBoy *gb) {
     if(gb->cpu.is_halted)
         return;
 
-    Instruction instruction = find_instr(gb, REG(PC));
+    const Instruction instruction = find_instr(gb, REG(PC));
 
-    void (*opcode_function)();
-    opcode_function = instruction.execute;
+    void (*opcode_function)() = instruction.execute;
 
     uint8_t operand_len = instruction.length - 1;
     uint16_t operand;
@@ -76,6 +76,9 @@ void execute_instr(GameBoy *gb) {
             operand = SREAD16(instr_start + 1);
             opcode_function(gb, operand);
             break;
+
+        default:
+            ASSERT_NOT_REACHED();
     }
 }
 

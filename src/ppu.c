@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "jgbc.h"
+#include "macro.h"
 #include "mmu.h"
 #include "cpu.h"
 #include "ppu.h"
@@ -470,9 +471,10 @@ static uint16_t get_shade(const uint8_t num) {
             return DGREY;
         case 3: 
             return BLACK;
+        default:
+            ASSERT_NOT_REACHED();
     } 
 
-    assert(num <= 3);
     return BLACK;
 }
 
@@ -506,7 +508,7 @@ void palette_index_write(GameBoy *gb, const uint16_t address, const uint8_t valu
     const uint8_t index = value & PI_INDEX;
     const uint16_t colour = palette[index / 2];
 
-    uint8_t data = 0;
+    uint8_t data;
 
     // First byte of colour data
     // Contains all 5 bits of red and the lower 3 bits of green

@@ -1,5 +1,6 @@
 #include <imgui.h>
 #include <glad/glad.h>
+#include <algorithm>
 #include "debugger/debugger.h"
 #include "debugger/windows/framebuffer.h"
 

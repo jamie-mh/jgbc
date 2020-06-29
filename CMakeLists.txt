@@ -44,6 +44,7 @@ add_executable(
     ${PROJECT_INCLUDE_DIR}/cart.h
     ${PROJECT_INCLUDE_DIR}/apu.h
     ${PROJECT_INCLUDE_DIR}/main.h
+    ${PROJECT_INCLUDE_DIR}/macro.h    
 )
 
 include_directories(${SDL2_INCLUDE_DIR})
@@ -72,6 +73,7 @@ add_executable(
     ${PROJECT_INCLUDE_DIR}/mmu.h
     ${PROJECT_INCLUDE_DIR}/cart.h
     ${PROJECT_INCLUDE_DIR}/apu.h
+    ${PROJECT_INCLUDE_DIR}/macro.h    
     
     ${PROJECT_SOURCE_DIR}/debugger/main.cpp
     ${PROJECT_SOURCE_DIR}/debugger/debugger.cpp

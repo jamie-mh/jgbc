@@ -64,7 +64,7 @@ void Breakpoints::render() {
                 debugger().remove_breakpoint(bp);
 
             ImGui::SameLine();
-            ImGui::Text("%lu: ", i);
+            ImGui::Text("%zu: ", i);
             ImGui::SameLine();
             ImGui::TextColored(Colours::address, "0x%04X", bp);
             ImGui::SameLine();

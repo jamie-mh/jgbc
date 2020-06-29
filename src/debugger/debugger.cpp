@@ -153,7 +153,7 @@ void Debugger::init_imgui() const {
 void Debugger::load_symbols(const char *rom_path) {
 
     auto symbols_path = std::string(rom_path);
-    auto extension_pos = symbols_path.find_last_of(".");
+    const auto extension_pos = symbols_path.find_last_of('.');
 
     if(extension_pos != std::string::npos) {
         symbols_path.erase(symbols_path.begin() + extension_pos, symbols_path.end());
@@ -179,10 +179,10 @@ void Debugger::load_symbols(const char *rom_path) {
         uint16_t addr;
         char label_buffer[30];
 
-        sscanf(line.c_str(), "%2s:%4hX %s", &bank, &addr, &label_buffer);
+        sscanf_s(line.c_str(), "%2s:%4hX %s", &bank, &addr, &label_buffer);
 
         std::string label(label_buffer);
-        disassembly_window->add_label(addr, std::move(label));
+        disassembly_window->add_label(addr, label);
     }
 }
 
@@ -202,7 +202,7 @@ void Debugger::run() {
     _gb->is_running = true;
 
     static auto window_disassembly = std::dynamic_pointer_cast<Windows::Disassembly>(_windows.at(WindowId::Disassembly));
-    static auto gb = _gb.get();
+    static auto *gb = _gb.get();
 
     while(_gb->is_running) {
 
@@ -252,7 +252,7 @@ void Debugger::run() {
     Emulator::save_ram(_gb.get());
 }
 
-void Debugger::handle_event(SDL_Event event) {
+void Debugger::handle_event(SDL_Event event) const {
 
     ImGui_ImplSDL2_ProcessEvent(&event);
 

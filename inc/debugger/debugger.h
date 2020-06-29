@@ -68,5 +68,5 @@ class Debugger final {
         void init_imgui() const;
         void load_symbols(const char *);
 
-        void handle_event(SDL_Event);
+        void handle_event(SDL_Event) const;
 };

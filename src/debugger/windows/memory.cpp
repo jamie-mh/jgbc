@@ -17,7 +17,7 @@ void Memory::render() {
 
     if(ImGui::BeginCombo("Region", _labels[_selected_idx], 0)) {
         for(size_t i = 0; i < REGION_COUNT; i++) {
-            bool is_selected = i == _selected_idx;
+            const auto is_selected = i == _selected_idx;
 
             if(ImGui::Selectable(_labels[i], is_selected))
                 _selected_idx = i;

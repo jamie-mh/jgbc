@@ -17,17 +17,16 @@ void Stack::render() {
     }
 
     INIT_GB_CTX();
-    const auto draw_list = ImGui::GetWindowDrawList();
+    auto *const draw_list = ImGui::GetWindowDrawList();
 
     ImGui::BeginChild("##scroll");
 
     ImGuiListClipper clipper(0xFFFF - REG(SP));
-    uint16_t addr;
 
     while(clipper.Step()) {
         for(auto i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
 
-            addr = REG(SP) + i;
+            const uint16_t addr = REG(SP) + i;
 
             if(addr == REG(SP)) {
                 const auto line_coords = ImGui::GetCursorScreenPos();

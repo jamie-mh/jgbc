@@ -1,6 +1,6 @@
 #include "debugger/window.h"
 
-Window::Window(Debugger &debugger) : _is_open(true), _debugger(debugger) {
+Window::Window(Debugger &debugger) : _debugger(debugger) {
 
 }
 
@@ -12,6 +12,6 @@ bool Window::is_open() const {
     return _is_open;
 }
 
-Debugger &Window::debugger() {
+Debugger &Window::debugger() const {
     return _debugger;
 }

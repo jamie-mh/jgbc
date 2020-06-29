@@ -79,7 +79,7 @@ void Controls::step_over() {
     debugger().set_paused(false);
 }
 
-void Controls::run_to_next() {
+void Controls::run_to_next() const {
     INIT_GB_CTX();
     const auto instr = Emulator::find_instr(gb, REG(PC));
     debugger().set_next_stop(REG(PC) + instr.length, std::nullopt);

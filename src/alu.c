@@ -1,4 +1,5 @@
 #include "jgbc.h"
+#include "macro.h"
 #include "cpu.h"
 #include "alu.h"
 

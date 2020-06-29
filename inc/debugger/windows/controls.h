@@ -12,7 +12,7 @@ namespace Windows {
         private:
             void step_into();
             void step_over();
-            void run_to_next();
+            void run_to_next() const;
 
             static bool is_subroutine_call(uint8_t opcode) ;
             static bool is_jump_call(uint8_t opcode) ;

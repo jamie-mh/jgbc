@@ -1,4 +1,7 @@
+#include <stdlib.h>
+#include <assert.h>
 #include "jgbc.h"
+#include "macro.h"
 #include "ppu.h"
 #include "cpu.h"
 #include "mmu.h"
@@ -277,5 +280,8 @@ static void hdma_write(GameBoy *gb, const uint16_t addr, const uint8_t value) {
             gb->mmu.hdma.mode = (value & HDMA5_MODE) >> 7;
             gb->mmu.hdma.is_active = true;
             break;
+
+        default:
+            ASSERT_NOT_REACHED();
     }
 }

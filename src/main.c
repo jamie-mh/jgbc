@@ -1,7 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
 #include "jgbc.h"
 #include "main.h"
+
 #include "ppu.h"
 #include "cpu.h"
 #include "apu.h"
@@ -20,7 +23,7 @@ static CliArgs parse_cli_args(int, const char **);
 
 int main(const int argc, const char **argv) {
 
-    CliArgs args = parse_cli_args(argc, argv);
+    const CliArgs args = parse_cli_args(argc, argv);
 
     if(args.should_show_help) {
         print_help();
