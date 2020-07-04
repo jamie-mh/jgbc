@@ -217,6 +217,9 @@ typedef struct {
 
     uint8_t downsample_clock;
 
+    uint8_t left_volume;
+    uint8_t right_volume;
+
     uint8_t channels[4];
     bool left_enabled[4];
     bool right_enabled[4];

@@ -65,6 +65,9 @@ void reset_apu(GameBoy *gb) {
     gb->apu.frame_sequencer.step = 0;
     gb->apu.downsample_clock = 0;
 
+    gb->apu.left_volume = 0;
+    gb->apu.right_volume = 0;
+
     gb->apu.buffer_position = 0;
     memset(gb->apu.buffer, 0, gb->apu.audio_spec.size);
 }
@@ -174,12 +177,6 @@ void update_apu(GameBoy *gb) {
         if(apu->downsample_clock++ >= DOWNSAMPLE_DIVIDER) {
             apu->downsample_clock = 0;
 
-            float volume_left = (SREAD8(NR50) & VOL_LEFT) >> 4;
-            volume_left /= 7;
-
-            float volume_right = SREAD8(NR50) & VOL_RIGHT;
-            volume_right /= 7;
-
             float left = 0.0f;
             float right = 0.0f;
 
@@ -192,8 +189,8 @@ void update_apu(GameBoy *gb) {
                     right += apu->channels[j];
             }
 
-            left *= volume_left;
-            right *= volume_right;
+            left *= (float) gb->apu.left_volume / 7.f;
+            right *= (float) gb->apu.right_volume / 7.f;
 
             apu->buffer[apu->buffer_position] = left / 60.0f;
             apu->buffer[apu->buffer_position + 1] = right / 60.0f;
@@ -248,6 +245,13 @@ void audio_register_write(GameBoy *gb, const uint16_t address, const uint8_t val
             read_noise(gb, address, value);
             break;
 
+        // Channel control
+        case NR50:
+            gb->apu.left_volume = (value & VOL_LEFT) >> 4;
+            gb->apu.right_volume = value & VOL_RIGHT;
+            break;
+
+        // Channel enable
         case NR51:
             gb->apu.right_enabled[CHANNEL_NOISE] = (value & SND_4_TO_SO2) >> 7;
             gb->apu.right_enabled[CHANNEL_WAVE] = (value & SND_3_TO_SO2) >> 6;
@@ -262,9 +266,7 @@ void audio_register_write(GameBoy *gb, const uint16_t address, const uint8_t val
 
         case NR52:
             gb->apu.enabled = (value & SND_ENABLED);
-
-        default:
-            ASSERT_NOT_REACHED();
+            break;
     }
 }
 
@@ -327,9 +329,6 @@ static void read_square(GameBoy *gb, const uint16_t address, const uint8_t value
             square->frequency = ((value & CHANNEL_FREQUENCY_MSB) << 8) | (square->frequency & 0xFF);
             if(value & CHANNEL_TRIGGER) trigger_square(gb, idx);
             break;
-
-        default:
-            ASSERT_NOT_REACHED();
     }
 }
 
@@ -421,7 +420,7 @@ static void read_wave(GameBoy *gb, const uint16_t address, const uint8_t value) 
             break;
 
         default:
-            ASSERT_NOT_REACHED();
+            break;
     }
 }
 
@@ -493,9 +492,6 @@ static void read_noise(GameBoy *gb, const uint16_t address, const uint8_t value)
             noise->length.enabled = (value & CHANNEL_LENGTH_ENABLE) >> 6;
             if(value & CHANNEL_TRIGGER) trigger_noise(gb);
             break;
-
-        default:
-            ASSERT_NOT_REACHED();
     }
 }
 
