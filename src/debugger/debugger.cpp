@@ -177,9 +177,9 @@ void Debugger::load_symbols(const char *rom_path) {
         // TODO: deal with banks
         uint8_t bank;
         uint16_t addr;
-        char label_buffer[30];
+        char label_buffer[101];
 
-        sscanf_s(line.c_str(), "%2s:%4hX %s", &bank, &addr, &label_buffer);
+        sscanf(line.c_str(), "%hhd:%4hX %100s", &bank, &addr, label_buffer);
 
         std::string label(label_buffer);
         disassembly_window->add_label(addr, label);
