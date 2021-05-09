@@ -93,10 +93,8 @@ static void reset_square_wave(GameBoy *gb, const uint8_t idx) {
     square->envelope.current_volume = 0;
     square->envelope.mode = Decrease;
 
-    square->sweep.enabled = false;
     square->sweep.period = 0;
     square->sweep.shift = 0;
-    square->sweep.current_frequency = 0;
     square->sweep.mode = Addition;
 }
 
@@ -150,7 +148,7 @@ void update_apu(GameBoy *gb) {
             switch(gb->apu.frame_sequencer.step) {
                 case 2:
                 case 6:
-                    /*update_square_sweep(gb);*/
+                    update_square_sweep(gb);
                 case 0:
                 case 4:
                     update_length(&apu->square_waves[0].length, &apu->square_waves[0].enabled);
@@ -370,10 +368,25 @@ static void update_square_sweep(GameBoy *gb) {
 
     SquareWave *square = &gb->apu.square_waves[0];
 
-    if(!square->sweep.enabled || square->sweep.period == 0)
+    if(square->sweep.period == 0 || square->sweep.shift == 0)
         return;
 
-    // TODO: Implement
+    uint16_t frequency = square->frequency;
+    frequency = frequency + (frequency >> square->sweep.shift);
+
+    if(frequency >= 2048) {
+        square->enabled = false;
+        return;
+    }
+
+    square->frequency = frequency;
+    SWRITE8(NR13, (frequency & 0xFF00) >> 8);
+    SWRITE8(NR14, (SREAD8(NR14) & ~CHANNEL_FREQUENCY_MSB) | ((frequency >> 8) & CHANNEL_FREQUENCY_MSB));
+
+    frequency = frequency + (frequency >> square->sweep.shift);
+
+    if(frequency >= 2048)
+        square->enabled = false;
 }
 
 static void trigger_square(GameBoy *gb, const uint8_t idx) {
@@ -387,13 +400,6 @@ static void trigger_square(GameBoy *gb, const uint8_t idx) {
 
     square->clock = (2048 - square->frequency) * 4;
     square->envelope.current_volume = square->envelope.initial_volume;
-
-    square->sweep.current_frequency = square->frequency;
-    // sweep timer reset
-    square->sweep.enabled = (square->sweep.period > 0 || square->sweep.shift > 0);
-
-    /*if(square->sweep.shift > 0)*/
-        // frequency calculation and overflow check
 }
 
 static void read_wave(GameBoy *gb, const uint16_t address, const uint8_t value) {

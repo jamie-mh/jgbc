@@ -155,11 +155,9 @@ typedef struct {
     bool dac_enabled;
 
     struct {
-        bool enabled;
         uint8_t period;
         SweepMode mode;
         uint8_t shift;
-        uint16_t current_frequency;
     }
     sweep;
 
