@@ -120,7 +120,7 @@ typedef struct {
     }
     hdma;
 
-    void (*serial_write_handler)(uint8_t);
+    void (*serial_write_handler)(const uint8_t);
 }
 MMU;
 
