@@ -538,16 +538,18 @@ static void update_noise(GameBoy *gb) {
 
         const uint8_t new_bit = (GET_BIT(noise->lfsr, 1) ^ GET_BIT(noise->lfsr, 0));
 
-        noise->lfsr = noise->lfsr >> 1;
+        noise->lfsr >>= 1;
         noise->lfsr |= (new_bit << 14);
 
-        if(noise->width_mode == 1)
+        if(noise->width_mode == 1) {
+            noise->lfsr &= ~(1 << 5);
             noise->lfsr |= (new_bit << 5);
+        }
 
         noise->last_result = !GET_BIT(noise->lfsr, 0);
     }
 
-    gb->apu.channels[CHANNEL_NOISE] = noise->last_result * noise->envelope.current_volume; 
+    gb->apu.channels[CHANNEL_NOISE] = noise->last_result * noise->envelope.current_volume;
 }
 
 static void trigger_noise(GameBoy *gb) {
