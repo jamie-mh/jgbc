@@ -474,8 +474,6 @@ static uint16_t get_shade(const uint8_t num) {
         default:
             ASSERT_NOT_REACHED();
     } 
-
-    return BLACK;
 }
 
 // Modifies a table to add the color shades for bg tiles according to the palette register provided
