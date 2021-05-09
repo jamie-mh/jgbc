@@ -38,6 +38,7 @@
 #define CHANNEL_FREQUENCY_MSB 0x7
 
 // Square Wave 2
+#define NR20 0xFF15
 #define NR21 0xFF16
 #define NR22 0xFF17
 #define NR23 0xFF18
@@ -58,6 +59,7 @@
 #define WAVE_TABLE_START 0xFF30
 
 // Noise
+#define NR40 0xFF1F
 #define NR41 0xFF20
 #define NR42 0xFF21
 

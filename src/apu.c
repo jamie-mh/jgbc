@@ -219,6 +219,7 @@ void audio_register_write(GameBoy *gb, const uint16_t address, const uint8_t val
             break;
 
         // Square Wave 2
+        case NR20: break;
         case NR21:
         case NR22:
         case NR23:
@@ -236,6 +237,7 @@ void audio_register_write(GameBoy *gb, const uint16_t address, const uint8_t val
             break;
 
         // Noise
+        case NR40: break;
         case NR41:
         case NR42:
         case NR43:
