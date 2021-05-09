@@ -19,7 +19,7 @@ namespace Windows {
             std::optional<uint16_t> _address_to_scroll_to;
             std::map<uint16_t, const std::string> _labels;
 
-            static void draw_region_prefix(const uint16_t addr) ;
+            static void draw_region_prefix(uint16_t addr) ;
             void draw_instr_line(uint16_t, const Emulator::Instruction &);
             void draw_data_line(uint16_t) const;
 
