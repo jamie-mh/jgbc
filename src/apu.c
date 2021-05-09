@@ -149,6 +149,7 @@ void update_apu(GameBoy *gb) {
                 case 2:
                 case 6:
                     update_square_sweep(gb);
+                    // fallthrough
                 case 0:
                 case 4:
                     update_length(&apu->square_waves[0].length, &apu->square_waves[0].enabled);
