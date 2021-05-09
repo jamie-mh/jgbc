@@ -493,12 +493,12 @@ void palette_index_write(GameBoy *gb, const uint16_t address, const uint8_t valu
     assert(address == BGPI || address == OBPI);
 
     uint16_t *palette = NULL;
-    uint16_t data_reg_addr = 0;
+    uint16_t data_reg_addr;
 
     if(address == BGPI) {
         palette = gb->ppu.bg_palette;
         data_reg_addr = BGPD;
-    } else if(address == OBPI) { 
+    } else {
         palette = gb->ppu.obj_palette;
         data_reg_addr = OBPD;
     }
@@ -525,12 +525,12 @@ void palette_data_write(GameBoy *gb, const uint16_t address, const uint8_t value
     assert(address == BGPD || address == OBPD);
 
     uint16_t *palette = NULL;
-    uint16_t index_reg_addr = 0;
+    uint16_t index_reg_addr;
 
     if(address == BGPD) {
         palette = gb->ppu.bg_palette;
         index_reg_addr = BGPI;
-    } else if(address == OBPD) {
+    } else {
         palette = gb->ppu.obj_palette;
         index_reg_addr = OBPI;
     }
