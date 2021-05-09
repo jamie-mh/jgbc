@@ -17,7 +17,6 @@ static bool read_header(FILE *file, uint8_t *);
 static void alloc_banks(GameBoy *);
 static void copy_data(GameBoy *, FILE *);
 static void set_banks(GameBoy *);
-static void load_ram(GameBoy *);
 
 
 bool load_rom(GameBoy *gb, const char *path) {
@@ -57,6 +56,32 @@ bool load_rom(GameBoy *gb, const char *path) {
     return true;
 }
 
+bool load_ram(GameBoy *gb) {
+
+    if(gb->cart.ram_size == 0)
+        return true;
+
+    char filename[256 + 5];
+    STR_COPY_APPEND(filename, gb->cart.filename, ".save");
+    FILE *file = fopen(filename, "rb");
+
+    if(file == NULL)
+        return true;
+
+    uint8_t *buffer = malloc(EXTRAM_BANK_SIZE * sizeof(uint8_t));
+    size_t bytes_read = fread(buffer, sizeof(uint8_t), EXTRAM_BANK_SIZE, file);
+    fclose(file);
+
+    if(bytes_read != EXTRAM_BANK_SIZE) {
+        free(buffer);
+        return false;
+    }
+
+    memcpy(gb->cart.ram_banks[0], buffer, EXTRAM_BANK_SIZE);
+    free(buffer);
+    return true;
+}
+
 void save_ram(GameBoy *gb) {
 
     if(gb->cart.ram_size == 0)
@@ -68,21 +93,6 @@ void save_ram(GameBoy *gb) {
 
     if(file != NULL) {
         fwrite(gb->cart.ram_banks[0], sizeof(uint8_t), EXTRAM_BANK_SIZE, file);
-        fclose(file);
-    }
-}
-
-static void load_ram(GameBoy *gb) {
-
-    if(gb->cart.ram_size == 0)
-        return;
-
-    char filename[256 + 5];
-    STR_COPY_APPEND(filename, gb->cart.filename, ".save");
-    FILE *file = fopen(filename, "rb");
-
-    if(file != NULL) {
-        fread(gb->cart.ram_banks[0], sizeof(uint8_t), EXTRAM_BANK_SIZE, file);
         fclose(file);
     }
 }

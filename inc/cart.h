@@ -17,6 +17,7 @@
 
 
 bool load_rom(GameBoy *, const char *);
+bool load_ram(GameBoy *);
 void save_ram(GameBoy *);
 
 void print_cart_info(GameBoy *);

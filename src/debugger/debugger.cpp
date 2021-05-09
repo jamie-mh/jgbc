@@ -39,6 +39,9 @@ Debugger::Debugger(const char *rom_path) {
         std::exit(EXIT_FAILURE);
     }
 
+    if(!Emulator::load_ram(_gb.get()))
+        std::cerr << "ERROR: Cannot load ram (save) file" << std::endl;
+
     init_sdl();
     init_gl();
     init_imgui();

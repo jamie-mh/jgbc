@@ -51,6 +51,9 @@ int main(const int argc, const char **argv) {
         return EXIT_FAILURE;
     }
 
+    if(!load_ram(gb))
+        fprintf(stderr, "ERROR: Cannot load ram (save) file\n");
+
     if(!args.is_headless) {
         init_window(gb);
         set_window_title(gb);
