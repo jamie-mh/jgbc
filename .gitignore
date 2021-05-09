@@ -404,6 +404,12 @@ ASALocalRun/
 # MFractors (Xamarin productivity tool) working folder
 .mfractor/
 
+# Ninja
+.ninja_deps
+.ninja_log
+build.ninja
+rules.ninja
+
 *.vcxproj
 *.filters
 *.sln
@@ -417,3 +423,4 @@ out/
 CMakeSettings.json
 
 *.save
+.cmake/
