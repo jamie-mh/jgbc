@@ -267,6 +267,9 @@ void audio_register_write(GameBoy *gb, const uint16_t address, const uint8_t val
         case NR52:
             gb->apu.enabled = (value & SND_ENABLED);
             break;
+
+        default:
+            ASSERT_NOT_REACHED();
     }
 }
 
@@ -329,6 +332,9 @@ static void read_square(GameBoy *gb, const uint16_t address, const uint8_t value
             square->frequency = ((value & CHANNEL_FREQUENCY_MSB) << 8) | (square->frequency & 0xFF);
             if(value & CHANNEL_TRIGGER) trigger_square(gb, idx);
             break;
+
+        default:
+            ASSERT_NOT_REACHED();
     }
 }
 
@@ -492,6 +498,9 @@ static void read_noise(GameBoy *gb, const uint16_t address, const uint8_t value)
             noise->length.enabled = (value & CHANNEL_LENGTH_ENABLE) >> 6;
             if(value & CHANNEL_TRIGGER) trigger_noise(gb);
             break;
+
+        default:
+            ASSERT_NOT_REACHED();
     }
 }
 
