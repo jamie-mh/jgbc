@@ -9,7 +9,7 @@ namespace Windows {
             ~Framebuffer() override;
 
             void render() override;
-            const char *title() const override;
+            [[nodiscard]] const char *title() const override;
 
         private:
             GLuint _texture_id;

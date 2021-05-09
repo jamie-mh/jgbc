@@ -8,7 +8,7 @@ namespace Windows {
             explicit IO(Debugger &);
 
             void render() override;
-            const char *title() const override;
+            [[nodiscard]] const char *title() const override;
 
         private:
             void draw_values(const char **, const uint16_t *, int) const;

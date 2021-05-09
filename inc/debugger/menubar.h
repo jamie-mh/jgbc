@@ -7,5 +7,5 @@ class MenuBar final : Window {
         explicit MenuBar(Debugger &debugger);
 
         void render() override;
-        const char *title() const override;
+        [[nodiscard]] const char *title() const override;
 };

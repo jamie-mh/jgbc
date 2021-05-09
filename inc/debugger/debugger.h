@@ -27,12 +27,12 @@ class Debugger final {
 
         std::shared_ptr<Emulator::GameBoy> &gb();
 
-        const std::vector<uint16_t> &breakpoints() const;
-        bool is_breakpoint(uint16_t) const;
+        [[nodiscard]] const std::vector<uint16_t> &breakpoints() const;
+        [[nodiscard]] bool is_breakpoint(uint16_t) const;
         void add_breakpoint(uint16_t);
         void remove_breakpoint(uint16_t);
 
-        bool is_paused() const;
+        [[nodiscard]] bool is_paused() const;
         void set_paused(bool);
 
         void set_next_stop(std::optional<uint16_t>, std::optional<uint16_t>);

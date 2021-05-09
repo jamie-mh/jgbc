@@ -11,12 +11,12 @@ class Window {
         virtual ~Window() = default;
 
         virtual void render() = 0;
-        virtual const char *title() const = 0;
+        [[nodiscard]] virtual const char *title() const = 0;
 
         void set_open(bool);
-        bool is_open() const;
+        [[nodiscard]] bool is_open() const;
 
-        Debugger &debugger() const;
+        [[nodiscard]] Debugger &debugger() const;
 
     private:
         bool _is_open = true;

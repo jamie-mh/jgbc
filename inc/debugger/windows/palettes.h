@@ -7,6 +7,6 @@ namespace Windows {
             explicit Palettes(Debugger &);
 
             void render() override;
-            const char *title() const override;
+            [[nodiscard]] const char *title() const override;
     };
 }

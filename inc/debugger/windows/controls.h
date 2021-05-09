@@ -7,7 +7,7 @@ namespace Windows {
             explicit Controls(Debugger &);
 
             void render() override;
-            const char *title() const override;
+            [[nodiscard]] const char *title() const override;
 
         private:
             void step_into();

@@ -8,7 +8,7 @@ namespace Windows {
             explicit Memory(Debugger &);
 
             void render() override;
-            const char *title() const override;
+            [[nodiscard]] const char *title() const override;
 
         private:
             static constexpr size_t REGION_COUNT = 9;

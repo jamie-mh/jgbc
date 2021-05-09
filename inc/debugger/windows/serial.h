@@ -9,7 +9,7 @@ namespace Windows {
             explicit Serial(Debugger &);
 
             void render() override;
-            const char *title() const override;
+            [[nodiscard]] const char *title() const override;
 
             static void serial_write_handler(uint8_t);
 

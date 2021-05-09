@@ -10,7 +10,7 @@ namespace Windows {
             explicit Disassembly(Debugger &);
 
             void render() override;
-            const char *title() const override;
+            [[nodiscard]] const char *title() const override;
 
             void scroll_to_address(uint16_t);
             void add_label(uint16_t, const std::string &);
@@ -25,7 +25,7 @@ namespace Windows {
 
             static bool is_executable(uint16_t) ;
             static const char *get_region_label(uint16_t) ;
-            uint16_t address_of_nth_line(uint16_t, size_t) const;
-            size_t line_count(uint16_t, uint16_t) const;
+            [[nodiscard]] uint16_t address_of_nth_line(uint16_t, size_t) const;
+            [[nodiscard]] size_t line_count(uint16_t, uint16_t) const;
     };
 }
