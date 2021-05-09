@@ -3,7 +3,7 @@
 // Cartridge Header
 #define CART_HEADER_START 0x100
 #define CART_HEADER_END 0x14F
-#define CART_HEADER_SIZE CART_HEADER_END - CART_HEADER_START
+#define CART_HEADER_SIZE (CART_HEADER_END - CART_HEADER_START)
 
 // Cartridge Header Data Locations
 #define CART_HEADER_TITLE 0x134
