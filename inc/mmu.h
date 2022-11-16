@@ -63,7 +63,6 @@
 // Serial output
 #define SB 0xFF01
 
-
 void init_mmu(GameBoy *);
 void reset_mmu(GameBoy *);
 

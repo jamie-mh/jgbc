@@ -1,22 +1,20 @@
-#include <imgui.h>
 #include "debugger/windows/serial.h"
+#include <imgui.h>
 
 using namespace Windows;
 
 std::stringstream Serial::_buffer;
 
-Serial::Serial(Debugger &debugger) : Window(debugger) {
-
-}
+Serial::Serial(Debugger &debugger) : Window(debugger) {}
 
 void Serial::render() {
 
-    if(!ImGui::Begin(title())) {
+    if (!ImGui::Begin(title())) {
         ImGui::End();
         return;
     }
 
-    if(ImGui::Button("Clear"))
+    if (ImGui::Button("Clear"))
         _buffer.str("");
 
     ImGui::BeginChild("##scroll");
@@ -26,10 +24,6 @@ void Serial::render() {
     ImGui::End();
 }
 
-const char *Serial::title() const {
-    return "Serial Output";
-}
+const char *Serial::title() const { return "Serial Output"; }
 
-void Serial::serial_write_handler(const uint8_t data) {
-    _buffer << static_cast<char>(data);
-}
+void Serial::serial_write_handler(const uint8_t data) { _buffer << static_cast<char>(data); }

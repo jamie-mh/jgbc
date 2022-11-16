@@ -1,17 +1,15 @@
-#include <imgui.h>
-#include "debugger/debugger.h"
-#include "debugger/colours.h"
 #include "debugger/windows/stack.h"
+#include "debugger/colours.h"
+#include "debugger/debugger.h"
+#include <imgui.h>
 
 using namespace Windows;
 
-Stack::Stack(Debugger &debugger) : Window(debugger) {
-
-}
+Stack::Stack(Debugger &debugger) : Window(debugger) {}
 
 void Stack::render() {
 
-    if(!ImGui::Begin(title())) {
+    if (!ImGui::Begin(title())) {
         ImGui::End();
         return;
     }
@@ -23,12 +21,12 @@ void Stack::render() {
 
     ImGuiListClipper clipper(0xFFFF - REG(SP));
 
-    while(clipper.Step()) {
-        for(auto i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
+    while (clipper.Step()) {
+        for (auto i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
 
             const uint16_t addr = REG(SP) + i;
 
-            if(addr == REG(SP)) {
+            if (addr == REG(SP)) {
                 const auto line_coords = ImGui::GetCursorScreenPos();
                 const auto line_height = ImGui::GetTextLineHeight();
                 const auto line_center = line_coords.y + line_height / 2;
@@ -48,6 +46,4 @@ void Stack::render() {
     ImGui::End();
 }
 
-const char *Stack::title() const {
-    return "Stack";
-}
+const char *Stack::title() const { return "Stack"; }

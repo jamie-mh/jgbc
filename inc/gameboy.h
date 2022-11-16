@@ -4,9 +4,9 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
-#include <stdint.h>
-#include <stdbool.h>
 #include <SDL.h>
+#include <stdbool.h>
+#include <stdint.h>
 
 struct GameBoy_s;
 typedef struct GameBoy_s GameBoy;
@@ -47,8 +47,7 @@ typedef struct {
     uint16_t PC;
     uint16_t SP;
     bool IME;
-}
-Registers;
+} Registers;
 
 typedef struct {
     bool is_halted;
@@ -58,16 +57,14 @@ typedef struct {
     uint8_t ticks;
     uint16_t div_clock; // Divider Timer Clock
     uint16_t cnt_clock; // Timer Counter Clock
-}
-CPU;
+} CPU;
 
 typedef struct {
     uint8_t y;
     uint8_t x;
     uint8_t tile;
     uint8_t attributes;
-}
-Sprite;
+} Sprite;
 
 typedef struct {
     uint16_t *framebuffer;
@@ -81,13 +78,9 @@ typedef struct {
     SDL_Window *window;
     SDL_Renderer *renderer;
     SDL_Texture *texture;
-}
-PPU;
+} PPU;
 
-typedef enum {
-    GeneralPurposeDMA = 0, HBlankDMA = 1
-}
-HDMAMode;
+typedef enum { GeneralPurposeDMA = 0, HBlankDMA = 1 } HDMAMode;
 
 typedef struct {
     uint16_t rom_bank;
@@ -95,16 +88,16 @@ typedef struct {
     uint8_t wram_bank;
     uint8_t vram_bank;
 
-    uint8_t *rom00; // 16KB ROM Bank
-    uint8_t *romNN; // 16KB Switchable ROM Bank
-    uint8_t *vram; // 8KB Video RAM
+    uint8_t *rom00;  // 16KB ROM Bank
+    uint8_t *romNN;  // 16KB Switchable ROM Bank
+    uint8_t *vram;   // 8KB Video RAM
     uint8_t *extram; // 8KB External Ram (cartridge)
     uint8_t *wram00; // 4KB Work RAM bank 0
-    uint8_t *wramNN; // 4KB Work RAM bank 1-7 (switchable) 
-    uint8_t *oam; // 1.59KB Sprite Attribute Table
-    uint8_t *io; // 128B IO Ports
-    uint8_t *hram; // 128B High RAM
-    uint8_t *ier; // 1B Interrupt Enable Register
+    uint8_t *wramNN; // 4KB Work RAM bank 1-7 (switchable)
+    uint8_t *oam;    // 1.59KB Sprite Attribute Table
+    uint8_t *io;     // 128B IO Ports
+    uint8_t *hram;   // 128B High RAM
+    uint8_t *ier;    // 1B Interrupt Enable Register
 
     uint8_t **wram_banks; // 8x4KB WRAM Banks (GBC Only)
     uint8_t **vram_banks; // 2x8KB VRAM Banks (GBC Only)
@@ -117,38 +110,26 @@ typedef struct {
         uint8_t length;
         HDMAMode mode;
         bool is_active;
-    }
-    hdma;
+    } hdma;
 
     void (*serial_write_handler)(const uint8_t);
-}
-MMU;
+} MMU;
 
-typedef enum {
-    Decrease = 0,
-    Increase = 1
-}
-EnvelopeMode;
+typedef enum { Decrease = 0, Increase = 1 } EnvelopeMode;
 
 typedef struct {
     uint8_t initial_volume;
     uint8_t current_volume;
     EnvelopeMode mode;
     uint8_t period;
-}
-ChannelEnvelope;
+} ChannelEnvelope;
 
 typedef struct {
     bool enabled;
     uint16_t clock;
-}
-ChannelLength;
+} ChannelLength;
 
-typedef enum {
-    Addition = 0,
-    Subtraction = 1
-}
-SweepMode;
+typedef enum { Addition = 0, Subtraction = 1 } SweepMode;
 
 typedef struct {
     bool enabled;
@@ -158,22 +139,19 @@ typedef struct {
         uint8_t period;
         SweepMode mode;
         uint8_t shift;
-    }
-    sweep;
+    } sweep;
 
     struct {
         uint8_t mode;
         uint8_t step;
-    }
-    duty;
+    } duty;
 
     ChannelEnvelope envelope;
     ChannelLength length;
 
     int32_t clock;
     uint16_t frequency;
-}
-SquareWave;
+} SquareWave;
 
 typedef struct {
     bool enabled;
@@ -183,8 +161,7 @@ typedef struct {
     uint8_t position;
     uint32_t clock;
     uint16_t frequency;
-}
-Wave;
+} Wave;
 
 typedef struct {
     bool enabled;
@@ -196,8 +173,7 @@ typedef struct {
     uint16_t lfsr;
     uint32_t clock;
     uint8_t last_result;
-}
-Noise;
+} Noise;
 
 typedef struct {
     bool enabled;
@@ -210,8 +186,7 @@ typedef struct {
     struct {
         uint8_t step;
         uint16_t clock;
-    }
-    frame_sequencer;
+    } frame_sequencer;
 
     uint8_t downsample_clock;
 
@@ -225,8 +200,7 @@ typedef struct {
     SquareWave square_waves[2];
     Wave wave;
     Noise noise;
-}
-APU;
+} APU;
 
 typedef struct {
     char filename[256];
@@ -239,8 +213,7 @@ typedef struct {
 
     uint8_t **rom_banks;
     uint8_t **ram_banks;
-}
-Cart;
+} Cart;
 
 typedef struct {
     bool up;
@@ -251,8 +224,7 @@ typedef struct {
     bool select;
     bool a;
     bool b;
-}
-Input;
+} Input;
 
 struct GameBoy_s {
     bool is_running;

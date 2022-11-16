@@ -1,17 +1,17 @@
 #pragma once
 #include "debugger/window.h"
-
+#include <cstdint>
 
 namespace Windows {
-    class IO final : public Window {
-        public:
-            explicit IO(Debugger &);
+class IO final : public Window {
+public:
+    explicit IO(Debugger &);
 
-            void render() override;
-            [[nodiscard]] const char *title() const override;
+    void render() override;
+    [[nodiscard]] const char *title() const override;
 
-        private:
-            void draw_values(const char **, const uint16_t *, int) const;
-            void draw_registers(const char **, uint16_t, const uint8_t *, int) const;
-    };
+private:
+    void draw_values(const char **, const uint16_t *, int) const;
+    void draw_registers(const char **, uint16_t, const uint8_t *, int) const;
+};
 }

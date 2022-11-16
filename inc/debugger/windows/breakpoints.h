@@ -2,12 +2,12 @@
 #include "debugger/window.h"
 
 namespace Windows {
-    class Breakpoints final : public Window {
-        public:
-            explicit Breakpoints(Debugger &);
+class Breakpoints final : public Window {
+public:
+    explicit Breakpoints(Debugger &);
 
-            void render() override;
+    void render() override;
 
-            [[nodiscard]] const char *title() const override;
-    };
+    [[nodiscard]] const char *title() const override;
+};
 }

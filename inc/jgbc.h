@@ -1,6 +1,5 @@
 #pragma once
 
-
 typedef struct {
     int invalid_option_index;
 
@@ -10,5 +9,4 @@ typedef struct {
     bool should_show_help;
     bool is_headless;
     bool should_print_info;
-}
-CliArgs;
+} CliArgs;

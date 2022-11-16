@@ -7,7 +7,6 @@
 
 static void reset_hw_registers(GameBoy *);
 
-
 void init(GameBoy *gb) {
     init_mmu(gb);
     init_ppu(gb);
