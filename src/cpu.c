@@ -1,9 +1,8 @@
-#include <assert.h>
-#include "jgbc.h"
-#include "macro.h"
-#include "mmu.h"
 #include "cpu.h"
 #include "instr.h"
+#include "macro.h"
+#include "mmu.h"
+#include <assert.h>
 
 static void service_interrupt(GameBoy *, uint8_t);
 

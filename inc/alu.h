@@ -1,5 +1,7 @@
 #pragma once
 
+#include "gameboy.h"
+
 uint8_t and(GameBoy *, uint8_t, uint8_t);
 uint8_t or(GameBoy *, uint8_t, uint8_t);
 uint8_t xor(GameBoy *, uint8_t, uint8_t);

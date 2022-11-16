@@ -1,6 +1,9 @@
 #pragma once
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
+#include "gameboy.h"
+#include "cpu.h"
+
 void op_ld_a_d(GameBoy *);
 void op_nop(GameBoy *);
 void op_ld_bcp_a(GameBoy *);

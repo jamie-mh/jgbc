@@ -1,5 +1,7 @@
 #pragma once
 
+#include "gameboy.h"
+
 // Macro Shortcuts
 #define SREAD8(addr) read_byte(gb, (addr), false)
 #define SWRITE8(addr, value) write_byte(gb, (addr), (value), false)

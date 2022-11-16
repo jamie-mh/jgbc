@@ -3,7 +3,7 @@
 namespace Emulator 
 {
     extern "C" {
-        #include "jgbc.h"
+        #include "gameboy.h"
         #include "mmu.h"
         #include "cpu.h"
         #include "mbc.h"

@@ -1,7 +1,6 @@
-#include "jgbc.h"
-#include "macro.h"
-#include "cpu.h"
 #include "alu.h"
+#include "cpu.h"
+#include "macro.h"
 
 static bool did_byte_half_carry(uint8_t, uint8_t);
 static bool did_byte_full_carry(uint8_t, uint8_t);

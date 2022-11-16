@@ -1,11 +1,10 @@
-#include <stdio.h>
-#include <assert.h>
-#include <string.h>
-#include <stdlib.h>
-#include "jgbc.h"
 #include "cart.h"
-#include "mmu.h"
 #include "mbc.h"
+#include "mmu.h"
+#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define STR_COPY_APPEND(buffer, filename, ext) { \
     strcpy((buffer), (filename)); \

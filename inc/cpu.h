@@ -1,5 +1,7 @@
 #pragma once
 
+#include "gameboy.h"
+
 #define CPU_STEP 4
 #define PROGRAM_START 0x100
 

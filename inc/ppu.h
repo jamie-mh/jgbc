@@ -1,5 +1,7 @@
 #pragma once
 
+#include "gameboy.h"
+
 #define SCREEN_WIDTH 160
 #define SCREEN_HEIGHT 144
 #define FRAMERATE 60.0

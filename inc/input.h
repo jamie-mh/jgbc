@@ -1,5 +1,7 @@
 #pragma once
 
+#include "gameboy.h"
+
 #define JOYP 0xFF00
 
 // Joypad Button Bits

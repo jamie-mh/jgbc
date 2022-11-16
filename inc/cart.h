@@ -1,5 +1,7 @@
 #pragma once
 
+#include "gameboy.h"
+
 // Cartridge Header
 #define CART_HEADER_START 0x100
 #define CART_HEADER_END 0x14F

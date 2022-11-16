@@ -1,7 +1,5 @@
-#include "jgbc.h"
 #include "input.h"
 #include "mmu.h"
-
 
 void reset_input(GameBoy *gb) {
     gb->input.up = false;

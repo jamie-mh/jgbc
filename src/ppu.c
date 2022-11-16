@@ -1,11 +1,10 @@
-#include <assert.h>
-#include <string.h>
-#include <stdlib.h>
-#include "jgbc.h"
+#include "ppu.h"
+#include "cpu.h"
 #include "macro.h"
 #include "mmu.h"
-#include "cpu.h"
-#include "ppu.h"
+#include <assert.h>
+#include <stdlib.h>
+#include <string.h>
 
 static void update_render_mode(GameBoy *, uint8_t, bool);
 

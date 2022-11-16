@@ -1,12 +1,11 @@
-#include <stdlib.h>
-#include <assert.h>
-#include "jgbc.h"
-#include "macro.h"
-#include "ppu.h"
-#include "cpu.h"
 #include "mmu.h"
 #include "apu.h"
+#include "cpu.h"
 #include "input.h"
+#include "macro.h"
+#include "ppu.h"
+#include <assert.h>
+#include <stdlib.h>
 
 static uint8_t *get_memory(GameBoy *, uint16_t *);
 static bool is_accessible(GameBoy *, uint16_t);

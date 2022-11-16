@@ -1,5 +1,7 @@
 #pragma once
 
+#include "gameboy.h"
+
 #define AUDIO_SAMPLES 1024 
 #define AUDIO_CHANNELS 2
 #define SAMPLE_RATE 44100 

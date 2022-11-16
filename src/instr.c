@@ -1,8 +1,7 @@
-#include "jgbc.h"
-#include "mmu.h"
-#include "cpu.h"
-#include "alu.h"
 #include "instr.h"
+#include "alu.h"
+#include "cpu.h"
+#include "mmu.h"
 
 // 0x00: NOP (- - - -)
 void op_nop(GameBoy *gb) {

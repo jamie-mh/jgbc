@@ -1,11 +1,10 @@
-#include <string.h>
-#include <assert.h>
-#include <stdlib.h>
-#include "jgbc.h"
+#include "apu.h"
+#include "cpu.h"
 #include "macro.h"
 #include "mmu.h"
-#include "cpu.h"
-#include "apu.h"
+#include <assert.h>
+#include <stdlib.h>
+#include <string.h>
 
 static void update_envelope(ChannelEnvelope *);
 static void update_length(ChannelLength *, bool *);

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "gameboy.h"
+
 #define MBC1_RAM_ENABLE_END 0x1FFF
 #define MBC1_RAM_ENABLE_NIBBLE 0xA
 

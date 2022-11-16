@@ -1,6 +1,4 @@
-#include "jgbc.h"
 #include "mbc.h"
-
 
 void mbc1_handler(GameBoy *gb, const uint16_t address, const uint8_t value) {
 
