@@ -19,7 +19,8 @@ void Stack::render() {
 
     ImGui::BeginChild("##scroll");
 
-    ImGuiListClipper clipper(0xFFFF - REG(SP));
+    ImGuiListClipper clipper;
+    clipper.Begin(0xFFFF - REG(SP));
 
     while (clipper.Step()) {
         for (auto i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {

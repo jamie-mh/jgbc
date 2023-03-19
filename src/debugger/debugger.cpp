@@ -6,7 +6,7 @@
 #include "debugger/font.h"
 #include "glad/glad.h"
 #include "imgui/backends/imgui_impl_opengl3.h"
-#include "imgui/backends/imgui_impl_sdl.h"
+#include "imgui/backends/imgui_impl_sdl2.h"
 
 #include "debugger/windows/breakpoints.h"
 #include "debugger/windows/cart_info.h"

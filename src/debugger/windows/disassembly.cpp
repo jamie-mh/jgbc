@@ -54,7 +54,8 @@ void Disassembly::render() {
         _address_to_scroll_to = selected_label_addr;
 
     ImGui::BeginChild("##scroll");
-    ImGuiListClipper clipper(line_count(0, UINT16_MAX));
+    ImGuiListClipper clipper;
+    clipper.Begin(line_count(0, UINT16_MAX));
 
     // TODO: fix bug with display when label is placed at 0x0000
 
