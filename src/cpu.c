@@ -44,11 +44,7 @@ void execute_instr(GameBoy *gb) {
     }
 
     const Instruction instruction = find_instr(gb, REG(PC));
-
-    void (*opcode_function)() = instruction.execute;
-
     uint8_t operand_len = instruction.length - 1;
-    uint16_t operand;
 
     if (instruction.extended) {
         operand_len--;
@@ -59,21 +55,27 @@ void execute_instr(GameBoy *gb) {
     REG(PC) += instruction.length;
 
     switch (operand_len) {
-    case 0:
+    case 0: {
+        const void (*opcode_function)(GameBoy *) = instruction.execute;
         opcode_function(gb);
         break;
+    }
 
-    case 1:
+    case 1: {
         TICK(1);
-        operand = SREAD8(instr_start + 1);
+        const void (*opcode_function)(GameBoy *, const uint8_t) = instruction.execute;
+        const uint8_t operand = SREAD8(instr_start + 1);
         opcode_function(gb, (uint8_t)operand);
         break;
+    }
 
-    case 2:
+    case 2: {
         TICK(2);
-        operand = SREAD16(instr_start + 1);
+        const void (*opcode_function)(GameBoy *, const uint16_t) = instruction.execute;
+        const uint16_t operand = SREAD16(instr_start + 1);
         opcode_function(gb, operand);
         break;
+    }
 
     default:
         ASSERT_NOT_REACHED();
