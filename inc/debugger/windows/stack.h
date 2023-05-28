@@ -7,6 +7,6 @@ public:
     explicit Stack(Debugger &);
 
     void render() override;
-    [[nodiscard]] const char *title() const override;
+    [[nodiscard]] constexpr const char *title() const override;
 };
 }

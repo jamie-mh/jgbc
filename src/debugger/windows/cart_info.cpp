@@ -8,7 +8,6 @@ using namespace Windows;
 CartInfo::CartInfo(Debugger &debugger) : Window(debugger) {}
 
 void CartInfo::render() {
-
     if (!ImGui::Begin(title())) {
         ImGui::End();
         return;
@@ -37,4 +36,4 @@ void CartInfo::render() {
     ImGui::End();
 }
 
-const char *CartInfo::title() const { return "Cartridge Info"; }
+constexpr const char *CartInfo::title() const { return "Cartridge Info"; }

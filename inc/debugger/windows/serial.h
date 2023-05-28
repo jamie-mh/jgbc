@@ -9,7 +9,7 @@ public:
     explicit Serial(Debugger &);
 
     void render() override;
-    [[nodiscard]] const char *title() const override;
+    [[nodiscard]] constexpr const char *title() const override;
 
     static void serial_write_handler(uint8_t);
 

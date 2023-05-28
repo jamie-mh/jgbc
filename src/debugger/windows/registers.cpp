@@ -7,7 +7,6 @@ using namespace Windows;
 Registers::Registers(Debugger &debugger) : Window(debugger) {}
 
 void Registers::render() {
-
     if (!ImGui::Begin(title())) {
         ImGui::End();
         return;
@@ -30,8 +29,9 @@ void Registers::render() {
     for (auto i = 0; i < 6; ++i) {
         int value = *cpu_reg_addr[i];
         if (ImGui::InputScalar(cpu_reg_labels[i], ImGuiDataType_U32, &value, &step, &step_fast, "%04X",
-                               ImGuiInputTextFlags_CharsHexadecimal))
+                               ImGuiInputTextFlags_CharsHexadecimal)) {
             *cpu_reg_addr[i] = value;
+        }
     }
 
     ImGui::NextColumn();
@@ -41,13 +41,15 @@ void Registers::render() {
     for (auto i = 0; i < 5; ++i) {
         int value = io_reg_addr[i];
         if (ImGui::InputScalar(io_reg_labels[i], ImGuiDataType_U32, &value, &step, &step_fast, "%02X",
-                               ImGuiInputTextFlags_CharsHexadecimal))
+                               ImGuiInputTextFlags_CharsHexadecimal)) {
             SWRITE8(io_reg_addr[i], value);
+        }
     }
 
     bool ime = REG(IME);
-    if (ImGui::Checkbox("IME", &ime))
+    if (ImGui::Checkbox("IME", &ime)) {
         REG(IME) = ime;
+    }
 
     ImGui::Columns(1);
     ImGui::Separator();
@@ -58,20 +60,24 @@ void Registers::render() {
     bool flag_carry = FGET(FLAG_CARRY);
 
     ImGui::Text("FLAGS");
-    if (ImGui::Checkbox("Z", &flag_zero))
+    if (ImGui::Checkbox("Z", &flag_zero)) {
         FSET(FLAG_ZERO, flag_zero);
+    }
 
     ImGui::SameLine();
-    if (ImGui::Checkbox("N", &flag_subtract))
+    if (ImGui::Checkbox("N", &flag_subtract)) {
         FSET(FLAG_SUBTRACT, flag_subtract);
+    }
 
     ImGui::SameLine();
-    if (ImGui::Checkbox("H", &flag_halfcarry))
+    if (ImGui::Checkbox("H", &flag_halfcarry)) {
         FSET(FLAG_HALFCARRY, flag_halfcarry);
+    }
 
     ImGui::SameLine();
-    if (ImGui::Checkbox("C", &flag_carry))
+    if (ImGui::Checkbox("C", &flag_carry)) {
         FSET(FLAG_CARRY, flag_carry);
+    }
 
     ImGui::Separator();
     ImGui::Text("STATE");
@@ -81,4 +87,4 @@ void Registers::render() {
     ImGui::End();
 }
 
-const char *Registers::title() const { return "Registers"; }
+constexpr const char *Registers::title() const { return "Registers"; }

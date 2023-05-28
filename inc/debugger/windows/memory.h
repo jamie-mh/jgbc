@@ -9,7 +9,7 @@ public:
     explicit Memory(Debugger &);
 
     void render() override;
-    [[nodiscard]] const char *title() const override;
+    [[nodiscard]] constexpr const char *title() const override;
 
 private:
     static constexpr size_t REGION_COUNT = 9;
@@ -21,12 +21,12 @@ private:
         debugger().gb()->mmu.rom00,  debugger().gb()->mmu.romNN,  debugger().gb()->mmu.vram,
         debugger().gb()->mmu.extram, debugger().gb()->mmu.wram00, debugger().gb()->mmu.wramNN,
         debugger().gb()->mmu.oam,    debugger().gb()->mmu.io,     debugger().gb()->mmu.hram};
-    const char *_labels[REGION_COUNT] = {"ROM 00",  "ROM NN", "VRAM", "EXTRAM", "WRAM 00",
+    static constexpr const char *_labels[REGION_COUNT] = {"ROM 00",  "ROM NN", "VRAM", "EXTRAM", "WRAM 00",
                                          "WRAM NN", "OAM",    "IO",   "HRAM"};
-    const size_t _sizes[REGION_COUNT] = {ROM_BANK_SIZE,    ROM_BANK_SIZE,  VRAM_BANK_SIZE,
+    static constexpr const size_t _sizes[REGION_COUNT] = {ROM_BANK_SIZE,    ROM_BANK_SIZE,  VRAM_BANK_SIZE,
                                          EXTRAM_BANK_SIZE, WRAM_BANK_SIZE, WRAM_BANK_SIZE,
                                          OAM_SIZE,         IO_SIZE,        HRAM_SIZE};
-    const size_t _offsets[REGION_COUNT] = {ROM00_START,  ROMNN_START, VRAM_START, EXTRAM_START, WRAM00_START,
+    static constexpr const size_t _offsets[REGION_COUNT] = {ROM00_START,  ROMNN_START, VRAM_START, EXTRAM_START, WRAM00_START,
                                            WRAMNN_START, OAM_START,   IO_START,   HRAM_START};
 };
 }

@@ -7,7 +7,6 @@ using namespace Windows;
 Palettes::Palettes(Debugger &debugger) : Window(debugger) {}
 
 void Palettes::render() {
-
     if (!ImGui::Begin(title())) {
         ImGui::End();
         return;
@@ -18,12 +17,12 @@ void Palettes::render() {
     ImGui::Columns(2, nullptr, true);
 
     for (auto palette = 0; palette < 8; ++palette) {
-
         for (auto type = 0; type < 2; ++type) {
-            if (type == 0)
+            if (type == 0) {
                 ImGui::Text("BG %d: ", palette);
-            else
+            } else {
                 ImGui::Text("OBJ %d: ", palette);
+            }
 
             for (auto i = 0; i < 4; ++i) {
                 ImGui::SameLine();
@@ -47,4 +46,4 @@ void Palettes::render() {
     ImGui::End();
 }
 
-const char *Palettes::title() const { return "Palettes"; }
+constexpr const char *Palettes::title() const { return "Palettes"; }

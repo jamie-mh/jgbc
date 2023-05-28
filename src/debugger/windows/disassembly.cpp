@@ -20,7 +20,6 @@ Disassembly::Disassembly(Debugger &debugger) : Window(debugger) {
 }
 
 void Disassembly::render() {
-
     if (!ImGui::Begin(title())) {
         ImGui::End();
         return;
@@ -28,8 +27,9 @@ void Disassembly::render() {
 
     INIT_GB_CTX();
 
-    if (ImGui::Button("Goto PC"))
+    if (ImGui::Button("Goto PC")) {
         _address_to_scroll_to = REG(PC);
+    }
 
     ImGui::SameLine();
 
@@ -39,8 +39,9 @@ void Disassembly::render() {
         for (const auto &[addr, name] : _labels) {
             ImGui::PushID(reinterpret_cast<void *>(addr));
 
-            if (ImGui::Selectable(name.c_str(), selected_label_addr == addr))
+            if (ImGui::Selectable(name.c_str(), selected_label_addr == addr)) {
                 selected_label_addr = addr;
+            }
 
             ImGui::PopID();
         }
@@ -50,8 +51,9 @@ void Disassembly::render() {
 
     ImGui::SameLine();
 
-    if (ImGui::Button("Goto"))
+    if (ImGui::Button("Goto")) {
         _address_to_scroll_to = selected_label_addr;
+    }
 
     ImGui::BeginChild("##scroll");
     ImGuiListClipper clipper;
@@ -60,7 +62,6 @@ void Disassembly::render() {
     // TODO: fix bug with display when label is placed at 0x0000
 
     while (clipper.Step()) {
-
         if (_address_to_scroll_to.has_value()) {
             const auto offset = ImGui::GetTextLineHeightWithSpacing() *
                                 static_cast<float>(line_count(0, _address_to_scroll_to.value()) + _labels.size());
@@ -70,7 +71,6 @@ void Disassembly::render() {
         auto addr = address_of_nth_line(0, clipper.DisplayStart);
 
         for (auto i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
-
             for (const auto &[a, label] : _labels) {
                 if (addr == a) {
                     ImGui::Text("%s:", label.c_str());
@@ -96,10 +96,9 @@ void Disassembly::render() {
     _address_to_scroll_to = std::nullopt;
 }
 
-const char *Disassembly::title() const { return "Disassembly"; }
+constexpr const char *Disassembly::title() const { return "Disassembly"; }
 
 void Disassembly::draw_instr_line(uint16_t addr, const Emulator::Instruction &instr) {
-
     INIT_GB_CTX();
 
     const auto line_coords = ImGui::GetCursorScreenPos();
@@ -109,8 +108,9 @@ void Disassembly::draw_instr_line(uint16_t addr, const Emulator::Instruction &in
     if (addr == REG(PC)) {
         ImGui::Selectable("", true, ImGuiSelectableFlags_NoHoldingActiveID);
         ImGui::SameLine();
-    } else
+    } else {
         ImGui::NewLine();
+    }
 
     if (debugger().is_breakpoint(addr)) {
         auto *const draw_list = ImGui::GetWindowDrawList();
@@ -123,7 +123,6 @@ void Disassembly::draw_instr_line(uint16_t addr, const Emulator::Instruction &in
     ImGui::SameLine();
 
     if (instr.length > 1 && opcode != 0xCB) {
-
         uint16_t operand = 0;
         uint16_t label_addr = 0;
 
@@ -135,7 +134,6 @@ void Disassembly::draw_instr_line(uint16_t addr, const Emulator::Instruction &in
                 const auto jump_addr = addr + static_cast<int8_t>(operand);
                 label_addr = jump_addr + Emulator::find_instr(gb, jump_addr).length;
             }
-
         } else if (instr.length == 3) {
             operand = SREAD16(addr + 1);
             ImGui::TextColored(Colours::data, "%02X %02X", operand & 0xFF, (operand & 0xFF00) >> 8);
@@ -163,7 +161,6 @@ void Disassembly::draw_instr_line(uint16_t addr, const Emulator::Instruction &in
 }
 
 void Disassembly::draw_data_line(uint16_t addr) const {
-
     INIT_GB_CTX();
     ImGui::NewLine();
     draw_region_prefix(addr);
@@ -178,46 +175,68 @@ void Disassembly::draw_region_prefix(const uint16_t addr) {
     ImGui::SameLine(40);
     const auto *const prefix = get_region_label(addr);
 
-    if (prefix != nullptr)
+    if (prefix != nullptr) {
         ImGui::TextColored(Colours::region, "%s: ", prefix);
+    }
 
     ImGui::SameLine(120);
     ImGui::TextColored(Colours::address, "0x%04X", addr);
     ImGui::SameLine(200);
 }
 
-bool Disassembly::is_executable(const uint16_t addr) {
-
+constexpr bool Disassembly::is_executable(const uint16_t addr) {
     return (addr <= 0x103 || (addr > CART_HEADER_END && addr <= ROMNN_END) ||
             (addr >= EXTRAM_START && addr <= OAM_START) || (addr >= HRAM_START && addr <= HRAM_END));
 }
 
-const char *Disassembly::get_region_label(const uint16_t addr) {
-
-    if (addr <= ROM00_END)
+constexpr const char *Disassembly::get_region_label(const uint16_t addr) {
+    if (addr <= ROM00_END) {
         return "ROM00";
-    if (addr >= ROMNN_START && addr <= ROMNN_END)
+    }
+
+    if (addr >= ROMNN_START && addr <= ROMNN_END) {
         return "ROMNN";
-    if (addr >= VRAM_START && addr <= VRAM_END)
+    }
+
+    if (addr >= VRAM_START && addr <= VRAM_END) {
         return "VRAM";
-    if (addr >= EXTRAM_START && addr <= EXTRAM_END)
+    }
+
+    if (addr >= EXTRAM_START && addr <= EXTRAM_END) {
         return "EXTRAM";
-    if (addr >= WRAM00_START && addr <= WRAM00_END)
+    }
+
+    if (addr >= WRAM00_START && addr <= WRAM00_END) {
         return "WRAM00";
-    if (addr >= WRAMNN_START && addr <= WRAMNN_END)
+    }
+
+    if (addr >= WRAMNN_START && addr <= WRAMNN_END) {
         return "WRAMNN";
-    if (addr >= WRAM00_MIRROR_START && addr <= WRAM00_MIRROR_END)
+    }
+
+    if (addr >= WRAM00_MIRROR_START && addr <= WRAM00_MIRROR_END) {
         return "ECHO00";
-    if (addr >= WRAMNN_MIRROR_START && addr <= WRAMNN_MIRROR_END)
+    }
+
+    if (addr >= WRAMNN_MIRROR_START && addr <= WRAMNN_MIRROR_END) {
         return "ECHONN";
-    if (addr >= OAM_START && addr <= OAM_END)
+    }
+
+    if (addr >= OAM_START && addr <= OAM_END) {
         return "OAM";
-    if (addr >= IO_START && addr <= IO_END)
+    }
+
+    if (addr >= IO_START && addr <= IO_END) {
         return "IO";
-    if (addr >= HRAM_START && addr <= HRAM_END)
+    }
+
+    if (addr >= HRAM_START && addr <= HRAM_END) {
         return "HRAM";
-    if (addr == IE_START_END)
+    }
+
+    if (addr == IE_START_END) {
         return "IE";
+    }
 
     return nullptr;
 }
@@ -227,13 +246,15 @@ uint16_t Disassembly::address_of_nth_line(const uint16_t start_addr, const size_
 
     for (uint32_t addr = start_addr; addr <= 0xFFFF; count++) {
 
-        if (is_executable(addr))
+        if (is_executable(addr)) {
             addr += Emulator::find_instr(debugger().gb().get(), addr).length;
-        else
+        } else {
             addr++;
+        }
 
-        if (count == n)
+        if (count == n) {
             return addr;
+        }
     }
 
     return 0;
@@ -243,11 +264,11 @@ size_t Disassembly::line_count(const uint16_t from_addr, const uint16_t to_addr)
     size_t count = 0;
 
     for (uint32_t addr = from_addr; addr <= to_addr;) {
-
-        if (is_executable(addr))
+        if (is_executable(addr)) {
             addr += Emulator::find_instr(debugger().gb().get(), addr).length;
-        else
+        } else {
             addr++;
+        }
 
         count++;
     }

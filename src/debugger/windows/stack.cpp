@@ -8,7 +8,6 @@ using namespace Windows;
 Stack::Stack(Debugger &debugger) : Window(debugger) {}
 
 void Stack::render() {
-
     if (!ImGui::Begin(title())) {
         ImGui::End();
         return;
@@ -24,7 +23,6 @@ void Stack::render() {
 
     while (clipper.Step()) {
         for (auto i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
-
             const uint16_t addr = REG(SP) + i;
 
             if (addr == REG(SP)) {
@@ -47,4 +45,4 @@ void Stack::render() {
     ImGui::End();
 }
 
-const char *Stack::title() const { return "Stack"; }
+constexpr const char *Stack::title() const { return "Stack"; }

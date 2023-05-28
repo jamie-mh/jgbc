@@ -8,7 +8,7 @@ public:
     explicit IO(Debugger &);
 
     void render() override;
-    [[nodiscard]] const char *title() const override;
+    [[nodiscard]] constexpr const char *title() const override;
 
 private:
     void draw_values(const char **, const uint16_t *, int) const;

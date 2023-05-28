@@ -10,7 +10,7 @@ public:
     virtual ~Window() = default;
 
     virtual void render() = 0;
-    [[nodiscard]] virtual const char *title() const = 0;
+    [[nodiscard]] virtual constexpr const char *title() const = 0;
 
     void set_open(bool);
     [[nodiscard]] bool is_open() const;

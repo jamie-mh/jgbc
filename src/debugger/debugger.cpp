@@ -38,8 +38,9 @@ Debugger::Debugger(const char *rom_path) {
         std::exit(EXIT_FAILURE);
     }
 
-    if (!Emulator::load_ram(_gb.get()))
+    if (!Emulator::load_ram(_gb.get())) {
         std::cerr << "ERROR: Cannot load ram (save) file" << std::endl;
+    }
 
     init_sdl();
     init_gl();
@@ -73,7 +74,6 @@ void Debugger::init_sdl() {
 }
 
 void Debugger::init_gl() {
-
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
@@ -110,7 +110,6 @@ void Debugger::set_next_stop(const std::optional<uint16_t> fall_thru_addr, const
 }
 
 void Debugger::init_imgui() const {
-
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
 
@@ -188,15 +187,12 @@ void Debugger::run() {
     static auto *gb = _gb.get();
 
     while (_gb->is_running) {
-
         static const uint32_t max_ticks = CLOCK_SPEED / FRAMERATE;
 
         if (!SDL_GetQueuedAudioSize(_gb->apu.device_id)) {
-
             uint32_t frame_ticks = 0;
 
             while (!_is_paused && frame_ticks < max_ticks) {
-
                 Emulator::execute_instr(_gb.get());
                 Emulator::update_ppu(_gb.get());
 
@@ -228,15 +224,15 @@ void Debugger::run() {
 
         render();
 
-        while (SDL_PollEvent(&event))
+        while (SDL_PollEvent(&event)) {
             handle_event(event);
+        }
     }
 
     Emulator::save_ram(_gb.get());
 }
 
 void Debugger::handle_event(SDL_Event event) const {
-
     ImGui_ImplSDL2_ProcessEvent(&event);
 
     switch (event.type) {
@@ -260,7 +256,6 @@ void Debugger::handle_event(SDL_Event event) const {
 }
 
 void Debugger::render() {
-
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL2_NewFrame(_window);
     ImGui::NewFrame();
@@ -282,9 +277,11 @@ void Debugger::render() {
 
     _menu.render();
 
-    for (const auto &[_, window] : _windows)
-        if (window->is_open())
+    for (const auto &[_, window] : _windows) {
+        if (window->is_open()) {
             window->render();
+        }
+    }
 
     // ImGui::ShowDemoWindow();
     ImGui::End();
@@ -305,8 +302,9 @@ bool Debugger::is_breakpoint(const uint16_t addr) const {
 }
 
 void Debugger::add_breakpoint(const uint16_t addr) {
-    if (is_breakpoint(addr))
+    if (is_breakpoint(addr)) {
         return;
+    }
 
     _breakpoints.push_back(addr);
 }

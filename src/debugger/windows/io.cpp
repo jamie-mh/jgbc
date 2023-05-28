@@ -8,7 +8,6 @@ using namespace Windows;
 IO::IO(Debugger &debugger) : Window(debugger) {}
 
 void IO::render() {
-
     if (!ImGui::Begin(title())) {
         ImGui::End();
         return;
@@ -119,7 +118,7 @@ void IO::render() {
     ImGui::End();
 }
 
-const char *IO::title() const { return "IO Map"; }
+constexpr const char *IO::title() const { return "IO Map"; }
 
 void IO::draw_values(const char **labels, const uint16_t *addrs, const int count) const {
     INIT_GB_CTX();
@@ -131,8 +130,9 @@ void IO::draw_values(const char **labels, const uint16_t *addrs, const int count
 
         int value = SREAD8(addrs[i]);
         if (ImGui::InputScalar(labels[i], ImGuiDataType_U32, &value, &step, &step_fast, "%02X",
-                               ImGuiInputTextFlags_CharsHexadecimal))
+                               ImGuiInputTextFlags_CharsHexadecimal)) {
             WRITE8(addrs[i], value);
+        }
     }
 }
 
@@ -141,7 +141,8 @@ void IO::draw_registers(const char **labels, const uint16_t regis, const uint8_t
 
     for (auto i = 0; i < count; ++i) {
         bool checked = Emulator::read_register(gb, regis, bits[i]);
-        if (ImGui::Checkbox(labels[i], &checked))
+        if (ImGui::Checkbox(labels[i], &checked)) {
             Emulator::write_register(gb, regis, bits[i], checked);
+        }
     }
 }

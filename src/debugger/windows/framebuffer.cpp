@@ -21,7 +21,6 @@ Framebuffer::Framebuffer(Debugger &debugger) : Window(debugger) {
 Framebuffer::~Framebuffer() { glDeleteTextures(1, &_texture_id); }
 
 void Framebuffer::render() {
-
     if (!ImGui::Begin(title())) {
         ImGui::End();
         return;
@@ -38,4 +37,4 @@ void Framebuffer::render() {
     ImGui::End();
 }
 
-const char *Framebuffer::title() const { return "Framebuffer"; }
+constexpr const char *Framebuffer::title() const { return "Framebuffer"; }

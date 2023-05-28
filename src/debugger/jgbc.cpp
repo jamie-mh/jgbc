@@ -3,7 +3,6 @@
 #include <iostream>
 
 int main(const int argc, const char **argv) {
-
     if (argc != 2) {
         std::cerr << "Usage: jgbc_debugger.exe <path to rom>" << std::endl;
         return EXIT_FAILURE;
