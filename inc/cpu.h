@@ -1,5 +1,7 @@
 #pragma once
 
+#include "gameboy.h"
+
 #define CPU_STEP 4
 #define PROGRAM_START 0x100
 
@@ -13,7 +15,7 @@
 #define WRITE16(addr, value) write_short(gb, (addr), (value), true)
 
 #define FSET(flag, value) set_flag(gb, flag, value)
-#define FGET(flag) get_flag(gb, flag) 
+#define FGET(flag) get_flag(gb, flag)
 
 #define PUSH8(val) stack_push_byte(gb, val)
 #define POP8() stack_pop_byte(gb)
@@ -56,15 +58,14 @@
 #define CB_INSTRUCTION_COUNT 256
 
 // F Register Flags
-#define FLAG_ZERO 7 
-#define FLAG_SUBTRACT 6 
-#define FLAG_HALFCARRY 5 
+#define FLAG_ZERO 7
+#define FLAG_SUBTRACT 6
+#define FLAG_HALFCARRY 5
 #define FLAG_CARRY 4
 
 // CPU Speed Switching (CGB)
 #define KEY1 0xFF4D
 #define KEY1_SPEED_PREPARE 0
-
 
 typedef struct {
     const char *disassembly;
@@ -72,8 +73,7 @@ typedef struct {
     bool signed_operand;
     bool extended;
     void *execute;
-} 
-Instruction;
+} Instruction;
 
 void reset_cpu(GameBoy *gb);
 Instruction find_instr(GameBoy *, uint16_t);

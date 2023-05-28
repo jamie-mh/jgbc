@@ -2,11 +2,11 @@
 #include "debugger/window.h"
 
 namespace Windows {
-    class Stack final : public Window {
-        public:
-            explicit Stack(Debugger &);
+class Stack final : public Window {
+public:
+    explicit Stack(Debugger &);
 
-            void render() override;
-            [[nodiscard]] const char *title() const override;
-    };
+    void render() override;
+    [[nodiscard]] constexpr const char *title() const override;
+};
 }

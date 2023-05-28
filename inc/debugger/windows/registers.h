@@ -2,11 +2,11 @@
 #include "debugger/window.h"
 
 namespace Windows {
-    class Registers final : public Window {
-        public:
-            explicit Registers(Debugger &);
+class Registers final : public Window {
+public:
+    explicit Registers(Debugger &);
 
-            void render() override;
-            [[nodiscard]] const char *title() const override;
-    };
+    void render() override;
+    [[nodiscard]] constexpr const char *title() const override;
+};
 }

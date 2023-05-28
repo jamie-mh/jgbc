@@ -1,12 +1,12 @@
-#include <iostream>
-#include <fstream>
 #include <algorithm>
+#include <fstream>
+#include <iostream>
 
 #include "debugger/debugger.h"
 #include "debugger/font.h"
-#include "imgui/backends/imgui_impl_sdl.h"
-#include "imgui/backends/imgui_impl_opengl3.h"
 #include "glad/glad.h"
+#include "imgui/backends/imgui_impl_opengl3.h"
+#include "imgui/backends/imgui_impl_sdl2.h"
 
 #include "debugger/windows/breakpoints.h"
 #include "debugger/windows/cart_info.h"
@@ -19,7 +19,6 @@
 #include "debugger/windows/registers.h"
 #include "debugger/windows/serial.h"
 #include "debugger/windows/stack.h"
-
 
 Debugger::Debugger(const char *rom_path) {
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
@@ -34,13 +33,14 @@ Debugger::Debugger(const char *rom_path) {
     _gb = std::make_shared<Emulator::GameBoy>();
     Emulator::init(_gb.get());
 
-    if(!Emulator::load_rom(_gb.get(), rom_path)) {
+    if (!Emulator::load_rom(_gb.get(), rom_path)) {
         std::cerr << "ERROR: Cannot load rom file" << std::endl;
         std::exit(EXIT_FAILURE);
     }
 
-    if(!Emulator::load_ram(_gb.get()))
+    if (!Emulator::load_ram(_gb.get())) {
         std::cerr << "ERROR: Cannot load ram (save) file" << std::endl;
+    }
 
     init_sdl();
     init_gl();
@@ -69,18 +69,11 @@ Debugger::Debugger(const char *rom_path) {
 }
 
 void Debugger::init_sdl() {
-    _window = SDL_CreateWindow(
-        WINDOW_TITLE,
-        SDL_WINDOWPOS_CENTERED,
-        SDL_WINDOWPOS_CENTERED,
-        WINDOW_WIDTH,
-        WINDOW_HEIGHT,
-        SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE
-    );
+    _window = SDL_CreateWindow(WINDOW_TITLE, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH,
+                               WINDOW_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 }
 
 void Debugger::init_gl() {
-
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
@@ -92,27 +85,19 @@ void Debugger::init_gl() {
     _gl_context = SDL_GL_CreateContext(_window);
     SDL_GL_SetSwapInterval(1);
 
-    if(!gladLoadGL()) {
+    if (!gladLoadGL()) {
         std::cerr << "ERROR: Cannot load OpenGL extensions!" << std::endl;
         std::exit(EXIT_FAILURE);
     }
 }
 
-std::shared_ptr<Emulator::GameBoy> &Debugger::gb() {
-    return _gb;
-}
+std::shared_ptr<Emulator::GameBoy> &Debugger::gb() { return _gb; }
 
-std::map<Debugger::WindowId, std::shared_ptr<Window>> &Debugger::windows() {
-    return _windows;
-}
+std::map<Debugger::WindowId, std::shared_ptr<Window>> &Debugger::windows() { return _windows; }
 
-std::shared_ptr<Window> &Debugger::window(const Debugger::WindowId id) {
-    return _windows.at(id);
-}
+std::shared_ptr<Window> &Debugger::window(const Debugger::WindowId id) { return _windows.at(id); }
 
-bool Debugger::is_paused() const {
-    return _is_paused;
-}
+bool Debugger::is_paused() const { return _is_paused; }
 
 void Debugger::set_paused(const bool value) {
     _is_paused = value;
@@ -125,7 +110,6 @@ void Debugger::set_next_stop(const std::optional<uint16_t> fall_thru_addr, const
 }
 
 void Debugger::init_imgui() const {
-
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
 
@@ -144,11 +128,7 @@ void Debugger::init_imgui() const {
     style.TabRounding = 0.0f;
     style.WindowBorderSize = 0.0f;
 
-    io.Fonts->AddFontFromMemoryCompressedTTF(
-        LiberationMono_compressed_data, 
-        LiberationMono_compressed_size, 
-        15.0f
-    );
+    io.Fonts->AddFontFromMemoryCompressedTTF(LiberationMono_compressed_data, LiberationMono_compressed_size, 15.0f);
 }
 
 void Debugger::load_symbols(const char *rom_path) {
@@ -156,7 +136,7 @@ void Debugger::load_symbols(const char *rom_path) {
     auto symbols_path = std::string(rom_path);
     const auto extension_pos = symbols_path.find_last_of('.');
 
-    if(extension_pos != std::string::npos) {
+    if (extension_pos != std::string::npos) {
         symbols_path.erase(symbols_path.begin() + extension_pos, symbols_path.end());
     }
 
@@ -164,15 +144,15 @@ void Debugger::load_symbols(const char *rom_path) {
 
     std::ifstream file(symbols_path);
 
-    if(!file.is_open())
+    if (!file.is_open())
         return;
 
     auto disassembly_window = std::dynamic_pointer_cast<Windows::Disassembly>(_windows.at(WindowId::Disassembly));
 
     std::string line;
-    while(std::getline(file, line)) {
+    while (std::getline(file, line)) {
 
-        if(line.empty() || line[0] == ';')
+        if (line.empty() || line[0] == ';')
             continue;
 
         // TODO: deal with banks
@@ -202,23 +182,21 @@ void Debugger::run() {
     SDL_Event event;
     _gb->is_running = true;
 
-    static auto window_disassembly = std::dynamic_pointer_cast<Windows::Disassembly>(_windows.at(WindowId::Disassembly));
+    static auto window_disassembly =
+        std::dynamic_pointer_cast<Windows::Disassembly>(_windows.at(WindowId::Disassembly));
     static auto *gb = _gb.get();
 
-    while(_gb->is_running) {
-
+    while (_gb->is_running) {
         static const uint32_t max_ticks = CLOCK_SPEED / FRAMERATE;
 
-        if(!SDL_GetQueuedAudioSize(_gb->apu.device_id)) {
-
+        if (!SDL_GetQueuedAudioSize(_gb->apu.device_id)) {
             uint32_t frame_ticks = 0;
 
-            while(!_is_paused && frame_ticks < max_ticks) {
-
+            while (!_is_paused && frame_ticks < max_ticks) {
                 Emulator::execute_instr(_gb.get());
                 Emulator::update_ppu(_gb.get());
 
-                if(_gb->cpu.is_double_speed) {
+                if (_gb->cpu.is_double_speed) {
                     Emulator::execute_instr(_gb.get());
                     Emulator::update_ppu(_gb.get());
                 }
@@ -229,12 +207,12 @@ void Debugger::run() {
 
                 frame_ticks += _gb->cpu.ticks;
 
-                if(is_breakpoint(_gb->cpu.reg.PC)) {
+                if (is_breakpoint(_gb->cpu.reg.PC)) {
                     window_disassembly->scroll_to_address(_gb->cpu.reg.PC);
                     _is_paused = true;
                 }
 
-                if(_next_stop_fall_thru == REG(PC) || _next_stop_jump == REG(PC)) {
+                if (_next_stop_fall_thru == REG(PC) || _next_stop_jump == REG(PC)) {
                     _next_stop_fall_thru = std::nullopt;
                     _next_stop_jump = std::nullopt;
 
@@ -246,48 +224,47 @@ void Debugger::run() {
 
         render();
 
-        while(SDL_PollEvent(&event))
+        while (SDL_PollEvent(&event)) {
             handle_event(event);
+        }
     }
 
     Emulator::save_ram(_gb.get());
 }
 
 void Debugger::handle_event(SDL_Event event) const {
-
     ImGui_ImplSDL2_ProcessEvent(&event);
 
-    switch(event.type) {
-        case SDL_QUIT:
+    switch (event.type) {
+    case SDL_QUIT:
+        _gb->is_running = false;
+        break;
+
+    case SDL_WINDOWEVENT:
+        if (event.window.event == SDL_WINDOWEVENT_CLOSE)
             _gb->is_running = false;
-            break;
+        break;
 
-        case SDL_WINDOWEVENT:
-            if(event.window.event == SDL_WINDOWEVENT_CLOSE)
-                _gb->is_running = false;
-            break;
+    case SDL_KEYDOWN:
+        Emulator::set_key(_gb.get(), event.key.keysym.scancode, true);
+        break;
 
-        case SDL_KEYDOWN:
-            Emulator::set_key(_gb.get(), event.key.keysym.scancode, true);
-            break;
-
-        case SDL_KEYUP:
-            Emulator::set_key(_gb.get(), event.key.keysym.scancode, false);
-            break;
+    case SDL_KEYUP:
+        Emulator::set_key(_gb.get(), event.key.keysym.scancode, false);
+        break;
     }
 }
 
 void Debugger::render() {
-
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL2_NewFrame(_window);
     ImGui::NewFrame();
 
-    const auto flags =
-        ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDocking |
-        ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoBackground |
-        ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoCollapse |
-        ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoBringToFrontOnFocus;
+    const auto flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDocking |
+                       ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoBackground |
+                       ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoCollapse |
+                       ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_MenuBar |
+                       ImGuiWindowFlags_NoBringToFrontOnFocus;
 
     ImGui::SetNextWindowPos(ImVec2(0, 0));
     ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
@@ -300,9 +277,11 @@ void Debugger::render() {
 
     _menu.render();
 
-    for(const auto &[_, window] : _windows)
-        if(window->is_open())
+    for (const auto &[_, window] : _windows) {
+        if (window->is_open()) {
             window->render();
+        }
+    }
 
     // ImGui::ShowDemoWindow();
     ImGui::End();
@@ -323,21 +302,20 @@ bool Debugger::is_breakpoint(const uint16_t addr) const {
 }
 
 void Debugger::add_breakpoint(const uint16_t addr) {
-    if(is_breakpoint(addr))
+    if (is_breakpoint(addr)) {
         return;
+    }
 
     _breakpoints.push_back(addr);
 }
 
 void Debugger::remove_breakpoint(const uint16_t addr) {
-    for(size_t i = 0; i < _breakpoints.size(); ++i) {
-        if(_breakpoints[i] == addr) {
+    for (size_t i = 0; i < _breakpoints.size(); ++i) {
+        if (_breakpoints[i] == addr) {
             _breakpoints.erase(_breakpoints.begin() + i);
             return;
         }
     }
 }
 
-const std::vector<uint16_t>& Debugger::breakpoints() const {
-    return _breakpoints;
-}
+const std::vector<uint16_t> &Debugger::breakpoints() const { return _breakpoints; }

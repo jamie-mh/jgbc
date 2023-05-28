@@ -9,10 +9,6 @@ set(PROJECT_LIB_DIR "${PROJECT_ROOT}/lib")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_ROOT}/bin")
 set(OpenGL_GL_PREFERENCE "GLVND")
 
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    add_definitions(-Wall -Wextra -O2)
-endif()
-
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_ROOT}/cmake/")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON) 
 
@@ -22,6 +18,7 @@ find_package(OpenGL REQUIRED)
 add_executable(
     jgbc
     ${PROJECT_SOURCE_DIR}/jgbc.c
+    ${PROJECT_SOURCE_DIR}/gameboy.c
     ${PROJECT_SOURCE_DIR}/alu.c
     ${PROJECT_SOURCE_DIR}/cpu.c
     ${PROJECT_SOURCE_DIR}/input.c
@@ -31,9 +28,8 @@ add_executable(
     ${PROJECT_SOURCE_DIR}/mmu.c
     ${PROJECT_SOURCE_DIR}/cart.c
     ${PROJECT_SOURCE_DIR}/apu.c
-    ${PROJECT_SOURCE_DIR}/main.c
 
-    ${PROJECT_INCLUDE_DIR}/jgbc.h    
+    ${PROJECT_INCLUDE_DIR}/gameboy.h
     ${PROJECT_INCLUDE_DIR}/alu.h
     ${PROJECT_INCLUDE_DIR}/cpu.h
     ${PROJECT_INCLUDE_DIR}/input.h
@@ -43,8 +39,7 @@ add_executable(
     ${PROJECT_INCLUDE_DIR}/mmu.h
     ${PROJECT_INCLUDE_DIR}/cart.h
     ${PROJECT_INCLUDE_DIR}/apu.h
-    ${PROJECT_INCLUDE_DIR}/main.h
-    ${PROJECT_INCLUDE_DIR}/macro.h    
+    ${PROJECT_INCLUDE_DIR}/macro.h
 )
 
 include_directories(${SDL2_INCLUDE_DIR})
@@ -52,7 +47,7 @@ target_include_directories(jgbc PRIVATE ${PROJECT_INCLUDE_DIR})
 
 add_executable(
     jgbc_debugger
-    ${PROJECT_SOURCE_DIR}/jgbc.c
+    ${PROJECT_SOURCE_DIR}/gameboy.c
     ${PROJECT_SOURCE_DIR}/alu.c
     ${PROJECT_SOURCE_DIR}/cpu.c
     ${PROJECT_SOURCE_DIR}/input.c
@@ -63,7 +58,7 @@ add_executable(
     ${PROJECT_SOURCE_DIR}/cart.c
     ${PROJECT_SOURCE_DIR}/apu.c
 
-    ${PROJECT_INCLUDE_DIR}/jgbc.h    
+    ${PROJECT_INCLUDE_DIR}/gameboy.h
     ${PROJECT_INCLUDE_DIR}/alu.h
     ${PROJECT_INCLUDE_DIR}/cpu.h
     ${PROJECT_INCLUDE_DIR}/input.h
@@ -75,7 +70,7 @@ add_executable(
     ${PROJECT_INCLUDE_DIR}/apu.h
     ${PROJECT_INCLUDE_DIR}/macro.h    
     
-    ${PROJECT_SOURCE_DIR}/debugger/main.cpp
+    ${PROJECT_SOURCE_DIR}/debugger/jgbc.cpp
     ${PROJECT_SOURCE_DIR}/debugger/debugger.cpp
     ${PROJECT_SOURCE_DIR}/debugger/colours.cpp
     ${PROJECT_SOURCE_DIR}/debugger/menubar.cpp
@@ -118,7 +113,7 @@ add_executable(
 
     ${PROJECT_LIB_DIR}/glad/glad.c
     ${PROJECT_LIB_DIR}/imgui/backends/imgui_impl_opengl3.cpp
-    ${PROJECT_LIB_DIR}/imgui/backends/imgui_impl_sdl.cpp
+    ${PROJECT_LIB_DIR}/imgui/backends/imgui_impl_sdl2.cpp
 )
 
 set_property(TARGET jgbc_debugger PROPERTY CXX_STANDARD 17)

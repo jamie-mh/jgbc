@@ -1,8 +1,10 @@
 #pragma once
 
-uint8_t and(GameBoy *, uint8_t, uint8_t);
-uint8_t or(GameBoy *, uint8_t, uint8_t);
-uint8_t xor(GameBoy *, uint8_t, uint8_t);
+#include "gameboy.h"
+
+uint8_t and (GameBoy *, uint8_t, uint8_t);
+uint8_t or (GameBoy *, uint8_t, uint8_t);
+uint8_t xor (GameBoy *, uint8_t, uint8_t);
 
 uint8_t inc(GameBoy *, uint8_t);
 uint8_t dec(GameBoy *, uint8_t);
@@ -28,4 +30,4 @@ void test_bit(GameBoy *, uint8_t, uint8_t);
 uint8_t reset_bit(uint8_t, uint8_t);
 uint8_t set_bit(uint8_t, uint8_t);
 
-uint8_t daa(GameBoy *, uint8_t); 
+uint8_t daa(GameBoy *, uint8_t);

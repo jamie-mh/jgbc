@@ -1,8 +1,10 @@
 #pragma once
 
-#define AUDIO_SAMPLES 1024 
+#include "gameboy.h"
+
+#define AUDIO_SAMPLES 1024
 #define AUDIO_CHANNELS 2
-#define SAMPLE_RATE 44100 
+#define SAMPLE_RATE 44100
 
 #define CHANNEL_SQUARE_1 0
 #define CHANNEL_SQUARE_2 1
@@ -91,7 +93,6 @@
 #define SND_3_ON 0x4
 #define SND_2_ON 0x2
 #define SND_1_ON 0x1
-
 
 void init_apu(GameBoy *);
 void reset_apu(GameBoy *);
