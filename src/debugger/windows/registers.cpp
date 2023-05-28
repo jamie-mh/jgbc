@@ -22,7 +22,7 @@ void Registers::render() {
     ImGui::NextColumn();
     ImGui::Separator();
 
-    const char *cpu_reg_labels[6] = {"AF", "BC", "DE", "HL", "SP", "PC"};
+    static constexpr const char *cpu_reg_labels[6] = {"AF", "BC", "DE", "HL", "SP", "PC"};
     uint16_t *cpu_reg_addr[6] = {&REG(AF), &REG(BC), &REG(DE), &REG(HL), &REG(SP), &REG(PC)};
 
     const ImU32 step = 1, step_fast = 10;
@@ -35,7 +35,7 @@ void Registers::render() {
     }
 
     ImGui::NextColumn();
-    const char *io_reg_labels[5] = {"LCDC", "STAT", "LY", "IE", "IF"};
+    static constexpr const char *io_reg_labels[5] = {"LCDC", "STAT", "LY", "IE", "IF"};
     const uint16_t io_reg_addr[5] = {LCDC, STAT, LY, IE, IF};
 
     for (auto i = 0; i < 5; ++i) {
