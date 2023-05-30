@@ -247,14 +247,18 @@ void op_inc_sp(GameBoy *gb) {
 
 // 0x34: INC (HL) (Z 0 H -)
 void op_inc_hlp(GameBoy *gb) {
-    WRITE8(REG(HL), inc(gb, READ8(REG(HL))));
-    TICK(2);
+    const uint8_t hl = READ8(REG(HL));
+    TICK(1);
+    WRITE8(REG(HL), inc(gb, hl));
+    TICK(1);
 }
 
 // 0x35: DEC (HL) (Z 1 H -)
 void op_dec_hlp(GameBoy *gb) {
-    WRITE8(REG(HL), dec(gb, READ8(REG(HL))));
-    TICK(2);
+    const uint8_t hl = READ8(REG(HL));
+    TICK(1);
+    WRITE8(REG(HL), dec(gb, hl));
+    TICK(1);
 }
 
 // 0x36: LD (HL), d8 (- - - -)
@@ -1094,8 +1098,10 @@ void op_rlc_l(GameBoy *gb) { REG(L) = rotate_left_carry(gb, REG(L), true); }
 
 // 0xCB06: RLC (HL) (Z 0 0 C)
 void op_rlc_hlp(GameBoy *gb) {
-    WRITE8(REG(HL), rotate_left_carry(gb, READ8(REG(HL)), true));
-    TICK(2);
+    const uint8_t hl = READ8(REG(HL));
+    TICK(1);
+    WRITE8(REG(HL), rotate_left_carry(gb, hl, true));
+    TICK(1);
 }
 
 // 0xCB07: RLC A (Z 0 0 C)
@@ -1121,8 +1127,10 @@ void op_rrc_l(GameBoy *gb) { REG(L) = rotate_right_carry(gb, REG(L), true); }
 
 // 0xCB0E: RRC (HL) (Z 0 0 C)
 void op_rrc_hlp(GameBoy *gb) {
-    WRITE8(REG(HL), rotate_right_carry(gb, READ8(REG(HL)), true));
-    TICK(2);
+    const uint8_t hl = READ8(REG(HL));
+    TICK(1);
+    WRITE8(REG(HL), rotate_right_carry(gb, hl, true));
+    TICK(1);
 }
 
 // 0xCB0F: RRC A (Z 0 0 C)
@@ -1148,8 +1156,10 @@ void op_rl_l(GameBoy *gb) { REG(L) = rotate_left(gb, REG(L), true); }
 
 // 0xCB16: RL (HL) (Z 0 0 C)
 void op_rl_hlp(GameBoy *gb) {
-    WRITE8(REG(HL), rotate_left(gb, READ8(REG(HL)), true));
-    TICK(2);
+    const uint8_t hl = READ8(REG(HL));
+    TICK(1);
+    WRITE8(REG(HL), rotate_left(gb, hl, true));
+    TICK(1);
 }
 
 // 0xCB17: RL A (Z 0 0 C)
@@ -1175,8 +1185,10 @@ void op_rr_l(GameBoy *gb) { REG(L) = rotate_right(gb, REG(L)); }
 
 // 0xCB1E: RR (HL) (Z 0 0 C)
 void op_rr_hlp(GameBoy *gb) {
-    WRITE8(REG(HL), rotate_right(gb, READ8(REG(HL))));
-    TICK(2);
+    const uint8_t hl = READ8(REG(HL));
+    TICK(1);
+    WRITE8(REG(HL), rotate_right(gb, hl));
+    TICK(1);
 }
 
 // 0xCB1F: RR A (Z 0 0 C)
@@ -1202,8 +1214,10 @@ void op_sla_l(GameBoy *gb) { REG(L) = shift_left_arith(gb, REG(L)); }
 
 // 0xCB26: SLA (HL) (Z 0 0 C)
 void op_sla_hlp(GameBoy *gb) {
-    WRITE8(REG(HL), shift_left_arith(gb, READ8(REG(HL))));
-    TICK(2);
+    const uint8_t hl = READ8(REG(HL));
+    TICK(1);
+    WRITE8(REG(HL), shift_left_arith(gb, hl));
+    TICK(1);
 }
 
 // 0xCB27: SLA A (Z 0 0 C)
@@ -1229,8 +1243,10 @@ void op_sra_l(GameBoy *gb) { REG(L) = shift_right_arith(gb, REG(L)); }
 
 // 0xCB2E: SRA (HL) (Z 0 0 0)
 void op_sra_hlp(GameBoy *gb) {
-    WRITE8(REG(HL), shift_right_arith(gb, READ8(REG(HL))));
-    TICK(2);
+    const uint8_t hl = READ8(REG(HL));
+    TICK(1);
+    WRITE8(REG(HL), shift_right_arith(gb, hl));
+    TICK(1);
 }
 
 // 0xCB2F: SRA A (Z 0 0 0)
@@ -1256,8 +1272,10 @@ void op_swap_l(GameBoy *gb) { REG(L) = swap(gb, REG(L)); }
 
 // 0xCB36: SWAP (HL) (Z 0 0 0)
 void op_swap_hlp(GameBoy *gb) {
-    WRITE8(REG(HL), swap(gb, READ8(REG(HL))));
-    TICK(2);
+    const uint8_t hl = READ8(REG(HL));
+    TICK(1);
+    WRITE8(REG(HL), swap(gb, hl));
+    TICK(1);
 }
 
 // 0xCB37: SWAP A (Z 0 0 0)
@@ -1283,8 +1301,10 @@ void op_srl_l(GameBoy *gb) { REG(L) = shift_right_logic(gb, REG(L)); }
 
 // 0xCB3E: SRL (HL) (Z 0 0 C)
 void op_srl_hlp(GameBoy *gb) {
-    WRITE8(REG(HL), shift_right_logic(gb, READ8(REG(HL))));
-    TICK(2);
+    const uint8_t hl = READ8(REG(HL));
+    TICK(1);
+    WRITE8(REG(HL), shift_right_logic(gb, hl));
+    TICK(1);
 }
 
 // 0xCB3F: SRL A (Z 0 0 C)
@@ -1523,8 +1543,10 @@ void op_res_0_l(GameBoy *gb) { REG(L) = reset_bit(REG(L), 0); }
 
 // 0xCB86: RES 0, (HL) (- - - -)
 void op_res_0_hlp(GameBoy *gb) {
-    WRITE8(REG(HL), reset_bit(READ8(REG(HL)), 0));
-    TICK(2);
+    const uint8_t hl = READ8(REG(HL));
+    TICK(1);
+    WRITE8(REG(HL), reset_bit(hl, 0));
+    TICK(1);
 }
 
 // 0xCB87: RES 0, A (- - - -)
@@ -1550,8 +1572,10 @@ void op_res_1_l(GameBoy *gb) { REG(L) = reset_bit(REG(L), 1); }
 
 // 0xCB8E: RES 1, (HL) (- - - -)
 void op_res_1_hlp(GameBoy *gb) {
-    WRITE8(REG(HL), reset_bit(READ8(REG(HL)), 1));
-    TICK(2);
+    const uint8_t hl = READ8(REG(HL));
+    TICK(1);
+    WRITE8(REG(HL), reset_bit(hl, 1));
+    TICK(1);
 }
 
 // 0xCB8F: RES 1, A (- - - -)
@@ -1577,8 +1601,10 @@ void op_res_2_l(GameBoy *gb) { REG(L) = reset_bit(REG(L), 2); }
 
 // 0xCB96: RES 2, (HL) (- - - -)
 void op_res_2_hlp(GameBoy *gb) {
-    WRITE8(REG(HL), reset_bit(READ8(REG(HL)), 2));
-    TICK(2);
+    const uint8_t hl = READ8(REG(HL));
+    TICK(1);
+    WRITE8(REG(HL), reset_bit(hl, 2));
+    TICK(1);
 }
 
 // 0xCB97: RES 2, A (- - - -)
@@ -1604,8 +1630,10 @@ void op_res_3_l(GameBoy *gb) { REG(L) = reset_bit(REG(L), 3); }
 
 // 0xCB9E: RES 3, (HL) (- - - -)
 void op_res_3_hlp(GameBoy *gb) {
-    WRITE8(REG(HL), reset_bit(READ8(REG(HL)), 3));
-    TICK(2);
+    const uint8_t hl = READ8(REG(HL));
+    TICK(1);
+    WRITE8(REG(HL), reset_bit(hl, 3));
+    TICK(1);
 }
 
 // 0xCB9F: RES 3, A (- - - -)
@@ -1631,8 +1659,10 @@ void op_res_4_l(GameBoy *gb) { REG(L) = reset_bit(REG(L), 4); }
 
 // 0xCBA6: RES 4, (HL) (- - - -)
 void op_res_4_hlp(GameBoy *gb) {
-    WRITE8(REG(HL), reset_bit(READ8(REG(HL)), 4));
-    TICK(2);
+    const uint8_t hl = READ8(REG(HL));
+    TICK(1);
+    WRITE8(REG(HL), reset_bit(hl, 4));
+    TICK(1);
 }
 
 // 0xCBA7: RES 4, A (- - - -)
@@ -1658,8 +1688,10 @@ void op_res_5_l(GameBoy *gb) { REG(L) = reset_bit(REG(L), 5); }
 
 // 0xCBAE: RES 5, (HL) (- - - -)
 void op_res_5_hlp(GameBoy *gb) {
-    WRITE8(REG(HL), reset_bit(READ8(REG(HL)), 5));
-    TICK(2);
+    const uint8_t hl = READ8(REG(HL));
+    TICK(1);
+    WRITE8(REG(HL), reset_bit(hl, 5));
+    TICK(1);
 }
 
 // 0xCBAF: RES 5, A (- - - -)
@@ -1685,8 +1717,10 @@ void op_res_6_l(GameBoy *gb) { REG(L) = reset_bit(REG(L), 6); }
 
 // 0xCBB6: RES 6, (HL) (- - - -)
 void op_res_6_hlp(GameBoy *gb) {
-    WRITE8(REG(HL), reset_bit(READ8(REG(HL)), 6));
-    TICK(2);
+    const uint8_t hl = READ8(REG(HL));
+    TICK(1);
+    WRITE8(REG(HL), reset_bit(hl, 6));
+    TICK(1);
 }
 
 // 0xCBB7: RES 6, A (- - - -)
@@ -1712,8 +1746,10 @@ void op_res_7_l(GameBoy *gb) { REG(L) = reset_bit(REG(L), 7); }
 
 // 0xCBBE: RES 7, (HL) (- - - -)
 void op_res_7_hlp(GameBoy *gb) {
-    WRITE8(REG(HL), reset_bit(READ8(REG(HL)), 7));
-    TICK(2);
+    const uint8_t hl = READ8(REG(HL));
+    TICK(1);
+    WRITE8(REG(HL), reset_bit(hl, 7));
+    TICK(1);
 }
 
 // 0xCBBF: RES 7, A (- - - -)
@@ -1739,8 +1775,10 @@ void op_set_0_l(GameBoy *gb) { REG(L) = set_bit(REG(L), 0); }
 
 // 0xCBC6: SET 0, (HL) (- - - -)
 void op_set_0_hlp(GameBoy *gb) {
-    WRITE8(REG(HL), set_bit(READ8(REG(HL)), 0));
-    TICK(2);
+    const uint8_t hl = READ8(REG(HL));
+    TICK(1);
+    WRITE8(REG(HL), set_bit(hl, 0));
+    TICK(1);
 }
 
 // 0xCBC7: SET 0, A (- - - -)
@@ -1766,8 +1804,10 @@ void op_set_1_l(GameBoy *gb) { REG(L) = set_bit(REG(L), 1); }
 
 // 0xCBCE: SET 1, (HL) (- - - -)
 void op_set_1_hlp(GameBoy *gb) {
-    WRITE8(REG(HL), set_bit(READ8(REG(HL)), 1));
-    TICK(2);
+    const uint8_t hl = READ8(REG(HL));
+    TICK(1);
+    WRITE8(REG(HL), set_bit(hl, 1));
+    TICK(1);
 }
 
 // 0xCBCF: SET 1, A (- - - -)
@@ -1793,8 +1833,10 @@ void op_set_2_l(GameBoy *gb) { REG(L) = set_bit(REG(L), 2); }
 
 // 0xCBD6: SET 2, (HL) (- - - -)
 void op_set_2_hlp(GameBoy *gb) {
-    WRITE8(REG(HL), set_bit(READ8(REG(HL)), 2));
-    TICK(2);
+    const uint8_t hl = READ8(REG(HL));
+    TICK(1);
+    WRITE8(REG(HL), set_bit(hl, 2));
+    TICK(1);
 }
 
 // 0xCBD7: SET 2, A (- - - -)
@@ -1820,8 +1862,10 @@ void op_set_3_l(GameBoy *gb) { REG(L) = set_bit(REG(L), 3); }
 
 // 0xCBDE: SET 3, (HL) (- - - -)
 void op_set_3_hlp(GameBoy *gb) {
-    WRITE8(REG(HL), set_bit(READ8(REG(HL)), 3));
-    TICK(2);
+    const uint8_t hl = READ8(REG(HL));
+    TICK(1);
+    WRITE8(REG(HL), set_bit(hl, 3));
+    TICK(1);
 }
 
 // 0xCBDF: SET 3, A (- - - -)
@@ -1847,8 +1891,10 @@ void op_set_4_l(GameBoy *gb) { REG(L) = set_bit(REG(L), 4); }
 
 // 0xCBE6: SET 4, (HL) (- - - -)
 void op_set_4_hlp(GameBoy *gb) {
-    WRITE8(REG(HL), set_bit(READ8(REG(HL)), 4));
-    TICK(2);
+    const uint8_t hl = READ8(REG(HL));
+    TICK(1);
+    WRITE8(REG(HL), set_bit(hl, 4));
+    TICK(1);
 }
 
 // 0xCBE7: SET 4, A (- - - -)
@@ -1874,8 +1920,10 @@ void op_set_5_l(GameBoy *gb) { REG(L) = set_bit(REG(L), 5); }
 
 // 0xCBEE: SET 5, (HL) (- - - -)
 void op_set_5_hlp(GameBoy *gb) {
-    WRITE8(REG(HL), set_bit(READ8(REG(HL)), 5));
-    TICK(2);
+    const uint8_t hl = READ8(REG(HL));
+    TICK(1);
+    WRITE8(REG(HL), set_bit(hl, 5));
+    TICK(1);
 }
 
 // 0xCBEF: SET 5, A (- - - -)
@@ -1901,8 +1949,10 @@ void op_set_6_l(GameBoy *gb) { REG(L) = set_bit(REG(L), 6); }
 
 // 0xCBF6: SET 6, (HL) (- - - -)
 void op_set_6_hlp(GameBoy *gb) {
-    WRITE8(REG(HL), set_bit(READ8(REG(HL)), 6));
-    TICK(2);
+    const uint8_t hl = READ8(REG(HL));
+    TICK(1);
+    WRITE8(REG(HL), set_bit(hl, 6));
+    TICK(1);
 }
 
 // 0xCBF7: SET 6, A (- - - -)
@@ -1928,8 +1978,10 @@ void op_set_7_l(GameBoy *gb) { REG(L) = set_bit(REG(L), 7); }
 
 // 0xCBFE: SET 7, (HL) (- - - -)
 void op_set_7_hlp(GameBoy *gb) {
-    WRITE8(REG(HL), set_bit(READ8(REG(HL)), 7));
-    TICK(2);
+    const uint8_t hl = READ8(REG(HL));
+    TICK(1);
+    WRITE8(REG(HL), set_bit(hl, 7));
+    TICK(1);
 }
 
 // 0xCBFF: SET 7, A (- - - -)
