@@ -178,7 +178,6 @@ void write_byte(GameBoy *gb, uint16_t address, uint8_t value, const bool is_prog
 
         if (address == DMA) {
             sprite_dma_transfer(gb, value);
-            return;
         }
 
         if (address == DIV) {
