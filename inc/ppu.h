@@ -110,7 +110,7 @@ void init_ppu(GameBoy *);
 void reset_ppu(GameBoy *);
 void init_window(GameBoy *);
 
-void render(GameBoy *);
+void render_framebuffer(GameBoy *);
 void update_ppu(GameBoy *);
 
 void get_sprites(GameBoy *);

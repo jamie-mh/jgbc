@@ -60,7 +60,7 @@ void init_window(GameBoy *gb) {
                                         SCREEN_WIDTH, SCREEN_HEIGHT);
 }
 
-void render(GameBoy *gb) {
+void render_framebuffer(GameBoy *gb) {
     SDL_SetRenderDrawColor(gb->ppu.renderer, 0, 0, 0, 255);
     SDL_RenderClear(gb->ppu.renderer);
 
@@ -100,7 +100,7 @@ void update_ppu(GameBoy *gb) {
             WREG(IF, IEF_VBLANK, 1);
 
             if (gb->ppu.window != NULL) {
-                render(gb);
+                render_framebuffer(gb);
             }
         }
 
