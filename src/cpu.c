@@ -201,7 +201,7 @@ void set_div(GameBoy *gb, const uint16_t value) {
 static void increment_tima(GameBoy *gb) {
     const uint8_t tima = SREAD8(TIMA);
 
-    if (tima + 1 >= 256) {
+    if (tima + 1 == 256) {
         gb->cpu.div_overflow = true;
         gb->cpu.div_overflow_ticks = 0;
         SWRITE8(TIMA, 0);
