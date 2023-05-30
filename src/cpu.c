@@ -66,17 +66,19 @@ void update_cpu(GameBoy *gb) {
     }
 
     case 1: {
-        TICK(1);
-        const void (*opcode_function)(GameBoy *, const uint8_t) = instruction.execute;
         const uint8_t operand = SREAD8(instr_start + 1);
+        TICK(1);
+
+        const void (*opcode_function)(GameBoy *, const uint8_t) = instruction.execute;
         opcode_function(gb, operand);
         break;
     }
 
     case 2: {
-        TICK(2);
-        const void (*opcode_function)(GameBoy *, const uint16_t) = instruction.execute;
         const uint16_t operand = SREAD16(instr_start + 1);
+        TICK(2);
+
+        const void (*opcode_function)(GameBoy *, const uint16_t) = instruction.execute;
         opcode_function(gb, operand);
         break;
     }
