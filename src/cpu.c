@@ -5,6 +5,7 @@
 #include <assert.h>
 
 static void service_interrupt(GameBoy *, uint8_t);
+static void increment_tima(GameBoy *);
 
 void reset_cpu(GameBoy *gb) {
     REG(AF) = 0x11B0;
@@ -65,7 +66,7 @@ void execute_instr(GameBoy *gb) {
         TICK(1);
         const void (*opcode_function)(GameBoy *, const uint8_t) = instruction.execute;
         const uint8_t operand = SREAD8(instr_start + 1);
-        opcode_function(gb, (uint8_t)operand);
+        opcode_function(gb, operand);
         break;
     }
 
@@ -169,17 +170,41 @@ static void service_interrupt(GameBoy *gb, const uint8_t number) {
     Timer
 */
 
+void reset_div(GameBoy *gb) {
+    const uint8_t speed_index = SREAD8(TAC) & 0x3;
+    static const uint8_t div_bit_pos[] = { 9, 3, 5, 7 };
+
+    const uint8_t multiplexer_value = GET_BIT(gb->cpu.div_clock, div_bit_pos[speed_index]);
+    const bool current_output = multiplexer_value & RREG(TAC, TAC_STOP);
+
+    // Falling edge of DIV reset, increment TIMA
+    if (current_output) {
+        increment_tima(gb);
+    }
+
+    gb->cpu.div_clock = 0;
+    gb->cpu.cnt_clock = 0;
+}
+
+static void increment_tima(GameBoy *gb) {
+    const uint8_t curr_cnt = SREAD8(TIMA);
+    uint8_t new_cnt;
+
+    if (curr_cnt == 255) {
+        new_cnt = SREAD8(TMA);
+        WREG(IF, IEF_TIMER, 1);
+    } else {
+        new_cnt = curr_cnt + 1;
+    }
+
+    SWRITE8(TIMA, new_cnt);
+}
+
 void update_timer(GameBoy *gb) {
     gb->cpu.div_clock += gb->cpu.ticks;
 
     // The divider register updates at one 256th of the clock speed (aka 256 clocks)
-    // Reset the clock and update the register
-    if (gb->cpu.div_clock >= 256) {
-        const uint8_t curr_div = SREAD8(DIV);
-        SWRITE8(DIV, curr_div + 1);
-
-        gb->cpu.div_clock = 0;
-    }
+    SWRITE8(DIV, (gb->cpu.div_clock & 0xFF) >> 8);
 
     // The timer counter updates at the rate given in the control register
     // Although unlike the divider, it must be enabled in the control register
@@ -194,17 +219,7 @@ void update_timer(GameBoy *gb) {
         const uint16_t threshold = timer_thresholds[speed_index];
 
         while (gb->cpu.cnt_clock >= threshold) {
-            const uint8_t curr_cnt = SREAD8(TIMA);
-            uint8_t new_cnt;
-
-            if (curr_cnt + 1 == 256) {
-                new_cnt = SREAD8(TMA);
-                WREG(IF, IEF_TIMER, 1);
-            } else {
-                new_cnt = curr_cnt + 1;
-            }
-
-            SWRITE8(TIMA, new_cnt);
+            increment_tima(gb);
             gb->cpu.cnt_clock -= threshold;
         }
     }

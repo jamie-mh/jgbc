@@ -182,9 +182,7 @@ void write_byte(GameBoy *gb, uint16_t address, uint8_t value, const bool is_prog
         }
 
         if (address == DIV) {
-            gb->cpu.div_clock = 0;
-            gb->cpu.cnt_clock = 0;
-
+            reset_div(gb);
             value = 0x0;
         }
 

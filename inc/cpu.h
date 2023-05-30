@@ -90,4 +90,5 @@ void set_flag(GameBoy *, uint8_t, uint8_t);
 uint8_t get_flag(GameBoy *, uint8_t);
 
 void check_interrupts(GameBoy *);
+void reset_div(GameBoy *);
 void update_timer(GameBoy *);
