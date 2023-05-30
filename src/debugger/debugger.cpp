@@ -193,15 +193,14 @@ void Debugger::run() {
             uint32_t frame_ticks = 0;
 
             while (!_is_paused && frame_ticks < max_ticks) {
-                Emulator::execute_instr(_gb.get());
+                Emulator::update_cpu(_gb.get());
                 Emulator::update_ppu(_gb.get());
 
                 if (_gb->cpu.is_double_speed) {
-                    Emulator::execute_instr(_gb.get());
+                    Emulator::update_cpu(_gb.get());
                     Emulator::update_ppu(_gb.get());
                 }
 
-                Emulator::update_timer(_gb.get());
                 Emulator::update_apu(_gb.get());
                 Emulator::check_interrupts(_gb.get());
 

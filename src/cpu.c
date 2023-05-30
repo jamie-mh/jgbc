@@ -18,8 +18,10 @@ void reset_cpu(GameBoy *gb) {
 
     gb->cpu.is_halted = false;
     gb->cpu.is_double_speed = false;
-    gb->cpu.div_clock = 0;
-    gb->cpu.cnt_clock = 0;
+
+    gb->cpu.div = 0;
+    gb->cpu.div_overflow = false;
+    gb->cpu.div_overflow_ticks = 0;
 }
 
 /*
@@ -37,8 +39,9 @@ Instruction find_instr(GameBoy *gb, const uint16_t address) {
     }
 }
 
-void execute_instr(GameBoy *gb) {
+void update_cpu(GameBoy *gb) {
     gb->cpu.ticks = CPU_STEP;
+    tick_timer(gb, CPU_STEP);
 
     if (gb->cpu.is_halted) {
         return;
@@ -170,57 +173,54 @@ static void service_interrupt(GameBoy *gb, const uint8_t number) {
     Timer
 */
 
-void reset_div(GameBoy *gb) {
+void set_div(GameBoy *gb, const uint16_t value) {
     const uint8_t speed_index = SREAD8(TAC) & 0x3;
     static const uint8_t div_bit_pos[] = { 9, 3, 5, 7 };
 
-    const uint8_t multiplexer_value = GET_BIT(gb->cpu.div_clock, div_bit_pos[speed_index]);
-    const bool current_output = multiplexer_value & RREG(TAC, TAC_STOP);
+    const uint8_t old_mult_val = GET_BIT(gb->cpu.div, div_bit_pos[speed_index]);
+    const uint8_t new_mult_val = GET_BIT(value, div_bit_pos[speed_index]);
 
-    // Falling edge of DIV reset, increment TIMA
-    if (current_output) {
+    const uint8_t tac_state = RREG(TAC, TAC_STOP);
+    const bool old_output = old_mult_val & tac_state;
+    const bool current_output = new_mult_val & tac_state;
+
+    // Falling edge of DIV bit, increment TIMA
+    if (old_output && !current_output) {
         increment_tima(gb);
     }
 
-    gb->cpu.div_clock = 0;
-    gb->cpu.cnt_clock = 0;
+    // The divider register updates at one 256th of the clock speed (aka 256 clocks)
+    // Write the top half of the 16 bit internal divider register
+    SWRITE8(DIV, (value & 0xFF) >> 8);
+
+    gb->cpu.div = value;
 }
 
 static void increment_tima(GameBoy *gb) {
-    const uint8_t curr_cnt = SREAD8(TIMA);
-    uint8_t new_cnt;
+    const uint8_t tima = SREAD8(TIMA);
 
-    if (curr_cnt == 255) {
-        new_cnt = SREAD8(TMA);
-        WREG(IF, IEF_TIMER, 1);
+    if (tima + 1 >= 256) {
+        gb->cpu.div_overflow = true;
+        gb->cpu.div_overflow_ticks = 0;
+        SWRITE8(TIMA, 0);
     } else {
-        new_cnt = curr_cnt + 1;
+        SWRITE8(TIMA, tima + 1);
     }
-
-    SWRITE8(TIMA, new_cnt);
 }
 
-void update_timer(GameBoy *gb) {
-    gb->cpu.div_clock += gb->cpu.ticks;
+void tick_timer(GameBoy *gb, const uint8_t ticks) {
+    for (uint8_t i = 0; i < ticks; ++i) {
+        set_div(gb, gb->cpu.div + 1);
 
-    // The divider register updates at one 256th of the clock speed (aka 256 clocks)
-    SWRITE8(DIV, (gb->cpu.div_clock & 0xFF) >> 8);
+        if (gb->cpu.div_overflow) {
+            if (gb->cpu.div_overflow_ticks >= CPU_STEP) {
+                const uint8_t tma = SREAD8(TMA);
+                SWRITE8(TIMA, tma);
+                WREG(IF, IEF_TIMER, 1);
+                gb->cpu.div_overflow = false;
+            }
 
-    // The timer counter updates at the rate given in the control register
-    // Although unlike the divider, it must be enabled in the control register
-    // (0 == Stopped) (1 == Running)
-    if (RREG(TAC, TAC_STOP) == 1) {
-        gb->cpu.cnt_clock += gb->cpu.ticks;
-        const uint8_t speed_index = SREAD8(TAC) & 0x3;
-
-        static const uint16_t timer_thresholds[4] = {CLOCK_SPEED / 4096, CLOCK_SPEED / 262144, CLOCK_SPEED / 65536,
-                                                     CLOCK_SPEED / 16384};
-
-        const uint16_t threshold = timer_thresholds[speed_index];
-
-        while (gb->cpu.cnt_clock >= threshold) {
-            increment_tima(gb);
-            gb->cpu.cnt_clock -= threshold;
+            gb->cpu.div_overflow_ticks++;
         }
     }
 }

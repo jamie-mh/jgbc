@@ -81,12 +81,10 @@ static void run(GameBoy *gb) {
         uint32_t frame_ticks = 0;
 
         while (frame_ticks < max_ticks) {
-            execute_instr(gb);
-            update_timer(gb);
+            update_cpu(gb);
 
             if (gb->cpu.is_double_speed) {
-                execute_instr(gb);
-                update_timer(gb);
+                update_cpu(gb);
             }
 
             update_ppu(gb);

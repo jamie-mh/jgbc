@@ -10,7 +10,7 @@
 static uint8_t *get_memory(GameBoy *, uint16_t *);
 static bool is_accessible(GameBoy *, uint16_t);
 
-static void sprite_dma_transfer(GameBoy *gb, const uint8_t value);
+static void sprite_dma_transfer(GameBoy *gb, uint8_t value);
 static void hdma_write(GameBoy *, uint16_t, uint8_t);
 
 void init_mmu(GameBoy *gb) {
@@ -182,7 +182,7 @@ void write_byte(GameBoy *gb, uint16_t address, uint8_t value, const bool is_prog
         }
 
         if (address == DIV) {
-            reset_div(gb);
+            set_div(gb, 0);
             value = 0x0;
         }
 

@@ -6,7 +6,12 @@
 #define PROGRAM_START 0x100
 
 // Shortcut Macros
-#define TICK(T) gb->cpu.ticks += (CPU_STEP * (T))
+#define TICK(T)                                                                                                        \
+    {                                                                                                                  \
+        gb->cpu.ticks += (CPU_STEP * (T));                                                                             \
+        tick_timer(gb, (T * CPU_STEP));                                                                                           \
+    }
+
 #define REG(N) gb->cpu.reg.N
 
 #define READ8(addr) read_byte(gb, (addr), true)
@@ -77,7 +82,7 @@ typedef struct {
 
 void reset_cpu(GameBoy *gb);
 Instruction find_instr(GameBoy *, uint16_t);
-void execute_instr(GameBoy *);
+void update_cpu(GameBoy *);
 
 void stack_push_byte(GameBoy *, uint8_t);
 void stack_push_short(GameBoy *, uint16_t);
@@ -90,5 +95,5 @@ void set_flag(GameBoy *, uint8_t, uint8_t);
 uint8_t get_flag(GameBoy *, uint8_t);
 
 void check_interrupts(GameBoy *);
-void reset_div(GameBoy *);
-void update_timer(GameBoy *);
+void set_div(GameBoy *, uint16_t value);
+void tick_timer(GameBoy *, uint8_t);

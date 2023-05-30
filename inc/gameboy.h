@@ -55,8 +55,10 @@ typedef struct {
 
     Registers reg;
     uint8_t ticks;
-    uint16_t div_clock; // Divider Timer Clock
-    uint16_t cnt_clock; // Timer Counter Clock
+
+    uint16_t div;
+    bool div_overflow;
+    uint8_t div_overflow_ticks;
 } CPU;
 
 typedef struct {
