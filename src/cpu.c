@@ -149,7 +149,7 @@ void check_interrupts(GameBoy *gb) {
     const uint8_t enable = SREAD8(IE);
     const uint8_t request = SREAD8(IF);
 
-    for (int i = 0; i < 5; i++) {
+    for (uint8_t i = 0; i < 5; i++) {
         if (GET_BIT(enable, i) && GET_BIT(request, i)) {
             if (REG(IME)) {
                 service_interrupt(gb, i);
