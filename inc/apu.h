@@ -100,4 +100,4 @@ void reset_apu(GameBoy *);
 void update_apu(GameBoy *);
 
 void audio_register_write(GameBoy *, uint16_t, uint8_t);
-uint8_t audio_register_mask(uint16_t, uint8_t);
+uint8_t audio_register_read(GameBoy *, uint16_t, uint8_t);

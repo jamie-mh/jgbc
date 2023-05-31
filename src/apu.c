@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+static void disable_apu(GameBoy *gb);
+
 static void update_envelope(ChannelEnvelope *);
 static void update_length(ChannelLength *, bool *);
 
@@ -61,6 +63,20 @@ void reset_apu(GameBoy *gb) {
 
     gb->apu.buffer_position = 0;
     memset(gb->apu.buffer, 0, gb->apu.audio_spec.size);
+}
+
+static void disable_apu(GameBoy *gb) {
+    gb->apu.enabled = false;
+    gb->apu.square_waves[0].enabled = false;
+    gb->apu.square_waves[1].enabled = false;
+    gb->apu.wave.enabled = false;
+    gb->apu.noise.enabled = false;
+
+    // When APU is disabled, all registers are reset to 0
+    for (uint16_t addr = NR10; addr <= NR52; ++addr) {
+        SWRITE8(addr, 0);
+        audio_register_read(gb, addr, 0);
+    }
 }
 
 static void reset_square_wave(GameBoy *gb, const uint8_t idx) {
@@ -253,18 +269,32 @@ void audio_register_write(GameBoy *gb, const uint16_t address, const uint8_t val
         gb->apu.left_enabled[CHANNEL_SQUARE_1] = value & SND_1_TO_SO1;
         break;
 
-    case NR52:
-        gb->apu.enabled = (value & SND_ENABLED);
+    case NR52: {
+        const bool enabled = value & SND_ENABLED;
+        gb->apu.enabled = enabled;
+
+        if (!enabled) {
+            disable_apu(gb);
+        }
         break;
+    }
 
     default:
         ASSERT_NOT_REACHED();
     }
 }
 
-uint8_t audio_register_mask(const uint16_t address, const uint8_t data) {
+uint8_t audio_register_read(GameBoy *gb, const uint16_t address, uint8_t data) {
     assert(address >= NR10);
     assert(address <= NR52);
+
+    if (address == NR52) {
+        data = gb->apu.enabled << 7;
+        data |= gb->apu.square_waves[0].enabled;
+        data |= (gb->apu.square_waves[1].enabled) << 1;
+        data |= (gb->apu.wave.enabled) << 2;
+        data |= (gb->apu.noise.enabled) << 3;
+    }
 
     static const uint8_t masks[] = {
         0x80, 0x3F, 0x00, 0xFF, 0xBF, // NR10-NR14

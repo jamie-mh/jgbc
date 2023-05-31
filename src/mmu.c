@@ -149,7 +149,7 @@ uint8_t read_byte(GameBoy *gb, uint16_t address, const bool is_program) {
     }
 
     if (address >= NR10 && address <= NR52) {
-        data = audio_register_mask(address, data);
+        data = audio_register_read(gb, address, data);
     } else if (address >= UNUSED_AUDIO_START && address < WAVE_TABLE_START) {
         // Above the NR registers, all data is set to FF
         data = 0xFF;
@@ -200,6 +200,12 @@ void write_byte(GameBoy *gb, uint16_t address, uint8_t value, const bool is_prog
         }
 
         if (address >= NR10 && address <= NR52) {
+            // Ignore APU register writes when APU is disabled
+            // Unless we're changing the control register
+            if (!gb->apu.enabled && address != NR52) {
+                return;
+            }
+
             audio_register_write(gb, address, value);
         }
 
