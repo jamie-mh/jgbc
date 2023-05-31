@@ -29,7 +29,7 @@ static bool did_short_full_carry(const uint16_t a, const uint16_t b) { return ((
  *   Instruction ALU
  */
 
-uint8_t and (GameBoy * gb, const uint8_t a, const uint8_t b) {
+uint8_t and(GameBoy * gb, const uint8_t a, const uint8_t b) {
     const uint8_t result = a & b;
 
     FSET(FLAG_ZERO, result == 0);
@@ -40,7 +40,7 @@ uint8_t and (GameBoy * gb, const uint8_t a, const uint8_t b) {
     return result;
 }
 
-uint8_t or (GameBoy * gb, const uint8_t a, const uint8_t b) {
+uint8_t or(GameBoy * gb, const uint8_t a, const uint8_t b) {
     const uint8_t result = a | b;
 
     FSET(FLAG_ZERO, result == 0);

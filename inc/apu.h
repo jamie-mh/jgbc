@@ -59,6 +59,7 @@
 #define NR34 0xFF1E
 
 #define WAVE_TABLE_START 0xFF30
+#define UNUSED_AUDIO_START 0xFF27
 
 // Noise
 #define NR40 0xFF1F
@@ -97,4 +98,6 @@
 void init_apu(GameBoy *);
 void reset_apu(GameBoy *);
 void update_apu(GameBoy *);
+
 void audio_register_write(GameBoy *, uint16_t, uint8_t);
+uint8_t audio_register_mask(uint16_t, uint8_t);

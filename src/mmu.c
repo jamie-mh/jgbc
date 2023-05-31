@@ -140,10 +140,20 @@ uint8_t read_byte(GameBoy *gb, uint16_t address, const bool is_program) {
         return (!gb->mmu.hdma.is_active << 7) | (0x1F);
     }
 
-    uint8_t *mem = get_memory(gb, &address);
-    uint8_t data = mem[address];
+    uint16_t relative_addr = address;
+    const uint8_t *mem = get_memory(gb, &relative_addr);
+    uint8_t data = mem[relative_addr];
 
-    if (address == KEY1) {
+    if (address >= 0xFF27 && address <= 0xFF2F) {
+        data = 0xFF;
+    }
+
+    if (address >= NR10 && address <= NR52) {
+        data = audio_register_mask(address, data);
+    } else if (address >= UNUSED_AUDIO_START && address < WAVE_TABLE_START) {
+        // Above the NR registers, all data is set to FF
+        data = 0xFF;
+    } else if (address == KEY1) {
         data = (data & 0x7F) | (gb->cpu.is_double_speed << 7);
     }
 

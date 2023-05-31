@@ -262,6 +262,22 @@ void audio_register_write(GameBoy *gb, const uint16_t address, const uint8_t val
     }
 }
 
+uint8_t audio_register_mask(const uint16_t address, const uint8_t data) {
+    assert(address >= NR10);
+    assert(address <= NR52);
+
+    static const uint8_t masks[] = {
+        0x80, 0x3F, 0x00, 0xFF, 0xBF, // NR10-NR14
+        0xFF, 0x3F, 0x00, 0xFF, 0xBF, // NR20-NR24
+        0x7F, 0xFF, 0x9F, 0xFF, 0xBF, // NR30-NR34
+        0xFF, 0xFF, 0x00, 0x00, 0xBF, // NR40-NR44
+        0x00, 0x00, 0x70              // NR50-NR52
+    };
+
+    // OR the values when reading audio registers
+    return data | masks[address - NR10];
+}
+
 static void update_envelope(ChannelEnvelope *envelope) {
     if (envelope->period == 0) {
         return;
