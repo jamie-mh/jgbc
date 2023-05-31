@@ -1057,12 +1057,15 @@ void op_ld_hl_sppr8(GameBoy *gb, const int8_t operand) {
 }
 
 // 0xF9: LD SP, HL (- - - -)
-void op_ld_sp_hl(GameBoy *gb) { REG(SP) = REG(HL); }
+void op_ld_sp_hl(GameBoy *gb) {
+    REG(SP) = REG(HL);
+    TICK(1);
+}
 
 // 0xFA: LD A, (a16) (- - - -)
 void op_ld_a_a16p(GameBoy *gb, const uint16_t operand) {
     REG(A) = READ8(operand);
-    TICK(2);
+    TICK(1);
 }
 
 // 0xFB: EI (- - - -)
@@ -1331,7 +1334,7 @@ void op_bit_0_l(GameBoy *gb) { test_bit(gb, REG(L), 0); }
 // 0xCB46: BIT 0, (HL) (Z 0 1 -)
 void op_bit_0_hlp(GameBoy *gb) {
     test_bit(gb, READ8(REG(HL)), 0);
-    TICK(2);
+    TICK(1);
 }
 
 // 0xCB47: BIT 0, A (Z 0 1 -)
@@ -1358,7 +1361,7 @@ void op_bit_1_l(GameBoy *gb) { test_bit(gb, REG(L), 1); }
 // 0xCB4E: BIT 1, (HL) (Z 0 1 -)
 void op_bit_1_hlp(GameBoy *gb) {
     test_bit(gb, READ8(REG(HL)), 1);
-    TICK(2);
+    TICK(1);
 }
 
 // 0xCB4F: BIT 1, A (Z 0 1 -)
@@ -1385,7 +1388,7 @@ void op_bit_2_l(GameBoy *gb) { test_bit(gb, REG(L), 2); }
 // 0xCB56: BIT 2, (HL) (Z 0 1 -)
 void op_bit_2_hlp(GameBoy *gb) {
     test_bit(gb, READ8(REG(HL)), 2);
-    TICK(2);
+    TICK(1);
 }
 
 // 0xCB57: BIT 2, A (Z 0 1 -)
@@ -1412,7 +1415,7 @@ void op_bit_3_l(GameBoy *gb) { test_bit(gb, REG(L), 3); }
 // 0xCB5E: BIT 3, (HL) (Z 0 1 -)
 void op_bit_3_hlp(GameBoy *gb) {
     test_bit(gb, READ8(REG(HL)), 3);
-    TICK(2);
+    TICK(1);
 }
 
 // 0xCB5F: BIT 3, A (Z 0 1 -)
@@ -1439,7 +1442,7 @@ void op_bit_4_l(GameBoy *gb) { test_bit(gb, REG(L), 4); }
 // 0xCB66: BIT 4, (HL) (Z 0 1 -)
 void op_bit_4_hlp(GameBoy *gb) {
     test_bit(gb, READ8(REG(HL)), 4);
-    TICK(2);
+    TICK(1);
 }
 
 // 0xCB67: BIT 4, A (Z 0 1 -)
@@ -1466,7 +1469,7 @@ void op_bit_5_l(GameBoy *gb) { test_bit(gb, REG(L), 5); }
 // 0xCB6E: BIT 5, (HL) (Z 0 1 -)
 void op_bit_5_hlp(GameBoy *gb) {
     test_bit(gb, READ8(REG(HL)), 5);
-    TICK(2);
+    TICK(1);
 }
 
 // 0xCB6F: BIT 5, A (Z 0 1 -)
@@ -1493,7 +1496,7 @@ void op_bit_6_l(GameBoy *gb) { test_bit(gb, REG(L), 6); }
 // 0xCB76: BIT 6, (HL) (Z 0 1 -)
 void op_bit_6_hlp(GameBoy *gb) {
     test_bit(gb, READ8(REG(HL)), 6);
-    TICK(2);
+    TICK(1);
 }
 
 // 0xCB77: BIT 6, A (Z 0 1 -)
@@ -1518,7 +1521,10 @@ void op_bit_7_h(GameBoy *gb) { test_bit(gb, REG(H), 7); }
 void op_bit_7_l(GameBoy *gb) { test_bit(gb, REG(L), 7); }
 
 // 0xCB7E: BIT 7, (HL) (Z 0 1 -)
-void op_bit_7_hlp(GameBoy *gb) { test_bit(gb, READ8(REG(HL)), 7); }
+void op_bit_7_hlp(GameBoy *gb) {
+    test_bit(gb, READ8(REG(HL)), 7);
+    TICK(1);
+}
 
 // 0xCB7F: BIT 7, A (Z 0 1 -)
 void op_bit_7_a(GameBoy *gb) { test_bit(gb, REG(A), 7); }
