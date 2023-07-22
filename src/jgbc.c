@@ -138,7 +138,7 @@ static void set_window_title(GameBoy *gb) {
     SDL_SetWindowTitle(gb->ppu.window, buffer);
 }
 
-CliArgs parse_cli_args(const int argc, const char **argv) {
+static CliArgs parse_cli_args(const int argc, const char **argv) {
     CliArgs result;
     result.invalid_option_index = -1;
     result.rom_path = NULL;
@@ -147,8 +147,9 @@ CliArgs parse_cli_args(const int argc, const char **argv) {
     result.should_show_help = false;
     result.should_print_info = false;
 
-    if (argc < 1)
+    if (argc < 1) {
         return result;
+    }
 
     for (int i = 1; i < argc; ++i) {
         const char *arg = argv[i];
