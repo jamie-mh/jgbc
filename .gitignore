@@ -424,3 +424,4 @@ CMakeSettings.json
 
 *.save
 .cmake/
+.cache/
