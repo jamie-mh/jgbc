@@ -70,10 +70,12 @@ typedef struct __attribute__((__packed__)) {
 
 typedef struct {
     uint16_t *framebuffer;
-    Sprite *sprite_buffer;
     uint16_t scan_clock;
     uint16_t frame_clock;
     uint8_t window_ly;
+
+    Sprite *sprite_buffer;
+    uint8_t sprite_count;
 
     uint16_t bg_palette[32];
     uint16_t obj_palette[32];

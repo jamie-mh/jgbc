@@ -20,13 +20,14 @@ static void render_bg_scan(GameBoy *, uint8_t);
 static void render_window_scan(GameBoy *, uint8_t);
 static void render_sprite_scan(GameBoy *, uint8_t);
 
+static void perform_sprite_search(GameBoy *gb, uint8_t);
 static int sprite_cmp(const void *, const void *);
 static uint16_t get_shade(uint8_t);
 static void fill_shade_table(uint8_t, uint16_t *);
 
 void init_ppu(GameBoy *gb) {
     gb->ppu.framebuffer = malloc(SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(uint16_t));
-    gb->ppu.sprite_buffer = malloc(40 * sizeof(Sprite));
+    gb->ppu.sprite_buffer = malloc(10 * sizeof(Sprite));
 
     gb->ppu.window = NULL;
     gb->ppu.renderer = NULL;
@@ -37,9 +38,10 @@ void reset_ppu(GameBoy *gb) {
     gb->ppu.scan_clock = 0;
     gb->ppu.frame_clock = 0;
     gb->ppu.window_ly = 0;
+    gb->ppu.sprite_count = 0;
 
     memset(gb->ppu.framebuffer, 0, SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(int16_t));
-    memset(gb->ppu.sprite_buffer, 0, 40 * sizeof(Sprite));
+    memset(gb->ppu.sprite_buffer, 0, 10 * sizeof(Sprite));
     memset(gb->ppu.bg_palette, 0, 32 * sizeof(uint16_t));
     memset(gb->ppu.obj_palette, 0, 32 * sizeof(uint16_t));
 }
@@ -89,11 +91,7 @@ void update_ppu(GameBoy *gb) {
 
     if (gb->ppu.scan_clock >= CLOCKS_PER_SCANLINE) {
         gb->ppu.scan_clock = 0;
-
-        if (ly == 0) {
-            fill_sprite_buffer(gb);
-            gb->ppu.window_ly = 0;
-        }
+        perform_sprite_search(gb, ly);
 
         // Render scanlines (144 pixel tall screen)
         if (ly < 144) {
@@ -355,18 +353,12 @@ static void render_sprite_scan(GameBoy *gb, const uint8_t ly) {
 
     const bool tall_sprites = RREG(LCDC, LCDC_OBJ_SIZE);
     const uint8_t height = tall_sprites ? 16 : 8;
-    uint8_t visible_sprite_count = 0;
 
-    for (int i = 0; i < 40; i++) {
+    for (int i = 0; i < gb->ppu.sprite_count; i++) {
         const Sprite sprite = gb->ppu.sprite_buffer[i];
         const int16_t x = sprite.x - 8;
         const int16_t y = sprite.y - 16;
 
-        if ((y > ly || y + height <= ly) || visible_sprite_count == 10) {
-            continue;
-        }
-
-        visible_sprite_count++;
         const uint16_t palette_addr = (GET_BIT(sprite.attributes, SPRITE_ATTR_PALETTE)) ? OBP1 : OBP0;
         const uint8_t palette = SREAD8(palette_addr);
 
@@ -419,12 +411,43 @@ static void render_sprite_scan(GameBoy *gb, const uint8_t ly) {
 }
 
 // Sorting comparison function for sprite priority
-static int sprite_cmp(const void *a, const void *b) { return ((Sprite *)a)->x - ((Sprite *)b)->x; }
+static int sprite_cmp(const void *a, const void *b) {
+    const Sprite *sprite_a = a;
+    const Sprite *sprite_b = b;
+
+    if (sprite_a->x == sprite_b->x) {
+        return 1;
+    }
+
+    return sprite_b->x - sprite_a->x;
+}
 
 // Fills the sprite buffer with sprite structs from memory
-void fill_sprite_buffer(GameBoy *gb) {
-    memcpy(gb->ppu.sprite_buffer, gb->mmu.oam, 40 * sizeof(Sprite));
-    qsort(gb->ppu.sprite_buffer, 40, sizeof(Sprite), sprite_cmp);
+static void perform_sprite_search(GameBoy *gb, const uint8_t ly) {
+    const Sprite *oam = (Sprite *) gb->mmu.oam;
+
+    const bool tall_sprites = RREG(LCDC, LCDC_OBJ_SIZE);
+    const uint8_t height = tall_sprites ? 16 : 8;
+    uint8_t count = 0;
+
+    for (int i = 0; i < 40; ++i) {
+        const Sprite sprite = oam[i];
+        const int16_t y = sprite.y - 16;
+
+        if (y <= ly && y + height > ly) {
+            gb->ppu.sprite_buffer[count] = sprite;
+
+            if (++count == 10) {
+                break;
+            }
+        }
+    }
+
+    gb->ppu.sprite_count = count;
+
+    if (count > 1) {
+        qsort(gb->ppu.sprite_buffer, count, sizeof(Sprite), sprite_cmp);
+    }
 }
 
 // Returns the colour associated with a shade number tiles

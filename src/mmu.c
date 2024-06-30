@@ -260,8 +260,6 @@ static void sprite_dma_transfer(GameBoy *gb, const uint8_t value) {
     for (uint8_t i = 0; i <= 0x9F; ++i) {
         SWRITE8(0xFE00 + i, SREAD8(address + i));
     }
-
-    fill_sprite_buffer(gb);
 }
 
 void update_hdma(GameBoy *gb) {
