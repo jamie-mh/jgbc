@@ -86,11 +86,9 @@ void update_ppu(GameBoy *gb) {
 
     if (gb->ppu.scan_clock >= CLOCKS_PER_SCANLINE) {
         gb->ppu.scan_clock = 0;
-        ly = (ly == 153) ? 0 : ly + 1;
-        SWRITE8(LY, ly);
 
         if (ly == 0) {
-            get_sprites(gb);
+            fill_sprite_buffer(gb);
         }
 
         // Render scanlines (144 pixel tall screen)
@@ -107,6 +105,9 @@ void update_ppu(GameBoy *gb) {
                 render_framebuffer(gb);
             }
         }
+
+        ly = (ly == 153) ? 0 : ly + 1;
+        SWRITE8(LY, ly);
 
         // Check if LY == LYC
         // And request an interrupt
