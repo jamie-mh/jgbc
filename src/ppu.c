@@ -110,12 +110,18 @@ void update_ppu(GameBoy *gb) {
             }
         }
 
-        ly = (ly == 153) ? 0 : ly + 1;
-        SWRITE8(LY, ly);
+        if (ly == 153) {
+            ly = 0;
+            gb->ppu.window_ly = 0;
+        } else {
+            ly++;
 
-        if (SREAD8(WX) < SCREEN_WIDTH - 1 + 7 && SREAD8(WY) < SCREEN_HEIGHT - 1) {
-            gb->ppu.window_ly++;
+            if (SREAD8(WX) < SCREEN_WIDTH - 1 + 7 && SREAD8(WY) < SCREEN_HEIGHT - 1) {
+                gb->ppu.window_ly++;
+            }
         }
+
+        SWRITE8(LY, ly);
 
         // Check if LY == LYC
         // And request an interrupt
