@@ -36,6 +36,7 @@ void init_ppu(GameBoy *gb) {
 void reset_ppu(GameBoy *gb) {
     gb->ppu.scan_clock = 0;
     gb->ppu.frame_clock = 0;
+    gb->ppu.window_ly = 0;
 
     memset(gb->ppu.framebuffer, 0, SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(int16_t));
     memset(gb->ppu.sprite_buffer, 0, 40 * sizeof(Sprite));
@@ -80,6 +81,7 @@ void update_ppu(GameBoy *gb) {
     if (!lcd_on) {
         SWRITE8(LY, 0);
         gb->ppu.scan_clock = 0;
+        gb->ppu.window_ly = 0;
         return;
     }
 
@@ -90,6 +92,7 @@ void update_ppu(GameBoy *gb) {
 
         if (ly == 0) {
             fill_sprite_buffer(gb);
+            gb->ppu.window_ly = 0;
         }
 
         // Render scanlines (144 pixel tall screen)
@@ -109,6 +112,10 @@ void update_ppu(GameBoy *gb) {
 
         ly = (ly == 153) ? 0 : ly + 1;
         SWRITE8(LY, ly);
+
+        if (SREAD8(WX) < SCREEN_WIDTH - 1 + 7 && SREAD8(WY) < SCREEN_HEIGHT - 1) {
+            gb->ppu.window_ly++;
+        }
 
         // Check if LY == LYC
         // And request an interrupt
@@ -192,7 +199,7 @@ static uint16_t get_tile_map_offset(const Position screen) { return (screen.x / 
 static uint16_t get_tile_data_offset(GameBoy *gb, const uint16_t map_addr, const bool signed_tile_num) {
 
     if (signed_tile_num) {
-        const int8_t tile_number = (int8_t)SREAD8(map_addr);
+        const int8_t tile_number = (int8_t) SREAD8(map_addr);
         return ((tile_number + 128) * 16);
     } else {
         const uint8_t tile_number = SREAD8(map_addr);
@@ -295,7 +302,7 @@ static void render_window_scan(GameBoy *gb, const uint8_t ly) {
         return;
     }
 
-    const uint16_t map_start = (RREG(LCDC, LCDC_WINDOW_TILE_MAP) ? 0x9C00 : 0x9800);
+    const uint16_t map_start = RREG(LCDC, LCDC_WINDOW_TILE_MAP) ? 0x9C00 : 0x9800;
 
     uint16_t data_start;
     const bool signed_tile_num = get_bg_tile_data_start(gb, &data_start);
@@ -317,13 +324,13 @@ static void render_window_scan(GameBoy *gb, const uint8_t ly) {
         }
 
         // Position in screen memory after scrolling
-        const Position screen_pos = {window_x + scan_x, ly - window_y};
+        const Position screen_pos = {scan_x - window_x, gb->ppu.window_ly - window_y};
 
         const uint16_t map_addr = map_start + get_tile_map_offset(screen_pos);
         const uint16_t data_addr = data_start + get_tile_data_offset(gb, map_addr, signed_tile_num);
 
         uint8_t data[2];
-        const uint8_t line = screen_pos.y % 8;
+        const uint8_t line = gb->ppu.window_ly % 8;
         get_tile_row_data(gb, line, 0, data_addr, data);
 
         const uint16_t colour = get_tile_pixel(screen_pos, data, false, colours);
