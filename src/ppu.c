@@ -89,6 +89,10 @@ void update_ppu(GameBoy *gb) {
         ly = (ly == 153) ? 0 : ly + 1;
         SWRITE8(LY, ly);
 
+        if (ly == 0) {
+            get_sprites(gb);
+        }
+
         // Render scanlines (144 pixel tall screen)
         if (ly < 144) {
             render_bg_scan(gb, ly);
@@ -335,68 +339,72 @@ static void render_sprite_scan(GameBoy *gb, const uint8_t ly) {
     }
 
     const bool tall_sprites = RREG(LCDC, LCDC_OBJ_SIZE);
-    const uint8_t height = (tall_sprites) ? 16 : 8;
+    const uint8_t height = tall_sprites ? 16 : 8;
+    uint8_t visible_sprite_count = 0;
 
     for (int i = 0; i < 40; i++) {
         const Sprite sprite = gb->ppu.sprite_buffer[i];
         const int16_t x = sprite.x - 8;
         const int16_t y = sprite.y - 16;
 
-        if (y <= ly && y + height > ly) {
-            const uint16_t palette_addr = (GET_BIT(sprite.attributes, SPRITE_ATTR_PALETTE)) ? OBP1 : OBP0;
-            const uint8_t palette = SREAD8(palette_addr);
+        if ((y > ly || y + height <= ly) || visible_sprite_count == 10) {
+            continue;
+        }
 
-            uint16_t shades[4];
-            fill_shade_table(palette, shades);
+        visible_sprite_count++;
+        const uint16_t palette_addr = (GET_BIT(sprite.attributes, SPRITE_ATTR_PALETTE)) ? OBP1 : OBP0;
+        const uint8_t palette = SREAD8(palette_addr);
 
-            // A tall sprite has the first bit removed
-            const uint8_t tile = (tall_sprites) ? sprite.tile & 0x7F : sprite.tile;
-            uint8_t row_index = ly - y;
+        uint16_t shades[4];
+        fill_shade_table(palette, shades);
 
-            if (GET_BIT(sprite.attributes, SPRITE_ATTR_FLIP_Y)) {
-                row_index = (height - 1) - row_index;
+        // A tall sprite has the first bit removed
+        const uint8_t tile = tall_sprites ? sprite.tile & 0x7F : sprite.tile;
+        uint8_t row_index = ly - y;
+
+        if (GET_BIT(sprite.attributes, SPRITE_ATTR_FLIP_Y)) {
+            row_index = (height - 1) - row_index;
+        }
+
+        const uint16_t row_offset = (tile * 16) + row_index * 2;
+
+        uint16_t data[2];
+        data[0] = SREAD16(0x8000 + row_offset + 0);
+        data[1] = SREAD16(0x8000 + row_offset + 1);
+
+        const bool is_flipped_x = GET_BIT(sprite.attributes, SPRITE_ATTR_FLIP_X);
+        const bool is_behind_bg = GET_BIT(sprite.attributes, SPRITE_ATTR_PRIORITY);
+
+        // Draw the pixels of the sprite, however if the sprite is offscreen
+        // then only draw the visible pixels
+        for (uint8_t px = (x < 0 ? -x : 0); px < 8; px++) {
+            if (x + px > SCREEN_WIDTH) {
+                break;
             }
 
-            const uint16_t row_offset = (tile * 16) + row_index * 2;
+            const uint8_t bit = is_flipped_x ? px : 7 - px;
+            const uint8_t shade_num = GET_BIT(data[0], bit) | (GET_BIT(data[1], bit) << 1);
 
-            uint16_t data[2];
-            data[0] = SREAD16(0x8000 + row_offset + 0);
-            data[1] = SREAD16(0x8000 + row_offset + 1);
-
-            const bool is_flipped_x = GET_BIT(sprite.attributes, SPRITE_ATTR_FLIP_X);
-            const bool is_behind_bg = GET_BIT(sprite.attributes, SPRITE_ATTR_PRIORITY);
-
-            // Draw the pixels of the sprite, however if the sprite is offscreen
-            // then only draw the visible pixels
-            for (uint8_t px = ((x < 0) ? -x : 0); px < 8; px++) {
-                if (x + px > SCREEN_WIDTH) {
-                    break;
-                }
-
-                const uint8_t bit = (is_flipped_x) ? px : 7 - px;
-                const uint8_t shade_num = GET_BIT(data[0], bit) | (GET_BIT(data[1], bit) << 1);
-
-                // White is transparent for sprites
-                if (shade_num == 0) {
-                    continue;
-                }
-
-                const uint16_t shade = shades[shade_num];
-                const uint32_t buf_offset = (x + px) + (ly * SCREEN_WIDTH);
-
-                // If the sprite is behind the background, it is only visible above white
-                if (is_behind_bg && gb->ppu.framebuffer[buf_offset] != WHITE) {
-                    continue;
-                }
-
-                gb->ppu.framebuffer[buf_offset] = shade;
+            // White is transparent for sprites
+            if (shade_num == 0) {
+                continue;
             }
+
+            const uint16_t shade = shades[shade_num];
+            const uint32_t buf_offset = (x + px) + (ly * SCREEN_WIDTH);
+
+            // If the sprite is behind the background, it is only visible above white
+            if (is_behind_bg && gb->ppu.framebuffer[buf_offset] != WHITE) {
+                continue;
+            }
+
+            gb->ppu.framebuffer[buf_offset] = shade;
         }
     }
 }
 
 // Sorting comparison function for sprite priority
-static int sprite_cmp(const void *a, const void *b) { return ((Sprite *)b)->x - ((Sprite *)a)->x; }
+static int sprite_cmp(const void *a, const void *b) { return ((Sprite *)a)->x - ((Sprite *)b)->x; }
 
 // Fills the sprite buffer with sprite structs from memory
 void get_sprites(GameBoy *gb) {
@@ -408,8 +416,6 @@ void get_sprites(GameBoy *gb) {
         sprite->x = SREAD8(address + 1);
         sprite->tile = SREAD8(address + 2);
         sprite->attributes = SREAD8(address + 3);
-
-        // TODO: put attributes in struct
     }
 
     qsort(gb->ppu.sprite_buffer, 40, sizeof(Sprite), sprite_cmp);
