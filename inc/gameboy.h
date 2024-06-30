@@ -61,7 +61,7 @@ typedef struct {
     uint8_t div_overflow_ticks;
 } CPU;
 
-typedef struct {
+typedef struct __attribute__((__packed__)) {
     uint8_t y;
     uint8_t x;
     uint8_t tile;
@@ -70,7 +70,7 @@ typedef struct {
 
 typedef struct {
     uint16_t *framebuffer;
-    Sprite sprite_buffer[40];
+    Sprite *sprite_buffer;
     uint16_t scan_clock;
     uint16_t frame_clock;
 

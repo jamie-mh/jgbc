@@ -26,6 +26,7 @@ static void fill_shade_table(uint8_t, uint16_t *);
 
 void init_ppu(GameBoy *gb) {
     gb->ppu.framebuffer = malloc(SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(uint16_t));
+    gb->ppu.sprite_buffer = malloc(40 * sizeof(Sprite));
 
     gb->ppu.window = NULL;
     gb->ppu.renderer = NULL;
@@ -409,16 +410,7 @@ static int sprite_cmp(const void *a, const void *b) { return ((Sprite *)a)->x - 
 
 // Fills the sprite buffer with sprite structs from memory
 void fill_sprite_buffer(GameBoy *gb) {
-    for (uint8_t i = 0; i < 40; i++) {
-        Sprite *sprite = &gb->ppu.sprite_buffer[i];
-        const uint16_t address = 0xFE00 + (i * 4);
-
-        sprite->y = SREAD8(address + 0);
-        sprite->x = SREAD8(address + 1);
-        sprite->tile = SREAD8(address + 2);
-        sprite->attributes = SREAD8(address + 3);
-    }
-
+    memcpy(gb->ppu.sprite_buffer, gb->mmu.oam, 40 * sizeof(Sprite));
     qsort(gb->ppu.sprite_buffer, 40, sizeof(Sprite), sprite_cmp);
 }
 
