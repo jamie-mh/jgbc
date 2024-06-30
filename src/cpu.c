@@ -193,7 +193,7 @@ void set_div(GameBoy *gb, const uint16_t value) {
 
     // The divider register updates at one 256th of the clock speed (aka 256 clocks)
     // Write the top half of the 16 bit internal divider register
-    SWRITE8(DIV, (value & 0xFF) >> 8);
+    SWRITE8(DIV, (value & 0xFF00) >> 8);
 
     gb->cpu.div = value;
 }
