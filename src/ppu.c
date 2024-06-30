@@ -368,14 +368,14 @@ static void render_sprite_scan(GameBoy *gb, const uint8_t ly) {
         fill_shade_table(palette, shades);
 
         // A tall sprite has the first bit removed
-        const uint8_t tile = tall_sprites ? sprite.tile & 0x7F : sprite.tile;
+        const uint8_t tile_number = tall_sprites ? sprite.tile & 0xFE : sprite.tile;
         uint8_t row_index = ly - y;
 
         if (GET_BIT(sprite.attributes, SPRITE_ATTR_FLIP_Y)) {
             row_index = (height - 1) - row_index;
         }
 
-        const uint16_t row_offset = (tile * 16) + row_index * 2;
+        const uint16_t row_offset = (tile_number * 16) + row_index * 2;
 
         uint16_t data[2];
         data[0] = SREAD16(0x8000 + row_offset + 0);
