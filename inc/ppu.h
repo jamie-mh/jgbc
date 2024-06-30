@@ -113,7 +113,7 @@ void init_window(GameBoy *);
 void render_framebuffer(GameBoy *);
 void update_ppu(GameBoy *);
 
-void get_sprites(GameBoy *);
+void fill_sprite_buffer(GameBoy *gb);
 
 void palette_index_write(GameBoy *, uint16_t, uint8_t);
 void palette_data_write(GameBoy *, uint16_t, uint8_t);

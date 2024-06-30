@@ -407,7 +407,7 @@ static void render_sprite_scan(GameBoy *gb, const uint8_t ly) {
 static int sprite_cmp(const void *a, const void *b) { return ((Sprite *)a)->x - ((Sprite *)b)->x; }
 
 // Fills the sprite buffer with sprite structs from memory
-void get_sprites(GameBoy *gb) {
+void fill_sprite_buffer(GameBoy *gb) {
     for (uint8_t i = 0; i < 40; i++) {
         Sprite *sprite = &gb->ppu.sprite_buffer[i];
         const uint16_t address = 0xFE00 + (i * 4);

@@ -261,7 +261,7 @@ static void sprite_dma_transfer(GameBoy *gb, const uint8_t value) {
         SWRITE8(0xFE00 + i, SREAD8(address + i));
     }
 
-    get_sprites(gb);
+    fill_sprite_buffer(gb);
 }
 
 void update_hdma(GameBoy *gb) {
