@@ -198,11 +198,12 @@ void Debugger::run() {
 
                 if (_gb->cpu.is_double_speed) {
                     Emulator::update_cpu(_gb.get());
-                    Emulator::update_ppu(_gb.get());
                 }
 
-                Emulator::update_apu(_gb.get());
                 Emulator::check_interrupts(_gb.get());
+                Emulator::update_apu(_gb.get());
+                Emulator::update_dma(_gb.get());
+                Emulator::update_hdma(_gb.get());
 
                 frame_ticks += _gb->cpu.ticks;
 

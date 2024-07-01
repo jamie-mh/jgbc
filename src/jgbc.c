@@ -90,6 +90,7 @@ static void run(GameBoy *gb) {
             update_ppu(gb);
             check_interrupts(gb);
             update_apu(gb);
+            update_dma(gb);
             update_hdma(gb);
 
             frame_ticks += gb->cpu.ticks;

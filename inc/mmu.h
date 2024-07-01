@@ -51,6 +51,9 @@
 #define WRAM_BANK_COUNT 8
 #define VRAM_BANK_COUNT 2
 
+// DMA
+#define DMA_CLOCKS 640
+
 // VRAM DMA (CGB)
 #define HDMA1 0xFF51
 #define HDMA2 0xFF52
@@ -75,4 +78,5 @@ void write_short(GameBoy *, uint16_t, uint16_t, bool);
 void write_register(GameBoy *, uint16_t, uint8_t, uint8_t);
 uint8_t read_register(GameBoy *, uint16_t, uint8_t);
 
+void update_dma(GameBoy *);
 void update_hdma(GameBoy *);

@@ -110,6 +110,12 @@ typedef struct {
     void (*mbc_handler)(GameBoy *, uint16_t, uint8_t);
 
     struct {
+        uint16_t address;
+        uint16_t clock;
+        bool is_active;
+    } dma;
+
+    struct {
         uint16_t source_addr;
         uint16_t dest_addr;
         uint8_t length;

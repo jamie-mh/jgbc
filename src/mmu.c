@@ -10,7 +10,7 @@
 static uint8_t *get_memory(GameBoy *, uint16_t *);
 static bool is_accessible(GameBoy *, uint16_t);
 
-static void sprite_dma_transfer(GameBoy *gb, uint8_t value);
+static void trigger_dma(GameBoy *gb, const uint8_t value);
 static void hdma_write(GameBoy *, uint16_t, uint8_t);
 
 void init_mmu(GameBoy *gb) {
@@ -42,6 +42,10 @@ void reset_mmu(GameBoy *gb) {
     gb->mmu.vram = gb->mmu.vram_banks[0];
     gb->mmu.wram00 = gb->mmu.wram_banks[0];
     gb->mmu.wramNN = gb->mmu.wram_banks[1];
+
+    gb->mmu.dma.is_active = false;
+    gb->mmu.dma.address = 0;
+    gb->mmu.dma.clock = 0;
 
     gb->mmu.hdma.is_active = false;
     gb->mmu.hdma.source_addr = 0;
@@ -140,21 +144,29 @@ uint8_t read_byte(GameBoy *gb, uint16_t address, const bool is_program) {
         return (!gb->mmu.hdma.is_active << 7) | (0x1F);
     }
 
+    if (gb->mmu.dma.is_active && gb->mmu.dma.clock > 0 && address >= OAM_START && address <= OAM_END) {
+        return 0xFF;
+    }
+
+    if (address >= 0xFF27 && address <= 0xFF2F) {
+        return 0xFF;
+    }
+
+    if (address >= UNUSED_AUDIO_START && address < WAVE_TABLE_START) {
+        // Above the NR registers, all data is set to FF
+        return 0xFF;
+    }
+
     uint16_t relative_addr = address;
     const uint8_t *mem = get_memory(gb, &relative_addr);
     uint8_t data = mem[relative_addr];
 
-    if (address >= 0xFF27 && address <= 0xFF2F) {
-        data = 0xFF;
+    if (address >= NR10 && address <= NR52) {
+        return audio_register_read(gb, address, data);
     }
 
-    if (address >= NR10 && address <= NR52) {
-        data = audio_register_read(gb, address, data);
-    } else if (address >= UNUSED_AUDIO_START && address < WAVE_TABLE_START) {
-        // Above the NR registers, all data is set to FF
-        data = 0xFF;
-    } else if (address == KEY1) {
-        data = (data & 0x7F) | (gb->cpu.is_double_speed << 7);
+    if (address == KEY1) {
+        return (data & 0x7F) | (gb->cpu.is_double_speed << 7);
     }
 
     return data;
@@ -187,7 +199,7 @@ void write_byte(GameBoy *gb, uint16_t address, uint8_t value, const bool is_prog
         }
 
         if (address == DMA) {
-            sprite_dma_transfer(gb, value);
+            trigger_dma(gb, value);
         }
 
         if (address == DIV) {
@@ -253,12 +265,25 @@ uint8_t read_register(GameBoy *gb, const uint16_t address, const uint8_t bit) {
     return GET_BIT(byte, bit);
 }
 
-static void sprite_dma_transfer(GameBoy *gb, const uint8_t value) {
-    // TODO: emulate timing
-    const uint16_t address = value * 0x100;
+static void trigger_dma(GameBoy *gb, const uint8_t value) {
+    gb->mmu.dma.is_active = true;
+    gb->mmu.dma.clock = 0;
+    gb->mmu.dma.address = value * 0x100;
+}
 
-    for (uint8_t i = 0; i <= 0x9F; ++i) {
-        SWRITE8(0xFE00 + i, SREAD8(address + i));
+void update_dma(GameBoy *gb) {
+    if (!gb->mmu.dma.is_active) {
+        return;
+    }
+
+    gb->mmu.dma.clock += gb->cpu.ticks;
+
+    if (gb->mmu.dma.clock >= DMA_CLOCKS) {
+        for (uint8_t i = 0; i <= 0x9F; ++i)  {
+            SWRITE8(0xFE00 + i, SREAD8(gb->mmu.dma.address + i));
+        }
+
+        gb->mmu.dma.is_active = false;
     }
 }
 
