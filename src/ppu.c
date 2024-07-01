@@ -267,36 +267,31 @@ static void render_bg_scan(GameBoy *gb, const uint8_t ly) {
     const uint8_t palette = SREAD8(BGP);
     fill_shade_table(palette, colours);
 
-    // TODO: optimise: only fetch attributes and data once per 8 pixels
-    // TODO: merge bg and window code somehow
+    Position tile_pos = {0, scroll_y + ly};
+    uint8_t tile_row_data[2];
+    TileAttributes attributes = {};
+
     for (uint8_t scan_x = 0; scan_x < SCREEN_WIDTH; scan_x++) {
+        tile_pos.x = scroll_x + scan_x;
 
-        // Position in screen memory after scrolling
-        const Position screen_pos = {scroll_x + scan_x, scroll_y + ly};
+        if (scan_x == 0 || tile_pos.x % 8 == 0) {
+            const uint16_t map_offset = get_tile_map_offset(tile_pos);
+            const uint16_t map_addr = map_start + map_offset;
+            attributes = get_tile_attributes(gb, map_addr);
 
-        const uint16_t map_offset = get_tile_map_offset(screen_pos);
-        const uint16_t map_addr = map_start + map_offset;
-        const TileAttributes attributes = get_tile_attributes(gb, map_addr);
-
-        if (gb->cart.is_colour) {
-            for (uint8_t i = 0; i < 4; ++i) {
-                colours[i] = gb->ppu.bg_palette[attributes.palette * 4 + i];
+            if (gb->cart.is_colour) {
+                for (uint8_t i = 0; i < 4; ++i) {
+                    colours[i] = gb->ppu.bg_palette[attributes.palette * 4 + i];
+                }
             }
+
+            const uint16_t data_addr = data_start + get_tile_data_offset(gb, map_addr, signed_tile_num);
+            const uint8_t line = attributes.is_flipped_y ? 7 - tile_pos.y % 8 : tile_pos.y % 8;
+            get_tile_row_data(gb, line, attributes.vram_bank, data_addr, tile_row_data);
         }
 
-        const uint16_t data_addr = data_start + get_tile_data_offset(gb, map_addr, signed_tile_num);
-
-        uint8_t data[2];
-
-        const uint8_t line = attributes.is_flipped_y ? 7 - screen_pos.y % 8 : screen_pos.y % 8;
-
-        get_tile_row_data(gb, line, attributes.vram_bank, data_addr, data);
-
-        const uint16_t colour = get_tile_pixel(screen_pos, data, attributes.is_flipped_x, colours);
-
-        // Position on the physical display
+        const uint16_t colour = get_tile_pixel(tile_pos, tile_row_data, attributes.is_flipped_x, colours);
         const Position display_pos = {scan_x, ly};
-
         plot_tile_pixel(gb->ppu.framebuffer, display_pos, colour);
     }
 }
@@ -318,6 +313,9 @@ static void render_window_scan(GameBoy *gb, const uint8_t ly) {
     const uint8_t window_x = SREAD8(WX) - 7;
     const uint8_t window_y = SREAD8(WY);
 
+    Position tile_pos = {0, gb->ppu.window_ly - window_y};
+    uint8_t tile_row_data[2];
+
     for (uint8_t scan_x = 0; scan_x < SCREEN_WIDTH; scan_x++) {
         if (ly < window_y) {
             return;
@@ -327,21 +325,17 @@ static void render_window_scan(GameBoy *gb, const uint8_t ly) {
             continue;
         }
 
-        // Position in screen memory after scrolling
-        const Position screen_pos = {scan_x - window_x, gb->ppu.window_ly - window_y};
+        tile_pos.x = scan_x - window_x;
 
-        const uint16_t map_addr = map_start + get_tile_map_offset(screen_pos);
-        const uint16_t data_addr = data_start + get_tile_data_offset(gb, map_addr, signed_tile_num);
+        if (scan_x == 0 || tile_pos.x % 8 == 0) {
+            const uint16_t map_addr = map_start + get_tile_map_offset(tile_pos);
+            const uint16_t data_addr = data_start + get_tile_data_offset(gb, map_addr, signed_tile_num);
+            const uint8_t line = gb->ppu.window_ly % 8;
+            get_tile_row_data(gb, line, 0, data_addr, tile_row_data);
+        }
 
-        uint8_t data[2];
-        const uint8_t line = gb->ppu.window_ly % 8;
-        get_tile_row_data(gb, line, 0, data_addr, data);
-
-        const uint16_t colour = get_tile_pixel(screen_pos, data, false, colours);
-
-        // Position on the physical display
+        const uint16_t colour = get_tile_pixel(tile_pos, tile_row_data, false, colours);
         const Position display_pos = {scan_x, ly};
-
         plot_tile_pixel(gb->ppu.framebuffer, display_pos, colour);
     }
 }
