@@ -35,7 +35,9 @@
 #define SPRITE_ATTR_PRIORITY 7
 #define SPRITE_ATTR_FLIP_Y 6
 #define SPRITE_ATTR_FLIP_X 5
-#define SPRITE_ATTR_PALETTE 4
+#define SPRITE_ATTR_DMG_PALETTE 4
+#define SPRITE_ATTR_BANK 3
+#define SPRITE_ATTR_CGB_PALETTE_MASK 0x7
 
 // SCY: Scroll Y
 #define SCY 0xFF42
@@ -86,7 +88,7 @@
 #define PI_AUTO_INCR 0x80
 
 // Tile Attributes
-#define TILE_ATTR_PALETTE 0x7
+#define TILE_ATTR_PALETTE_MASK 0x7
 #define TILE_ATTR_BANK 0x8
 #define TILE_ATTR_FLIP_X 0x20
 #define TILE_ATTR_FLIP_Y 0x40
