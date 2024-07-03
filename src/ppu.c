@@ -12,7 +12,7 @@ static bool get_bg_tile_data_start(GameBoy *, uint16_t *);
 static uint16_t get_tile_map_offset(Position);
 static uint16_t get_tile_data_offset(GameBoy *gb, uint16_t, bool);
 static void get_tile_row_data(GameBoy *gb, uint8_t, uint8_t, uint16_t, uint8_t *);
-static uint16_t get_tile_pixel(Position, const uint8_t *, bool, const uint16_t *);
+static uint8_t get_tile_pixel_colour(Position, const uint8_t *, bool);
 static TileAttributes get_tile_attributes(GameBoy *, uint16_t);
 static void plot_tile_pixel(uint16_t *, Position, uint16_t);
 
@@ -224,14 +224,10 @@ static inline void get_tile_row_data(GameBoy *gb, const uint8_t line, const uint
     data[1] = vram[data_addr + tile_y + 1 - VRAM_START];
 }
 
-// Get the colour of a pixel in a tile
-static inline uint16_t get_tile_pixel(Position screen_pos, const uint8_t *data, const bool is_flipped_x,
-                               const uint16_t *palette) {
-
+// Get the colour index of a pixel in a tile
+static inline uint8_t get_tile_pixel_colour(Position screen_pos, const uint8_t *data, const bool is_flipped_x) {
     const uint8_t bit = is_flipped_x ? screen_pos.x % 8 : 7 - screen_pos.x % 8;
-
-    const uint8_t colour_num = GET_BIT(data[0], bit) | (GET_BIT(data[1], bit) << 1);
-    return palette[colour_num];
+    return GET_BIT(data[0], bit) | (GET_BIT(data[1], bit) << 1);
 }
 
 // Gets the tile attributes for a given tile (CGB only)
@@ -288,9 +284,14 @@ static void render_bg_scan(GameBoy *gb, const uint8_t ly) {
             get_tile_row_data(gb, line, attributes.vram_bank, data_addr, tile_row_data);
         }
 
-        const uint16_t colour = get_tile_pixel(tile_pos, tile_row_data, attributes.is_flipped_x, colours);
+        const uint8_t colour_num = get_tile_pixel_colour(tile_pos, tile_row_data, attributes.is_flipped_x);
+        const uint16_t colour = colours[colour_num];
         const Position display_pos = {scan_x, ly};
+
         plot_tile_pixel(gb->ppu.framebuffer, display_pos, colour);
+
+        gb->ppu.current_scan_bg_colour[scan_x] = colour_num;
+        gb->ppu.current_scan_bg_has_priority[scan_x] = attributes.has_priority;
     }
 }
 
@@ -332,9 +333,9 @@ static void render_window_scan(GameBoy *gb, const uint8_t ly) {
             get_tile_row_data(gb, line, 0, data_addr, tile_row_data);
         }
 
-        const uint16_t colour = get_tile_pixel(tile_pos, tile_row_data, false, colours);
+        const uint16_t colour_num = get_tile_pixel_colour(tile_pos, tile_row_data, false);
         const Position display_pos = {scan_x, ly};
-        plot_tile_pixel(gb->ppu.framebuffer, display_pos, colour);
+        plot_tile_pixel(gb->ppu.framebuffer, display_pos, colours[colour_num]);
     }
 }
 
@@ -344,6 +345,8 @@ static void render_sprite_scan(GameBoy *gb, const uint8_t ly) {
     }
 
     const bool tall_sprites = RREG(LCDC, LCDC_OBJ_SIZE);
+    const bool global_sprites_have_priority = RREG(LCDC, LCDC_BG_DISPLAY);
+
     const uint8_t height = tall_sprites ? 16 : 8;
     uint16_t colours[4];
 
@@ -371,17 +374,20 @@ static void render_sprite_scan(GameBoy *gb, const uint8_t ly) {
 
         const uint16_t row_offset = (tile_number * 16) + row_index * 2;
 
+        // TODO: fetch data from vram bank 1 if specified in attrs
         uint16_t data[2];
         data[0] = SREAD16(0x8000 + row_offset + 0);
         data[1] = SREAD16(0x8000 + row_offset + 1);
 
         const bool is_flipped_x = GET_BIT(sprite.attributes, SPRITE_ATTR_FLIP_X);
-        const bool is_behind_bg = GET_BIT(sprite.attributes, SPRITE_ATTR_PRIORITY);
+        const bool bg_has_priority_sprite = GET_BIT(sprite.attributes, SPRITE_ATTR_PRIORITY);
 
         // Draw the pixels of the sprite, however if the sprite is offscreen
         // then only draw the visible pixels
         for (uint8_t px = (x < 0 ? -x : 0); px < 8; px++) {
-            if (x + px > SCREEN_WIDTH) {
+            const uint8_t scan_x = x + px;
+
+            if (scan_x > SCREEN_WIDTH) {
                 break;
             }
 
@@ -394,14 +400,23 @@ static void render_sprite_scan(GameBoy *gb, const uint8_t ly) {
             }
 
             const uint16_t colour = colours[colour_num];
-            const uint32_t buf_offset = (x + px) + (ly * SCREEN_WIDTH);
+            const uint32_t buf_offset = scan_x + (ly * SCREEN_WIDTH);
 
-            // If the sprite is behind the background, it is only visible above white
-            if (is_behind_bg && gb->ppu.framebuffer[buf_offset] != WHITE) {
-                continue;
+            bool should_draw = false;
+
+            if (gb->cart.is_colour) {
+                const bool bg_has_priority_tile = gb->ppu.current_scan_bg_has_priority[scan_x];
+                const uint8_t bg_colour_num = gb->ppu.current_scan_bg_colour[scan_x];
+                should_draw = bg_colour_num == 0
+                              || !global_sprites_have_priority
+                              || (!bg_has_priority_tile && !bg_has_priority_sprite);
+            } else {
+                should_draw = !bg_has_priority_sprite || gb->ppu.framebuffer[buf_offset] == WHITE;
             }
 
-            gb->ppu.framebuffer[buf_offset] = colour;
+            if (should_draw) {
+                gb->ppu.framebuffer[buf_offset] = colour;
+            }
         }
     }
 }

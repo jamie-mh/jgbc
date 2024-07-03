@@ -105,7 +105,7 @@ typedef struct {
     uint8_t vram_bank;
     bool is_flipped_x;
     bool is_flipped_y;
-    bool is_bg_above;
+    bool has_priority;
 } TileAttributes;
 
 void init_ppu(GameBoy *);

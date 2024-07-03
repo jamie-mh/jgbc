@@ -80,6 +80,9 @@ typedef struct {
     uint16_t bg_palette[32];
     uint16_t obj_palette[32];
 
+    uint8_t current_scan_bg_colour[160];
+    bool current_scan_bg_has_priority[160];
+
     SDL_Window *window;
     SDL_Renderer *renderer;
     SDL_Texture *texture;
