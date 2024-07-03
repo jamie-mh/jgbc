@@ -21,7 +21,7 @@ static void render_window_scan(GameBoy *, uint8_t);
 static void render_sprite_scan(GameBoy *, uint8_t);
 
 static void perform_sprite_search(GameBoy *gb, uint8_t);
-static int sprite_cmp(const void *, const void *);
+static int dmg_sprite_cmp(const void *, const void *);
 static uint16_t get_shade(uint8_t);
 static void fill_shade_table(uint8_t, uint16_t *);
 static void fill_colour_table(uint8_t, uint16_t *, uint16_t *);
@@ -434,8 +434,8 @@ static void render_sprite_scan(GameBoy *gb, const uint8_t ly) {
     }
 }
 
-// Sorting comparison function for sprite priority
-static int sprite_cmp(const void *a, const void *b) {
+// DMG Sorting comparison function for sprite priority
+static int dmg_sprite_cmp(const void *a, const void *b) {
     const Sprite *sprite_a = a;
     const Sprite *sprite_b = b;
 
@@ -454,7 +454,7 @@ static void perform_sprite_search(GameBoy *gb, const uint8_t ly) {
     const uint8_t height = tall_sprites ? 16 : 8;
     uint8_t count = 0;
 
-    for (int i = 0; i < 40; ++i) {
+    for (uint8_t i = 0; i < 40; ++i) {
         const Sprite sprite = oam[i];
         const int16_t y = sprite.y - 16;
 
@@ -469,8 +469,18 @@ static void perform_sprite_search(GameBoy *gb, const uint8_t ly) {
 
     gb->ppu.sprite_count = count;
 
-    if (count > 1) {
-        qsort(gb->ppu.sprite_buffer, count, sizeof(Sprite), sprite_cmp);
+    // On CGB, sprites are prioritised based on their position in the OAM
+    // On DMG, sprites are prioritised based on their x coordinate
+    if (count > 0) {
+        if (gb->cart.is_colour) {
+            for (uint8_t i = 0; i < count / 2; ++i) {
+                const Sprite copy = gb->ppu.sprite_buffer[i];
+                gb->ppu.sprite_buffer[i] = gb->ppu.sprite_buffer[count - 1 - i];
+                gb->ppu.sprite_buffer[count - 1 - i] = copy;
+            }
+        } else {
+            qsort(gb->ppu.sprite_buffer, count, sizeof(Sprite), dmg_sprite_cmp);
+        }
     }
 }
 
