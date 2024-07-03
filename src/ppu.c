@@ -383,11 +383,14 @@ static void render_sprite_scan(GameBoy *gb, const uint8_t ly) {
         }
 
         const uint16_t row_offset = (tile_number * 16) + row_index * 2;
+        uint8_t data[2];
 
-        // TODO: fetch data from vram bank 1 if specified in attrs
-        uint16_t data[2];
-        data[0] = SREAD16(0x8000 + row_offset + 0);
-        data[1] = SREAD16(0x8000 + row_offset + 1);
+        if (gb->cart.is_colour) {
+            const uint8_t bank = GET_BIT(sprite.attributes, SPRITE_ATTR_BANK);
+            memcpy(data, gb->mmu.vram_banks[bank] + row_offset, 2);
+        } else {
+            memcpy(data, gb->mmu.vram + row_offset, 2);
+        }
 
         const bool is_flipped_x = GET_BIT(sprite.attributes, SPRITE_ATTR_FLIP_X);
         const bool bg_has_priority_sprite = GET_BIT(sprite.attributes, SPRITE_ATTR_PRIORITY);
