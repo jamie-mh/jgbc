@@ -248,7 +248,7 @@ static inline void plot_tile_pixel(uint16_t *framebuffer, const Position display
 }
 
 static void render_bg_scan(GameBoy *gb, const uint8_t ly) {
-    if (!RREG(LCDC, LCDC_BG_DISPLAY)) {
+    if (!gb->cart.is_colour && !RREG(LCDC, LCDC_BG_DISPLAY)) {
         return;
     }
 
