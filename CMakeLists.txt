@@ -44,6 +44,7 @@ add_executable(
 
 include_directories(${SDL2_INCLUDE_DIR})
 target_include_directories(jgbc PRIVATE ${PROJECT_INCLUDE_DIR})
+target_include_directories(jgbc PRIVATE ${PROJECT_LIB_DIR}/stb)
 
 add_executable(
     jgbc_debugger

@@ -14,3 +14,6 @@
 [submodule "rom/cgb-acid2"]
 	path = rom/cgb-acid2
 	url = https://github.com/mattcurrie/cgb-acid2.git
+[submodule "lib/stb"]
+	path = lib/stb
+	url = https://github.com/nothings/stb.git

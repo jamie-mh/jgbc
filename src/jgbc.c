@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
+
 #include "gameboy.h"
 #include "jgbc.h"
 
@@ -15,9 +18,11 @@
 static void handle_event(GameBoy *, SDL_Event);
 static void set_window_title(GameBoy *);
 static void run(GameBoy *);
+static void take_screenshot(GameBoy *);
 static void print_help();
 static void serial_write_handler(uint8_t);
 static CliArgs parse_cli_args(int, const char **);
+
 
 int main(const int argc, const char **argv) {
     const CliArgs args = parse_cli_args(argc, argv);
@@ -108,6 +113,38 @@ static void run(GameBoy *gb) {
     save_ram(gb);
 }
 
+static void take_screenshot(GameBoy *gb) {
+    const size_t name_len = strlen(gb->cart.title) + 10 + strlen("-.png") + 1;
+    char name[name_len];
+    snprintf(name, name_len, "%s-%d.png", gb->cart.title, (int) time(NULL));
+
+    uint8_t *image_data = malloc(sizeof(uint8_t) * SCREEN_WIDTH * SCREEN_HEIGHT * 3);
+
+    for (size_t i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; ++i) {
+        const uint16_t pixel = gb->ppu.framebuffer[i];
+
+        // Image data is 5 bpp, normalise to 8 bpp
+        const uint8_t r = pixel & 0x1F;
+        const uint8_t g = (pixel & 0x3E0) >> 5;
+        const uint8_t b = (pixel & 0x7C00) >> 10;
+
+        const size_t out_offset = i * 3;
+
+        image_data[out_offset + 0] = (int) (r / (double) 0x1F * (double) 0xFF);
+        image_data[out_offset + 1] = (int) (g / (double) 0x1F * (double) 0xFF);
+        image_data[out_offset + 2] = (int) (b / (double) 0x1F * (double) 0xFF);
+    }
+
+    const int result = stbi_write_png(name, SCREEN_WIDTH, SCREEN_HEIGHT, 3, image_data, SCREEN_WIDTH * sizeof(uint8_t) * 3);
+    free(image_data);
+
+    if (result != 0) {
+        printf("Written screenshot to %s\n", name);
+    } else {
+        fprintf(stderr, "error: Failed to perform screenshot\n");
+    }
+}
+
 static void handle_event(GameBoy *gb, const SDL_Event event) {
     switch (event.type) {
     case SDL_QUIT:
@@ -119,6 +156,10 @@ static void handle_event(GameBoy *gb, const SDL_Event event) {
         break;
 
     case SDL_KEYUP:
+        if (event.key.keysym.scancode == SDL_SCANCODE_F1) {
+            take_screenshot(gb);
+        }
+
         set_key(gb, event.key.keysym.scancode, false);
         break;
     }
