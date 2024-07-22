@@ -117,7 +117,7 @@ add_executable(
     ${PROJECT_LIB_DIR}/imgui/backends/imgui_impl_sdl2.cpp
 )
 
-set_property(TARGET jgbc_debugger PROPERTY CXX_STANDARD 17)
+set_property(TARGET jgbc_debugger PROPERTY CXX_STANDARD 20)
 set_property(TARGET jgbc_debugger PROPERTY CXX_STANDARD_REQUIRED ON)
 
 target_include_directories(jgbc_debugger PRIVATE ${PROJECT_INCLUDE_DIR})
