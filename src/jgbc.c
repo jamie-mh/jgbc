@@ -130,9 +130,9 @@ static void take_screenshot(GameBoy *gb) {
 
         const size_t out_offset = i * 3;
 
-        image_data[out_offset + 0] = (int) (r / (double) 0x1F * (double) 0xFF);
-        image_data[out_offset + 1] = (int) (g / (double) 0x1F * (double) 0xFF);
-        image_data[out_offset + 2] = (int) (b / (double) 0x1F * (double) 0xFF);
+        image_data[out_offset + 0] = (uint8_t) (r / (double) 0x1F * (double) 0xFF);
+        image_data[out_offset + 1] = (uint8_t) (g / (double) 0x1F * (double) 0xFF);
+        image_data[out_offset + 2] = (uint8_t) (b / (double) 0x1F * (double) 0xFF);
     }
 
     const int result = stbi_write_png(name, SCREEN_WIDTH, SCREEN_HEIGHT, 3, image_data, SCREEN_WIDTH * sizeof(uint8_t) * 3);
