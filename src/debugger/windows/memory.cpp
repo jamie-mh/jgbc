@@ -28,11 +28,15 @@ void Memory::render() {
         ImGui::EndCombo();
     }
 
-    // Careful not to point to non existent extram
-    if (!(_offsets[_selected_idx] == EXTRAM_START && debugger().gb()->mmu.extram == nullptr)) {
-        _editor.DrawContents((void *) _regions[_selected_idx], _sizes[_selected_idx], _offsets[_selected_idx]);
-    } else {
+    if (_offsets[_selected_idx] == EXTRAM_START && debugger().gb()->mmu.extram == nullptr) {
         ImGui::Text("EXTRAM not available.");
+    } else {
+        uint8_t *_regions[REGION_COUNT] = {
+            debugger().gb()->mmu.rom00,  debugger().gb()->mmu.romNN,  debugger().gb()->mmu.vram,
+            debugger().gb()->mmu.extram, debugger().gb()->mmu.wram00, debugger().gb()->mmu.wramNN,
+            debugger().gb()->mmu.oam,    debugger().gb()->mmu.io,     debugger().gb()->mmu.hram};
+
+        _editor.DrawContents(_regions[_selected_idx], _sizes[_selected_idx], _offsets[_selected_idx]);
     }
 
     ImGui::End();

@@ -17,10 +17,6 @@ private:
 
     size_t _selected_idx;
 
-    const uint8_t *_regions[REGION_COUNT] = {
-        debugger().gb()->mmu.rom00,  debugger().gb()->mmu.romNN,  debugger().gb()->mmu.vram,
-        debugger().gb()->mmu.extram, debugger().gb()->mmu.wram00, debugger().gb()->mmu.wramNN,
-        debugger().gb()->mmu.oam,    debugger().gb()->mmu.io,     debugger().gb()->mmu.hram};
     static constexpr const char *_labels[REGION_COUNT] = {"ROM 00",  "ROM NN", "VRAM", "EXTRAM", "WRAM 00",
                                          "WRAM NN", "OAM",    "IO",   "HRAM"};
     static constexpr const size_t _sizes[REGION_COUNT] = {ROM_BANK_SIZE,    ROM_BANK_SIZE,  VRAM_BANK_SIZE,
