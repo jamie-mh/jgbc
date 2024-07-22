@@ -148,10 +148,6 @@ uint8_t read_byte(GameBoy *gb, uint16_t address, const bool is_program) {
         return 0xFF;
     }
 
-    if (address >= 0xFF27 && address <= 0xFF2F) {
-        return 0xFF;
-    }
-
     if (address >= UNUSED_AUDIO_START && address < WAVE_TABLE_START) {
         // Above the NR registers, all data is set to FF
         return 0xFF;
@@ -162,11 +158,9 @@ uint8_t read_byte(GameBoy *gb, uint16_t address, const bool is_program) {
     uint8_t data = mem[relative_addr];
 
     if (address >= NR10 && address <= NR52) {
-        return audio_register_read(gb, address, data);
-    }
-
-    if (address == KEY1) {
-        return (data & 0x7F) | (gb->cpu.is_double_speed << 7);
+        data = audio_register_read(gb, address, data);
+    } else if (address == KEY1) {
+        data = (data & 0x7F) | (gb->cpu.is_double_speed << 7);
     }
 
     return data;
