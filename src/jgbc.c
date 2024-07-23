@@ -89,6 +89,7 @@ static void run(GameBoy *gb) {
             update_cpu(gb);
 
             if (gb->cpu.is_double_speed) {
+                check_interrupts(gb);
                 update_cpu(gb);
             }
 
