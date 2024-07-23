@@ -321,12 +321,14 @@ static void update_envelope(ChannelEnvelope *envelope) {
 }
 
 static void update_length(ChannelLength *length, bool *channel_enabled) {
-    if (!length->enabled || length->clock == 0) {
+    if (!length->enabled) {
         return;
     }
 
-    if (length->clock-- == 0) {
+    if (length->clock == 0) {
         *channel_enabled = false;
+    } else {
+        length->clock--;
     }
 }
 
