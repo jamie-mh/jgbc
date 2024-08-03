@@ -117,6 +117,9 @@ add_executable(
     ${PROJECT_LIB_DIR}/imgui/backends/imgui_impl_sdl2.cpp
 )
 
+add_custom_command(TARGET jgbc_debugger POST_BUILD COMMAND
+    ${CMAKE_COMMAND} -E copy ${PROJECT_ROOT}/_imgui.ini ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/imgui.ini)
+
 set_property(TARGET jgbc_debugger PROPERTY CXX_STANDARD 20)
 set_property(TARGET jgbc_debugger PROPERTY CXX_STANDARD_REQUIRED ON)
 
