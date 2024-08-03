@@ -106,7 +106,7 @@ void Disassembly::draw_instr_line(uint16_t addr, const Emulator::Instruction &in
     const auto line_center = line_coords.y + line_height / 2;
 
     if (addr == REG(PC)) {
-        ImGui::Selectable("", true, ImGuiSelectableFlags_NoHoldingActiveID);
+        ImGui::Selectable("##", true, ImGuiSelectableFlags_NoHoldingActiveID);
         ImGui::SameLine();
     } else {
         ImGui::NewLine();

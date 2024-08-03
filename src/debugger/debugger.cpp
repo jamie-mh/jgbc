@@ -258,7 +258,7 @@ void Debugger::handle_event(SDL_Event event) const {
 
 void Debugger::render() {
     ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplSDL2_NewFrame(_window);
+    ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
 
     const auto flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDocking |
